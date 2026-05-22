@@ -200,6 +200,7 @@ export default function App() {
   const [isCloudDataLoaded, setIsCloudDataLoaded] = useState(false);
   const [accentColor, setAccentColor] = useState("#ccff00");
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [guestDropdownOpen, setGuestDropdownOpen] = useState(false);
 
   // State for tracked owned balls
   const [balls, setBalls] = useState<GolfBall[]>(() => {
@@ -1134,52 +1135,9 @@ export default function App() {
             </div>
           </div>
 
-          {/* Double Actions: Theme Selector & Login Button */}
+          {/* Double Actions: Dropdown Menus */}
           <div className="flex items-center gap-3 flex-wrap justify-center">
             
-            {/* Premium Theme Selector */}
-            <div className="flex items-center p-0.5 bg-neutral-900 border border-neutral-800 rounded-xl" id="theme-mode-selector">
-              <button
-                type="button"
-                onClick={() => handleSetTheme("light")}
-                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                  theme === "light"
-                    ? "bg-[#ccff00] text-black font-bold shadow-sm"
-                    : "text-neutral-400 hover:text-neutral-200"
-                }`}
-                title="Light Mode"
-                id="theme-light-btn"
-              >
-                <Sun size={13} />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSetTheme("dark")}
-                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                  theme === "dark"
-                    ? "bg-[#ccff00] text-black font-bold shadow-sm"
-                    : "text-neutral-400 hover:text-neutral-200"
-                }`}
-                title="Dark Mode"
-                id="theme-dark-btn"
-              >
-                <Moon size={13} />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSetTheme("system")}
-                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                  theme === "system"
-                    ? "bg-[#ccff00] text-black font-bold shadow-sm"
-                    : "text-neutral-400 hover:text-neutral-200"
-                }`}
-                title="System Theme"
-                id="theme-system-btn"
-              >
-                <Monitor size={13} />
-              </button>
-            </div>
-
             {/* Quick login / Sync access */}
             {isLoadingCloudData ? (
               <div className="flex items-center gap-2 text-neutral-500 text-[11px] font-mono border border-neutral-850 px-4 py-2 rounded-xl bg-neutral-950">
@@ -1265,6 +1223,27 @@ export default function App() {
                         </>
                       )}
 
+                      {/* Theme selection row */}
+                      <div className="px-2.5 py-2 hover:bg-neutral-900 rounded-lg transition-colors flex items-center justify-between border border-transparent">
+                        <div className="flex items-center gap-2 text-neutral-400">
+                          {theme === "light" && <Sun size={12} className="text-neutral-500" />}
+                          {theme === "dark" && <Moon size={12} className="text-neutral-500" />}
+                          {theme === "system" && <Monitor size={12} className="text-neutral-500" />}
+                          <span>Theme</span>
+                        </div>
+                        <select
+                          value={theme}
+                          onChange={(e) => handleSetTheme(e.target.value as 'light' | 'dark' | 'system')}
+                          className="bg-neutral-950 border border-neutral-850 rounded px-1.5 py-0.5 text-neutral-300 focus:outline-none focus:border-[#ccff00] text-[10px] cursor-pointer"
+                        >
+                          <option value="system">System</option>
+                          <option value="light">Light</option>
+                          <option value="dark">Dark</option>
+                        </select>
+                      </div>
+
+                      <div className="border-b border-neutral-900 my-1"></div>
+
                       <button
                         onClick={() => {
                           setAuthModalOpen(true);
@@ -1305,14 +1284,60 @@ export default function App() {
                 )}
               </div>
             ) : (
-              <button
-                onClick={() => setAuthModalOpen(true)}
-                className="text-[11px] font-mono hover:text-[#ccff00] border transition-all cursor-pointer flex items-center gap-1.5 shadow-sm px-4 py-2 rounded-xl text-neutral-400 border border-neutral-850 hover:border-neutral-750 bg-neutral-950 hover:bg-neutral-900 animate-in fade-in"
-                id="global-login-btn"
-              >
-                <User size={13} className="text-neutral-500" />
-                <span>Login</span>
-              </button>
+              <div className="relative" id="guest-dropdown-container">
+                <button
+                  onClick={() => setGuestDropdownOpen(!guestDropdownOpen)}
+                  className="text-[11px] font-mono hover:text-[#ccff00] border transition-all cursor-pointer flex items-center gap-2 shadow-sm px-3 py-1.5 rounded-xl text-neutral-300 border border-neutral-850 hover:border-neutral-750 bg-neutral-950 hover:bg-neutral-900"
+                  id="guest-menu-btn"
+                >
+                  <User size={13} className="text-neutral-500" />
+                  <span>Guest Settings</span>
+                  <ChevronDown size={11} className={`text-neutral-500 transition-transform ${guestDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {guestDropdownOpen && (
+                  <>
+                    {/* Backdrop cover for clicking outside */}
+                    <div className="fixed inset-0 z-30" onClick={() => setGuestDropdownOpen(false)}></div>
+                    <div
+                      className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-neutral-850 bg-neutral-950/95 backdrop-blur-md p-2 shadow-2xl z-40 flex flex-col gap-1 text-[11px] font-mono animate-in fade-in slide-in-from-top-2 duration-150"
+                      id="guest-menu"
+                    >
+                      {/* Theme selection row */}
+                      <div className="px-2.5 py-2 hover:bg-neutral-900 rounded-lg transition-colors flex items-center justify-between border border-transparent">
+                        <div className="flex items-center gap-2 text-neutral-400">
+                          {theme === "light" && <Sun size={12} className="text-neutral-500" />}
+                          {theme === "dark" && <Moon size={12} className="text-neutral-500" />}
+                          {theme === "system" && <Monitor size={12} className="text-neutral-500" />}
+                          <span>Theme</span>
+                        </div>
+                        <select
+                          value={theme}
+                          onChange={(e) => handleSetTheme(e.target.value as 'light' | 'dark' | 'system')}
+                          className="bg-neutral-950 border border-neutral-850 rounded px-1.5 py-0.5 text-neutral-300 focus:outline-none focus:border-[#ccff00] text-[10px] cursor-pointer"
+                        >
+                          <option value="system">System</option>
+                          <option value="light">Light</option>
+                          <option value="dark">Dark</option>
+                        </select>
+                      </div>
+
+                      <div className="border-b border-neutral-900 my-1"></div>
+
+                      <button
+                        onClick={() => {
+                          setAuthModalOpen(true);
+                          setGuestDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-2.5 py-2 hover:bg-neutral-900 rounded-lg text-neutral-300 hover:text-white transition-colors flex items-center gap-2 cursor-pointer border border-transparent"
+                      >
+                        <User size={12} className="text-neutral-500" />
+                        <span>Login / Register</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             )}
 
           </div>
@@ -2283,6 +2308,8 @@ export default function App() {
         onClose={() => setAuthModalOpen(false)} 
         currentUser={currentUser}
         userProfile={userProfile}
+        theme={theme}
+        onThemeChange={handleSetTheme}
         onProfileUpdate={(updatedUser) => {
           setCurrentUser(updatedUser);
           setUserProfile({

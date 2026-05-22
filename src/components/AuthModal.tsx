@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon } from "lucide-react";
+import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor } from "lucide-react";
 import {
   auth,
   db,
@@ -25,6 +25,8 @@ interface AuthModalProps {
   currentUser?: any;
   userProfile?: { name: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string } | null;
   onProfileUpdate?: (updatedUser: any) => void;
+  theme?: 'light' | 'dark' | 'system';
+  onThemeChange?: (theme: 'light' | 'dark' | 'system') => void;
 }
 
 const ACCENT_COLORS = [
@@ -198,7 +200,9 @@ export default function AuthModal({
   onMockLogin,
   currentUser,
   userProfile,
-  onProfileUpdate
+  onProfileUpdate,
+  theme = "system",
+  onThemeChange
 }: AuthModalProps) {
   const [tab, setTab] = useState<"signin" | "signup" | "settings">("signin");
   
