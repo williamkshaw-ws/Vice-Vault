@@ -28,6 +28,7 @@ interface UserProfile {
   email?: string;
   password?: string;
   username?: string;
+  authUid?: string;
 }
 
 interface CatalogItem {
@@ -438,11 +439,11 @@ async function cleanDatabaseFields() {
       const adminDoc = usersSnap.docs.find(doc => doc.data()?.email?.toLowerCase() === "admin@vault.com");
       const userDoc = usersSnap.docs.find(doc => doc.data()?.email?.toLowerCase() === "user@vault.com");
 
-      // 4B. Fetch locker data from old documents if their ID is not realAdminUid/realUserUid
+      // 4B. Fetch locker data from old documents if their ID is not u-admin/u-user
       let adminLockerBalls = null;
       let userLockerBalls = null;
 
-      if (adminDoc && adminDoc.id !== realAdminUid) {
+      if (adminDoc && adminDoc.id !== "u-admin") {
         console.log(`Found existing admin@vault.com under doc ID: ${adminDoc.id}. Migrating locker...`);
         const lockerSnap = await dbAdmin.collection("users").doc(adminDoc.id).collection("data").doc("locker").get();
         if (lockerSnap.exists) {
@@ -450,7 +451,7 @@ async function cleanDatabaseFields() {
         }
       }
 
-      if (userDoc && userDoc.id !== realUserUid) {
+      if (userDoc && userDoc.id !== "u-user") {
         console.log(`Found existing user@vault.com under doc ID: ${userDoc.id}. Migrating locker...`);
         const lockerSnap = await dbAdmin.collection("users").doc(userDoc.id).collection("data").doc("locker").get();
         if (lockerSnap.exists) {
@@ -458,26 +459,55 @@ async function cleanDatabaseFields() {
         }
       }
 
-      // 4C. Delete all users from Firestore that are not in allowedUids
-      const userRefs = await dbAdmin.collection("users").listDocuments();
-      for (const docRef of userRefs) {
-        const uid = docRef.id;
-        if (!allowedUids.has(uid)) {
-          console.log(`Pruning legacy Firestore user doc and subcollections: ${uid}`);
-          await deleteFirestoreDocAndSubcollections(docRef);
+      // 4C. Delete all users from Firestore that are not authorized, or migrate legacy authorized ones
+      for (const doc of usersSnap.docs) {
+        const docId = doc.id;
+        const data = doc.data();
+        const firebaseAuthUid = data.uid || data.authUid;
+        const isAllowed = docId === "u-admin" || docId === "u-user" || (firebaseAuthUid && allowedUids.has(firebaseAuthUid));
+        if (!isAllowed) {
+          console.log(`Pruning unauthorized Firestore user doc and subcollections: ${docId}`);
+          await deleteFirestoreDocAndSubcollections(doc.ref);
+        } else if (!docId.startsWith("u-") && docId !== "u-admin" && docId !== "u-user") {
+          // This is an authorized user, but uses a legacy raw Auth UID document ID. Migrate it!
+          const username = (data.username || (data.email ? data.email.split('@')[0] : null) || "user").toLowerCase();
+          const targetDocId = `u-${username}`;
+          console.log(`Found legacy authorized user doc ${docId} for username ${username}. Migrating to ${targetDocId}...`);
+          
+          const targetRef = dbAdmin.collection("users").doc(targetDocId);
+          // Save the user data to the new document
+          await targetRef.set({
+            ...data,
+            uid: firebaseAuthUid,
+            authUid: firebaseAuthUid,
+            username: username
+          }, { merge: true });
+
+          // Copy locker subcollection
+          const oldLockerRef = doc.ref.collection("data").doc("locker");
+          const oldLockerSnap = await oldLockerRef.get();
+          if (oldLockerSnap.exists) {
+            const targetLockerRef = targetRef.collection("data").doc("locker");
+            await targetLockerRef.set(oldLockerSnap.data() || {});
+            console.log(`Migrated locker subcollection for legacy user ${docId} -> ${targetDocId}`);
+          }
+          
+          // Now delete the old document
+          console.log(`Deleting legacy user doc & subcollections: ${docId}`);
+          await deleteFirestoreDocAndSubcollections(doc.ref);
         }
       }
 
-      // 4D. Set up the two target users in Firestore with real UIDs
-      const firestoreAdminData = adminDoc ? { ...adminDoc.data() } as UserProfile : { ...initialAdmin };
-      firestoreAdminData.uid = realAdminUid;
+
+      // 4D. Set up the two target users in Firestore with u-USERNAME IDs
+      const firestoreAdminData = adminDoc ? { ...adminDoc.data() } : { ...initialAdmin };
+      firestoreAdminData.uid = realAdminUid; // Keep internal uid field as the Auth UID
       firestoreAdminData.role = "Admin";
       firestoreAdminData.email = "admin@vault.com";
       firestoreAdminData.username = "admin";
 
       const firestoreUserData = userDoc ? { ...userDoc.data() } : { ...initialUser };
-      firestoreUserData.uid = realUserUid;
-      // Do not copy admin profile details here! Ensure user details are set/preserved.
+      firestoreUserData.uid = realUserUid; // Keep internal uid field as the Auth UID
       firestoreUserData.displayName = firestoreUserData.displayName || initialUser.displayName;
       firestoreUserData.preferredColor = firestoreUserData.preferredColor || initialUser.preferredColor;
       firestoreUserData.avatarUrl = firestoreUserData.avatarUrl || initialUser.avatarUrl;
@@ -486,47 +516,50 @@ async function cleanDatabaseFields() {
       firestoreUserData.email = "user@vault.com";
       firestoreUserData.username = "user";
 
-      const finalFirestoreUsers = [firestoreAdminData, firestoreUserData];
+      const finalFirestoreUsers = [
+        { docId: "u-admin", data: firestoreAdminData, authUid: realAdminUid, lockerBalls: adminLockerBalls },
+        { docId: "u-user", data: firestoreUserData, authUid: realUserUid, lockerBalls: userLockerBalls }
+      ];
 
-      for (const u of finalFirestoreUsers) {
-        const { uid, ...profileData } = u;
-        const userRef = dbAdmin.collection("users").doc(uid);
+      for (const item of finalFirestoreUsers) {
+        const userRef = dbAdmin.collection("users").doc(item.docId);
         
         // Ensure profile settings are updated and correct
-        await userRef.set({ uid, ...profileData }, { merge: true });
+        await userRef.set({
+          ...item.data,
+          uid: item.authUid, // Keep Auth UID inside the 'uid' field
+          authUid: item.authUid,
+          username: item.docId.replace(/^u-/, "") // Ensure username field matches doc ID
+        }, { merge: true });
         
         const lockerRef = userRef.collection("data").doc("locker");
         const lockerSnap = await lockerRef.get();
 
-        let currentBalls = null;
-        if (uid === realAdminUid) {
-          currentBalls = adminLockerBalls || (lockerSnap.exists ? lockerSnap.data()?.balls : null);
-        } else {
-          currentBalls = userLockerBalls || (lockerSnap.exists ? lockerSnap.data()?.balls : null);
-        }
+        let currentBalls = item.lockerBalls || (lockerSnap.exists ? lockerSnap.data()?.balls : null);
         
         if (!currentBalls || !Array.isArray(currentBalls) || currentBalls.length === 0) {
-          console.log(`Seeding default Firestore locker for user: ${uid}`);
+          console.log(`Seeding default Firestore locker for user: ${item.docId}`);
           await lockerRef.set({ balls: DEFAULT_LOCKER });
         } else {
           const cleanedBalls = currentBalls.map((b: any) => cleanObject(b, userFieldsToRemove));
           await lockerRef.set({ balls: cleanedBalls });
-          console.log(`Cleaned Firestore locker for user: ${uid}`);
+          console.log(`Cleaned Firestore locker for user: ${item.docId}`);
         }
       }
 
-      // Clean lockers of other active users from Firebase Auth
-      for (const uid of allowedUids) {
-        if (uid !== "u-admin" && uid !== "u-user") {
-          const userRef = dbAdmin.collection("users").doc(uid);
-          const lockerRef = userRef.collection("data").doc("locker");
+      // Clean lockers of other active users from Firestore
+      const freshUsersSnap = await dbAdmin.collection("users").get();
+      for (const doc of freshUsersSnap.docs) {
+        const docId = doc.id;
+        if (docId !== "u-admin" && docId !== "u-user") {
+          const lockerRef = doc.ref.collection("data").doc("locker");
           const lockerSnap = await lockerRef.get();
           if (lockerSnap.exists) {
             const currentBalls = lockerSnap.data()?.balls;
             if (Array.isArray(currentBalls) && currentBalls.length > 0) {
               const cleanedBalls = currentBalls.map((b: any) => cleanObject(b, userFieldsToRemove));
               await lockerRef.set({ balls: cleanedBalls }, { merge: true });
-              console.log(`Cleaned Firestore locker for active user: ${uid}`);
+              console.log(`Cleaned Firestore locker for active user doc: ${docId}`);
             }
           }
         }
@@ -692,13 +725,39 @@ async function verifyAdmin(userId: string | undefined): Promise<boolean> {
 }
 
 // Async Database Helpers
+async function resolveUserDocId(uid: string): Promise<string> {
+  if (!uid) return "";
+  if (uid.startsWith("u-")) return uid;
+  if (dbAdmin) {
+    try {
+      const q = await dbAdmin.collection("users").where("uid", "==", uid).get();
+      if (!q.empty) {
+        return q.docs[0].id;
+      }
+      const qEmail = await dbAdmin.collection("users").where("email", "==", uid).get();
+      if (!qEmail.empty) {
+        return qEmail.docs[0].id;
+      }
+    } catch (e) {
+      console.error("resolveUserDocId failed in Firestore:", e);
+    }
+  }
+  return uid;
+}
+
+// Async Database Helpers
 async function getUsersList(): Promise<UserProfile[]> {
   if (dbAdmin) {
     try {
       const snapshot = await dbAdmin.collection("users").get();
       const users: UserProfile[] = [];
       snapshot.forEach(doc => {
-        users.push({ uid: doc.id, ...doc.data() } as UserProfile);
+        const data = doc.data();
+        users.push({
+          ...data,
+          uid: doc.id, // uid is the doc ID u-USERNAME
+          authUid: data.uid || data.authUid // keep Firebase Auth UID in authUid
+        } as UserProfile);
       });
       return users;
     } catch (error) {
@@ -711,7 +770,14 @@ async function getUsersList(): Promise<UserProfile[]> {
 async function saveUserToDb(user: UserProfile): Promise<void> {
   if (dbAdmin) {
     try {
-      await dbAdmin.collection("users").doc(user.uid).set(user, { merge: true });
+      const cleanUsername = cleanUsernameString(user.username || user.displayName || "user");
+      const docId = user.uid.startsWith("u-") ? user.uid : `u-${cleanUsername}`;
+      const dataToSave = {
+        ...user,
+        uid: user.authUid || user.uid, // Keep the Firebase Auth UID inside the 'uid' field for client lookup
+        authUid: user.authUid || user.uid // Ensure authUid is populated
+      };
+      await dbAdmin.collection("users").doc(docId).set(dataToSave, { merge: true });
       return;
     } catch (error) {
       console.error("Firestore saveUserToDb failed, fallback to file:", error);
@@ -728,22 +794,23 @@ async function saveUserToDb(user: UserProfile): Promise<void> {
 }
 
 async function deleteUserFromDb(userId: string): Promise<boolean> {
+  const resolvedId = await resolveUserDocId(userId);
   if (dbAdmin) {
     try {
-      await deleteFirestoreDocAndSubcollections(dbAdmin.collection("users").doc(userId));
+      await deleteFirestoreDocAndSubcollections(dbAdmin.collection("users").doc(resolvedId));
       return true;
     } catch (error) {
       console.error("Firestore deleteUserFromDb failed, fallback to file:", error);
     }
   }
   const users = loadUsers();
-  const userIndex = users.findIndex(u => u.uid === userId);
+  const userIndex = users.findIndex(u => u.uid === resolvedId);
   if (userIndex === -1) return false;
   users.splice(userIndex, 1);
   saveUsers(users);
 
   // Delete user's workspace data file if it exists
-  const userDataPath = getUserDataPath(userId);
+  const userDataPath = getUserDataPath(resolvedId);
   if (fs.existsSync(userDataPath)) {
     try {
       fs.unlinkSync(userDataPath);
@@ -755,9 +822,10 @@ async function deleteUserFromDb(userId: string): Promise<boolean> {
 }
 
 async function getUserLocker(uid: string): Promise<any[] | null> {
+  const resolvedId = await resolveUserDocId(uid);
   if (dbAdmin) {
     try {
-      const docSnap = await dbAdmin.collection("users").doc(uid).collection("data").doc("locker").get();
+      const docSnap = await dbAdmin.collection("users").doc(resolvedId).collection("data").doc("locker").get();
       if (docSnap.exists) {
         return docSnap.data()?.balls || null;
       }
@@ -766,20 +834,21 @@ async function getUserLocker(uid: string): Promise<any[] | null> {
     }
     return null;
   }
-  const data = loadUserData(uid);
+  const data = loadUserData(resolvedId);
   return data && data.balls ? data.balls : null;
 }
 
 async function saveUserLocker(uid: string, balls: any[]): Promise<void> {
+  const resolvedId = await resolveUserDocId(uid);
   if (dbAdmin) {
     try {
-      await dbAdmin.collection("users").doc(uid).collection("data").doc("locker").set({ balls }, { merge: true });
+      await dbAdmin.collection("users").doc(resolvedId).collection("data").doc("locker").set({ balls }, { merge: true });
       return;
     } catch (error) {
       console.error("Firestore saveUserLocker failed, fallback to file:", error);
     }
   }
-  saveUserData(uid, { balls });
+  saveUserData(resolvedId, { balls });
 }
 
 
@@ -1054,7 +1123,22 @@ app.patch("/api/users/:id/profile", async (req, res) => {
 
   // Update profile fields
   user.displayName = displayName.trim();
-  user.username = usernameLower;
+  const oldDocId = id;
+  let newDocId = id;
+  if (username !== undefined) {
+    const cleanUsername = cleanUsernameString(username);
+    if (!cleanUsername) {
+      return res.status(400).json({ error: "Username must contain letters, numbers, or underscores." });
+    }
+    // Check if username is already taken by someone else
+    const usernameExists = users.some(u => u.uid !== id && u.username?.toLowerCase() === cleanUsername);
+    if (usernameExists) {
+      return res.status(400).json({ error: "This username is already taken by another account." });
+    }
+    newDocId = `u-${cleanUsername}`;
+    user.username = cleanUsername;
+  }
+
   if (avatarUrl !== undefined) {
     user.avatarUrl = avatarUrl;
   }
@@ -1066,6 +1150,52 @@ app.patch("/api/users/:id/profile", async (req, res) => {
       return res.status(400).json({ error: "Password is too weak. It must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character." });
     }
     user.password = hashPassword(password);
+  }
+
+  if (newDocId !== oldDocId) {
+    if (dbAdmin) {
+      try {
+        const oldDocRef = dbAdmin.collection("users").doc(oldDocId);
+        const oldDocSnap = await oldDocRef.get();
+        const oldLockerRef = oldDocRef.collection("data").doc("locker");
+        const oldLockerSnap = await oldLockerRef.get();
+
+        const oldData = oldDocSnap.exists ? oldDocSnap.data() : {};
+        const newData = {
+          ...oldData,
+          ...user,
+          uid: user.authUid || user.uid,
+          authUid: user.authUid || user.uid,
+          username: user.username
+        };
+        const newDocRef = dbAdmin.collection("users").doc(newDocId);
+        await newDocRef.set(newData);
+
+        if (oldLockerSnap.exists) {
+          await newDocRef.collection("data").doc("locker").set(oldLockerSnap.data() || {});
+        }
+
+        await deleteFirestoreDocAndSubcollections(oldDocRef);
+        console.log(`Firestore document renamed in profile update from ${oldDocId} to ${newDocId}`);
+      } catch (err) {
+        console.error(`Failed to rename Firestore document from ${oldDocId} to ${newDocId}:`, err);
+        return res.status(500).json({ error: "Failed to rename user profile in database." });
+      }
+    } else {
+      const oldPath = getUserDataPath(oldDocId);
+      const newPath = getUserDataPath(newDocId);
+      if (fs.existsSync(oldPath)) {
+        try {
+          fs.renameSync(oldPath, newPath);
+        } catch (err) {
+          console.error(`Failed to rename local file:`, err);
+        }
+      }
+      const localUsers = loadUsers();
+      const filtered = localUsers.filter(u => u.uid !== oldDocId);
+      saveUsers(filtered);
+    }
+    user.uid = newDocId;
   }
 
   await saveUserToDb(user);
@@ -1115,8 +1245,35 @@ app.post("/api/users", async (req, res) => {
     suffix++;
   }
 
+  let authUid = userId;
+  if (isFirebaseAdminInitialized) {
+    if (!email || !email.trim()) {
+      return res.status(400).json({ error: "Email is required for creating a real Firebase user." });
+    }
+    const emailLower = email.trim().toLowerCase();
+    if (!password) {
+      return res.status(400).json({ error: "Password is required for creating a real Firebase user." });
+    }
+    if (!isStrongPassword(password)) {
+      return res.status(400).json({ error: "Password is too weak. It must be at least 8 characters long and contain uppercase, lowercase, numbers, and special characters." });
+    }
+    try {
+      const userRecord = await admin.auth().createUser({
+        email: emailLower,
+        password: password,
+        displayName: displayName.trim()
+      });
+      authUid = userRecord.uid;
+      console.log(`Created Firebase Auth user for ${emailLower} with UID: ${authUid}`);
+    } catch (authErr: any) {
+      console.error("Failed to create Firebase Auth user:", authErr);
+      return res.status(400).json({ error: authErr.message || "Failed to create user in Firebase Auth." });
+    }
+  }
+
   const newUser: UserProfile = {
     uid: userId,
+    authUid: authUid,
     displayName: displayName.trim(),
     username: userId.substring(2),
     email: email ? email.trim().toLowerCase() : undefined,
@@ -1197,6 +1354,8 @@ app.patch("/api/users/:id", async (req, res) => {
     targetUser.displayName = displayName.trim();
   }
 
+  const oldDocId = id;
+  let newDocId = id;
   if (username !== undefined) {
     const cleanUsername = cleanUsernameString(username);
     if (!cleanUsername) {
@@ -1207,6 +1366,7 @@ app.patch("/api/users/:id", async (req, res) => {
     if (usernameExists) {
       return res.status(400).json({ error: "This username is already taken by another account." });
     }
+    newDocId = `u-${cleanUsername}`;
     targetUser.username = cleanUsername;
   }
 
@@ -1241,8 +1401,8 @@ app.patch("/api/users/:id", async (req, res) => {
   }
 
   // If Firebase Admin SDK is initialized, propagate changes to Firebase Auth (skip for mock/local users)
-  const isMockId = id.startsWith("mock-u-") || id.startsWith("u-") || id === "admin" || id === "guest";
-  if (isFirebaseAdminInitialized && !isMockId) {
+  const isMockUser = !targetUser.authUid || targetUser.authUid.startsWith("u-");
+  if (isFirebaseAdminInitialized && !isMockUser && targetUser.authUid) {
     try {
       const authUpdates: any = {};
       if (email !== undefined) {
@@ -1258,17 +1418,63 @@ app.patch("/api/users/:id", async (req, res) => {
         authUpdates.photoURL = (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://")) ? avatarUrl : null;
       }
       if (Object.keys(authUpdates).length > 0) {
-        await admin.auth().updateUser(id, authUpdates);
-        console.log(`Successfully updated Auth credentials for user ${id} in Firebase Auth`);
+        await admin.auth().updateUser(targetUser.authUid, authUpdates);
+        console.log(`Successfully updated Auth credentials for user ${targetUser.authUid} in Firebase Auth`);
       }
     } catch (authErr: any) {
       console.error(`Failed to update user Auth credentials in Firebase:`, authErr);
       if (authErr.code === "auth/user-not-found" || authErr.code === "auth/configuration-not-found") {
-        console.warn(`Ignoring Firebase Auth update error (code: ${authErr.code}) for user ${id} and proceeding with database update.`);
+        console.warn(`Ignoring Firebase Auth update error (code: ${authErr.code}) for user ${targetUser.authUid} and proceeding with database update.`);
       } else {
         return res.status(400).json({ error: authErr.message || "Failed to update Firebase Auth credentials." });
       }
     }
+  }
+
+  if (newDocId !== oldDocId) {
+    if (dbAdmin) {
+      try {
+        const oldDocRef = dbAdmin.collection("users").doc(oldDocId);
+        const oldDocSnap = await oldDocRef.get();
+        const oldLockerRef = oldDocRef.collection("data").doc("locker");
+        const oldLockerSnap = await oldLockerRef.get();
+
+        const oldData = oldDocSnap.exists ? oldDocSnap.data() : {};
+        const newData = {
+          ...oldData,
+          ...targetUser,
+          uid: targetUser.authUid || targetUser.uid,
+          authUid: targetUser.authUid || targetUser.uid,
+          username: targetUser.username
+        };
+        const newDocRef = dbAdmin.collection("users").doc(newDocId);
+        await newDocRef.set(newData);
+
+        if (oldLockerSnap.exists) {
+          await newDocRef.collection("data").doc("locker").set(oldLockerSnap.data() || {});
+        }
+
+        await deleteFirestoreDocAndSubcollections(oldDocRef);
+        console.log(`Firestore document renamed in admin update from ${oldDocId} to ${newDocId}`);
+      } catch (err) {
+        console.error(`Failed to rename Firestore document from ${oldDocId} to ${newDocId}:`, err);
+        return res.status(500).json({ error: "Failed to rename user profile in database." });
+      }
+    } else {
+      const oldPath = getUserDataPath(oldDocId);
+      const newPath = getUserDataPath(newDocId);
+      if (fs.existsSync(oldPath)) {
+        try {
+          fs.renameSync(oldPath, newPath);
+        } catch (err) {
+          console.error(`Failed to rename local file:`, err);
+        }
+      }
+      const localUsers = loadUsers();
+      const filtered = localUsers.filter(u => u.uid !== oldDocId);
+      saveUsers(filtered);
+    }
+    targetUser.uid = newDocId;
   }
 
   await saveUserToDb(targetUser);
@@ -1290,6 +1496,26 @@ app.delete("/api/users/:id", async (req, res) => {
   // Self-deletion check
   if (id === actingUserId) {
     return res.status(400).json({ error: "Self-protection safeguard: You cannot delete your own admin account." });
+  }
+
+  const users = await getUsersList();
+  const targetUser = users.find(u => u.uid === id);
+  if (!targetUser) {
+    return res.status(404).json({ error: "User not found" });
+  }
+
+  // Delete from Firebase Auth if isFirebaseAdminInitialized and it's a real Firebase user
+  const isMockUser = !targetUser.authUid || targetUser.authUid.startsWith("u-");
+  if (isFirebaseAdminInitialized && !isMockUser && targetUser.authUid) {
+    try {
+      await admin.auth().deleteUser(targetUser.authUid);
+      console.log(`Successfully deleted user ${targetUser.authUid} from Firebase Auth`);
+    } catch (authErr: any) {
+      console.error(`Failed to delete user from Firebase Auth:`, authErr);
+      if (authErr.code !== "auth/user-not-found") {
+        return res.status(400).json({ error: authErr.message || "Failed to delete user from Firebase Auth" });
+      }
+    }
   }
 
   const success = await deleteUserFromDb(id);

@@ -41,7 +41,7 @@ import {
 import { auth, db, isFirebaseConfigured } from "./firebase";
 import AuthModal, { AvatarRenderer } from "./components/AuthModal";
 import { onAuthStateChanged, signOut, User as FirebaseUser } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, query, where, collection, getDocs } from "firebase/firestore";
 
 // Premium Custom Golf-Specific SVGs designed to match the Munich technical aesthetic
 function GolfBagIcon({ className = "w-5 h-5 text-neutral-400" }: { className?: string }) {
@@ -477,41 +477,97 @@ export default function App() {
         localStorage.removeItem("vice_vault_mock_user");
         
         setCurrentUser(user);
-        setIsLoadingCloudData(true);
         try {
           // 1. Load User Profile from Firestore
           if (db) {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists()) {
-              const data = userDoc.data();
-              setUserProfile({
-                displayName: data.displayName || data.name || user.displayName || "User",
-                username: data.username || "",
-                avatarUrl: data.avatarUrl || "initials",
-                preferredColor: data.preferredColor || "#ccff00",
-                role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User"
-              });
-              setAccentColor(data.preferredColor || "#ccff00");
-            } else {
-              setUserProfile({
-                displayName: user.displayName || "User",
-                username: "",
-                avatarUrl: user.photoURL || "initials",
-                preferredColor: "#ccff00",
-                role: "User"
-              });
-              setAccentColor("#ccff00");
+            let userDocData: any = null;
+            let userDocId: string = "";
+
+            // Query by uid first
+            const qUid = query(collection(db, "users"), where("uid", "==", user.uid));
+            const qUidSnap = await getDocs(qUid);
+            if (!qUidSnap.empty) {
+              userDocData = qUidSnap.docs[0].data();
+              userDocId = qUidSnap.docs[0].id;
+            } else if (user.email) {
+              // Try email backup
+              const qEmail = query(collection(db, "users"), where("email", "==", user.email.toLowerCase()));
+              const qEmailSnap = await getDocs(qEmail);
+              if (!qEmailSnap.empty) {
+                userDocData = qEmailSnap.docs[0].data();
+                userDocId = qEmailSnap.docs[0].id;
+              }
             }
 
-            // 2. Load inventory documents
-            const lockerDoc = await getDoc(doc(db, "users", user.uid, "data", "locker"));
+            if (userDocData && userDocId) {
+              // Found user profile
+              setUserProfile({
+                displayName: userDocData.displayName || userDocData.name || user.displayName || "User",
+                username: userDocData.username || userDocId.replace(/^u-/, ""),
+                avatarUrl: userDocData.avatarUrl || "initials",
+                preferredColor: userDocData.preferredColor || "#ccff00",
+                role: (userDocData.role && userDocData.role.toLowerCase() === "admin") ? "Admin" : "User",
+                createdAt: userDocData.createdAt,
+                email: userDocData.email || user.email || ""
+              } as any);
+              setAccentColor(userDocData.preferredColor || "#ccff00");
+            } else {
+              // Auto-derive u-USERNAME and create a default profile doc in Firestore
+              const rawUsername = user.displayName || user.email?.split("@")[0] || "user";
+              const cleanUsername = rawUsername.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
+              const docId = `u-${cleanUsername}`;
+
+              // Check if username is already taken in users collection. If so, append suffix
+              let finalDocId = docId;
+              let suffix = 1;
+              let exists = true;
+              while (exists) {
+                const docSnap = await getDoc(doc(db, "users", finalDocId));
+                if (docSnap.exists()) {
+                  finalDocId = `${docId}_${suffix}`;
+                  suffix++;
+                } else {
+                  exists = false;
+                }
+              }
+
+              const derivedUsername = finalDocId.replace(/^u-/, "");
+              const defaultProfile = {
+                uid: user.uid,
+                authUid: user.uid,
+                displayName: user.displayName || derivedUsername,
+                username: derivedUsername,
+                avatarUrl: user.photoURL || "preset-1",
+                preferredColor: "#ccff00",
+                role: derivedUsername === "admin" ? "Admin" : "User",
+                createdAt: new Date().toISOString(),
+                email: user.email || ""
+              };
+
+              await setDoc(doc(db, "users", finalDocId), defaultProfile);
+              
+              userDocId = finalDocId;
+              userDocData = defaultProfile;
+
+              setUserProfile({
+                displayName: defaultProfile.displayName,
+                username: defaultProfile.username,
+                avatarUrl: defaultProfile.avatarUrl,
+                preferredColor: defaultProfile.preferredColor,
+                role: defaultProfile.role as any
+              });
+              setAccentColor(defaultProfile.preferredColor);
+            }
+
+            // 2. Load inventory documents using the standard user doc ID
+            const lockerDoc = await getDoc(doc(db, "users", userDocId, "data", "locker"));
 
             let finalBalls = balls;
 
             if (lockerDoc.exists()) {
               finalBalls = lockerDoc.data().balls || [];
             } else {
-              await setDoc(doc(db, "users", user.uid, "data", "locker"), { balls });
+              await setDoc(doc(db, "users", userDocId, "data", "locker"), { balls });
             }
 
             setBalls(finalBalls);
@@ -790,13 +846,15 @@ export default function App() {
           body: JSON.stringify({ balls })
         }).catch(err => console.error("Error writing locker to server:", err));
       } else if (db) {
-        const lockerRef = doc(db, "users", currentUser.uid, "data", "locker");
+        const username = userProfile?.username;
+        const docId = username ? `u-${username}` : currentUser.uid;
+        const lockerRef = doc(db, "users", docId, "data", "locker");
         setDoc(lockerRef, { balls }).catch(err => console.error("Error writing locker to Firestore:", err));
       }
     } else if (!currentUser) {
       localStorage.setItem("vice_vault_balls", JSON.stringify(balls));
     }
-  }, [balls, currentUser, isCloudDataLoaded]);
+  }, [balls, currentUser, isCloudDataLoaded, userProfile]);
 
 
 

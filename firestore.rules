@@ -4,9 +4,10 @@ service cloud.firestore {
     
     // Helper function to check if the current user is an Admin
     function isAdmin() {
+      // Since the admin doc is u-admin, we check if the doc u-admin has uid matching request.auth.uid
       return request.auth != null && 
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin';
+        exists(/databases/$(database)/documents/users/u-admin) &&
+        get(/databases/$(database)/documents/users/u-admin).data.uid == request.auth.uid;
     }
 
     // Rules for the golf ball catalog collection
@@ -20,16 +21,23 @@ service cloud.firestore {
 
     // Rules for the users collection
     match /users/{userId} {
-      // Users can read and write (register/update) their own profiles.
-      // Admins can read or modify any user profile.
-      allow read, write: if (request.auth != null && request.auth.uid == userId) || isAdmin();
+      // Allow user to get/write their own profile if they are logged in and their Auth UID matches the document's internal uid field
+      allow read, write: if (request.auth != null && (
+        // For existing documents (read/update/delete)
+        (resource != null && resource.data.uid == request.auth.uid) ||
+        // For new/modified documents (create/write)
+        (request.resource != null && request.resource.data.uid == request.auth.uid)
+      )) || isAdmin();
 
       // Rules for nested user collections (e.g., users/{userId}/data/locker)
       match /data/{document=**} {
-        // Users can read/write their own locker data.
-        // Admins can read/write locker data for any user.
-        allow read, write: if (request.auth != null && request.auth.uid == userId) || isAdmin();
+        // Users can read/write their own locker data by checking the parent user doc's uid field.
+        allow read, write: if (request.auth != null && 
+          exists(/databases/$(database)/documents/users/$(userId)) &&
+          get(/databases/$(database)/documents/users/$(userId)).data.uid == request.auth.uid
+        ) || isAdmin();
       }
     }
   }
 }
+

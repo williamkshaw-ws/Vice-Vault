@@ -78,9 +78,10 @@ async function run() {
 
     // 3. Create or update the user document in Firestore
     try {
-      const userDocRef = db.collection('users').doc(authUser.uid);
+      const userDocRef = db.collection('users').doc('u-' + u.username);
       await userDocRef.set({
         uid: authUser.uid,
+        authUid: authUser.uid,
         username: u.username,
         displayName: u.displayName,
         role: u.role,

@@ -16,14 +16,14 @@ import {
   updateProfile,
   updatePassword
 } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, deleteDoc } from "firebase/firestore";
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onMockLogin?: (user: any) => void;
   currentUser?: any;
-  userProfile?: { displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string } | null;
+  userProfile?: { displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; createdAt?: string; email?: string } | null;
   onProfileUpdate?: (updatedUser: any) => void;
   theme?: 'light' | 'dark' | 'system';
   onThemeChange?: (theme: 'light' | 'dark' | 'system') => void;
@@ -402,8 +402,10 @@ export default function AuthModal({
 
       // Save user record to firestore user settings
       if (db) {
-        await setDoc(doc(db, "users", user.uid), {
+        const userDocId = `u-${cleanUsername}`;
+        await setDoc(doc(db, "users", userDocId), {
           uid: user.uid,
+          authUid: user.uid,
           username: cleanUsername,
           displayName: displayName,
           role: cleanUsername === "admin" ? "Admin" : "User",
@@ -507,12 +509,55 @@ export default function AuthModal({
       }
 
       if (db) {
-        await setDoc(doc(db, "users", currentUser.uid), {
-          displayName: displayName,
-          username: cleanUsername,
-          avatarUrl: finalAvatar,
-          preferredColor: preferredColor
-        }, { merge: true });
+        const oldUsername = userProfile?.username || currentUser.username || "";
+        const oldDocId = `u-${oldUsername}`;
+        const newDocId = `u-${cleanUsername}`;
+
+        if (cleanUsername !== oldUsername && oldUsername) {
+          const oldDocRef = doc(db, "users", oldDocId);
+          const newDocRef = doc(db, "users", newDocId);
+
+          const newProfileData = {
+            uid: currentUser.uid,
+            authUid: currentUser.uid,
+            displayName: displayName.trim(),
+            username: cleanUsername,
+            avatarUrl: finalAvatar,
+            preferredColor: preferredColor,
+            role: userProfile?.role || "User",
+            createdAt: userProfile?.createdAt || new Date().toISOString(),
+            email: currentUser.email || userProfile?.email || ""
+          };
+
+          await setDoc(newDocRef, newProfileData);
+
+          const oldLockerRef = doc(db, "users", oldDocId, "data", "locker");
+          const newLockerRef = doc(db, "users", newDocId, "data", "locker");
+
+          const lockerSnap = await getDoc(oldLockerRef);
+          if (lockerSnap.exists()) {
+            await setDoc(newLockerRef, lockerSnap.data());
+          }
+
+          try {
+            await deleteDoc(oldLockerRef);
+          } catch (e) {
+            console.error("Failed to delete old locker subcollection:", e);
+          }
+          try {
+            await deleteDoc(oldDocRef);
+          } catch (e) {
+            console.error("Failed to delete old user document:", e);
+          }
+        } else {
+          const docId = `u-${cleanUsername}`;
+          await setDoc(doc(db, "users", docId), {
+            displayName: displayName.trim(),
+            username: cleanUsername,
+            avatarUrl: finalAvatar,
+            preferredColor: preferredColor
+          }, { merge: true });
+        }
       }
 
       setSuccessMsg("Settings updated successfully!");
