@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if the current user is an Admin
+    function isAdmin() {
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin';
+    }
+
+    // Rules for the golf ball catalog collection
+    match /catalog/{itemId} {
+      // Anyone (even guest/unauthenticated users) can read the catalog
+      allow read: if true;
+      
+      // Only users with the Admin role can create, update, or delete catalog items
+      allow write: if isAdmin();
+    }
+
+    // Rules for the users collection
+    match /users/{userId} {
+      // Users can read and write (register/update) their own profiles.
+      // Admins can read or modify any user profile.
+      allow read, write: if (request.auth != null && request.auth.uid == userId) || isAdmin();
+
+      // Rules for nested user collections (e.g., users/{userId}/data/locker)
+      match /data/{document=**} {
+        // Users can read/write their own locker data.
+        // Admins can read/write locker data for any user.
+        allow read, write: if (request.auth != null && request.auth.uid == userId) || isAdmin();
+      }
+    }
+  }
+}
