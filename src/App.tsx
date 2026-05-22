@@ -461,7 +461,7 @@ export default function App() {
           username: parsed.username || "",
           avatarUrl: parsed.photoURL || "initials",
           preferredColor: parsed.preferredColor || "#ccff00",
-          role: parsed.role || "User"
+          role: (parsed.role && parsed.role.toLowerCase() === "admin") ? "Admin" : "User"
         });
         setAccentColor(parsed.preferredColor || "#ccff00");
         setIsCloudDataLoaded(false);
@@ -489,7 +489,7 @@ export default function App() {
                 username: data.username || "",
                 avatarUrl: data.avatarUrl || "initials",
                 preferredColor: data.preferredColor || "#ccff00",
-                role: data.role || "User"
+                role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User"
               });
               setAccentColor(data.preferredColor || "#ccff00");
             } else {
@@ -587,7 +587,7 @@ export default function App() {
                 username: data.username || "",
                 avatarUrl: data.photoURL || "initials",
                 preferredColor: data.preferredColor || "#ccff00",
-                role: data.role || "User"
+                role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User"
               });
               setAccentColor(data.preferredColor || "#ccff00");
               // Keep local storage up to date with latest server-side profile
@@ -642,7 +642,8 @@ export default function App() {
           id: u.uid || u.id,
           uid: u.uid || u.id,
           name: u.displayName || u.name,
-          displayName: u.displayName || u.name
+          displayName: u.displayName || u.name,
+          role: (u.role && u.role.toLowerCase() === "admin") ? "Admin" : "User"
         }));
         setUsersList(normalized);
       } catch (err: any) {
@@ -663,7 +664,8 @@ export default function App() {
               uid: doc.id,
               ...data,
               name: data.displayName || data.name || "User",
-              displayName: data.displayName || data.name || "User"
+              displayName: data.displayName || data.name || "User",
+              role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User"
             });
           });
           setUsersList(users);
@@ -704,7 +706,7 @@ export default function App() {
           username: data.username,
           avatarUrl: data.avatarUrl,
           preferredColor: data.preferredColor,
-          role: data.role
+          role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User"
         });
         setAccentColor(data.preferredColor);
       }

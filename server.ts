@@ -671,7 +671,8 @@ async function verifyAdmin(userId: string | undefined): Promise<boolean> {
       const docRef = dbAdmin.collection("users").doc(userId);
       const docSnap = await docRef.get();
       if (docSnap.exists) {
-        return docSnap.data()?.role === "Admin";
+        const role = docSnap.data()?.role;
+        return role && typeof role === "string" && role.toLowerCase() === "admin";
       }
     } catch (e) {
       console.error("verifyAdmin failed in Firebase Admin SDK:", e);
@@ -680,7 +681,7 @@ async function verifyAdmin(userId: string | undefined): Promise<boolean> {
   }
   const users = loadUsers();
   const user = users.find(u => u.uid === userId);
-  return user ? user.role === "Admin" : false;
+  return user ? user.role?.toLowerCase() === "admin" : false;
 }
 
 // Async Database Helpers
@@ -1078,7 +1079,7 @@ app.post("/api/users", async (req, res) => {
     username: userId.substring(2),
     email: email ? email.trim().toLowerCase() : undefined,
     password: password ? hashPassword(password) : undefined,
-    role: role === "Admin" ? "Admin" : "User", // Defaults to User unless explicitly set
+    role: (role && role.toLowerCase() === "admin") ? "Admin" : "User", // Defaults to User unless explicitly set
     preferredColor: preferredColor || "#3b82f6",
     avatarUrl: avatarUrl || "",
     createdAt: new Date().toISOString()
@@ -1094,7 +1095,8 @@ app.patch("/api/users/:id/role", async (req, res) => {
   const { role } = req.body;
   const actingUserId = req.headers["x-user-id"] as string | undefined;
 
-  if (role !== "Admin" && role !== "User") {
+  const normalizedRole = role && role.toLowerCase() === "admin" ? "Admin" : role && role.toLowerCase() === "user" ? "User" : null;
+  if (!normalizedRole) {
     return res.status(400).json({ error: "Invalid role. Must be 'Admin' or 'User'" });
   }
 
@@ -1109,7 +1111,7 @@ app.patch("/api/users/:id/role", async (req, res) => {
     return res.status(404).json({ error: "User not found" });
   }
 
-  targetUser.role = role;
+  targetUser.role = normalizedRole;
   await saveUserToDb(targetUser);
   res.json(targetUser);
 });
@@ -1130,8 +1132,19 @@ app.patch("/api/users/:id", async (req, res) => {
     return res.status(404).json({ error: "User not found" });
   }
 
+  let normalizedRole: "Admin" | "User" | undefined = undefined;
+  if (role !== undefined) {
+    if (role.toLowerCase() === "admin") {
+      normalizedRole = "Admin";
+    } else if (role.toLowerCase() === "user") {
+      normalizedRole = "User";
+    } else {
+      return res.status(400).json({ error: "Invalid role. Must be 'Admin' or 'User'." });
+    }
+  }
+
   // Self-demotion check
-  if (id === actingUserId && role !== undefined && role !== "Admin") {
+  if (id === actingUserId && normalizedRole !== undefined && normalizedRole !== "Admin") {
     return res.status(400).json({ error: "Self-protection safeguard: You cannot demote yourself from Admin." });
   }
 
@@ -1155,11 +1168,8 @@ app.patch("/api/users/:id", async (req, res) => {
     targetUser.username = cleanUsername;
   }
 
-  if (role !== undefined) {
-    if (role !== "Admin" && role !== "User") {
-      return res.status(400).json({ error: "Invalid role. Must be 'Admin' or 'User'." });
-    }
-    targetUser.role = role;
+  if (normalizedRole !== undefined) {
+    targetUser.role = normalizedRole;
   }
 
   if (preferredColor !== undefined) {
