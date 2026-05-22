@@ -31,7 +31,7 @@ const usersToCreate = [
   },
   {
     email: 'user@vault.com',
-    password: 'UserPass123!',
+    password: 'AdminPass123!',
     username: 'user',
     displayName: 'System User',
     role: 'User',

@@ -299,8 +299,25 @@ export default function AuthModal({
       }
     }
 
+    let resolvedEmail = email.trim();
+    if (!resolvedEmail.includes("@")) {
+      try {
+        const resolveRes = await fetch(`/api/auth/resolve-email?username=${encodeURIComponent(resolvedEmail)}`);
+        if (!resolveRes.ok) {
+          const resolveData = await resolveRes.json();
+          throw new Error(resolveData.error || `Username '${resolvedEmail}' not found.`);
+        }
+        const resolveData = await resolveRes.json();
+        resolvedEmail = resolveData.email;
+      } catch (err: any) {
+        setError(err.message || "Failed to resolve username to email.");
+        setIsLoading(false);
+        return;
+      }
+    }
+
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, resolvedEmail, password);
       setSuccessMsg("Logged in successfully!");
       setTimeout(() => {
         onClose();
@@ -392,7 +409,8 @@ export default function AuthModal({
           role: cleanUsername === "admin" ? "Admin" : "User",
           preferredColor: preferredColor,
           avatarUrl: finalAvatar,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          email: user.email || email
         });
       }
 

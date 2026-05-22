@@ -259,6 +259,8 @@ async function deleteFirestoreDocAndSubcollections(docRef: admin.firestore.Docum
 
 async function cleanDatabaseFields() {
   console.log("Starting database cleanup migration to remove obsolete fields and unauthorized users...");
+  let realAdminUid = "u-admin";
+  let realUserUid = "u-user";
   
   const fieldsToRemove = ["compression", "cover", "feel", "layers", "tagline", "isCustom"];
   const userFieldsToRemove = [
@@ -297,11 +299,11 @@ async function cleanDatabaseFields() {
   finalAdmin.username = "admin";
 
   const finalUser: UserProfile = userInFile ? { ...userInFile, uid: "u-user" } : { ...initialUser };
-  // Copy settings from admin
-  finalUser.displayName = finalAdmin.displayName;
-  finalUser.preferredColor = finalAdmin.preferredColor;
-  finalUser.avatarUrl = finalAdmin.avatarUrl;
-  finalUser.password = finalAdmin.password;
+  // Do not copy settings from admin
+  finalUser.displayName = finalUser.displayName || initialUser.displayName;
+  finalUser.preferredColor = finalUser.preferredColor || initialUser.preferredColor;
+  finalUser.avatarUrl = finalUser.avatarUrl || initialUser.avatarUrl;
+  finalUser.password = finalUser.password || initialUser.password;
   finalUser.role = "User";
   finalUser.email = "user@vault.com";
   finalUser.username = "user";
@@ -344,10 +346,15 @@ async function cleanDatabaseFields() {
         const listUsersResult = await admin.auth().listUsers(1000, nextPageToken);
         listUsersResult.users.forEach((userRecord) => {
           allowedUids.add(userRecord.uid);
+          if (userRecord.email?.toLowerCase() === "admin@vault.com") {
+            realAdminUid = userRecord.uid;
+          } else if (userRecord.email?.toLowerCase() === "user@vault.com") {
+            realUserUid = userRecord.uid;
+          }
         });
         nextPageToken = listUsersResult.pageToken;
       } while (nextPageToken);
-      console.log(`Fetched active Firebase Auth users. Total allowed UIDs: ${allowedUids.size}`);
+      console.log(`Fetched active Firebase Auth users. Total allowed UIDs: ${allowedUids.size}. Real Admin UID: ${realAdminUid}, Real User UID: ${realUserUid}`);
     } catch (e) {
       console.error("Failed to fetch users from Firebase Auth:", e);
     }
@@ -431,11 +438,11 @@ async function cleanDatabaseFields() {
       const adminDoc = usersSnap.docs.find(doc => doc.data()?.email?.toLowerCase() === "admin@vault.com");
       const userDoc = usersSnap.docs.find(doc => doc.data()?.email?.toLowerCase() === "user@vault.com");
 
-      // 4B. Fetch locker data from old documents if their ID is not u-admin/u-user
+      // 4B. Fetch locker data from old documents if their ID is not realAdminUid/realUserUid
       let adminLockerBalls = null;
       let userLockerBalls = null;
 
-      if (adminDoc && adminDoc.id !== "u-admin") {
+      if (adminDoc && adminDoc.id !== realAdminUid) {
         console.log(`Found existing admin@vault.com under doc ID: ${adminDoc.id}. Migrating locker...`);
         const lockerSnap = await dbAdmin.collection("users").doc(adminDoc.id).collection("data").doc("locker").get();
         if (lockerSnap.exists) {
@@ -443,7 +450,7 @@ async function cleanDatabaseFields() {
         }
       }
 
-      if (userDoc && userDoc.id !== "u-user") {
+      if (userDoc && userDoc.id !== realUserUid) {
         console.log(`Found existing user@vault.com under doc ID: ${userDoc.id}. Migrating locker...`);
         const lockerSnap = await dbAdmin.collection("users").doc(userDoc.id).collection("data").doc("locker").get();
         if (lockerSnap.exists) {
@@ -461,20 +468,20 @@ async function cleanDatabaseFields() {
         }
       }
 
-      // 4D. Set up the two target users in Firestore with u-admin and u-user IDs
+      // 4D. Set up the two target users in Firestore with real UIDs
       const firestoreAdminData = adminDoc ? { ...adminDoc.data() } as UserProfile : { ...initialAdmin };
-      firestoreAdminData.uid = "u-admin";
+      firestoreAdminData.uid = realAdminUid;
       firestoreAdminData.role = "Admin";
       firestoreAdminData.email = "admin@vault.com";
       firestoreAdminData.username = "admin";
 
       const firestoreUserData = userDoc ? { ...userDoc.data() } : { ...initialUser };
-      firestoreUserData.uid = "u-user";
-      // Sync properties from admin
-      firestoreUserData.displayName = firestoreAdminData.displayName;
-      firestoreUserData.preferredColor = firestoreAdminData.preferredColor;
-      firestoreUserData.avatarUrl = firestoreAdminData.avatarUrl;
-      firestoreUserData.password = firestoreAdminData.password;
+      firestoreUserData.uid = realUserUid;
+      // Do not copy admin profile details here! Ensure user details are set/preserved.
+      firestoreUserData.displayName = firestoreUserData.displayName || initialUser.displayName;
+      firestoreUserData.preferredColor = firestoreUserData.preferredColor || initialUser.preferredColor;
+      firestoreUserData.avatarUrl = firestoreUserData.avatarUrl || initialUser.avatarUrl;
+      firestoreUserData.password = firestoreUserData.password || initialUser.password;
       firestoreUserData.role = "User";
       firestoreUserData.email = "user@vault.com";
       firestoreUserData.username = "user";
@@ -492,7 +499,7 @@ async function cleanDatabaseFields() {
         const lockerSnap = await lockerRef.get();
 
         let currentBalls = null;
-        if (uid === "u-admin") {
+        if (uid === realAdminUid) {
           currentBalls = adminLockerBalls || (lockerSnap.exists ? lockerSnap.data()?.balls : null);
         } else {
           currentBalls = userLockerBalls || (lockerSnap.exists ? lockerSnap.data()?.balls : null);
@@ -895,6 +902,41 @@ app.post("/api/auth/signup", async (req, res) => {
   };
 
   res.status(211).json(clientUser);
+});
+
+// Resolve username to email address
+app.get("/api/auth/resolve-email", async (req, res) => {
+  const { username } = req.query;
+  if (!username || typeof username !== "string") {
+    return res.status(400).json({ error: "Username query parameter is required." });
+  }
+
+  const clean = username.trim().toLowerCase();
+  
+  // 1. Check local DEFAULT_USERS / loadUsers()
+  const localUsers = loadUsers();
+  const localUser = localUsers.find(u => u.username?.toLowerCase() === clean);
+  if (localUser && localUser.email) {
+    return res.json({ email: localUser.email });
+  }
+
+  // 2. Check Firestore if configured
+  if (isFirebaseAdminInitialized && dbAdmin) {
+    try {
+      const usersRef = dbAdmin.collection("users");
+      const snapshot = await usersRef.where("username", "==", clean).get();
+      if (!snapshot.empty) {
+        const userData = snapshot.docs[0].data();
+        if (userData.email) {
+          return res.json({ email: userData.email });
+        }
+      }
+    } catch (e) {
+      console.error("resolve-email failed in Firestore:", e);
+    }
+  }
+
+  return res.status(404).json({ error: "Username not found." });
 });
 
 // Auth SignIn
