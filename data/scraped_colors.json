@@ -1,0 +1,154 @@
+{
+  "PRO_PLUS-PURE_GLOSS_WHITE": {
+    "id": "PRO_PLUS-PURE_GLOSS_WHITE",
+    "model": "PRO PLUS",
+    "color": "Pure Gloss White",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0563/0227/2645/files/vicegolf_ball_pro_white_th_acadea3d-cc1d-4376-a696-0bd93d44cd49.png?v=1762199211&width=100&height=100&crop=center",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-pro-plus-white-x-divot-dudes",
+    "score": 70
+  },
+  "PRO-PURE_GLOSS_WHITE": {
+    "id": "PRO-PURE_GLOSS_WHITE",
+    "model": "PRO",
+    "color": "Pure Gloss White",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_white_th_35dcf74c-c5a3-4467-aa5a-c9adf7b01bc0.png?v=1711374990",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-golf-pro-white-2023",
+    "score": 80
+  },
+  "PRO_AIR-PURE_GLOSS_WHITE": {
+    "id": "PRO_AIR-PURE_GLOSS_WHITE",
+    "model": "PRO AIR",
+    "color": "Pure Gloss White",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Pro_Air_White_Front_Zoom.jpg?v=1709810992",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-golf-pro-air-white",
+    "score": 260
+  },
+  "TOUR-PURE_GLOSS_WHITE": {
+    "id": "TOUR-PURE_GLOSS_WHITE",
+    "model": "TOUR",
+    "color": "Pure Gloss White",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vice-golf-PDP-Tour-White-Front.jpg?v=1716672682",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-golf-tour-white",
+    "score": 180
+  },
+  "DRIVE-PURE_GLOSS_WHITE": {
+    "id": "DRIVE-PURE_GLOSS_WHITE",
+    "model": "DRIVE",
+    "color": "Pure Gloss White",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Drive_White_Front_Zoom.jpg?v=1709810929",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-golf-drive-white",
+    "score": 230
+  },
+  "PRO_AIR-LIME_BLACK_DRIP_SPLATTER": {
+    "id": "PRO_AIR-LIME_BLACK_DRIP_SPLATTER",
+    "model": "PRO AIR",
+    "color": "Lime/Black Drip Splatter",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/Vice-Golf-Pro-Air-Neon-Drip-Ball-Front-Cut.png?v=1726668730",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-golf-pro-air-neon-drip-lime",
+    "score": 210
+  },
+  "PRO_PLUS-NEON_GLOSS_LIME": {
+    "id": "PRO_PLUS-NEON_GLOSS_LIME",
+    "model": "PRO PLUS",
+    "color": "Neon Gloss Lime",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Pro_Plus_Neon_Lime_Front_Zoom.jpg?v=1709811032",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-golf-pro-plus-neon-lime",
+    "score": 340
+  },
+  "PRO_PLUS-LIME_BLACK_DRIP_SPLATTER": {
+    "id": "PRO_PLUS-LIME_BLACK_DRIP_SPLATTER",
+    "model": "PRO PLUS",
+    "color": "Lime/Black Drip Splatter",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/New-Ball-PDP-ProPlus-Drip-Lime-Front.png?v=1760630522",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-golf-pro-plus-drip-lime",
+    "score": 250
+  },
+  "PRO_PLUS-LIMITED_EDITION_GOLD": {
+    "id": "PRO_PLUS-LIMITED_EDITION_GOLD",
+    "model": "PRO PLUS",
+    "color": "Limited Edition Gold",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/Vice_Pro-Plus_Gold-4.png?v=1752227365",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-pro-plus-gold",
+    "score": 110
+  },
+  "PRO-NEON_GLOSS_LIME": {
+    "id": "PRO-NEON_GLOSS_LIME",
+    "model": "PRO",
+    "color": "Neon Gloss Lime",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Pro_Neon_Lime_Front_Zoom.jpg?v=1709811015",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-golf-pro-neon-lime",
+    "score": 270
+  },
+  "PRO_SOFT-PURE_GLOSS_WHITE": {
+    "id": "PRO_SOFT-PURE_GLOSS_WHITE",
+    "model": "PRO SOFT",
+    "color": "Pure Gloss White",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/pro_soft_white.png?v=1774447514",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-golf-pro-soft-white-2023",
+    "score": 110
+  },
+  "PRO_SOFT-NEON_GLOSS_LIME": {
+    "id": "PRO_SOFT-NEON_GLOSS_LIME",
+    "model": "PRO SOFT",
+    "color": "Neon Gloss Lime",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_soft_lime_exploded.jpg?v=1774352579",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-golf-pro-soft-neon-lime-2023",
+    "score": 110
+  },
+  "PRO-RED_BLUE_DRIP_SPLATTER": {
+    "id": "PRO-RED_BLUE_DRIP_SPLATTER",
+    "model": "PRO",
+    "color": "Red/Blue Drip Splatter",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/New-Ball-PDP-Pro-Drip-Red-Blue-Front.png?v=1760629724",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-golf-pro-drip-red-blue",
+    "score": 260
+  },
+  "PRO-LIME_BLACK_DRIP_SPLATTER": {
+    "id": "PRO-LIME_BLACK_DRIP_SPLATTER",
+    "model": "PRO",
+    "color": "Lime/Black Drip Splatter",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/New-Ball-PDP-Pro-Drip-Lime-Front_1.png?v=1760629446",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-golf-pro-drip-lime",
+    "score": 260
+  },
+  "PRO_AIR-NEON_GLOSS_LIME": {
+    "id": "PRO_AIR-NEON_GLOSS_LIME",
+    "model": "PRO AIR",
+    "color": "Neon Gloss Lime",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Pro_Air_Neon_Lime_Front_Zoom.jpg?v=1709810992",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-golf-pro-air-neon-lime",
+    "score": 340
+  },
+  "PRO-NEON_GLOSS_RED": {
+    "id": "PRO-NEON_GLOSS_RED",
+    "model": "PRO",
+    "color": "Neon Gloss Red",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_neon_red_th_ecb9923b-f473-478e-bfa3-8fa1e5a76358.png?v=1711374486",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-golf-pro-neon-red-2023",
+    "score": 120
+  },
+  "PRO-SHINING_HUE_BLUE": {
+    "id": "PRO-SHINING_HUE_BLUE",
+    "model": "PRO",
+    "color": "Shining Hue Blue",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_ice_blue_frontalView.jpg?v=1774431946",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-pro-ice-blue-2023",
+    "score": 180
+  },
+  "PRO-YELLOW_TEAL_DRIP_SPLATTER": {
+    "id": "PRO-YELLOW_TEAL_DRIP_SPLATTER",
+    "model": "PRO",
+    "color": "Yellow / Teal Drip Splatter",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_drip_yellow_green_sashimi.png?v=1774433556",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-golf-pro-drip-yellow-green-2023",
+    "score": 120
+  },
+  "PRO_SOFT-NEON_GLOSS_RED": {
+    "id": "PRO_SOFT-NEON_GLOSS_RED",
+    "model": "PRO SOFT",
+    "color": "Neon Gloss Red",
+    "scrapedImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/pro_soft_red_3.png?v=1774447120",
+    "sourceUrl": "https://www.vicegolf.com/golf-balls/vice-golf-pro-soft-neon-red-2023",
+    "score": 150
+  }
+}

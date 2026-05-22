@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* Light mode colors (harmonious off-white and cool gray palette) */
+  --color-black: #fafafa;
+  --color-neutral-950: #ffffff;
+  --color-neutral-900: #f4f4f5;
+  --color-neutral-850: #e4e4e7;
+  --color-neutral-800: #d4d4d8;
+  --color-neutral-750: #c4c4c7;
+  --color-neutral-700: #a1a1aa;
+  --color-neutral-600: #71717a;
+  --color-neutral-500: #71717a;
+  --color-neutral-400: #3f3f46;
+  --color-neutral-350: #27272a;
+  --color-neutral-300: #18181b;
+  --color-neutral-200: #09090b;
+  --color-neutral-100: #09090b;
+  --color-white: #09090b;
+}
+
+.dark {
+  /* Dark mode colors (original premium dark & neon theme palette) */
+  --color-black: #000000;
+  --color-neutral-950: #0a0a0a;
+  --color-neutral-900: #171717;
+  --color-neutral-850: #1f1f1f;
+  --color-neutral-800: #262626;
+  --color-neutral-750: #2b2b2b;
+  --color-neutral-700: #404040;
+  --color-neutral-600: #525252;
+  --color-neutral-500: #737373;
+  --color-neutral-400: #a3a3a3;
+  --color-neutral-350: #a3a3a3;
+  --color-neutral-300: #d4d4d4;
+  --color-neutral-200: #e5e5e5;
+  --color-neutral-100: #f5f5f5;
+  --color-white: #ffffff;
+}
+
+/* Force physical ball graphics to keep their original brand colors */
+[id^="golfball-"], 
+[id^="golfball-"] *,
+.ball-visual-force,
+.ball-visual-force * {
+  --color-white: #ffffff !important;
+  --color-black: #000000 !important;
+  --color-neutral-100: #f5f5f5 !important;
+  --color-neutral-200: #e5e5e5 !important;
+  --color-neutral-300: #d4d4d4 !important;
+  --color-neutral-400: #a3a3a3 !important;
+  --color-neutral-500: #737373 !important;
+  --color-neutral-600: #525252 !important;
+  --color-neutral-700: #404040 !important;
+  --color-neutral-800: #262626 !important;
+  --color-neutral-850: #1f1f1f !important;
+  --color-neutral-900: #171717 !important;
+  --color-neutral-950: #0a0a0a !important;
+}
+
+/* Force white text on buttons that have dark solid backgrounds (red/rose buttons, green buttons) */
+.bg-rose-600,
+.bg-rose-600 *,
+.bg-rose-500,
+.bg-rose-500 *,
+.bg-emerald-500,
+.bg-emerald-500 *,
+.bg-red-600,
+.bg-red-600 *,
+.text-white-force {
+  color: #ffffff !important;
+}
+
+/* Make hardcoded SVG inline fills follow theme variables */
+svg path[fill="#000"], 
+svg circle[fill="#000"] {
+  fill: var(--color-black) !important;
+}
+svg path[fill="#070707"] {
+  fill: var(--color-neutral-950) !important;
+}
+
+/* Smooth transition for theme colors */
+body, header, main, div, section, input, button, select, h1, h2, h3, h4, p, span {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Global body styling */
+body {
+  background-color: var(--color-black);
+  color: var(--color-neutral-100);
+}
+
+/* Disable spin-button for input type="number" */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}

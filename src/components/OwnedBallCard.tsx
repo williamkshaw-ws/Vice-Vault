@@ -1,0 +1,534 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState } from "react";
+import { GolfBall, BallCondition } from "../types";
+import BallVisual from "./BallVisual";
+import { Trash2, Calendar, FileText, ChevronDown, Check, Save, Edit2, X, Package, MessageSquare } from "lucide-react";
+
+interface OwnedBallCardProps {
+  key?: string | number;
+  ball: GolfBall;
+  onUpdateBall: (id: string, updatedFields: Partial<GolfBall>) => void;
+  onDelete: (id: string) => void;
+}
+
+export default function OwnedBallCard({
+  ball,
+  onUpdateBall,
+  onDelete
+}: OwnedBallCardProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Parse version and notes from ball (handling legacy bracketed format if necessary)
+  const getVersionAndNotes = (b: GolfBall) => {
+    let version = b.version || "Standard Edition";
+    let notes = b.notes || "";
+    if (!b.version && notes.startsWith("[")) {
+      const match = notes.match(/^\[(.*?)\]\s*(.*)$/);
+      if (match) {
+        version = match[1];
+        notes = match[2];
+      }
+    }
+    return { version, notes };
+  };
+
+  const { version: currentVersion, notes: currentNotes } = getVersionAndNotes(ball);
+
+  // Edit fields state
+  const [editQty, setEditQty] = useState(ball.quantity);
+  const [editPkgType, setEditPkgType] = useState<'ea' | 'sleeve' | 'box'>(ball.packageType || 'ea');
+  const [editPlayNumber, setEditPlayNumber] = useState<number>(ball.customNumber || 1);
+  const [editCustomNumberInput, setEditCustomNumberInput] = useState<string>(
+    [1, 2, 3, 4].includes(ball.customNumber) ? "" : String(ball.customNumber || "")
+  );
+  const [editCondition, setEditCondition] = useState<BallCondition>(ball.condition);
+  const [editVersion, setEditVersion] = useState<string>(currentVersion);
+  const [editNotes, setEditNotes] = useState<string>(currentNotes);
+
+  const startEditing = () => {
+    const { version, notes } = getVersionAndNotes(ball);
+    setEditQty(ball.quantity);
+    setEditPkgType(ball.packageType || 'ea');
+    setEditPlayNumber(ball.customNumber || 1);
+    setEditCustomNumberInput([1, 2, 3, 4].includes(ball.customNumber) ? "" : String(ball.customNumber || ""));
+    setEditCondition(ball.condition);
+    setEditVersion(version);
+    setEditNotes(notes);
+    setIsEditing(true);
+  };
+
+  const handleSave = () => {
+    onUpdateBall(ball.id, {
+      quantity: editQty,
+      packageType: editPkgType,
+      customNumber: editPkgType === 'box' ? 1 : editPlayNumber,
+      condition: editCondition,
+      version: editVersion,
+      notes: editNotes.trim(),
+    });
+    setIsEditing(false);
+  };
+
+  const incrementEditQty = () => {
+    if (editPkgType === 'box') {
+      setEditQty((q) => q + 12);
+    } else if (editPkgType === 'sleeve') {
+      setEditQty((q) => q + 3);
+    } else {
+      setEditQty((q) => q + 1);
+    }
+  };
+
+  const decrementEditQty = () => {
+    if (editPkgType === 'box') {
+      setEditQty((q) => (q > 12 ? q - 12 : 12));
+    } else if (editPkgType === 'sleeve') {
+      setEditQty((q) => (q > 3 ? q - 3 : 3));
+    } else {
+      setEditQty((q) => (q > 1 ? q - 1 : 1));
+    }
+  };
+
+  const handlePkgTypeChange = (type: 'ea' | 'sleeve' | 'box') => {
+    setEditPkgType(type);
+    if (type === 'box') {
+      setEditQty(12);
+    } else if (type === 'sleeve') {
+      setEditQty(3);
+    } else {
+      setEditQty(1);
+    }
+  };
+
+  const getConditionColor = (cond: BallCondition) => {
+    switch (cond) {
+      case BallCondition.NEW:
+        return "text-lime-400 bg-lime-950/40 border-lime-900";
+      case BallCondition.MINT:
+        return "text-emerald-400 bg-emerald-950/30 border-emerald-900";
+      case BallCondition.PLAYED:
+        return "text-amber-400 bg-amber-950/30 border-amber-900";
+      case BallCondition.SHAG:
+        return "text-rose-400 bg-rose-950/30 border-rose-900";
+      default:
+        return "text-neutral-400 bg-neutral-950/40 border-neutral-900";
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <div 
+        className="bg-neutral-900 border border-[#ccff00]/50 rounded-2xl p-4 transition-all duration-300 shadow-md shadow-[#ccff00]/5 relative overflow-hidden"
+        id={`owned-card-edit-${ball.id}`}
+      >
+        <div className="text-xs font-bold text-[#ccff00] uppercase tracking-widest mb-3 flex items-center justify-between">
+          <span>Edit Ball Stack</span>
+          <button 
+            type="button" 
+            onClick={() => setIsEditing(false)} 
+            className="text-neutral-500 hover:text-white cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Play Number */}
+          <div>
+            <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
+              Ball Play-Number
+            </label>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4].map((num) => (
+                <button
+                  key={num}
+                  type="button"
+                  disabled={editPkgType === 'box'}
+                  onClick={() => {
+                    setEditPlayNumber(num);
+                    setEditCustomNumberInput("");
+                  }}
+                  className={`flex-1 text-center py-1 rounded text-[11px] font-mono font-bold border transition-all cursor-pointer ${
+                    editPkgType === 'box'
+                      ? "bg-neutral-950 text-neutral-600 border-neutral-900 cursor-not-allowed opacity-50"
+                      : editPlayNumber === num && editCustomNumberInput === ""
+                      ? "bg-[#ccff00] border-[#ccff00] text-black"
+                      : "bg-neutral-950 border-neutral-850 text-neutral-300 hover:border-neutral-700"
+                  }`}
+                >
+                  {num}
+                </button>
+              ))}
+              
+              <input
+                type="text"
+                maxLength={2}
+                disabled={editPkgType === 'box'}
+                value={editPkgType === 'box' ? "" : editCustomNumberInput}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9]/g, "");
+                  if (val !== "" && !["1", "2", "3", "4"].includes(val.charAt(0))) {
+                    return;
+                  }
+                  setEditCustomNumberInput(val);
+                  if (val === "") {
+                    setEditPlayNumber(1);
+                  } else {
+                    setEditPlayNumber(parseInt(val, 10));
+                  }
+                }}
+                placeholder={editPkgType === 'box' ? "—" : "##"}
+                className={`w-9 text-center py-1 font-mono text-xs border rounded transition-all focus:outline-none focus:border-neutral-500 ${
+                  editPkgType === 'box'
+                    ? "border-neutral-900 bg-neutral-950 text-neutral-600 cursor-not-allowed opacity-55"
+                    : editCustomNumberInput !== ""
+                    ? "bg-[#ccff00] text-black border-[#ccff00] font-bold"
+                    : "bg-neutral-950 border-neutral-850 text-neutral-400"
+                }`}
+                title={editPkgType === 'box' ? "Not customizable for boxes" : "Enter any 2-digit number"}
+              />
+            </div>
+          </div>
+
+          {/* Condition Dropdown */}
+          <div>
+            <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
+              Condition
+            </label>
+            <select
+              value={editCondition}
+              onChange={(e) => setEditCondition(e.target.value as BallCondition)}
+              className="w-full bg-neutral-950 text-xs py-1.5 px-2 rounded text-neutral-300 font-bold border border-neutral-850 focus:border-neutral-750 outline-none cursor-pointer"
+            >
+              {Object.values(BallCondition).map((cond) => (
+                <option key={cond} value={cond}>
+                  {cond}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Version Dropdown */}
+          <div>
+            <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1 font-bold">
+              Version
+            </label>
+            <select
+              value={editVersion}
+              onChange={(e) => setEditVersion(e.target.value)}
+              className="w-full bg-neutral-950 text-xs py-1.5 px-2 rounded text-neutral-300 font-bold border border-neutral-850 focus:border-neutral-750 outline-none cursor-pointer"
+            >
+              <option value="Standard Edition">Standard Edition</option>
+              <option value="2024/25 Release">2024/25 Release</option>
+              <option value="2022/23 Release">2022/23 Release</option>
+              <option value="Vintage Series">Vintage Series</option>
+              <option value="Special Logo Print">Special Logo Print</option>
+              <option value="Practice / X-Out">Practice / X-Out</option>
+              <option value="Refurbished">Refurbished</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end mt-3">
+          {/* Quantity adjustment */}
+          <div>
+            <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
+              Quantity
+            </label>
+            <div className="flex items-center gap-2">
+              <div className="flex bg-neutral-950 rounded-md border border-neutral-850 p-0.5 shrink-0 transition-opacity items-center">
+                <button
+                  type="button"
+                  onClick={decrementEditQty}
+                  className="w-4.5 h-4.5 flex items-center justify-center text-neutral-400 hover:text-white rounded hover:bg-neutral-900 transition-colors text-xs cursor-pointer"
+                >
+                  -
+                </button>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={
+                    editPkgType === 'box'
+                      ? Math.max(1, Math.round(editQty / 12))
+                      : editPkgType === 'sleeve'
+                      ? Math.max(1, Math.round(editQty / 3))
+                      : editQty
+                  }
+                  onChange={(e) => {
+                    const val = Math.max(1, parseInt(e.target.value.replace(/[^0-9]/g, "")) || 1);
+                    if (editPkgType === 'box') {
+                      setEditQty(val * 12);
+                    } else if (editPkgType === 'sleeve') {
+                      setEditQty(val * 3);
+                    } else {
+                      setEditQty(val);
+                    }
+                  }}
+                  className="w-5.5 bg-transparent text-center font-mono font-black text-xs text-white outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={incrementEditQty}
+                  className="w-4.5 h-4.5 flex items-center justify-center text-neutral-400 hover:text-white rounded hover:bg-neutral-900 transition-colors text-xs cursor-pointer"
+                >
+                  +
+                </button>
+              </div>
+
+              {/* Quick Presets */}
+              <div className="flex gap-1 flex-1 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => handlePkgTypeChange('ea')}
+                  className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
+                    editPkgType === 'ea'
+                      ? "bg-[#ccff00] border-[#ccff00] text-neutral-950 font-bold"
+                      : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  Ball
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePkgTypeChange('sleeve')}
+                  className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
+                    editPkgType === 'sleeve'
+                      ? "bg-[#ccff00] border-[#ccff00] text-neutral-950 font-bold"
+                      : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  Sleeve
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePkgTypeChange('box')}
+                  className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
+                    editPkgType === 'box'
+                      ? "bg-[#ccff00] border-[#ccff00] text-neutral-950 font-bold"
+                      : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  Box
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Notes Input */}
+          <div>
+            <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1 flex items-center gap-1">
+              <MessageSquare className="w-3 h-3 text-neutral-500" /> Notes
+            </label>
+            <input
+              type="text"
+              placeholder="Collection notes..."
+              value={editNotes}
+              onChange={(e) => setEditNotes(e.target.value)}
+              className="w-full bg-neutral-950 text-xs py-1.5 px-3 rounded text-neutral-300 border border-neutral-850 focus:border-neutral-750 outline-none"
+            />
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2 justify-end mt-4 pt-3 border-t border-neutral-800/70">
+          <button
+            type="button"
+            onClick={() => setIsEditing(false)}
+            className="px-3 py-1.5 bg-neutral-950 hover:bg-neutral-850 border border-neutral-800 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer text-[10px] uppercase tracking-wider font-bold"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            className="px-3 py-1.5 bg-[#ccff00] hover:bg-[#b5e000] text-black font-extrabold rounded-lg transition-all cursor-pointer text-[10px] uppercase tracking-wider flex items-center gap-1"
+          >
+            <Save className="w-3.5 h-3.5" /> Save Changes
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div 
+      className="bg-neutral-900 hover:bg-neutral-900/90 border border-neutral-800 rounded-2xl p-4 transition-all duration-300 shadow-sm relative group overflow-hidden"
+      id={`owned-card-${ball.id}`}
+    >
+      {showDeleteConfirm && (
+        <div className="absolute inset-0 bg-neutral-950/95 flex flex-col items-center justify-center p-3 text-center z-10 animate-fade-in backdrop-blur-sm">
+          <Trash2 className="w-5 h-5 text-rose-500 mb-1 animate-bounce" />
+          <h4 className="text-white font-sans font-black text-xs uppercase tracking-wider">
+            Remove from Locker?
+          </h4>
+          <p className="text-[10px] text-neutral-400 mt-0.5 max-w-[220px] leading-snug">
+            Delete <strong>{ball.model} ({ball.color})</strong> from your list?
+          </p>
+          <div className="flex gap-2 mt-2 w-full max-w-[180px]">
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(false)}
+              className="flex-1 py-1 px-2 bg-neutral-950 border border-neutral-800 hover:bg-neutral-900 text-neutral-400 font-mono text-[9px] uppercase font-bold tracking-wider rounded-md transition-all cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onDelete(ball.id);
+                setShowDeleteConfirm(false);
+              }}
+              className="flex-1 py-1 px-2 bg-rose-600 hover:bg-rose-500 text-white font-mono text-[9px] uppercase font-bold tracking-wider rounded-md transition-all cursor-pointer shadow-md shadow-rose-950/40"
+            >
+              Confirm
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Row representing main ball state and descriptors */}
+      <div className="flex gap-4">
+        {/* Ball representation */}
+        <div className="flex-shrink-0 flex flex-col items-center justify-center p-1 bg-neutral-950 rounded-xl border border-neutral-850 h-22 w-22 shadow-inner relative">
+          <BallVisual 
+            color={ball.color} 
+            model={ball.model} 
+            number={ball.packageType === 'box' ? undefined : ball.customNumber} 
+            size="md" 
+            customImage={ball.customImage}
+          />
+          {ball.packageType !== 'box' && (
+            <div className="absolute -bottom-1 text-[8px] font-mono uppercase bg-neutral-950 border border-neutral-800 text-neutral-400 px-1.5 py-0.5 rounded leading-none scale-90">
+              #{ball.customNumber}
+            </div>
+          )}
+        </div>
+
+        {/* Core content information */}
+        <div className="flex-1 min-w-0 flex flex-col justify-between">
+          <div>
+            <div className="flex items-start justify-between gap-1">
+              <div className="truncate">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[9px] font-mono tracking-widest text-[#ccff00] uppercase font-black">
+                    {ball.model}
+                  </span>
+                  <span className={`text-[8px] px-1 py-0.2 rounded font-mono font-bold uppercase border tracking-wider scale-95 ${
+                    ball.packageType === 'box'
+                      ? "bg-blue-950/40 border-blue-900/60 text-blue-400"
+                      : ball.packageType === 'sleeve'
+                      ? "bg-purple-950/40 border-purple-900/60 text-purple-400"
+                      : "bg-teal-950/40 border-teal-900/60 text-teal-400"
+                  }`}>
+                    {ball.packageType === 'box' ? 'Box' : ball.packageType === 'sleeve' ? 'Sleeve' : 'Ball'}
+                  </span>
+                </div>
+                <h4 className="font-sans font-black text-white text-base leading-tight truncate mt-0.5" title={ball.color}>
+                  {ball.color}
+                </h4>
+              </div>
+
+              {/* Action Buttons (Edit and Delete) */}
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={startEditing}
+                  className="text-neutral-500 hover:text-[#ccff00] p-1 flex-shrink-0 cursor-pointer transition-colors"
+                  title="Edit Ball Details"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="text-neutral-500 hover:text-rose-400 p-1 flex-shrink-0 cursor-pointer transition-colors"
+                  title="Wipe stack"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Condition badge */}
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-[10px] font-mono text-neutral-500 uppercase">Condition:</span>
+              <span className={`text-[10px] py-0.5 px-2 rounded font-bold border select-none transition-all ${getConditionColor(ball.condition)}`}>
+                {ball.condition}
+              </span>
+            </div>
+
+            {/* Version Display */}
+            <div className="mt-1.5 flex items-center gap-2">
+              <span className="text-[10px] font-mono text-neutral-500 uppercase">Version:</span>
+              <span className="text-[10px] py-0.5 px-2 rounded font-bold border border-neutral-800 bg-neutral-950 text-neutral-300 select-none">
+                {currentVersion}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-2 text-[10px] text-neutral-400 font-mono flex items-center gap-2">
+            <span className="text-neutral-500">ADDED:</span>
+            <span className="bg-neutral-950/60 p-0.5 px-1.5 rounded text-neutral-400">{ball.dateAdded}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Row representing notes + count triggers */}
+      <div className="mt-4 pt-3.5 border-t border-neutral-800/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        
+        {/* Notes Read-Only */}
+        <div className="flex-1 min-w-0 pr-1">
+          <div className="flex items-center gap-1.5 text-xs text-neutral-400 py-1.5 px-2 bg-neutral-950/20 rounded-xl">
+            <FileText className="w-3.5 h-3.5 text-neutral-500 flex-shrink-0" />
+            <span className="italic truncate text-[11px] font-sans" title={currentNotes}>
+              {currentNotes || "No custom notes recorded."}
+            </span>
+          </div>
+        </div>
+
+        {/* Quantity Read-Only */}
+        <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto">
+          <span className="text-[10px] font-mono text-neutral-500 uppercase">Quantity Owned:</span>
+          
+          <div className="px-3 py-1 bg-neutral-950 rounded-lg border border-neutral-850 text-xs font-mono font-black text-[#ccff00]">
+            {ball.packageType === "box" ? (
+              <span>
+                {Math.max(1, Math.round(ball.quantity / 12))}{" "}
+                <span className="text-[10px] text-neutral-500 font-normal">
+                  {Math.round(ball.quantity / 12) === 1 ? "Box" : "Boxes"}
+                </span>
+                <span className="text-[9px] text-neutral-400 font-normal ml-1.5">
+                  ({ball.quantity} balls)
+                </span>
+              </span>
+            ) : ball.packageType === "sleeve" ? (
+              <span>
+                {Math.max(1, Math.round(ball.quantity / 3))}{" "}
+                <span className="text-[10px] text-neutral-500 font-normal">
+                  {Math.round(ball.quantity / 3) === 1 ? "Sleeve" : "Sleeves"}
+                </span>
+                <span className="text-[9px] text-neutral-400 font-normal ml-1.5">
+                  ({ball.quantity} balls)
+                </span>
+              </span>
+            ) : (
+              <span>
+                {ball.quantity}{" "}
+                <span className="text-[10px] text-neutral-500 font-normal">
+                  {ball.quantity === 1 ? "Ball" : "Balls"}
+                </span>
+              </span>
+            )}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
