@@ -194,7 +194,7 @@ export default function App() {
 
   // Firebase Auth & Cloud Sync states
   const [currentUser, setCurrentUser] = useState<any | null>(null);
-  const [userProfile, setUserProfile] = useState<{ name: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string } | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [isLoadingCloudData, setIsLoadingCloudData] = useState(false);
   const [isCloudDataLoaded, setIsCloudDataLoaded] = useState(false);
@@ -457,7 +457,7 @@ export default function App() {
         const parsed = JSON.parse(savedMockUser);
         setCurrentUser(parsed);
         setUserProfile({
-          name: parsed.displayName || "User",
+          displayName: parsed.displayName || "User",
           username: parsed.username || "",
           avatarUrl: parsed.photoURL || "initials",
           preferredColor: parsed.preferredColor || "#ccff00",
@@ -485,7 +485,7 @@ export default function App() {
             if (userDoc.exists()) {
               const data = userDoc.data();
               setUserProfile({
-                name: data.name || user.displayName || "User",
+                displayName: data.displayName || data.name || user.displayName || "User",
                 username: data.username || "",
                 avatarUrl: data.avatarUrl || "initials",
                 preferredColor: data.preferredColor || "#ccff00",
@@ -494,7 +494,7 @@ export default function App() {
               setAccentColor(data.preferredColor || "#ccff00");
             } else {
               setUserProfile({
-                name: user.displayName || "User",
+                displayName: user.displayName || "User",
                 username: "",
                 avatarUrl: user.photoURL || "initials",
                 preferredColor: "#ccff00",
@@ -583,7 +583,7 @@ export default function App() {
             const data = await res.json();
             if (data) {
               setUserProfile({
-                name: data.displayName || "User",
+                displayName: data.displayName || "User",
                 username: data.username || "",
                 avatarUrl: data.photoURL || "initials",
                 preferredColor: data.preferredColor || "#ccff00",
@@ -636,7 +636,15 @@ export default function App() {
         if (!res.ok) {
           throw new Error(data.error || "Failed to fetch users");
         }
-        setUsersList(data);
+        // Normalize each user to have both id & uid, and name & displayName for compatibility
+        const normalized = data.map((u: any) => ({
+          ...u,
+          id: u.uid || u.id,
+          uid: u.uid || u.id,
+          name: u.displayName || u.name,
+          displayName: u.displayName || u.name
+        }));
+        setUsersList(normalized);
       } catch (err: any) {
         setUsersError(err.message || "Failed to fetch users");
       } finally {
@@ -649,7 +657,14 @@ export default function App() {
           const querySnapshot = await getDocs(collection(db, "users"));
           const users: any[] = [];
           querySnapshot.forEach((doc) => {
-            users.push({ id: doc.id, ...doc.data() });
+            const data = doc.data();
+            users.push({
+              id: doc.id,
+              uid: doc.id,
+              ...data,
+              name: data.displayName || data.name || "User",
+              displayName: data.displayName || data.name || "User"
+            });
           });
           setUsersList(users);
         }
@@ -667,7 +682,7 @@ export default function App() {
     }
   }, [dbPanelTab, currentUser]);
 
-  const handleUpdateUser = async (userId: string, updatedFields: { name: string; username: string; role: string; preferredColor: string; avatarUrl: string; email?: string; password?: string }) => {
+  const handleUpdateUser = async (userId: string, updatedFields: { displayName: string; username: string; role: string; preferredColor: string; avatarUrl: string; email?: string; password?: string }) => {
     try {
       const res = await fetch(`/api/users/${userId}`, {
         method: "PATCH",
@@ -682,10 +697,10 @@ export default function App() {
         alert(data.error || "Failed to update user");
         return false;
       }
-      setUsersList(prev => prev.map(u => u.id === userId ? { ...u, ...data } : u));
+      setUsersList(prev => prev.map(u => (u.uid === userId || u.id === userId) ? { ...u, ...data, id: data.uid || data.id, name: data.displayName || data.name } : u));
       if (userId === currentUser?.uid) {
         setUserProfile({
-          name: data.name,
+          displayName: data.displayName,
           username: data.username,
           avatarUrl: data.avatarUrl,
           preferredColor: data.preferredColor,
@@ -719,7 +734,7 @@ export default function App() {
           alert(data.error || "Failed to delete user");
           return;
         }
-        setUsersList(prev => prev.filter(u => u.id !== userId));
+        setUsersList(prev => prev.filter(u => u.uid !== userId && u.id !== userId));
       } catch (err: any) {
         alert(err.message || "Error deleting user");
       }
@@ -728,7 +743,7 @@ export default function App() {
         const { doc, deleteDoc } = await import("firebase/firestore");
         if (db) {
           await deleteDoc(doc(db, "users", userId));
-          setUsersList(prev => prev.filter(u => u.id !== userId));
+          setUsersList(prev => prev.filter(u => u.uid !== userId && u.id !== userId));
         }
       } catch (err: any) {
         alert(err.message || "Error deleting user from Firestore");
@@ -737,8 +752,8 @@ export default function App() {
   };
 
   const startEditingUser = (user: any) => {
-    setEditingUserId(user.id);
-    setEditName(user.name || "");
+    setEditingUserId(user.uid || user.id);
+    setEditName(user.displayName || user.name || "");
     setEditUsername(user.username || "");
     setEditRole(user.role || "User");
     setEditColor(user.preferredColor || "#ccff00");
@@ -1151,8 +1166,8 @@ export default function App() {
                   className="text-[11px] font-mono hover:text-[#ccff00] border transition-all cursor-pointer flex items-center gap-2 shadow-sm px-3 py-1.5 rounded-xl text-neutral-300 border border-neutral-850 hover:border-neutral-750 bg-neutral-950 hover:bg-neutral-900"
                   id="user-profile-menu-btn"
                 >
-                  <AvatarRenderer avatarUrl={userProfile?.avatarUrl} name={userProfile?.name || currentUser.displayName || "User"} size="sm" color={accentColor} />
-                  <span>{userProfile?.name || currentUser.displayName || "User"}</span>
+                  <AvatarRenderer avatarUrl={userProfile?.avatarUrl} name={userProfile?.displayName || currentUser.displayName || "User"} size="sm" color={accentColor} />
+                  <span>{userProfile?.displayName || currentUser.displayName || "User"}</span>
                   {userProfile?.role === "Admin" && (
                     <span className="px-1 py-0.2 rounded border border-[#ccff00]/30 text-[8px] uppercase tracking-wider font-extrabold text-[#ccff00] bg-[#ccff00]/10 leading-none">
                       Admin
@@ -1171,11 +1186,11 @@ export default function App() {
                     >
                       <div className="px-2.5 py-2 border-b border-neutral-900 mb-1">
                         <div className="flex items-center gap-3">
-                          <AvatarRenderer avatarUrl={userProfile?.avatarUrl} name={userProfile?.name || currentUser.displayName || "User"} size="md" color={accentColor} />
+                          <AvatarRenderer avatarUrl={userProfile?.avatarUrl} name={userProfile?.displayName || currentUser.displayName || "User"} size="md" color={accentColor} />
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between gap-1.5">
                               <span className="font-bold text-white block truncate max-w-[110px]">
-                                {userProfile?.name || currentUser.displayName || "User"}
+                                {userProfile?.displayName || currentUser.displayName || "User"}
                               </span>
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" title="Cloud Sync Active"></span>
                             </div>
@@ -1284,60 +1299,14 @@ export default function App() {
                 )}
               </div>
             ) : (
-              <div className="relative" id="guest-dropdown-container">
-                <button
-                  onClick={() => setGuestDropdownOpen(!guestDropdownOpen)}
-                  className="text-[11px] font-mono hover:text-[#ccff00] border transition-all cursor-pointer flex items-center gap-2 shadow-sm px-3 py-1.5 rounded-xl text-neutral-300 border border-neutral-850 hover:border-neutral-750 bg-neutral-950 hover:bg-neutral-900"
-                  id="guest-menu-btn"
-                >
-                  <User size={13} className="text-neutral-500" />
-                  <span>Guest Settings</span>
-                  <ChevronDown size={11} className={`text-neutral-500 transition-transform ${guestDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                {guestDropdownOpen && (
-                  <>
-                    {/* Backdrop cover for clicking outside */}
-                    <div className="fixed inset-0 z-30" onClick={() => setGuestDropdownOpen(false)}></div>
-                    <div
-                      className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-neutral-850 bg-neutral-950/95 backdrop-blur-md p-2 shadow-2xl z-40 flex flex-col gap-1 text-[11px] font-mono animate-in fade-in slide-in-from-top-2 duration-150"
-                      id="guest-menu"
-                    >
-                      {/* Theme selection row */}
-                      <div className="px-2.5 py-2 hover:bg-neutral-900 rounded-lg transition-colors flex items-center justify-between border border-transparent">
-                        <div className="flex items-center gap-2 text-neutral-400">
-                          {theme === "light" && <Sun size={12} className="text-neutral-500" />}
-                          {theme === "dark" && <Moon size={12} className="text-neutral-500" />}
-                          {theme === "system" && <Monitor size={12} className="text-neutral-500" />}
-                          <span>Theme</span>
-                        </div>
-                        <select
-                          value={theme}
-                          onChange={(e) => handleSetTheme(e.target.value as 'light' | 'dark' | 'system')}
-                          className="bg-neutral-950 border border-neutral-850 rounded px-1.5 py-0.5 text-neutral-300 focus:outline-none focus:border-[#ccff00] text-[10px] cursor-pointer"
-                        >
-                          <option value="system">System</option>
-                          <option value="light">Light</option>
-                          <option value="dark">Dark</option>
-                        </select>
-                      </div>
-
-                      <div className="border-b border-neutral-900 my-1"></div>
-
-                      <button
-                        onClick={() => {
-                          setAuthModalOpen(true);
-                          setGuestDropdownOpen(false);
-                        }}
-                        className="w-full text-left px-2.5 py-2 hover:bg-neutral-900 rounded-lg text-neutral-300 hover:text-white transition-colors flex items-center gap-2 cursor-pointer border border-transparent"
-                      >
-                        <User size={12} className="text-neutral-500" />
-                        <span>Login / Register</span>
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
+              <button
+                onClick={() => setAuthModalOpen(true)}
+                className="text-[11px] font-mono hover:text-[#ccff00] border transition-all cursor-pointer flex items-center gap-2 shadow-sm px-3 py-1.5 rounded-xl text-neutral-300 border border-neutral-850 hover:border-neutral-750 bg-neutral-950 hover:bg-neutral-900 font-bold"
+                id="login-signup-btn"
+              >
+                <User size={13} className="text-neutral-500" />
+                <span>Login / Sign Up</span>
+              </button>
             )}
 
           </div>
@@ -1679,8 +1648,8 @@ export default function App() {
 
                         <div className="space-y-3 max-h-[550px] overflow-y-auto pr-1">
                           {[...usersList].sort((a, b) => {
-                            const isSelfA = a.id === currentUser?.uid;
-                            const isSelfB = b.id === currentUser?.uid;
+                            const isSelfA = (a.uid || a.id) === currentUser?.uid;
+                            const isSelfB = (b.uid || b.id) === currentUser?.uid;
                             if (isSelfA && !isSelfB) return -1;
                             if (!isSelfA && isSelfB) return 1;
                             
@@ -1689,8 +1658,8 @@ export default function App() {
                             if (roleA === "Admin" && roleB !== "Admin") return -1;
                             if (roleA !== "Admin" && roleB === "Admin") return 1;
                             
-                            const nameA = (a.name || "").trim().toLowerCase();
-                            const nameB = (b.name || "").trim().toLowerCase();
+                            const nameA = (a.displayName || a.name || "").trim().toLowerCase();
+                            const nameB = (b.displayName || b.name || "").trim().toLowerCase();
                             if (nameA < nameB) return -1;
                             if (nameA > nameB) return 1;
                             
@@ -1699,19 +1668,22 @@ export default function App() {
                             if (userA < userB) return -1;
                             if (userA > userB) return 1;
                             
-                            return a.id.localeCompare(b.id);
+                            const idA = a.uid || a.id || "";
+                            const idB = b.uid || b.id || "";
+                            return idA.localeCompare(idB);
                           }).map((user) => {
-                            const isSelf = user.id === currentUser?.uid;
-                            const isEditing = editingUserId === user.id;
+                            const userUid = user.uid || user.id;
+                            const isSelf = userUid === currentUser?.uid;
+                            const isEditing = editingUserId === userUid;
 
                             if (isEditing) {
                               return (
-                                <div key={user.id} className="bg-neutral-900 border border-[#ccff00] rounded-xl p-4 space-y-4 font-mono text-xs">
+                                <div key={userUid} className="bg-neutral-900 border border-[#ccff00] rounded-xl p-4 space-y-4 font-mono text-xs">
                                   <div className="flex items-center gap-3 border-b border-neutral-800 pb-3">
                                     <AvatarRenderer avatarUrl={editAvatarUrl} name={editName} size="md" color={editColor} />
                                     <div>
                                       <span className="text-white font-bold block">Editing User Profile</span>
-                                      <span className="text-neutral-555 text-[10px]">ID: {user.id}</span>
+                                      <span className="text-neutral-555 text-[10px]">ID: {userUid}</span>
                                     </div>
                                   </div>
 
@@ -1952,8 +1924,8 @@ export default function App() {
                                           alert("Passwords do not match. Please confirm the password correctly.");
                                           return;
                                         }
-                                        const success = await handleUpdateUser(user.id, {
-                                          name: editName,
+                                        const success = await handleUpdateUser(userUid, {
+                                          displayName: editName,
                                           username: editUsername,
                                           role: editRole,
                                           preferredColor: editColor,
@@ -1977,14 +1949,14 @@ export default function App() {
 
                             return (
                               <div 
-                                key={user.id}
+                                key={userUid}
                                 className="bg-neutral-950/60 border border-neutral-850 hover:border-neutral-750 p-3 rounded-xl flex items-center justify-between gap-3 transition-all"
                               >
                                 <div className="flex items-center gap-3 min-w-0">
-                                  <AvatarRenderer avatarUrl={user.avatarUrl} name={user.name || "User"} size="md" color={user.preferredColor || "#ccff00"} />
+                                  <AvatarRenderer avatarUrl={user.avatarUrl} name={user.displayName || user.name || "User"} size="md" color={user.preferredColor || "#ccff00"} />
                                   <div className="min-w-0">
                                     <div className="flex items-center gap-2">
-                                      <span className="font-bold text-white text-xs truncate max-w-[130px]">{user.name || "User"}</span>
+                                      <span className="font-bold text-white text-xs truncate max-w-[130px]">{user.displayName || user.name || "User"}</span>
                                       {isSelf && (
                                         <span className="text-[7.5px] font-mono text-[#ccff00] px-1 bg-[#ccff00]/10 border border-[#ccff00]/25 rounded uppercase">
                                           Self
@@ -2034,8 +2006,8 @@ export default function App() {
                                     <button
                                       type="button"
                                       onClick={() => {
-                                        if (confirm(`Are you absolutely sure you want to delete user ${user.name || "this user"}? This will also purge their custom specifications and locker storage permanently.`)) {
-                                          handleDeleteUser(user.id);
+                                        if (confirm(`Are you absolutely sure you want to delete user ${user.displayName || user.name || "this user"}? This will also purge their custom specifications and locker storage permanently.`)) {
+                                          handleDeleteUser(userUid);
                                         }
                                       }}
                                       className="p-1.5 rounded-lg bg-neutral-900 hover:bg-rose-950/50 border border-neutral-800 hover:border-rose-900 text-neutral-555 hover:text-rose-450 transition-colors cursor-pointer"
@@ -2313,7 +2285,7 @@ export default function App() {
         onProfileUpdate={(updatedUser) => {
           setCurrentUser(updatedUser);
           setUserProfile({
-            name: updatedUser.displayName,
+            displayName: updatedUser.displayName,
             username: updatedUser.username,
             avatarUrl: updatedUser.photoURL,
             preferredColor: updatedUser.preferredColor,
@@ -2324,7 +2296,7 @@ export default function App() {
         onMockLogin={(mockUser) => {
           setCurrentUser(mockUser);
           setUserProfile({
-            name: mockUser.displayName,
+            displayName: mockUser.displayName,
             username: mockUser.username,
             avatarUrl: mockUser.photoURL,
             preferredColor: mockUser.preferredColor,

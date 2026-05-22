@@ -19,8 +19,8 @@ const _dirname = typeof __dirname !== "undefined"
 
 
 interface UserProfile {
-  id: string;
-  name: string;
+  uid: string;
+  displayName: string;
   role: "Admin" | "User";
   preferredColor: string;
   avatarUrl?: string;
@@ -94,8 +94,8 @@ if (!fs.existsSync(USERS_DATA_DIR)) {
 // Initial Mock users
 const DEFAULT_USERS: UserProfile[] = [
   {
-    id: "u-admin",
-    name: "System Admin",
+    uid: "u-admin",
+    displayName: "System Admin",
     email: "admin@vault.com",
     username: "admin",
     role: "Admin",
@@ -105,8 +105,8 @@ const DEFAULT_USERS: UserProfile[] = [
     createdAt: new Date().toISOString()
   },
   {
-    id: "u-user",
-    name: "System Admin",
+    uid: "u-user",
+    displayName: "System User",
     email: "user@vault.com",
     username: "user",
     role: "User",
@@ -280,25 +280,25 @@ async function cleanDatabaseFields() {
   };
 
   // 1. Clean and prune local users.json
-  const initialAdmin = DEFAULT_USERS.find(u => u.id === "u-admin")!;
-  const initialUser = DEFAULT_USERS.find(u => u.id === "u-user")!;
+  const initialAdmin = DEFAULT_USERS.find(u => u.uid === "u-admin")!;
+  const initialUser = DEFAULT_USERS.find(u => u.uid === "u-user")!;
 
   let localUsers = loadUsers();
   const adminInFile = localUsers.find(u => u.email?.toLowerCase() === "admin@vault.com");
   const userInFile = localUsers.find(u => u.email?.toLowerCase() === "user@vault.com");
 
   // Keep track of old IDs to migrate local data files if necessary
-  const oldAdminId = adminInFile ? adminInFile.id : null;
-  const oldUserId = userInFile ? userInFile.id : null;
+  const oldAdminId = adminInFile ? adminInFile.uid : null;
+  const oldUserId = userInFile ? userInFile.uid : null;
 
-  const finalAdmin: UserProfile = adminInFile ? { ...adminInFile, id: "u-admin" } : { ...initialAdmin };
+  const finalAdmin: UserProfile = adminInFile ? { ...adminInFile, uid: "u-admin" } : { ...initialAdmin };
   finalAdmin.role = "Admin";
   finalAdmin.email = "admin@vault.com";
   finalAdmin.username = "admin";
 
-  const finalUser: UserProfile = userInFile ? { ...userInFile, id: "u-user" } : { ...initialUser };
+  const finalUser: UserProfile = userInFile ? { ...userInFile, uid: "u-user" } : { ...initialUser };
   // Copy settings from admin
-  finalUser.name = finalAdmin.name;
+  finalUser.displayName = finalAdmin.displayName;
   finalUser.preferredColor = finalAdmin.preferredColor;
   finalUser.avatarUrl = finalAdmin.avatarUrl;
   finalUser.password = finalAdmin.password;
@@ -308,9 +308,9 @@ async function cleanDatabaseFields() {
 
   const updatedLocalUsers = [finalAdmin, finalUser];
   saveUsers(updatedLocalUsers);
-  console.log("Pruned local users.json to contain only admin@vault.com and user@vault.com with standardized IDs");
+  console.log("Pruned local users.json to contain only admin@vault.com and user@vault.com with standardized UIDs");
 
-  // Migrate local files from old IDs to standardized IDs if necessary
+  // Migrate local files from old IDs to standardized UIDs if necessary
   const migrateLocalFile = (oldId: string | null, newId: string) => {
     if (oldId && oldId !== newId) {
       const oldPath = path.join(USERS_DATA_DIR, `${oldId.replace(/[^a-zA-Z0-9_-]/g, "")}.json`);
@@ -332,14 +332,35 @@ async function cleanDatabaseFields() {
   migrateLocalFile("mock-u-admin", "u-admin");
   migrateLocalFile("mock-u-user", "u-user");
 
+  // Set up allowed UIDs
+  const allowedUids = new Set<string>(["u-admin", "u-user"]);
+
+  // Fetch active Firebase Auth users if Firebase Admin is initialized
+  if (isFirebaseAdminInitialized) {
+    try {
+      console.log("Fetching active users from Firebase Auth...");
+      let nextPageToken: string | undefined = undefined;
+      do {
+        const listUsersResult = await admin.auth().listUsers(1000, nextPageToken);
+        listUsersResult.users.forEach((userRecord) => {
+          allowedUids.add(userRecord.uid);
+        });
+        nextPageToken = listUsersResult.pageToken;
+      } while (nextPageToken);
+      console.log(`Fetched active Firebase Auth users. Total allowed UIDs: ${allowedUids.size}`);
+    } catch (e) {
+      console.error("Failed to fetch users from Firebase Auth:", e);
+    }
+  }
+
   // 2. Prune legacy user data files and clean/seed remaining lockers
   if (fs.existsSync(USERS_DATA_DIR)) {
     try {
       const files = fs.readdirSync(USERS_DATA_DIR);
-      const allowedFiles = ["u-admin.json", "u-user.json"];
       for (const file of files) {
         if (file.endsWith(".json")) {
-          if (!allowedFiles.includes(file)) {
+          const fileUid = file.slice(0, -5);
+          if (!allowedUids.has(fileUid)) {
             console.log(`Pruning legacy user data file: ${file}`);
             try {
               fs.unlinkSync(path.join(USERS_DATA_DIR, file));
@@ -356,20 +377,20 @@ async function cleanDatabaseFields() {
 
   // Clean/seed lockers for allowed local users
   for (const u of updatedLocalUsers) {
-    const uPath = getUserDataPath(u.id);
+    const uPath = getUserDataPath(u.uid);
     let data: any = {};
     if (fs.existsSync(uPath)) {
       try {
         data = JSON.parse(fs.readFileSync(uPath, "utf-8"));
       } catch (e) {
-        console.error(`Failed to parse user data for ${u.id}:`, e);
+        console.error(`Failed to parse user data for ${u.uid}:`, e);
       }
     }
     
     // Seed default locker if missing or empty
     if (!data.balls || !Array.isArray(data.balls) || data.balls.length === 0) {
       data.balls = [...DEFAULT_LOCKER];
-      console.log(`Seeding default locker for local user ${u.id}`);
+      console.log(`Seeding default locker for local user ${u.uid}`);
     } else {
       data.balls = data.balls.map((b: any) => cleanObject(b, userFieldsToRemove));
     }
@@ -381,7 +402,7 @@ async function cleanDatabaseFields() {
     try {
       fs.writeFileSync(uPath, JSON.stringify(data, null, 2), "utf-8");
     } catch (err) {
-      console.error(`Failed to save user data for ${u.id}:`, err);
+      console.error(`Failed to save user data for ${u.uid}:`, err);
     }
   }
 
@@ -403,9 +424,8 @@ async function cleanDatabaseFields() {
   // 4. Clean and prune Firestore collections if initialized
   if (dbAdmin) {
     try {
-      console.log("Pruning unauthorized users from Firestore and standardizing IDs...");
+      console.log("Pruning unauthorized users from Firestore and standardizing UIDs...");
       const usersSnap = await dbAdmin.collection("users").get();
-      const allowedUids = ["u-admin", "u-user"];
 
       // 4A. Find existing doc IDs for admin@vault.com and user@vault.com in Firestore
       const adminDoc = usersSnap.docs.find(doc => doc.data()?.email?.toLowerCase() === "admin@vault.com");
@@ -431,11 +451,11 @@ async function cleanDatabaseFields() {
         }
       }
 
-      // 4C. Delete all users from Firestore that are not exactly u-admin or u-user
+      // 4C. Delete all users from Firestore that are not in allowedUids
       const userRefs = await dbAdmin.collection("users").listDocuments();
       for (const docRef of userRefs) {
         const uid = docRef.id;
-        if (!allowedUids.includes(uid)) {
+        if (!allowedUids.has(uid)) {
           console.log(`Pruning legacy Firestore user doc and subcollections: ${uid}`);
           await deleteFirestoreDocAndSubcollections(docRef);
         }
@@ -443,15 +463,15 @@ async function cleanDatabaseFields() {
 
       // 4D. Set up the two target users in Firestore with u-admin and u-user IDs
       const firestoreAdminData = adminDoc ? { ...adminDoc.data() } as UserProfile : { ...initialAdmin };
-      firestoreAdminData.id = "u-admin";
+      firestoreAdminData.uid = "u-admin";
       firestoreAdminData.role = "Admin";
       firestoreAdminData.email = "admin@vault.com";
       firestoreAdminData.username = "admin";
 
       const firestoreUserData = userDoc ? { ...userDoc.data() } : { ...initialUser };
-      firestoreUserData.id = "u-user";
+      firestoreUserData.uid = "u-user";
       // Sync properties from admin
-      firestoreUserData.name = firestoreAdminData.name;
+      firestoreUserData.displayName = firestoreAdminData.displayName;
       firestoreUserData.preferredColor = firestoreAdminData.preferredColor;
       firestoreUserData.avatarUrl = firestoreAdminData.avatarUrl;
       firestoreUserData.password = firestoreAdminData.password;
@@ -462,29 +482,46 @@ async function cleanDatabaseFields() {
       const finalFirestoreUsers = [firestoreAdminData, firestoreUserData];
 
       for (const u of finalFirestoreUsers) {
-        const { id, ...profileData } = u;
-        const userRef = dbAdmin.collection("users").doc(id);
+        const { uid, ...profileData } = u;
+        const userRef = dbAdmin.collection("users").doc(uid);
         
         // Ensure profile settings are updated and correct
-        await userRef.set(profileData, { merge: true });
+        await userRef.set({ uid, ...profileData }, { merge: true });
         
         const lockerRef = userRef.collection("data").doc("locker");
         const lockerSnap = await lockerRef.get();
 
         let currentBalls = null;
-        if (id === "u-admin") {
+        if (uid === "u-admin") {
           currentBalls = adminLockerBalls || (lockerSnap.exists ? lockerSnap.data()?.balls : null);
         } else {
           currentBalls = userLockerBalls || (lockerSnap.exists ? lockerSnap.data()?.balls : null);
         }
         
         if (!currentBalls || !Array.isArray(currentBalls) || currentBalls.length === 0) {
-          console.log(`Seeding default Firestore locker for user: ${id}`);
+          console.log(`Seeding default Firestore locker for user: ${uid}`);
           await lockerRef.set({ balls: DEFAULT_LOCKER });
         } else {
           const cleanedBalls = currentBalls.map((b: any) => cleanObject(b, userFieldsToRemove));
           await lockerRef.set({ balls: cleanedBalls });
-          console.log(`Cleaned Firestore locker for user: ${id}`);
+          console.log(`Cleaned Firestore locker for user: ${uid}`);
+        }
+      }
+
+      // Clean lockers of other active users from Firebase Auth
+      for (const uid of allowedUids) {
+        if (uid !== "u-admin" && uid !== "u-user") {
+          const userRef = dbAdmin.collection("users").doc(uid);
+          const lockerRef = userRef.collection("data").doc("locker");
+          const lockerSnap = await lockerRef.get();
+          if (lockerSnap.exists) {
+            const currentBalls = lockerSnap.data()?.balls;
+            if (Array.isArray(currentBalls) && currentBalls.length > 0) {
+              const cleanedBalls = currentBalls.map((b: any) => cleanObject(b, userFieldsToRemove));
+              await lockerRef.set({ balls: cleanedBalls }, { merge: true });
+              console.log(`Cleaned Firestore locker for active user: ${uid}`);
+            }
+          }
         }
       }
 
@@ -542,8 +579,8 @@ if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
         if (usersSnap.empty) {
           console.log("Seeding Firestore users collection with default profiles...");
           for (const user of DEFAULT_USERS) {
-            const { id, ...data } = user;
-            await dbAdmin!.collection("users").doc(id).set(data);
+            const { uid, ...data } = user;
+            await dbAdmin!.collection("users").doc(uid).set({ uid, ...data });
           }
         }
         
@@ -642,7 +679,7 @@ async function verifyAdmin(userId: string | undefined): Promise<boolean> {
     return false;
   }
   const users = loadUsers();
-  const user = users.find(u => u.id === userId);
+  const user = users.find(u => u.uid === userId);
   return user ? user.role === "Admin" : false;
 }
 
@@ -653,7 +690,7 @@ async function getUsersList(): Promise<UserProfile[]> {
       const snapshot = await dbAdmin.collection("users").get();
       const users: UserProfile[] = [];
       snapshot.forEach(doc => {
-        users.push({ id: doc.id, ...doc.data() } as UserProfile);
+        users.push({ uid: doc.id, ...doc.data() } as UserProfile);
       });
       return users;
     } catch (error) {
@@ -666,15 +703,14 @@ async function getUsersList(): Promise<UserProfile[]> {
 async function saveUserToDb(user: UserProfile): Promise<void> {
   if (dbAdmin) {
     try {
-      const { id, ...data } = user;
-      await dbAdmin.collection("users").doc(id).set(data, { merge: true });
+      await dbAdmin.collection("users").doc(user.uid).set(user, { merge: true });
       return;
     } catch (error) {
       console.error("Firestore saveUserToDb failed, fallback to file:", error);
     }
   }
   const users = loadUsers();
-  const idx = users.findIndex(u => u.id === user.id);
+  const idx = users.findIndex(u => u.uid === user.uid);
   if (idx > -1) {
     users[idx] = user;
   } else {
@@ -693,7 +729,7 @@ async function deleteUserFromDb(userId: string): Promise<boolean> {
     }
   }
   const users = loadUsers();
-  const userIndex = users.findIndex(u => u.id === userId);
+  const userIndex = users.findIndex(u => u.uid === userId);
   if (userIndex === -1) return false;
   users.splice(userIndex, 1);
   saveUsers(users);
@@ -832,8 +868,8 @@ app.post("/api/auth/signup", async (req, res) => {
   }
 
   const newUser: UserProfile = {
-    id: `u-${cleanUsername}`,
-    name: displayName.trim(),
+    uid: `u-${cleanUsername}`,
+    displayName: displayName.trim(),
     email: emailLower,
     password: hashPassword(password), // Store hashed password
     username: cleanUsername,
@@ -847,9 +883,9 @@ app.post("/api/auth/signup", async (req, res) => {
 
   // Return the session user profile (without password)
   const clientUser = {
-    uid: newUser.id,
+    uid: newUser.uid,
     email: newUser.email,
-    displayName: newUser.name,
+    displayName: newUser.displayName,
     photoURL: newUser.avatarUrl,
     username: newUser.username,
     preferredColor: newUser.preferredColor,
@@ -888,9 +924,9 @@ app.post("/api/auth/signin", async (req, res) => {
   }
 
   const clientUser = {
-    uid: user.id,
+    uid: user.uid,
     email: user.email,
-    displayName: user.name,
+    displayName: user.displayName,
     photoURL: user.avatarUrl,
     username: user.username,
     preferredColor: user.preferredColor,
@@ -924,14 +960,14 @@ app.post("/api/users/:uid/locker", async (req, res) => {
 app.get("/api/users/:id/profile", async (req, res) => {
   const { id } = req.params;
   const users = await getUsersList();
-  const user = users.find(u => u.id === id);
+  const user = users.find(u => u.uid === id);
   if (!user) {
     return res.status(404).json({ error: "User not found." });
   }
   const clientUser = {
-    uid: user.id,
+    uid: user.uid,
     email: user.email,
-    displayName: user.name,
+    displayName: user.displayName,
     photoURL: user.avatarUrl,
     username: user.username,
     preferredColor: user.preferredColor,
@@ -944,9 +980,9 @@ app.get("/api/users/:id/profile", async (req, res) => {
 // Update user profile details (Name, Username, avatarUrl, preferredColor)
 app.patch("/api/users/:id/profile", async (req, res) => {
   const { id } = req.params;
-  const { name, username, avatarUrl, preferredColor, password } = req.body;
+  const { displayName, username, avatarUrl, preferredColor, password } = req.body;
 
-  if (!name || !name.trim()) {
+  if (!displayName || !displayName.trim()) {
     return res.status(400).json({ error: "Display name is required." });
   }
   if (!username || !username.trim()) {
@@ -961,20 +997,20 @@ app.patch("/api/users/:id/profile", async (req, res) => {
   const users = await getUsersList();
   
   // Find target user
-  const user = users.find(u => u.id === id);
+  const user = users.find(u => u.uid === id);
   if (!user) {
     return res.status(404).json({ error: "User not found." });
   }
 
   // Check if username is already taken by someone else
   const usernameLower = cleanUsername.toLowerCase();
-  const usernameExists = users.some(u => u.id !== id && u.username?.toLowerCase() === usernameLower);
+  const usernameExists = users.some(u => u.uid !== id && u.username?.toLowerCase() === usernameLower);
   if (usernameExists) {
     return res.status(400).json({ error: "This username is already taken by another account." });
   }
 
   // Update profile fields
-  user.name = name.trim();
+  user.displayName = displayName.trim();
   user.username = usernameLower;
   if (avatarUrl !== undefined) {
     user.avatarUrl = avatarUrl;
@@ -993,9 +1029,9 @@ app.patch("/api/users/:id/profile", async (req, res) => {
 
   // Return the updated session user profile
   const clientUser = {
-    uid: user.id,
+    uid: user.uid,
     email: user.email,
-    displayName: user.name,
+    displayName: user.displayName,
     photoURL: user.avatarUrl,
     username: user.username,
     preferredColor: user.preferredColor,
@@ -1020,25 +1056,25 @@ app.get("/api/users", async (req, res) => {
 
 // Create a new customized profile user
 app.post("/api/users", async (req, res) => {
-  const { name, username, email, password, preferredColor, avatarUrl, role } = req.body;
-  if (!name || !name.trim()) {
+  const { displayName, username, email, password, preferredColor, avatarUrl, role } = req.body;
+  if (!displayName || !displayName.trim()) {
     return res.status(400).json({ error: "Display name is required" });
   }
 
-  const cleanUsername = cleanUsernameString(username || name || "user");
+  const cleanUsername = cleanUsernameString(username || displayName || "user");
   const users = await getUsersList();
   
   let baseUsername = cleanUsername || "user";
   let userId = `u-${baseUsername}`;
   let suffix = 1;
-  while (users.some(u => u.id === userId)) {
+  while (users.some(u => u.uid === userId)) {
     userId = `u-${baseUsername}_${suffix}`;
     suffix++;
   }
 
   const newUser: UserProfile = {
-    id: userId,
-    name: name.trim(),
+    uid: userId,
+    displayName: displayName.trim(),
     username: userId.substring(2),
     email: email ? email.trim().toLowerCase() : undefined,
     password: password ? hashPassword(password) : undefined,
@@ -1068,7 +1104,7 @@ app.patch("/api/users/:id/role", async (req, res) => {
   }
 
   const users = await getUsersList();
-  const targetUser = users.find(u => u.id === id);
+  const targetUser = users.find(u => u.uid === id);
   if (!targetUser) {
     return res.status(404).json({ error: "User not found" });
   }
@@ -1081,7 +1117,7 @@ app.patch("/api/users/:id/role", async (req, res) => {
 // Update user details (Admin only)
 app.patch("/api/users/:id", async (req, res) => {
   const { id } = req.params;
-  const { name, username, role, preferredColor, avatarUrl, email, password } = req.body;
+  const { displayName, username, role, preferredColor, avatarUrl, email, password } = req.body;
   const actingUserId = req.headers["x-user-id"] as string | undefined;
 
   if (!(await verifyAdmin(actingUserId))) {
@@ -1089,7 +1125,7 @@ app.patch("/api/users/:id", async (req, res) => {
   }
 
   const users = await getUsersList();
-  const targetUser = users.find(u => u.id === id);
+  const targetUser = users.find(u => u.uid === id);
   if (!targetUser) {
     return res.status(404).json({ error: "User not found" });
   }
@@ -1099,11 +1135,11 @@ app.patch("/api/users/:id", async (req, res) => {
     return res.status(400).json({ error: "Self-protection safeguard: You cannot demote yourself from Admin." });
   }
 
-  if (name !== undefined) {
-    if (!name.trim()) {
+  if (displayName !== undefined) {
+    if (!displayName.trim()) {
       return res.status(400).json({ error: "Display name cannot be empty." });
     }
-    targetUser.name = name.trim();
+    targetUser.displayName = displayName.trim();
   }
 
   if (username !== undefined) {
@@ -1112,7 +1148,7 @@ app.patch("/api/users/:id", async (req, res) => {
       return res.status(400).json({ error: "Username must contain letters, numbers, or underscores." });
     }
     // Check if username is already taken by someone else
-    const usernameExists = users.some(u => u.id !== id && u.username?.toLowerCase() === cleanUsername);
+    const usernameExists = users.some(u => u.uid !== id && u.username?.toLowerCase() === cleanUsername);
     if (usernameExists) {
       return res.status(400).json({ error: "This username is already taken by another account." });
     }
@@ -1138,7 +1174,7 @@ app.patch("/api/users/:id", async (req, res) => {
     if (!email.trim() || !email.includes("@")) {
       return res.status(400).json({ error: "Invalid email format." });
     }
-    const emailExists = users.some(u => u.id !== id && u.email?.toLowerCase() === email.trim().toLowerCase());
+    const emailExists = users.some(u => u.uid !== id && u.email?.toLowerCase() === email.trim().toLowerCase());
     if (emailExists) {
       return res.status(400).json({ error: "This email is already taken by another account." });
     }
@@ -1163,8 +1199,8 @@ app.patch("/api/users/:id", async (req, res) => {
       if (password !== undefined && password !== "") {
         authUpdates.password = password;
       }
-      if (name !== undefined) {
-        authUpdates.displayName = name.trim();
+      if (displayName !== undefined) {
+        authUpdates.displayName = displayName.trim();
       }
       if (avatarUrl !== undefined) {
         authUpdates.photoURL = (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://")) ? avatarUrl : null;

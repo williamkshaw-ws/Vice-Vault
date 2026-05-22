@@ -23,7 +23,7 @@ interface AuthModalProps {
   onClose: () => void;
   onMockLogin?: (user: any) => void;
   currentUser?: any;
-  userProfile?: { name: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string } | null;
+  userProfile?: { displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string } | null;
   onProfileUpdate?: (updatedUser: any) => void;
   theme?: 'light' | 'dark' | 'system';
   onThemeChange?: (theme: 'light' | 'dark' | 'system') => void;
@@ -237,7 +237,7 @@ export default function AuthModal({
       if (currentUser) {
         setTab("settings");
         
-        const nameVal = userProfile?.name || currentUser.displayName || "";
+        const nameVal = userProfile?.displayName || currentUser.displayName || "";
         const usernameVal = userProfile?.username || currentUser.username || "";
         const colorVal = userProfile?.preferredColor || currentUser.preferredColor || "#ccff00";
         const avatarVal = userProfile?.avatarUrl || currentUser.photoURL || "preset-1";
@@ -386,9 +386,9 @@ export default function AuthModal({
       // Save user record to firestore user settings
       if (db) {
         await setDoc(doc(db, "users", user.uid), {
-          id: user.uid,
+          uid: user.uid,
           username: cleanUsername,
-          name: displayName,
+          displayName: displayName,
           role: cleanUsername === "admin" ? "Admin" : "User",
           preferredColor: preferredColor,
           avatarUrl: finalAvatar,
@@ -439,7 +439,7 @@ export default function AuthModal({
     if (!isFirebaseConfigured || !auth || (currentUser && currentUser.isMock)) {
       try {
         const updateData: any = {
-          name: displayName.trim(),
+          displayName: displayName.trim(),
           username: cleanUsername,
           avatarUrl: finalAvatar,
           preferredColor
@@ -490,7 +490,7 @@ export default function AuthModal({
 
       if (db) {
         await setDoc(doc(db, "users", currentUser.uid), {
-          name: displayName,
+          displayName: displayName,
           username: cleanUsername,
           avatarUrl: finalAvatar,
           preferredColor: preferredColor
