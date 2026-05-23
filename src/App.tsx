@@ -1931,7 +1931,7 @@ export default function App() {
                         return (
                           <div key={ball.id} className="bg-neutral-950 border border-neutral-850 p-3 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
                             <div className="flex items-center gap-3">
-                              <BallVisual color={ball.color} model={ball.model} size="sm" />
+                              <BallVisual color={ball.color} model={ball.model} size="sm" customImage={ball.customImage} />
                               <div>
                                 <span className="text-white font-bold block">{ball.model}</span>
                                 <span className="text-neutral-450 block text-[10px]">{ball.color} • {currentPkg === "box" ? "box" : currentPkg === "sleeve" ? "sleeve" : "ea"}</span>
@@ -2384,7 +2384,7 @@ export default function App() {
                       return idA.localeCompare(idB);
                     }).map((user) => {
                       const userUid = user.uid || user.id;
-                      const isSelf = userUid === currentUser?.uid;
+                      const isSelf = userUid === currentUser?.uid || user.authUid === currentUser?.uid;
                       const isEditing = editingUserId === userUid;
 
                       if (isEditing) {
@@ -2722,18 +2722,16 @@ export default function App() {
                               <Pencil size={10} />
                               <span>Edit</span>
                             </button>
-                            {!isSelf && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setDeletingUserId(userUid);
-                                }}
-                                className="p-1.5 rounded-lg bg-neutral-900 hover:bg-rose-950/50 border border-neutral-800 hover:border-rose-900 text-neutral-555 hover:text-rose-455 transition-colors cursor-pointer"
-                                title="Delete User"
-                              >
-                                <Trash2 size={10} />
-                              </button>
-                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setDeletingUserId(userUid);
+                              }}
+                              className="p-1.5 rounded-lg bg-neutral-900 hover:bg-rose-950/50 border border-neutral-800 hover:border-rose-900 text-neutral-555 hover:text-rose-455 transition-colors cursor-pointer"
+                              title="Delete User"
+                            >
+                              <Trash2 size={10} />
+                            </button>
                           </div>
                         </div>
                       );
@@ -2747,40 +2745,73 @@ export default function App() {
       )}
 
       {/* Styled Deletion Confirmation Modal */}
-      {deletingUserId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-neutral-900 border border-rose-950/50 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 space-y-6 animate-in fade-in zoom-in-95 duration-200">
-            <h3 className="text-sm font-black text-rose-400 uppercase tracking-wider flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-rose-500" />
-              Confirm Delete User
-            </h3>
-            <p className="text-xs text-neutral-350 font-mono leading-relaxed">
-              Are you absolutely sure you want to delete user <span className="text-white font-bold font-sans">
-                {usersList.find(u => (u.uid || u.id) === deletingUserId)?.displayName || "this user"}
-              </span>? This will also purge their custom specifications and locker storage permanently.
-            </p>
-            <div className="flex gap-2 justify-end">
-              <button
-                type="button"
-                onClick={() => setDeletingUserId(null)}
-                className="px-4 py-2 bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-all cursor-pointer text-xs font-bold"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  handleDeleteUser(deletingUserId);
-                  setDeletingUserId(null);
-                }}
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-extrabold rounded-xl transition-all cursor-pointer text-xs uppercase tracking-wider"
-              >
-                Confirm Delete
-              </button>
+      {deletingUserId && (() => {
+        const targetUser = usersList.find(u => (u.uid || u.id) === deletingUserId);
+        const isSelfDeletion = targetUser && (
+          (targetUser.uid || targetUser.id) === currentUser?.uid ||
+          targetUser.authUid === currentUser?.uid
+        );
+
+        if (isSelfDeletion) {
+          return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
+              <div className="bg-neutral-900 border border-amber-950/50 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 space-y-6 animate-in fade-in zoom-in-95 duration-200">
+                <h3 className="text-sm font-black text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-500" />
+                  Self-Deletion Blocked
+                </h3>
+                <p className="text-xs text-neutral-350 font-mono leading-relaxed">
+                  You cannot delete your own logged in account (<span className="text-white font-bold font-sans">{targetUser?.displayName || "System Admin"}</span>). This self-protection safeguard prevents administrative lockout.
+                </p>
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setDeletingUserId(null)}
+                    className="px-4 py-2 bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-450 hover:text-white rounded-xl transition-all cursor-pointer text-xs font-bold font-mono uppercase tracking-wider"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
+            <div className="bg-neutral-900 border border-rose-950/50 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 space-y-6 animate-in fade-in zoom-in-95 duration-200">
+              <h3 className="text-sm font-black text-rose-400 uppercase tracking-wider flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-500" />
+                Confirm Delete User
+              </h3>
+              <p className="text-xs text-neutral-350 font-mono leading-relaxed">
+                Are you absolutely sure you want to delete user <span className="text-white font-bold font-sans">
+                  {targetUser?.displayName || "this user"}
+                </span>? This will also purge their custom specifications and locker storage permanently.
+              </p>
+              <div className="flex gap-2 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setDeletingUserId(null)}
+                  className="px-4 py-2 bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-all cursor-pointer text-xs font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleDeleteUser(deletingUserId);
+                    setDeletingUserId(null);
+                  }}
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-extrabold rounded-xl transition-all cursor-pointer text-xs uppercase tracking-wider"
+                >
+                  Confirm Delete
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
        {/* Toast Notification */}
        {toast && (
