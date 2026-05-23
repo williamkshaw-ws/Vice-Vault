@@ -198,7 +198,7 @@ export default function App() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [isLoadingCloudData, setIsLoadingCloudData] = useState(false);
   const [isCloudDataLoaded, setIsCloudDataLoaded] = useState(false);
-  const [accentColor, setAccentColor] = useState("#7cb300");
+  const [accentColor, setAccentColor] = useState("#2563eb");
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [guestDropdownOpen, setGuestDropdownOpen] = useState(false);
 
@@ -232,7 +232,7 @@ export default function App() {
   const [editName, setEditName] = useState("");
   const [editUsername, setEditUsername] = useState("");
   const [editRole, setEditRole] = useState<"Admin" | "User">("User");
-  const [editColor, setEditColor] = useState("#7cb300");
+  const [editColor, setEditColor] = useState("#2563eb");
   const [editAvatarUrl, setEditAvatarUrl] = useState("preset-1");
   const [editEmail, setEditEmail] = useState("");
   const [editPassword, setEditPassword] = useState("");
@@ -460,10 +460,10 @@ export default function App() {
           displayName: parsed.displayName || "User",
           username: parsed.username || "",
           avatarUrl: parsed.photoURL || "initials",
-          preferredColor: parsed.preferredColor || "#7cb300",
+          preferredColor: parsed.preferredColor || "#2563eb",
           role: (parsed.role && parsed.role.toLowerCase() === "admin") ? "Admin" : "User"
         });
-        setAccentColor(parsed.preferredColor || "#7cb300");
+        setAccentColor(parsed.preferredColor || "#2563eb");
         setIsCloudDataLoaded(false);
       } catch (e) {
         console.error("Error loading mock user:", e);
@@ -478,12 +478,33 @@ export default function App() {
         
         setCurrentUser(user);
         try {
-          // 1. Load User Profile from Firestore
-          if (db) {
-            let userDocData: any = null;
-            let userDocId: string = "";
+          // 1. Load User Profile from the Server API (which resolves standard Firestore documents securely)
+          let userDocData: any = null;
+          let userDocId: string = "";
 
-            // Query by uid first
+          if (db) {
+            try {
+              const profileRes = await fetch(`/api/users/${user.uid}/profile`);
+              if (profileRes.ok) {
+                const profileData = await profileRes.json();
+                userDocData = {
+                  displayName: profileData.displayName,
+                  username: profileData.username,
+                  avatarUrl: profileData.photoURL,
+                  preferredColor: profileData.preferredColor,
+                  role: profileData.role,
+                  email: profileData.email,
+                  uid: profileData.uid
+                };
+                userDocId = `u-${profileData.username}`;
+              }
+            } catch (apiErr) {
+              console.error("Failed to fetch user profile from API, falling back to local query:", apiErr);
+            }
+          }
+
+          if (db && !userDocData) {
+            // Fallback query by uid if API is unreachable
             const qUid = query(collection(db, "users"), where("uid", "==", user.uid));
             const qUidSnap = await getDocs(qUid);
             if (!qUidSnap.empty) {
@@ -498,19 +519,21 @@ export default function App() {
                 userDocId = qEmailSnap.docs[0].id;
               }
             }
+          }
 
+          if (db) {
             if (userDocData && userDocId) {
               // Found user profile
               setUserProfile({
                 displayName: userDocData.displayName || userDocData.name || user.displayName || "User",
                 username: userDocData.username || userDocId.replace(/^u-/, ""),
                 avatarUrl: userDocData.avatarUrl || "initials",
-                preferredColor: userDocData.preferredColor || "#7cb300",
+                preferredColor: userDocData.preferredColor || "#2563eb",
                 role: (userDocData.role && userDocData.role.toLowerCase() === "admin") ? "Admin" : "User",
                 createdAt: userDocData.createdAt,
                 email: userDocData.email || user.email || ""
               } as any);
-              setAccentColor(userDocData.preferredColor || "#7cb300");
+              setAccentColor(userDocData.preferredColor || "#2563eb");
             } else {
               // Auto-derive u-USERNAME and create a default profile doc in Firestore
               const rawUsername = user.displayName || user.email?.split("@")[0] || "user";
@@ -538,7 +561,7 @@ export default function App() {
                 displayName: user.displayName || derivedUsername,
                 username: derivedUsername,
                 avatarUrl: user.photoURL || "preset-1",
-                preferredColor: "#7cb300",
+                preferredColor: "#2563eb",
                 role: derivedUsername === "admin" ? "Admin" : "User",
                 createdAt: new Date().toISOString(),
                 email: user.email || ""
@@ -582,7 +605,7 @@ export default function App() {
         // Logged out / local-only fallback
         if (!localStorage.getItem("vice_vault_mock_user")) {
           setUserProfile(null);
-          setAccentColor("#7cb300");
+          setAccentColor("#2563eb");
           setIsCloudDataLoaded(false);
           setUserDropdownOpen(false);
 
@@ -642,10 +665,10 @@ export default function App() {
                 displayName: data.displayName || "User",
                 username: data.username || "",
                 avatarUrl: data.photoURL || "initials",
-                preferredColor: data.preferredColor || "#7cb300",
+                preferredColor: data.preferredColor || "#2563eb",
                 role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User"
               });
-              setAccentColor(data.preferredColor || "#7cb300");
+              setAccentColor(data.preferredColor || "#2563eb");
               // Keep local storage up to date with latest server-side profile
               localStorage.setItem("vice_vault_mock_user", JSON.stringify(data));
             }
@@ -814,7 +837,7 @@ export default function App() {
     setEditName(user.displayName || user.name || "");
     setEditUsername(user.username || "");
     setEditRole(user.role || "User");
-    setEditColor(user.preferredColor || "#7cb300");
+    setEditColor(user.preferredColor || "#2563eb");
     setEditAvatarUrl(user.avatarUrl || "preset-1");
     setEditEmail(user.email || "");
     setEditPassword("");
@@ -822,7 +845,7 @@ export default function App() {
   };
 
   const ACCENT_COLORS = [
-    { name: "Sporty Lime", value: "#7cb300" },
+    { name: "Royal Blue", value: "#2563eb" },
     { name: "Neon Red", value: "#ff3366" },
     { name: "Gold", value: "#d4af37" },
     { name: "Cyan Blue", value: "#00e5ff" },
@@ -1152,7 +1175,7 @@ export default function App() {
   const boxCount = balls.filter(b => b.packageType === "box").reduce((sum, b) => sum + Math.round(b.quantity / 12), 0);
 
   return (
-    <div className="min-h-screen transition-all duration-300 font-sans bg-black text-neutral-100 selection:bg-[#7cb300] selection:text-black" id="vice-vault-app">
+    <div className="min-h-screen transition-all duration-300 font-sans bg-black text-neutral-100 selection:bg-[#2563eb] selection:text-black" id="vice-vault-app">
       <style>{`
         :root {
           --theme-accent-color: ${accentColor};
@@ -1160,22 +1183,22 @@ export default function App() {
         }
         
         /* Class overrides for dynamic theme colors */
-        .text-\\[\\#7cb300\\] { color: var(--theme-accent-color) !important; }
-        .bg-\\[\\#7cb300\\] { background-color: var(--theme-accent-color) !important; }
-        .hover\\:text-\\[\\#7cb300\\]:hover { color: var(--theme-accent-color) !important; }
-        .border-\\[\\#7cb300\\] { border-color: var(--theme-accent-color) !important; }
-        .focus\\:border-\\[\\#7cb300\\]:focus { border-color: var(--theme-accent-color) !important; }
-        .selection\\:bg-\\[\\#7cb300\\]::selection { background-color: var(--theme-accent-color) !important; }
-        .shadow-\\[\\#7cb300\\]\\/10 { box-shadow: 0 10px 15px -3px rgba(var(--theme-accent-color-rgb), 0.1), 0 4px 6px -4px rgba(var(--theme-accent-color-rgb), 0.1) !important; }
-        .border-\\[\\#7cb300\\]\\/30 { border-color: rgba(var(--theme-accent-color-rgb), 0.3) !important; }
-        .border-\\[\\#7cb300\\]\\/25 { border-color: rgba(var(--theme-accent-color-rgb), 0.25) !important; }
-        .bg-\\[\\#7cb300\\]\\/10 { background-color: rgba(var(--theme-accent-color-rgb), 0.1) !important; }
-        .bg-\\[\\#7cb300\\]\\/20 { background-color: rgba(var(--theme-accent-color-rgb), 0.2) !important; }
-        .hover\\:bg-\\[\\#7cb300\\]\\/80:hover { background-color: rgba(var(--theme-accent-color-rgb), 0.8) !important; }
-        .bg-\\[\\#7cb300\\]\\/80 { background-color: rgba(var(--theme-accent-color-rgb), 0.8) !important; }
-        .hover\\:border-\\[\\#7cb300\\]\\/50:hover { border-color: rgba(var(--theme-accent-color-rgb), 0.5) !important; }
-        .border-\\[\\#7cb300\\]\\/50 { border-color: rgba(var(--theme-accent-color-rgb), 0.5) !important; }
-        .focus\\:border-\\[\\#7cb300\\]\\/50:focus { border-color: rgba(var(--theme-accent-color-rgb), 0.5) !important; }
+        .text-\\[\\#2563eb\\] { color: var(--theme-accent-color) !important; }
+        .bg-\\[\\#2563eb\\] { background-color: var(--theme-accent-color) !important; }
+        .hover\\:text-\\[\\#2563eb\\]:hover { color: var(--theme-accent-color) !important; }
+        .border-\\[\\#2563eb\\] { border-color: var(--theme-accent-color) !important; }
+        .focus\\:border-\\[\\#2563eb\\]:focus { border-color: var(--theme-accent-color) !important; }
+        .selection\\:bg-\\[\\#2563eb\\]::selection { background-color: var(--theme-accent-color) !important; }
+        .shadow-\\[\\#2563eb\\]\\/10 { box-shadow: 0 10px 15px -3px rgba(var(--theme-accent-color-rgb), 0.1), 0 4px 6px -4px rgba(var(--theme-accent-color-rgb), 0.1) !important; }
+        .border-\\[\\#2563eb\\]\\/30 { border-color: rgba(var(--theme-accent-color-rgb), 0.3) !important; }
+        .border-\\[\\#2563eb\\]\\/25 { border-color: rgba(var(--theme-accent-color-rgb), 0.25) !important; }
+        .bg-\\[\\#2563eb\\]\\/10 { background-color: rgba(var(--theme-accent-color-rgb), 0.1) !important; }
+        .bg-\\[\\#2563eb\\]\\/20 { background-color: rgba(var(--theme-accent-color-rgb), 0.2) !important; }
+        .hover\\:bg-\\[\\#2563eb\\]\\/80:hover { background-color: rgba(var(--theme-accent-color-rgb), 0.8) !important; }
+        .bg-\\[\\#2563eb\\]\\/80 { background-color: rgba(var(--theme-accent-color-rgb), 0.8) !important; }
+        .hover\\:border-\\[\\#2563eb\\]\\/50:hover { border-color: rgba(var(--theme-accent-color-rgb), 0.5) !important; }
+        .border-\\[\\#2563eb\\]\\/50 { border-color: rgba(var(--theme-accent-color-rgb), 0.5) !important; }
+        .focus\\:border-\\[\\#2563eb\\]\\/50:focus { border-color: rgba(var(--theme-accent-color-rgb), 0.5) !important; }
         
         /* Special elements using custom accent color styling */
         .text-accent-dynamic { color: var(--theme-accent-color) !important; }
@@ -1200,7 +1223,7 @@ export default function App() {
                 <h1 className="text-xl font-sans font-black tracking-tight text-white m-0 transition-all">
                   GOLF BALL VAULT
                 </h1>
-                <span className="px-2 py-0.5 rounded font-mono font-black text-[9px] uppercase tracking-wider transition-all duration-300 bg-[#7cb300] text-black font-black">
+                <span className="px-2 py-0.5 rounded font-mono font-black text-[9px] uppercase tracking-wider transition-all duration-300 bg-[#2563eb] text-black font-black">
                   Pro-Edition
                 </span>
               </div>
@@ -1216,20 +1239,20 @@ export default function App() {
             {/* Quick login / Sync access */}
             {isLoadingCloudData ? (
               <div className="flex items-center gap-2 text-neutral-500 text-[11px] font-mono border border-neutral-850 px-4 py-2 rounded-xl bg-neutral-950">
-                <RefreshCw size={13} className="animate-spin text-[#7cb300]" />
+                <RefreshCw size={13} className="animate-spin text-[#2563eb]" />
                 <span>Syncing...</span>
               </div>
             ) : currentUser ? (
               <div className="relative" id="user-profile-dropdown-container">
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="text-[11px] font-mono hover:text-[#7cb300] border transition-all cursor-pointer flex items-center gap-2 shadow-sm px-3 py-1.5 rounded-xl text-neutral-300 border border-neutral-850 hover:border-neutral-750 bg-neutral-950 hover:bg-neutral-900"
+                  className="text-[11px] font-mono hover:text-[#2563eb] border transition-all cursor-pointer flex items-center gap-2 shadow-sm px-3 py-1.5 rounded-xl text-neutral-300 border border-neutral-850 hover:border-neutral-750 bg-neutral-950 hover:bg-neutral-900"
                   id="user-profile-menu-btn"
                 >
                   <AvatarRenderer avatarUrl={userProfile?.avatarUrl} name={userProfile?.displayName || currentUser.displayName || "User"} size="sm" color={accentColor} />
                   <span>{userProfile?.displayName || currentUser.displayName || "User"}</span>
                   {userProfile?.role === "Admin" && (
-                    <span className="px-1 py-0.2 rounded border border-[#7cb300]/30 text-[8px] uppercase tracking-wider font-extrabold text-[#7cb300] bg-[#7cb300]/10 leading-none">
+                    <span className="px-1 py-0.2 rounded border border-[#2563eb]/30 text-[8px] uppercase tracking-wider font-extrabold text-[#2563eb] bg-[#2563eb]/10 leading-none">
                       Admin
                     </span>
                   )}
@@ -1256,12 +1279,12 @@ export default function App() {
                             </div>
                             <div className="flex items-center gap-1.5 min-w-0 mt-0.5">
                               {userProfile?.username ? (
-                                <span className="text-[9px] text-[#7cb300] truncate font-bold">@{userProfile.username}</span>
+                                <span className="text-[9px] text-[#2563eb] truncate font-bold">@{userProfile.username}</span>
                               ) : (
                                 <span className="text-[9px] text-neutral-500 truncate font-bold">@user</span>
                               )}
                               {userProfile?.role === "Admin" && (
-                                <span className="px-1 py-px rounded border border-[#7cb300]/30 text-[#7cb300] bg-[#7cb300]/10 text-[7px] uppercase tracking-wider font-extrabold shrink-0 leading-none">
+                                <span className="px-1 py-px rounded border border-[#2563eb]/30 text-[#2563eb] bg-[#2563eb]/10 text-[7px] uppercase tracking-wider font-extrabold shrink-0 leading-none">
                                   Admin
                                 </span>
                               )}
@@ -1278,9 +1301,9 @@ export default function App() {
                               setDbPanelTab("users");
                               setUserDropdownOpen(false);
                             }}
-                            className="w-full text-left px-2.5 py-2 hover:bg-neutral-900 rounded-lg text-[#7cb300] hover:text-white transition-colors flex items-center gap-2 cursor-pointer border border-transparent font-bold"
+                            className="w-full text-left px-2.5 py-2 hover:bg-neutral-900 rounded-lg text-[#2563eb] hover:text-white transition-colors flex items-center gap-2 cursor-pointer border border-transparent font-bold"
                           >
-                            <User size={12} className="text-[#7cb300]" />
+                            <User size={12} className="text-[#2563eb]" />
                             <span>User Manager</span>
                           </button>
                           <button
@@ -1289,9 +1312,9 @@ export default function App() {
                               setEditingItem(null);
                               setUserDropdownOpen(false);
                             }}
-                            className="w-full text-left px-2.5 py-2 hover:bg-neutral-900 rounded-lg text-[#7cb300] hover:text-white transition-colors flex items-center gap-2 cursor-pointer border border-transparent font-bold"
+                            className="w-full text-left px-2.5 py-2 hover:bg-neutral-900 rounded-lg text-[#2563eb] hover:text-white transition-colors flex items-center gap-2 cursor-pointer border border-transparent font-bold"
                           >
-                            <Settings size={12} className="text-[#7cb300]" />
+                            <Settings size={12} className="text-[#2563eb]" />
                             <span>Vault Admin</span>
                           </button>
                           <div className="border-b border-neutral-900 my-1"></div>
@@ -1309,7 +1332,7 @@ export default function App() {
                         <select
                           value={theme}
                           onChange={(e) => handleSetTheme(e.target.value as 'light' | 'dark' | 'system')}
-                          className="bg-neutral-950 border border-neutral-850 rounded px-1.5 py-0.5 text-neutral-300 focus:outline-none focus:border-[#7cb300] text-[10px] cursor-pointer"
+                          className="bg-neutral-950 border border-neutral-850 rounded px-1.5 py-0.5 text-neutral-300 focus:outline-none focus:border-[#2563eb] text-[10px] cursor-pointer"
                         >
                           <option value="system">System</option>
                           <option value="light">Light</option>
@@ -1340,7 +1363,7 @@ export default function App() {
                             setCurrentUser(null);
                             setUserProfile(null);
                             setIsCloudDataLoaded(false);
-                            setAccentColor("#7cb300");
+                            setAccentColor("#2563eb");
                             setUserDropdownOpen(false);
 
                             const savedBalls = localStorage.getItem("vice_vault_balls");
@@ -1361,7 +1384,7 @@ export default function App() {
             ) : (
               <button
                 onClick={() => setAuthModalOpen(true)}
-                className="text-[11px] font-mono hover:text-[#7cb300] border transition-all cursor-pointer flex items-center gap-2 shadow-sm px-3 py-1.5 rounded-xl text-neutral-300 border border-neutral-850 hover:border-neutral-750 bg-neutral-950 hover:bg-neutral-900 font-bold"
+                className="text-[11px] font-mono hover:text-[#2563eb] border transition-all cursor-pointer flex items-center gap-2 shadow-sm px-3 py-1.5 rounded-xl text-neutral-300 border border-neutral-850 hover:border-neutral-750 bg-neutral-950 hover:bg-neutral-900 font-bold"
                 id="login-signup-btn"
               >
                 <User size={13} className="text-neutral-500" />
@@ -1383,7 +1406,7 @@ export default function App() {
               onClick={() => setMobileTab("bag")}
               className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 mobileTab === "bag"
-                  ? "bg-[#7cb300] text-black font-extrabold shadow-sm"
+                  ? "bg-[#2563eb] text-black font-extrabold shadow-sm"
                   : "text-neutral-400 hover:text-white"
               }`}
             >
@@ -1394,7 +1417,7 @@ export default function App() {
               onClick={() => setMobileTab("catalog")}
               className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 mobileTab === "catalog"
-                  ? "bg-[#7cb300] text-black font-extrabold shadow-sm"
+                  ? "bg-[#2563eb] text-black font-extrabold shadow-sm"
                   : "text-neutral-400 hover:text-white"
               }`}
             >
@@ -1415,7 +1438,7 @@ export default function App() {
               
               {/* Registry Database Header Banner (Static, removing redundant Admin Tab) */}
               <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-neutral-850 bg-neutral-950">
-                <BallVaultIcon className="w-5 h-5 text-[#7cb300]" />
+                <BallVaultIcon className="w-5 h-5 text-[#2563eb]" />
                 <span className="text-xs font-black uppercase tracking-wider text-neutral-300">
                   Ball Vault ({catalog.length} Available Designs)
                 </span>
@@ -1427,8 +1450,8 @@ export default function App() {
                   <div className="space-y-6 animate-fade-in">
                     {/* Back to Search button for Catalog Admin */}
                     <div className="flex items-center justify-between border-b border-neutral-850 pb-3">
-                      <div className="flex items-center gap-1.5 text-[#7cb300]">
-                        <Settings className="w-3.5 h-3.5 text-[#7cb300] shrink-0" />
+                      <div className="flex items-center gap-1.5 text-[#2563eb]">
+                        <Settings className="w-3.5 h-3.5 text-[#2563eb] shrink-0" />
                         <span className="text-[10px] font-mono uppercase font-black tracking-wider">
                           {editingItem ? "Change Catalog Specifications Editor" : "Catalog Specifications Editor"}
                         </span>
@@ -1439,7 +1462,7 @@ export default function App() {
                           setDbPanelTab("browse");
                           setEditingItem(null);
                         }}
-                        className="px-2.5 py-1 text-[10px] font-mono font-black text-[#7cb300] hover:text-white hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-lg transition-all cursor-pointer"
+                        className="px-2.5 py-1 text-[10px] font-mono font-black text-[#2563eb] hover:text-white hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-lg transition-all cursor-pointer"
                       >
                         ◄ Back to Search
                       </button>
@@ -1454,11 +1477,11 @@ export default function App() {
                         }}
                         className={`flex-1 py-2 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                           !showXlsImporter
-                            ? "bg-neutral-900 text-[#7cb300] border border-neutral-800"
+                            ? "bg-neutral-900 text-[#2563eb] border border-neutral-800"
                             : "text-neutral-500 hover:text-neutral-350"
                         }`}
                       >
-                        <PlusSquare className="w-3.5 h-3.5 text-[#7cb300]" />
+                        <PlusSquare className="w-3.5 h-3.5 text-[#2563eb]" />
                         <span>Single Form</span>
                       </button>
                       <button
@@ -1469,7 +1492,7 @@ export default function App() {
                         }}
                         className={`flex-1 py-2 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                           showXlsImporter
-                            ? "bg-neutral-900 text-[#7cb300] border border-neutral-800"
+                            ? "bg-neutral-900 text-[#2563eb] border border-neutral-800"
                             : "text-neutral-500 hover:text-neutral-350"
                         }`}
                       >
@@ -1493,7 +1516,7 @@ export default function App() {
                     <div className="border-t border-neutral-850 pt-5 space-y-4">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <h4 className="font-sans font-black text-white text-xs uppercase tracking-wider text-[#7cb300] font-extrabold">
+                          <h4 className="font-sans font-black text-white text-xs uppercase tracking-wider text-[#2563eb] font-extrabold">
                             Registry Catalog Manager
                           </h4>
                           <p className="text-[10px] text-neutral-400">
@@ -1560,7 +1583,7 @@ export default function App() {
                               key={item.id}
                               className={`flex items-center justify-between p-2.5 rounded-xl border transition-all ${
                                 editingItem?.id === item.id 
-                                  ? "bg-neutral-900 border-[#7cb300]" 
+                                  ? "bg-neutral-900 border-[#2563eb]" 
                                   : "bg-neutral-950/60 hover:bg-neutral-900/80 border-neutral-850"
                               }`}
                             >
@@ -1628,7 +1651,7 @@ export default function App() {
                                         const el = document.getElementById("register-missing-database-panel");
                                         if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
                                       }}
-                                      className="p-1 px-2 rounded-md bg-neutral-900 hover:bg-neutral-800 border border-neutral-850 hover:border-neutral-750 text-[#7cb300] hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black shrink-0 cursor-pointer"
+                                      className="p-1 px-2 rounded-md bg-neutral-900 hover:bg-neutral-800 border border-neutral-850 hover:border-neutral-750 text-[#2563eb] hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black shrink-0 cursor-pointer"
                                       title="Edit Entry Specs"
                                     >
                                       <Pencil size={11} />
@@ -1671,8 +1694,8 @@ export default function App() {
                   <div className="space-y-6 animate-fade-in">
                     {/* Header Banner */}
                     <div className="flex items-center justify-between border-b border-neutral-850 pb-3">
-                      <div className="flex items-center gap-1.5 text-[#7cb300]">
-                        <User className="w-3.5 h-3.5 text-[#7cb300] shrink-0" />
+                      <div className="flex items-center gap-1.5 text-[#2563eb]">
+                        <User className="w-3.5 h-3.5 text-[#2563eb] shrink-0" />
                         <span className="text-[10px] font-mono uppercase font-black tracking-wider">User Registry Manager</span>
                       </div>
                       <button
@@ -1681,7 +1704,7 @@ export default function App() {
                           setDbPanelTab("browse");
                           setEditingUserId(null);
                         }}
-                        className="px-2.5 py-1 text-[10px] font-mono font-black text-[#7cb300] hover:text-white hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-lg transition-all cursor-pointer"
+                        className="px-2.5 py-1 text-[10px] font-mono font-black text-[#2563eb] hover:text-white hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-lg transition-all cursor-pointer"
                       >
                         ◄ Back to Search
                       </button>
@@ -1689,7 +1712,7 @@ export default function App() {
 
                     {isLoadingUsers ? (
                       <div className="py-12 text-center text-neutral-500 font-mono text-xs flex flex-col items-center justify-center gap-2">
-                        <RefreshCw className="animate-spin text-[#7cb300] w-6 h-6" />
+                        <RefreshCw className="animate-spin text-[#2563eb] w-6 h-6" />
                         <span>Querying user accounts...</span>
                       </div>
                     ) : usersError ? (
@@ -1701,7 +1724,7 @@ export default function App() {
                       <div className="space-y-4">
                         <div className="text-[10px] font-mono text-neutral-500 uppercase flex justify-between items-center">
                           <span>Registered Accounts ({usersList.length})</span>
-                          <button onClick={fetchUsers} className="text-[#7cb300] hover:underline flex items-center gap-1">
+                          <button onClick={fetchUsers} className="text-[#2563eb] hover:underline flex items-center gap-1">
                             <RefreshCw size={10} /> Reload
                           </button>
                         </div>
@@ -1738,7 +1761,7 @@ export default function App() {
 
                             if (isEditing) {
                               return (
-                                <div key={userUid} className="bg-neutral-900 border border-[#7cb300] rounded-xl p-4 space-y-4 font-mono text-xs">
+                                <div key={userUid} className="bg-neutral-900 border border-[#2563eb] rounded-xl p-4 space-y-4 font-mono text-xs">
                                   <div className="flex items-center gap-3 border-b border-neutral-800 pb-3">
                                     <AvatarRenderer avatarUrl={editAvatarUrl} name={editName} size="md" color={editColor} />
                                     <div>
@@ -1754,7 +1777,7 @@ export default function App() {
                                         type="text"
                                         value={editName}
                                         onChange={(e) => setEditName(e.target.value)}
-                                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#7cb300] outline-none"
+                                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none"
                                         placeholder="Name"
                                       />
                                     </div>
@@ -1764,7 +1787,7 @@ export default function App() {
                                         type="text"
                                         value={editUsername}
                                         onChange={(e) => setEditUsername(e.target.value)}
-                                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#7cb300] outline-none"
+                                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none"
                                         placeholder="username"
                                       />
                                     </div>
@@ -1778,7 +1801,7 @@ export default function App() {
                                         value={editRole}
                                         onChange={(e) => setEditRole(e.target.value as "Admin" | "User")}
                                         disabled={isSelf}
-                                        className="w-full bg-neutral-950 text-neutral-300 border border-neutral-800 rounded-lg p-2 text-xs focus:border-[#7cb300] outline-none cursor-pointer disabled:opacity-50"
+                                        className="w-full bg-neutral-950 text-neutral-300 border border-neutral-800 rounded-lg p-2 text-xs focus:border-[#2563eb] outline-none cursor-pointer disabled:opacity-50"
                                       >
                                         <option value="User">User</option>
                                         <option value="Admin">Admin</option>
@@ -1791,7 +1814,7 @@ export default function App() {
                                         type="email"
                                         value={editEmail}
                                         onChange={(e) => setEditEmail(e.target.value)}
-                                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#7cb300] outline-none"
+                                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none"
                                         placeholder="email@domain.com"
                                       />
                                     </div>
@@ -1808,7 +1831,7 @@ export default function App() {
                                           onChange={(e) => setEditPassword(e.target.value)}
                                           onFocus={() => setEditPasswordFocused(true)}
                                           onBlur={() => setTimeout(() => setEditPasswordFocused(false), 200)}
-                                          className={`w-full bg-neutral-950 border rounded-lg p-2 text-xs text-white focus:border-[#7cb300] outline-none ${editPassword && editPasswordConfirm && editPassword !== editPasswordConfirm ? "border-red-600" : "border-neutral-800"}`}
+                                          className={`w-full bg-neutral-950 border rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none ${editPassword && editPasswordConfirm && editPassword !== editPasswordConfirm ? "border-red-600" : "border-neutral-800"}`}
                                           placeholder="Leave blank to keep"
                                         />
                                         {editPasswordFocused && (
@@ -1855,7 +1878,7 @@ export default function App() {
                                           type="password"
                                           value={editPasswordConfirm}
                                           onChange={(e) => setEditPasswordConfirm(e.target.value)}
-                                          className={`w-full bg-neutral-950 border rounded-lg p-2 text-xs focus:border-[#7cb300] outline-none pr-7 ${
+                                          className={`w-full bg-neutral-950 border rounded-lg p-2 text-xs focus:border-[#2563eb] outline-none pr-7 ${
                                             editPasswordConfirm && editPassword !== editPasswordConfirm
                                               ? "border-red-600 text-red-400"
                                               : editPasswordConfirm && editPassword === editPasswordConfirm && editPassword
@@ -1952,7 +1975,7 @@ export default function App() {
                                               >
                                                 <input 
                                                   type="color" 
-                                                  value={isPreset ? "#7cb300" : editColor}
+                                                  value={isPreset ? "#2563eb" : editColor}
                                                   onChange={(e) => setEditColor(e.target.value)}
                                                   className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
                                                 />
@@ -1998,7 +2021,7 @@ export default function App() {
                                           setEditPasswordConfirm("");
                                         }
                                       }}
-                                      className="px-3 py-1.5 bg-[#7cb300] hover:bg-[#b5e000] text-black font-extrabold rounded-lg transition-all cursor-pointer text-[10px]"
+                                      className="px-3 py-1.5 bg-[#2563eb] hover:bg-[#b5e000] text-black font-extrabold rounded-lg transition-all cursor-pointer text-[10px]"
                                     >
                                       Save Settings
                                     </button>
@@ -2013,12 +2036,12 @@ export default function App() {
                                 className="bg-neutral-950/60 border border-neutral-850 hover:border-neutral-750 p-3 rounded-xl flex items-center justify-between gap-3 transition-all"
                               >
                                 <div className="flex items-center gap-3 min-w-0">
-                                  <AvatarRenderer avatarUrl={user.avatarUrl} name={user.displayName || user.name || "User"} size="md" color={user.preferredColor || "#7cb300"} />
+                                  <AvatarRenderer avatarUrl={user.avatarUrl} name={user.displayName || user.name || "User"} size="md" color={user.preferredColor || "#2563eb"} />
                                   <div className="min-w-0">
                                     <div className="flex items-center gap-2">
                                       <span className="font-bold text-white text-xs truncate max-w-[130px]">{user.displayName || user.name || "User"}</span>
                                       {isSelf && (
-                                        <span className="text-[7.5px] font-mono text-[#7cb300] px-1 bg-[#7cb300]/10 border border-[#7cb300]/25 rounded uppercase">
+                                        <span className="text-[7.5px] font-mono text-[#2563eb] px-1 bg-[#2563eb]/10 border border-[#2563eb]/25 rounded uppercase">
                                           Self
                                         </span>
                                       )}
@@ -2036,7 +2059,7 @@ export default function App() {
                                     </div>
                                     <div className="flex items-center gap-1.5 mt-1">
                                       {user.role === "Admin" ? (
-                                        <span className="px-1 py-0.2 rounded border border-[#7cb300]/30 text-[#7cb300] bg-[#7cb300]/10 text-[8px] uppercase tracking-wider font-bold font-mono">
+                                        <span className="px-1 py-0.2 rounded border border-[#2563eb]/30 text-[#2563eb] bg-[#2563eb]/10 text-[8px] uppercase tracking-wider font-bold font-mono">
                                           Admin
                                         </span>
                                       ) : (
@@ -2046,7 +2069,7 @@ export default function App() {
                                       )}
                                       <div className="flex items-center gap-1">
                                         <span className="text-[8px] text-neutral-600 font-mono">Accent:</span>
-                                        <span className="w-2.5 h-2.5 rounded-full border border-white/10" style={{ backgroundColor: user.preferredColor || "#7cb300" }}></span>
+                                        <span className="w-2.5 h-2.5 rounded-full border border-white/10" style={{ backgroundColor: user.preferredColor || "#2563eb" }}></span>
                                       </div>
                                     </div>
                                   </div>
@@ -2056,7 +2079,7 @@ export default function App() {
                                   <button
                                     type="button"
                                     onClick={() => startEditingUser(user)}
-                                    className="p-1 px-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-750 text-[#7cb300] hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black cursor-pointer"
+                                    className="p-1 px-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-750 text-[#2563eb] hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black cursor-pointer"
                                     title="Edit User Settings"
                                   >
                                     <Pencil size={10} />
@@ -2092,7 +2115,7 @@ export default function App() {
                     {/* Database Header */}
                     <div className="flex items-center justify-between text-[11px] font-mono border-b border-neutral-850 pb-2.5 flex-wrap gap-2">
                       <div className="flex items-center gap-1.5 text-neutral-400 font-bold">
-                        <BallVaultIcon className="w-3.5 h-3.5 text-[#7cb300]" />
+                        <BallVaultIcon className="w-3.5 h-3.5 text-[#2563eb]" />
                         <span className="uppercase font-bold">Ball Vault</span>
                       </div>
                     </div>
@@ -2129,7 +2152,7 @@ export default function App() {
                           <select
                             value={selectedBrandFilter}
                             onChange={(e) => setSelectedBrandFilter(e.target.value)}
-                            className="w-full bg-neutral-950 text-neutral-300 border border-neutral-850 hover:border-neutral-750 focus:border-[#7cb300] rounded-xl px-3 py-1.5 text-[11px] font-semibold outline-none transition-all cursor-pointer appearance-none pr-8 font-mono uppercase tracking-wider"
+                            className="w-full bg-neutral-950 text-neutral-300 border border-neutral-850 hover:border-neutral-750 focus:border-[#2563eb] rounded-xl px-3 py-1.5 text-[11px] font-semibold outline-none transition-all cursor-pointer appearance-none pr-8 font-mono uppercase tracking-wider"
                           >
                             <option value="ALL">All Varieties</option>
                             {registeredModels.map((m) => (
@@ -2171,7 +2194,7 @@ export default function App() {
                               // Fallback seed
                               if (searchQuery) setDbPanelTab("register");
                             }}
-                            className="mt-3 text-xs font-bold text-[#7cb300] hover:underline inline-flex items-center gap-1"
+                            className="mt-3 text-xs font-bold text-[#2563eb] hover:underline inline-flex items-center gap-1"
                           >
                             Register "{searchQuery || 'Custom Ball'}" now <ChevronRight className="w-3 h-3" />
                           </button>
@@ -2212,7 +2235,7 @@ export default function App() {
                       {totalOwnedCount}
                     </span>
                   </div>
-                  <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#7cb300]">
+                  <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
                     <GolfBallStackIcon className="w-[22px] h-[22px]" />
                   </div>
                 </div>
@@ -2226,7 +2249,7 @@ export default function App() {
                       {totalUniqueModels}
                     </span>
                   </div>
-                  <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#7cb300]">
+                  <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
                     <GolfBallOutlineIcon className="w-5 h-5" />
                   </div>
                 </div>

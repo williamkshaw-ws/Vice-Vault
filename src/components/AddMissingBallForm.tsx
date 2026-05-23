@@ -144,13 +144,13 @@ export default function AddMissingBallForm({
       {/* Decorative gradient header accent */}
       <div 
         className="absolute top-0 inset-x-0 h-1" 
-        style={{ backgroundImage: "linear-gradient(to right, var(--theme-accent-color, #ccff00), var(--color-emerald-500, #10b981), var(--color-teal-500, #14b8a6))" }}
+        style={{ backgroundImage: "linear-gradient(to right, var(--theme-accent-color, #2563eb), var(--color-emerald-500, #10b981), var(--color-teal-500, #14b8a6))" }}
       />
 
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-[#ccff00]" />
-          <h3 className="font-sans font-black text-white text-base uppercase tracking-wider text-[#ccff00] font-extrabold">
+          <Sparkles className="w-5 h-5 text-[#2563eb]" />
+          <h3 className="font-sans font-black text-white text-base uppercase tracking-wider text-[#2563eb] font-extrabold">
             {editItem ? "Edit Existing Design" : "Add Ball to Vault"}
           </h3>
         </div>
@@ -163,8 +163,8 @@ export default function AddMissingBallForm({
       </p>
 
       {success ? (
-        <div className="py-12 flex flex-col items-center justify-center text-center space-y-3 bg-neutral-950/40 rounded-xl border border-[#ccff00]/30">
-          <CheckCircle2 className="w-12 h-12 text-[#ccff00] animate-bounce" />
+        <div className="py-12 flex flex-col items-center justify-center text-center space-y-3 bg-neutral-950/40 rounded-xl border border-[#2563eb]/30">
+          <CheckCircle2 className="w-12 h-12 text-[#2563eb] animate-bounce" />
           <h4 className="text-white font-bold text-sm uppercase tracking-wider">
             {editItem ? "Updated Successfully!" : "Added to Ball Vault!"}
           </h4>
@@ -181,7 +181,7 @@ export default function AddMissingBallForm({
              {/* Model Name */}
              <div>
                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
-                 Model / Brand Name <span className="text-[#ccff00]">*</span>
+                 Model / Brand Name <span className="text-[#2563eb]">*</span>
                </label>
                <input
                  type="text"
@@ -190,7 +190,7 @@ export default function AddMissingBallForm({
                  placeholder="e.g. PRO GLOSS, PRO PLUS MATTE"
                  value={model}
                  onChange={(e) => setModel(e.target.value)}
-                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#ccff00]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
+                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
                  id="missing-model-input"
                />
              </div>
@@ -198,7 +198,7 @@ export default function AddMissingBallForm({
              {/* Cover / Color */}
              <div>
                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
-                 Color & Finish <span className="text-[#ccff00]">*</span>
+                 Color & Finish <span className="text-[#2563eb]">*</span>
                </label>
                <input
                  type="text"
@@ -207,7 +207,7 @@ export default function AddMissingBallForm({
                  placeholder="e.g. Coral Drip Splatter, Jet Black"
                  value={color}
                  onChange={(e) => setColor(e.target.value)}
-                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#ccff00]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
+                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
                  id="missing-color-input"
                />
              </div>
@@ -223,7 +223,7 @@ export default function AddMissingBallForm({
                  placeholder="e.g. Matte series, customized side stamp"
                  value={notes}
                  onChange={(e) => setNotes(e.target.value)}
-                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#ccff00]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
+                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
                  id="missing-notes-input"
                />
              </div>
@@ -241,7 +241,7 @@ export default function AddMissingBallForm({
               onClick={handleTriggerFileInput}
               className={`border border-dashed rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${
                 isDragActive
-                  ? "border-[#ccff00] bg-[#ccff00]/10"
+                  ? "border-[#2563eb] bg-[#2563eb]/10"
                   : customImage
                   ? "border-neutral-700 bg-neutral-950/60"
                   : "border-neutral-800 bg-neutral-950 hover:bg-neutral-900 hover:border-neutral-700"
@@ -280,10 +280,10 @@ export default function AddMissingBallForm({
                 </div>
               ) : (
                 <>
-                  <Upload className={`w-6 h-6 ${isDragActive ? "text-[#ccff00] animate-bounce" : "text-neutral-500"}`} />
+                  <Upload className={`w-6 h-6 ${isDragActive ? "text-[#2563eb] animate-bounce" : "text-neutral-500"}`} />
                   <div className="text-center">
                     <p className="text-xs text-neutral-300 font-medium">
-                      Drag & Drop photo here, or <span className="text-[#ccff00] underline">Browse files</span>
+                      Drag & Drop photo here, or <span className="text-[#2563eb] underline">Browse files</span>
                     </p>
                     <p className="text-[10px] text-neutral-500 font-mono mt-1">
                       PNG, JPG, or WEBP up to 2MB (Auto 3D-molding)
@@ -315,7 +315,7 @@ export default function AddMissingBallForm({
             </button>
             <button
               type="submit"
-              className="px-3 py-1.5 bg-[#ccff00] hover:bg-[#b5e000] text-black font-extrabold rounded-lg transition-all cursor-pointer text-[10px]"
+              className="px-3 py-1.5 bg-[#2563eb] hover:bg-[#3b82f6] text-black font-extrabold rounded-lg transition-all cursor-pointer text-[10px]"
             >
               <span>{editItem ? "Save Changes" : "Save Ball"}</span>
             </button>

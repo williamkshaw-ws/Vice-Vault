@@ -36,7 +36,7 @@ export default function ChartsPanel({ balls }: ChartsPanelProps) {
     // Assign custom color accent for theme bars
     let themeColor = "bg-neutral-600";
     if (model === BallModel.PRO_PLUS) themeColor = "bg-rose-500 shadow-sm";
-    else if (model === BallModel.PRO) themeColor = "bg-[#ccff00] text-black shadow-sm";
+    else if (model === BallModel.PRO) themeColor = "bg-[#2563eb] text-white shadow-sm";
     else if (model === BallModel.PRO_SOFT) themeColor = "bg-[#ffd700] text-neutral-900";
     else if (model === BallModel.TOUR) themeColor = "bg-sky-400";
     else if (model === BallModel.DRIVE) themeColor = "bg-slate-400";
@@ -205,12 +205,12 @@ export default function ChartsPanel({ balls }: ChartsPanelProps) {
               const circumference = 2 * Math.PI * radius;
               const strokeDashoffset = circumference - (item.percentage / 100) * circumference;
 
-              let ringColor = "text-lime-400";
+              let ringColor = "text-lime-600 dark:text-lime-400";
               let labelStyle = "text-white";
-              if (item.condition === BallCondition.NEW) ringColor = "text-lime-400";
-              if (item.condition === BallCondition.MINT) ringColor = "text-sky-400";
-              if (item.condition === BallCondition.PLAYED) ringColor = "text-amber-400";
-              if (item.condition === BallCondition.SHAG) ringColor = "text-rose-500";
+              if (item.condition === BallCondition.NEW) ringColor = "text-lime-600 dark:text-lime-400";
+              if (item.condition === BallCondition.MINT) ringColor = "text-sky-600 dark:text-sky-400";
+              if (item.condition === BallCondition.PLAYED) ringColor = "text-amber-600 dark:text-amber-400";
+              if (item.condition === BallCondition.SHAG) ringColor = "text-rose-600 dark:text-rose-500";
 
               return (
                 <div key={item.condition} className="bg-neutral-950 p-2.5 rounded-xl border border-neutral-800 text-center flex flex-col items-center justify-between" id={`condition-gauge-${item.condition.replace(/[^a-zA-Z]/g, "-")}`}>

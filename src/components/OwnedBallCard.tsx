@@ -108,25 +108,25 @@ export default function OwnedBallCard({
   const getConditionColor = (cond: BallCondition) => {
     switch (cond) {
       case BallCondition.NEW:
-        return "text-lime-400 bg-lime-950/40 border-lime-900";
+        return "text-lime-700 bg-lime-100 border-lime-200 dark:text-lime-400 dark:bg-lime-950/40 dark:border-lime-900";
       case BallCondition.MINT:
-        return "text-emerald-400 bg-emerald-950/30 border-emerald-900";
+        return "text-emerald-700 bg-emerald-100 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-950/30 dark:border-emerald-900";
       case BallCondition.PLAYED:
-        return "text-amber-400 bg-amber-950/30 border-amber-900";
+        return "text-amber-700 bg-amber-100 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-900";
       case BallCondition.SHAG:
-        return "text-rose-400 bg-rose-950/30 border-rose-900";
+        return "text-rose-700 bg-rose-100 border-rose-200 dark:text-rose-400 dark:bg-rose-950/30 dark:border-rose-900";
       default:
-        return "text-neutral-400 bg-neutral-950/40 border-neutral-900";
+        return "text-neutral-550 bg-neutral-100 border-neutral-200 dark:text-neutral-400 dark:bg-neutral-950/40 dark:border-neutral-900";
     }
   };
 
   if (isEditing) {
     return (
       <div 
-        className="bg-neutral-900 border border-[#ccff00]/50 rounded-2xl p-4 transition-all duration-300 shadow-md shadow-[#ccff00]/5 relative overflow-hidden"
+        className="bg-neutral-900 border border-[#2563eb]/50 rounded-2xl p-4 transition-all duration-300 shadow-md shadow-[#2563eb]/5 relative overflow-hidden"
         id={`owned-card-edit-${ball.id}`}
       >
-        <div className="text-xs font-bold text-[#ccff00] uppercase tracking-widest mb-3 flex items-center justify-between">
+        <div className="text-xs font-bold text-[#2563eb] uppercase tracking-widest mb-3 flex items-center justify-between">
           <span>Edit Ball Stack</span>
           <button 
             type="button" 
@@ -157,7 +157,7 @@ export default function OwnedBallCard({
                     editPkgType === 'box'
                       ? "bg-neutral-950 text-neutral-600 border-neutral-900 cursor-not-allowed opacity-50"
                       : editPlayNumber === num && editCustomNumberInput === ""
-                      ? "bg-[#ccff00] border-[#ccff00] text-black"
+                      ? "bg-[#2563eb] border-[#2563eb] text-black"
                       : "bg-neutral-950 border-neutral-850 text-neutral-300 hover:border-neutral-700"
                   }`}
                 >
@@ -187,7 +187,7 @@ export default function OwnedBallCard({
                   editPkgType === 'box'
                     ? "border-neutral-900 bg-neutral-950 text-neutral-600 cursor-not-allowed opacity-55"
                     : editCustomNumberInput !== ""
-                    ? "bg-[#ccff00] text-black border-[#ccff00] font-bold"
+                    ? "bg-[#2563eb] text-black border-[#2563eb] font-bold"
                     : "bg-neutral-950 border-neutral-850 text-neutral-400"
                 }`}
                 title={editPkgType === 'box' ? "Not customizable for boxes" : "Enter any 2-digit number"}
@@ -288,7 +288,7 @@ export default function OwnedBallCard({
                   onClick={() => handlePkgTypeChange('ea')}
                   className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
                     editPkgType === 'ea'
-                      ? "bg-[#ccff00] border-[#ccff00] text-neutral-950 font-bold"
+                      ? "bg-[#2563eb] border-[#2563eb] text-neutral-950 font-bold"
                       : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
                   }`}
                 >
@@ -299,7 +299,7 @@ export default function OwnedBallCard({
                   onClick={() => handlePkgTypeChange('sleeve')}
                   className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
                     editPkgType === 'sleeve'
-                      ? "bg-[#ccff00] border-[#ccff00] text-neutral-950 font-bold"
+                      ? "bg-[#2563eb] border-[#2563eb] text-neutral-950 font-bold"
                       : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
                   }`}
                 >
@@ -310,7 +310,7 @@ export default function OwnedBallCard({
                   onClick={() => handlePkgTypeChange('box')}
                   className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
                     editPkgType === 'box'
-                      ? "bg-[#ccff00] border-[#ccff00] text-neutral-950 font-bold"
+                      ? "bg-[#2563eb] border-[#2563eb] text-neutral-950 font-bold"
                       : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
                   }`}
                 >
@@ -347,7 +347,7 @@ export default function OwnedBallCard({
           <button
             type="button"
             onClick={handleSave}
-            className="px-3 py-1.5 bg-[#ccff00] hover:bg-[#b5e000] text-black font-extrabold rounded-lg transition-all cursor-pointer text-[10px] uppercase tracking-wider flex items-center gap-1"
+            className="px-3 py-1.5 bg-[#2563eb] hover:bg-[#3b82f6] text-black font-extrabold rounded-lg transition-all cursor-pointer text-[10px] uppercase tracking-wider flex items-center gap-1"
           >
             <Save className="w-3.5 h-3.5" /> Save Changes
           </button>
@@ -416,7 +416,7 @@ export default function OwnedBallCard({
             <div className="flex items-start justify-between gap-1">
               <div className="truncate">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[9px] font-mono tracking-widest text-[#ccff00] uppercase font-black">
+                  <span className="text-[9px] font-mono tracking-widest text-[#2563eb] uppercase font-black">
                     {ball.model}
                   </span>
                   <span className={`text-[8px] px-1 py-0.2 rounded font-mono font-bold uppercase border tracking-wider scale-95 ${
@@ -439,7 +439,7 @@ export default function OwnedBallCard({
                 <button
                   type="button"
                   onClick={startEditing}
-                  className="text-neutral-500 hover:text-[#ccff00] p-1 flex-shrink-0 cursor-pointer transition-colors"
+                  className="text-neutral-500 hover:text-[#2563eb] p-1 flex-shrink-0 cursor-pointer transition-colors"
                   title="Edit Ball Details"
                 >
                   <Edit2 className="w-4 h-4" />
@@ -496,7 +496,7 @@ export default function OwnedBallCard({
         <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto">
           <span className="text-[10px] font-mono text-neutral-500 uppercase">Quantity Owned:</span>
           
-          <div className="px-3 py-1 bg-neutral-950 rounded-lg border border-neutral-850 text-xs font-mono font-black text-[#ccff00]">
+          <div className="px-3 py-1 bg-neutral-950 rounded-lg border border-neutral-850 text-xs font-mono font-black text-[#2563eb]">
             {ball.packageType === "box" ? (
               <span>
                 {Math.max(1, Math.round(ball.quantity / 12))}{" "}

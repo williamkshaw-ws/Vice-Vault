@@ -87,7 +87,7 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
     <div 
       className={`relative rounded-xl border p-4 transition-all duration-300 ${
         isOpen 
-          ? "bg-neutral-900 border-[#ccff00]/50 shadow-md shadow-[#ccff00]/10" 
+          ? "bg-neutral-900 border-[#2563eb]/50 shadow-md shadow-[#2563eb]/10" 
           : "bg-neutral-900/60 hover:bg-neutral-900 border-neutral-800 hover:border-neutral-700 hover:shadow-sm"
       }`}
       id={`catalog-item-card-${item.id}`}
@@ -111,7 +111,7 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
                 <h4 className="font-sans font-black text-white text-base leading-tight truncate" title={item.model}>
                   {item.model}
                 </h4>
-                <p className="text-xs text-[#ccff00] font-mono font-medium truncate mt-0.5">
+                <p className="text-xs text-[#2563eb] font-mono font-medium truncate mt-0.5">
                   {item.color}
                 </p>
                 {item.notes && (
@@ -126,7 +126,7 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
                   <button
                     type="button"
                     onClick={() => setIsOpen(true)}
-                    className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-[#ccff00] hover:bg-[#ccff00]/80 text-black transition-colors cursor-pointer"
+                    className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-[#2563eb] hover:bg-[#2563eb]/80 text-black transition-colors cursor-pointer"
                     id={`btn-open-add-${item.id}`}
                     title="Add to Bag"
                   >
@@ -152,7 +152,7 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
       {/* Expandable Add Container */}
       {isOpen && (
         <form onSubmit={handleAddSubmit} className="mt-4 pt-4 border-t border-neutral-800 space-y-4">
-          <div className="text-xs font-bold text-[#ccff00] uppercase tracking-widest flex items-center justify-between">
+          <div className="text-xs font-bold text-[#2563eb] uppercase tracking-widest flex items-center justify-between">
             <span>Add to My Bag</span>
           </div>
 
@@ -176,7 +176,7 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
                       pkgType === 'box'
                         ? "bg-neutral-950 text-neutral-600 border-neutral-900 cursor-not-allowed opacity-50"
                         : playNumber === num && customNumberInput === ""
-                        ? "bg-[#ccff00] border-[#ccff00] text-black"
+                        ? "bg-[#2563eb] border-[#2563eb] text-black"
                         : "bg-neutral-950 border-neutral-850 text-neutral-300 hover:border-neutral-700"
                     }`}
                   >
@@ -207,7 +207,7 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
                     pkgType === 'box'
                       ? "border-neutral-900 bg-neutral-950 text-neutral-600 cursor-not-allowed opacity-55"
                       : customNumberInput !== ""
-                      ? "bg-[#ccff00] text-black border-[#ccff00] font-bold"
+                      ? "bg-[#2563eb] text-black border-[#2563eb] font-bold"
                       : "bg-neutral-950 border-neutral-850 text-neutral-400"
                   }`}
                   title={pkgType === 'box' ? "Not customizable for boxes" : "Enter any 2-digit number"}
@@ -311,7 +311,7 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
                     }}
                     className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
                       pkgType === 'ea'
-                        ? "bg-[#ccff00] border-[#ccff00] text-neutral-950 font-bold"
+                        ? "bg-[#2563eb] border-[#2563eb] text-neutral-950 font-bold"
                         : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
                     }`}
                   >
@@ -325,7 +325,7 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
                     }}
                     className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
                       pkgType === 'sleeve'
-                        ? "bg-[#ccff00] border-[#ccff00] text-neutral-950 font-bold"
+                        ? "bg-[#2563eb] border-[#2563eb] text-neutral-950 font-bold"
                         : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
                     }`}
                   >
@@ -339,7 +339,7 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
                     }}
                     className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
                       pkgType === 'box'
-                        ? "bg-[#ccff00] border-[#ccff00] text-neutral-950 font-bold"
+                        ? "bg-[#2563eb] border-[#2563eb] text-neutral-950 font-bold"
                         : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
                     }`}
                   >
@@ -371,7 +371,7 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
             className={`w-full py-2.5 rounded-lg font-bold text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
               justAdded
                 ? "bg-emerald-500 text-neutral-950 shadow-md shadow-emerald-950/20"
-                : "bg-[#ccff00] hover:bg-[#ccff00]/80 text-black active:scale-[0.99] shadow-sm cursor-pointer"
+                : "bg-[#2563eb] hover:bg-[#2563eb]/80 text-black active:scale-[0.99] shadow-sm cursor-pointer"
             }`}
           >
             {justAdded ? (

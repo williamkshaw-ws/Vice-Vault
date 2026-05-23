@@ -125,7 +125,7 @@ async function runTests() {
     password: 'AdminPass123!',
     username: '@admin', // username with @ symbol
     displayName: 'System Admin',
-    preferredColor: '#ccff00',
+    preferredColor: '#2563eb',
     avatarUrl: 'preset-1'
   });
 
@@ -168,7 +168,7 @@ async function runTests() {
   }
 
   const regularUser = signUpUserRes.body;
-  const regularUid = regularUser.uid;
+  let regularUid = regularUser.uid;
 
   // 3. Save some locker data for regular user so we can test cleanup on delete
   console.log('\n3. Saving locker data for regular user...');
@@ -226,7 +226,7 @@ async function runTests() {
   // 6. Test Admin Updating User Details (PATCH /api/users/:id)
   console.log('\n6. Testing Admin modifying regular user details...');
   const updateFields = {
-    name: 'Updated Name',
+    displayName: 'Updated Name',
     username: 'updated_user',
     role: 'Admin',
     preferredColor: '#00e5ff',
@@ -237,8 +237,9 @@ async function runTests() {
     'x-user-id': adminUid
   });
 
-  if (updateRes.statusCode === 200 && updateRes.body.role === 'Admin' && updateRes.body.name === 'Updated Name') {
+  if (updateRes.statusCode === 200 && updateRes.body.role === 'Admin' && updateRes.body.displayName === 'Updated Name') {
     console.log('✓ User modified successfully by admin:', updateRes.body);
+    regularUid = updateRes.body.uid;
   } else {
     console.error('✗ Failed to modify user details:', updateRes);
     process.exit(1);

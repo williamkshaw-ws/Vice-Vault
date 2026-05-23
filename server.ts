@@ -100,7 +100,7 @@ const DEFAULT_USERS: UserProfile[] = [
     email: "admin@vault.com",
     username: "admin",
     role: "Admin",
-    preferredColor: "#7cb300",
+    preferredColor: "#2563eb",
     avatarUrl: "preset-1",
     password: hashPassword("AdminPass123!"),
     createdAt: new Date().toISOString()
@@ -111,7 +111,7 @@ const DEFAULT_USERS: UserProfile[] = [
     email: "user@vault.com",
     username: "user",
     role: "User",
-    preferredColor: "#7cb300",
+    preferredColor: "#2563eb",
     avatarUrl: "preset-1",
     password: hashPassword("AdminPass123!"),
     createdAt: new Date().toISOString()
@@ -345,19 +345,29 @@ async function cleanDatabaseFields() {
       let nextPageToken: string | undefined = undefined;
       do {
         const listUsersResult = await admin.auth().listUsers(1000, nextPageToken);
-        listUsersResult.users.forEach((userRecord) => {
-          allowedUids.add(userRecord.uid);
-          if (userRecord.email?.toLowerCase() === "admin@vault.com") {
+        for (const userRecord of listUsersResult.users) {
+          const emailLower = userRecord.email?.toLowerCase();
+          if (emailLower === "admin@vault.com") {
             realAdminUid = userRecord.uid;
-          } else if (userRecord.email?.toLowerCase() === "user@vault.com") {
+            allowedUids.add(userRecord.uid);
+          } else if (emailLower === "user@vault.com") {
             realUserUid = userRecord.uid;
+            allowedUids.add(userRecord.uid);
+          } else {
+            // Delete this random user from Firebase Auth!
+            console.log(`Pruning unauthorized Auth user: ${userRecord.email} (${userRecord.uid})`);
+            try {
+              await admin.auth().deleteUser(userRecord.uid);
+            } catch (delErr) {
+              console.error(`Failed to delete user ${userRecord.email} from Auth:`, delErr);
+            }
           }
-        });
+        }
         nextPageToken = listUsersResult.pageToken;
       } while (nextPageToken);
-      console.log(`Fetched active Firebase Auth users. Total allowed UIDs: ${allowedUids.size}. Real Admin UID: ${realAdminUid}, Real User UID: ${realUserUid}`);
+      console.log(`Fetched and pruned active Firebase Auth users. Total allowed UIDs: ${allowedUids.size}. Real Admin UID: ${realAdminUid}, Real User UID: ${realUserUid}`);
     } catch (e) {
-      console.error("Failed to fetch users from Firebase Auth:", e);
+      console.error("Failed to fetch/prune users from Firebase Auth:", e);
     }
   }
 
@@ -708,7 +718,8 @@ async function verifyAdmin(userId: string | undefined): Promise<boolean> {
   if (!userId) return false;
   if (dbAdmin) {
     try {
-      const docRef = dbAdmin.collection("users").doc(userId);
+      const resolvedId = await resolveUserDocId(userId);
+      const docRef = dbAdmin.collection("users").doc(resolvedId);
       const docSnap = await docRef.get();
       if (docSnap.exists) {
         const role = docSnap.data()?.role;
@@ -723,6 +734,7 @@ async function verifyAdmin(userId: string | undefined): Promise<boolean> {
   const user = users.find(u => u.uid === userId);
   return user ? user.role?.toLowerCase() === "admin" : false;
 }
+
 
 // Async Database Helpers
 async function resolveUserDocId(uid: string): Promise<string> {
@@ -950,7 +962,7 @@ app.post("/api/auth/signup", async (req, res) => {
     email: emailLower,
     password: hashPassword(password), // Store hashed password
     username: cleanUsername,
-    preferredColor: preferredColor || "#7cb300",
+    preferredColor: preferredColor || "#2563eb",
     avatarUrl: avatarUrl || "preset-1",
     role: cleanUsername === "admin" ? "Admin" : "User",
     createdAt: new Date().toISOString()
