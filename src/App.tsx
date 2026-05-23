@@ -144,7 +144,8 @@ const INITIAL_OWNED_BALLS: GolfBall[] = [
     customNumber: 1,
     notes: "Tournament dozen box. Extreme wedge backspin control.",
     version: "Standard Edition",
-    dateAdded: "5/12/2026"
+    dateAdded: "5/12/2026",
+    customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_white_th_35dcf74c-c5a3-4467-aa5a-c9adf7b01bc0.png?v=1711374990"
   },
   {
     id: "OWNED-PRO-RED_BLUE_DRIP_SPLATTER-STANDARD_EDITION-NEAR_MINT_SCUFFED_0-EA-V2",
@@ -156,7 +157,8 @@ const INITIAL_OWNED_BALLS: GolfBall[] = [
     customNumber: 77,
     notes: "My lucky splattered golf balls.",
     version: "Standard Edition",
-    dateAdded: "5/14/2026"
+    dateAdded: "5/14/2026",
+    customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/New-Ball-PDP-Pro-Drip-Red-Blue-Front.png?v=1760629724"
   },
   {
     id: "OWNED-PRO_PLUS-NEON_GLOSS_LIME-STANDARD_EDITION-PLAYED_SCUFFED_1-SLEEVE-V3",
@@ -168,7 +170,8 @@ const INITIAL_OWNED_BALLS: GolfBall[] = [
     customNumber: 3,
     notes: "Practice round balls. Extremely responsive feel.",
     version: "Standard Edition",
-    dateAdded: "5/15/2026"
+    dateAdded: "5/15/2026",
+    customImage: "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Pro_Plus_Neon_Lime_Front_Zoom.jpg?v=1709811032"
   }
 ];
 
@@ -261,6 +264,9 @@ export default function App() {
   const [usersList, setUsersList] = useState<any[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [usersError, setUsersError] = useState<string | null>(null);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+  const [isUserManagerOpen, setIsUserManagerOpen] = useState(false);
+  const [isVaultManagerOpen, setIsVaultManagerOpen] = useState(false);
 
   // State for viewing/editing user bags
   const [selectedUserForBag, setSelectedUserForBag] = useState<any | null>(null);
@@ -273,6 +279,8 @@ export default function App() {
   const [modalPkgType, setModalPkgType] = useState<"ea" | "sleeve" | "box">("box");
   const [modalCondition, setModalCondition] = useState<BallCondition>(BallCondition.NEW);
   const [modalNotes, setModalNotes] = useState("");
+  const [modalPlayNumber, setModalPlayNumber] = useState<number>(1);
+  const [modalCustomNumberInput, setModalCustomNumberInput] = useState<string>("");
 
   // User Editing States
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
@@ -708,10 +716,10 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (dbPanelTab === "users" && currentUser) {
+    if (isUserManagerOpen && currentUser) {
       fetchUsers();
     }
-  }, [dbPanelTab, currentUser]);
+  }, [isUserManagerOpen, currentUser]);
 
   const handleUpdateUser = async (userId: string, updatedFields: { displayName: string; username: string; role: string; preferredColor: string; avatarUrl: string; email?: string; password?: string }) => {
     try {
@@ -1264,7 +1272,7 @@ export default function App() {
                         <>
                           <button
                             onClick={() => {
-                              setDbPanelTab("users");
+                              setIsUserManagerOpen(true);
                               setUserDropdownOpen(false);
                             }}
                             className="w-full text-left px-2.5 py-2 hover:bg-neutral-900 rounded-lg text-[#2563eb] hover:text-white transition-colors flex items-center gap-2 cursor-pointer border border-transparent font-bold"
@@ -1274,7 +1282,7 @@ export default function App() {
                           </button>
                           <button
                             onClick={() => {
-                              setDbPanelTab("admin");
+                              setIsVaultManagerOpen(true);
                               setEditingItem(null);
                               setUserDropdownOpen(false);
                             }}
@@ -1412,688 +1420,7 @@ export default function App() {
 
               {/* Panel tab content rendering */}
               <div className="p-4">
-                {dbPanelTab === "admin" && (
-                  <div className="space-y-6 animate-fade-in">
-                    {/* Back to Search button for Catalog Admin */}
-                    <div className="flex items-center justify-between border-b border-neutral-850 pb-3">
-                      <div className="flex items-center gap-1.5 text-[#2563eb]">
-                        <Settings className="w-3.5 h-3.5 text-[#2563eb] shrink-0" />
-                        <span className="text-[10px] font-mono uppercase font-black tracking-wider">
-                          {editingItem ? "Change Vault Manager Specs" : "Vault Manager"}
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setDbPanelTab("browse");
-                          setEditingItem(null);
-                        }}
-                        className="px-2.5 py-1 text-[10px] font-mono font-black text-[#2563eb] hover:text-white hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-lg transition-all cursor-pointer"
-                      >
-                        ◄ Back to Search
-                      </button>
-                    </div>
-                    {/* Inner admin toggle buttons */}
-                    <div className="flex gap-2 p-1 bg-neutral-950/60 border border-neutral-850 rounded-xl">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowXlsImporter(false);
-                          setEditingItem(null);
-                        }}
-                        className={`flex-1 py-2 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                          !showXlsImporter
-                            ? "bg-neutral-900 text-[#2563eb] border border-neutral-800"
-                            : "text-neutral-500 hover:text-neutral-350"
-                        }`}
-                      >
-                        <PlusSquare className="w-3.5 h-3.5 text-[#2563eb]" />
-                        <span>Single Form</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowXlsImporter(true);
-                          setEditingItem(null);
-                        }}
-                        className={`flex-1 py-2 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                          showXlsImporter
-                            ? "bg-neutral-900 text-[#2563eb] border border-neutral-800"
-                            : "text-neutral-500 hover:text-neutral-350"
-                        }`}
-                      >
-                        <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>Excel / XLS Bulk</span>
-                      </button>
-                    </div>
-
-                    {!showXlsImporter ? (
-                      <AddMissingBallForm 
-                        onAddCatalogItem={handleAddCatalogItem} 
-                        onUpdateCatalogItem={handleUpdateCatalogItem}
-                        editItem={editingItem}
-                        onCancelEdit={() => setEditingItem(null)}
-                      />
-                    ) : (
-                      <XlsImporter onImportItems={handleXlsImportCatalogItems} />
-                    )}
-
-                    {/* Registry Manager Header */}
-                    <div className="border-t border-neutral-850 pt-5 space-y-4">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h4 className="font-sans font-black text-white text-xs uppercase tracking-wider text-[#2563eb] font-extrabold">
-                            Vault Manager
-                          </h4>
-                          <p className="text-[10px] text-neutral-400">
-                            Prune and edit existing designs to prevent duplicate similar entries.
-                          </p>
-                        </div>
-                        <div className="flex flex-col items-end gap-1.5 shrink-0">
-                          <span className="text-[9px] bg-neutral-950 border border-neutral-850 text-neutral-400 px-2 py-0.5 rounded font-mono">
-                            {catalog.length} TEMPLATES
-                          </span>
-                          {catalog.length > 0 && (
-                            showDeleteAllCatalogConfirm ? (
-                              <div className="flex items-center gap-1 bg-rose-950/30 border border-rose-900/60 rounded-md p-0.5 animate-pulse">
-                                <span className="text-[8px] font-mono text-rose-300 px-1 uppercase font-bold">Wipe?</span>
-                                <button
-                                  type="button"
-                                  onClick={handleDeleteAllCatalog}
-                                  className="px-1.5 py-0.5 bg-rose-600 hover:bg-rose-500 text-white text-[8px] font-mono rounded font-bold cursor-pointer transition-all"
-                                >
-                                  Yes
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setShowDeleteAllCatalogConfirm(false)}
-                                  className="px-1 text-[8px] font-mono text-neutral-400 hover:text-white rounded cursor-pointer transition-all"
-                                >
-                                  No
-                                </button>
-                              </div>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => setShowDeleteAllCatalogConfirm(true)}
-                                className="text-[9px] font-mono text-neutral-500 hover:text-rose-400 border border-neutral-850 hover:border-rose-950/40 bg-neutral-950/30 px-1.5 py-0.5 rounded transition-all cursor-pointer"
-                              >
-                                Delete All
-                              </button>
-                            )
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Admin filter input */}
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" size={13} />
-                        <input
-                          type="text"
-                          placeholder="Search database templates..."
-                          value={adminSearchQuery}
-                          onChange={(e) => setAdminSearchQuery(e.target.value)}
-                          className="w-full bg-neutral-950 hover:bg-neutral-900/60 border border-neutral-850 rounded-xl px-9 py-2 text-xs text-white placeholder-neutral-550 outline-none focus:border-neutral-750 transition-all font-mono"
-                        />
-                      </div>
-
-                      {/* Admin items list */}
-                      <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1 font-sans">
-                        {catalog
-                          .filter(item => {
-                            const q = adminSearchQuery.toLowerCase();
-                            return item.model.toLowerCase().includes(q) || item.color.toLowerCase().includes(q);
-                          })
-                          .map((item) => (
-                            <div 
-                              key={item.id}
-                              className={`flex items-center justify-between p-2.5 rounded-xl border transition-all ${
-                                editingItem?.id === item.id 
-                                  ? "bg-neutral-900 border-[#2563eb]" 
-                                  : "bg-neutral-950/60 hover:bg-neutral-900/80 border-neutral-850"
-                              }`}
-                            >
-                              <div className="flex items-center gap-2.5 min-w-0">
-                                <span className="w-8 h-8 rounded-full bg-black/40 border border-neutral-950 flex items-center justify-center shrink-0 overflow-hidden">
-                                  <BallVisual 
-                                    color={item.color} 
-                                    model={item.model} 
-                                    size="sm" 
-                                    className="!w-8 !h-8 shadow-none border-none" 
-                                    customImage={item.customImage} 
-                                  />
-                                </span>
-                                <div className="truncate">
-                                  <div className="flex items-center gap-1.5">
-                                    <h5 className="font-bold text-xs text-white truncate max-w-[120px] md:max-w-[160px]">
-                                      {item.model}
-                                    </h5>
-                                  </div>
-                                  <p className="text-[10px] text-neutral-400 truncate mt-0.5 flex flex-wrap gap-x-2 items-center">
-                                    <span className="font-medium text-neutral-300">{item.color}</span>
-                                    {item.notes && (
-                                      <>
-                                        <span className="text-neutral-600 font-mono select-none">•</span>
-                                        <span className="text-neutral-400 italic text-[10px] truncate max-w-[150px] md:max-w-[280px]" title={item.notes}>
-                                          {item.notes}
-                                        </span>
-                                      </>
-                                    )}
-                                  </p>
-                                </div>
-                              </div>
-
-                              <div className="flex items-center gap-1 shrink-0 ml-2">
-                                {deleteConfirmId === item.id ? (
-                                  <div className="flex items-center gap-1 bg-rose-950/40 border border-rose-900/60 rounded-md p-0.5 animate-pulse">
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        handleDeleteCatalogItem(item.id);
-                                        setDeleteConfirmId(null);
-                                      }}
-                                      className="py-1 px-1.5 text-[8px] font-mono font-black uppercase text-rose-400 hover:text-white rounded transition-all cursor-pointer"
-                                      title="Confirm delete specification template"
-                                    >
-                                      Delete?
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => setDeleteConfirmId(null)}
-                                      className="px-1 text-[9px] text-neutral-400 hover:text-white rounded transition-all cursor-pointer font-bold"
-                                      title="Cancel"
-                                    >
-                                      ✕
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setShowXlsImporter(false); // force switch to form
-                                        setEditingItem(item);
-                                        // Smoothly scroll to top of database panel
-                                        const el = document.getElementById("register-missing-database-panel");
-                                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                                      }}
-                                      className="p-1 px-2 rounded-md bg-neutral-900 hover:bg-neutral-800 border border-neutral-850 hover:border-neutral-750 text-[#2563eb] hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black shrink-0 cursor-pointer"
-                                      title="Edit Entry Specs"
-                                    >
-                                      <Pencil size={11} />
-                                      <span>Edit</span>
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => setDeleteConfirmId(item.id)}
-                                      className="p-1 rounded-md bg-neutral-900 hover:bg-rose-950/50 border border-neutral-850 hover:border-rose-900 text-neutral-550 hover:text-rose-450 transition-colors cursor-pointer"
-                                      title="Delete Specification"
-                                    >
-                                      <Trash2 size={11} />
-                                    </button>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-
-                        {catalog.length === 0 ? (
-                          <div className="py-8 px-4 text-center border border-dashed border-neutral-850 rounded-xl bg-neutral-950/10 text-neutral-500 text-xs">
-                            Ball Vault templates list is empty. Create some above or use Excel Bulk Import!
-                          </div>
-                        ) : (
-                          catalog.filter(item => {
-                            const q = adminSearchQuery.toLowerCase();
-                            return item.model.toLowerCase().includes(q) || item.color.toLowerCase().includes(q);
-                          }).length === 0 && (
-                            <div className="py-6 text-center border border-dashed border-neutral-850 rounded-xl bg-neutral-950/10 text-neutral-500 text-xs">
-                              No templates match "{adminSearchQuery}"
-                            </div>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {dbPanelTab === "users" && (
-                  <div className="space-y-6 animate-fade-in">
-                    {/* Header Banner */}
-                    <div className="flex items-center justify-between border-b border-neutral-850 pb-3">
-                      <div className="flex items-center gap-1.5 text-[#2563eb]">
-                        <User className="w-3.5 h-3.5 text-[#2563eb] shrink-0" />
-                        <span className="text-[10px] font-mono uppercase font-black tracking-wider">User Manager</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setDbPanelTab("browse");
-                          setEditingUserId(null);
-                        }}
-                        className="px-2.5 py-1 text-[10px] font-mono font-black text-[#2563eb] hover:text-white hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-lg transition-all cursor-pointer"
-                      >
-                        ◄ Back to Search
-                      </button>
-                    </div>
-
-                    {isLoadingUsers ? (
-                      <div className="py-12 text-center text-neutral-500 font-mono text-xs flex flex-col items-center justify-center gap-2">
-                        <RefreshCw className="animate-spin text-[#2563eb] w-6 h-6" />
-                        <span>Querying user accounts...</span>
-                      </div>
-                    ) : usersError ? (
-                      <div className="py-6 text-center text-rose-400 bg-rose-950/20 border border-rose-900/40 rounded-xl font-mono text-xs p-4">
-                        <AlertTriangle className="w-6 h-6 mx-auto mb-2 text-rose-500" />
-                        <span>{usersError}</span>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <div className="text-[10px] font-mono text-neutral-500 uppercase flex justify-between items-center">
-                          <span>Registered Accounts ({usersList.length})</span>
-                          <button onClick={fetchUsers} className="text-[#2563eb] hover:underline flex items-center gap-1">
-                            <RefreshCw size={10} /> Reload
-                          </button>
-                        </div>
-
-                        <div className="space-y-3 max-h-[550px] overflow-y-auto pr-1">
-                          {[...usersList].sort((a, b) => {
-                            const isSelfA = (a.uid || a.id) === currentUser?.uid;
-                            const isSelfB = (b.uid || b.id) === currentUser?.uid;
-                            if (isSelfA && !isSelfB) return -1;
-                            if (!isSelfA && isSelfB) return 1;
-                            
-                            const roleA = a.role || "User";
-                            const roleB = b.role || "User";
-                            if (roleA === "Admin" && roleB !== "Admin") return -1;
-                            if (roleA !== "Admin" && roleB === "Admin") return 1;
-                            
-                            const nameA = (a.displayName || a.name || "").trim().toLowerCase();
-                            const nameB = (b.displayName || b.name || "").trim().toLowerCase();
-                            if (nameA < nameB) return -1;
-                            if (nameA > nameB) return 1;
-                            
-                            const userA = (a.username || "").trim().toLowerCase();
-                            const userB = (b.username || "").trim().toLowerCase();
-                            if (userA < userB) return -1;
-                            if (userA > userB) return 1;
-                            
-                            const idA = a.uid || a.id || "";
-                            const idB = b.uid || b.id || "";
-                            return idA.localeCompare(idB);
-                          }).map((user) => {
-                            const userUid = user.uid || user.id;
-                            const isSelf = userUid === currentUser?.uid;
-                            const isEditing = editingUserId === userUid;
-
-                            if (isEditing) {
-                              return (
-                                <div key={userUid} className="bg-neutral-900 border border-[#2563eb] rounded-xl p-4 space-y-4 font-mono text-xs">
-                                  <div className="flex items-center gap-3 border-b border-neutral-800 pb-3">
-                                    <AvatarRenderer avatarUrl={editAvatarUrl} name={editName} size="md" color={editColor} />
-                                    <div>
-                                      <span className="text-white font-bold block">Editing User Profile</span>
-                                      <span className="text-neutral-555 text-[10px]">ID: {userUid}</span>
-                                    </div>
-                                  </div>
-
-                                  <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                      <label className="block text-[9px] uppercase text-neutral-400 mb-1">Display Name</label>
-                                      <input
-                                        type="text"
-                                        value={editName}
-                                        onChange={(e) => setEditName(e.target.value)}
-                                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none"
-                                        placeholder="Name"
-                                      />
-                                    </div>
-                                    <div>
-                                      <label className="block text-[9px] uppercase text-neutral-400 mb-1">Username</label>
-                                      <input
-                                        type="text"
-                                        value={editUsername}
-                                        onChange={(e) => setEditUsername(e.target.value)}
-                                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none"
-                                        placeholder="username"
-                                      />
-                                    </div>
-                                  </div>
-
-                                  {/* System Role + Email Address */}
-                                  <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                      <label className="block text-[9px] uppercase text-neutral-400 mb-1">System Role</label>
-                                      <select
-                                        value={editRole}
-                                        onChange={(e) => setEditRole(e.target.value as "Admin" | "User")}
-                                        disabled={isSelf}
-                                        className="w-full bg-neutral-950 text-neutral-300 border border-neutral-800 rounded-lg p-2 text-xs focus:border-[#2563eb] outline-none cursor-pointer disabled:opacity-50"
-                                      >
-                                        <option value="User">User</option>
-                                        <option value="Admin">Admin</option>
-                                      </select>
-                                      {isSelf && <span className="text-[8px] text-amber-500 mt-1 block font-bold">You cannot demote yourself</span>}
-                                    </div>
-                                    <div>
-                                      <label className="block text-[9px] uppercase text-neutral-400 mb-1">Email Address</label>
-                                      <input
-                                        type="email"
-                                        value={editEmail}
-                                        onChange={(e) => setEditEmail(e.target.value)}
-                                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none"
-                                        placeholder="email@domain.com"
-                                      />
-                                    </div>
-                                  </div>
-
-                                  {/* New Password + Confirm Password */}
-                                  <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                      <label className="block text-[9px] uppercase text-neutral-400 mb-1">New Password</label>
-                                      <div className="relative">
-                                        <input
-                                          type="password"
-                                          value={editPassword}
-                                          onChange={(e) => setEditPassword(e.target.value)}
-                                          onFocus={() => setEditPasswordFocused(true)}
-                                          onBlur={() => setTimeout(() => setEditPasswordFocused(false), 200)}
-                                          className={`w-full bg-neutral-950 border rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none ${editPassword && editPasswordConfirm && editPassword !== editPasswordConfirm ? "border-red-600" : "border-neutral-800"}`}
-                                          placeholder="Leave blank to keep"
-                                        />
-                                        {editPasswordFocused && (
-                                          <div className="absolute z-20 left-0 right-0 mt-1 bg-neutral-950 border border-neutral-800 rounded-xl p-3 shadow-2xl space-y-1.5 font-mono text-[9px] text-left">
-                                            <div className="text-[8px] uppercase text-neutral-500 font-bold mb-1">Password Requirements:</div>
-                                            <div className="flex items-center gap-1.5">
-                                              <span className={editPassword.length >= 8 ? "text-emerald-400 font-bold" : "text-neutral-600"}>
-                                                {editPassword.length >= 8 ? "✓" : "○"}
-                                              </span>
-                                              <span className={editPassword.length >= 8 ? "text-emerald-300" : "text-neutral-400"}>At least 8 characters</span>
-                                            </div>
-                                            <div className="flex items-center gap-1.5">
-                                              <span className={/[A-Z]/.test(editPassword) ? "text-emerald-400 font-bold" : "text-neutral-600"}>
-                                                {/[A-Z]/.test(editPassword) ? "✓" : "○"}
-                                              </span>
-                                              <span className={/[A-Z]/.test(editPassword) ? "text-emerald-300" : "text-neutral-400"}>One uppercase letter</span>
-                                            </div>
-                                            <div className="flex items-center gap-1.5">
-                                              <span className={/[a-z]/.test(editPassword) ? "text-emerald-400 font-bold" : "text-neutral-600"}>
-                                                {/[a-z]/.test(editPassword) ? "✓" : "○"}
-                                              </span>
-                                              <span className={/[a-z]/.test(editPassword) ? "text-emerald-300" : "text-neutral-400"}>One lowercase letter</span>
-                                            </div>
-                                            <div className="flex items-center gap-1.5">
-                                              <span className={/[0-9]/.test(editPassword) ? "text-emerald-400 font-bold" : "text-neutral-600"}>
-                                                {/[0-9]/.test(editPassword) ? "✓" : "○"}
-                                              </span>
-                                              <span className={/[0-9]/.test(editPassword) ? "text-emerald-300" : "text-neutral-400"}>One number</span>
-                                            </div>
-                                            <div className="flex items-center gap-1.5">
-                                              <span className={/[!@#$%^&*(),.?":{}|<>]/.test(editPassword) ? "text-emerald-400 font-bold" : "text-neutral-600"}>
-                                                {/[!@#$%^&*(),.?":{}|<>]/.test(editPassword) ? "✓" : "○"}
-                                              </span>
-                                              <span className={/[!@#$%^&*(),.?":{}|<>]/.test(editPassword) ? "text-emerald-300" : "text-neutral-400"}>One special character</span>
-                                            </div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                    <div>
-                                      <label className="block text-[9px] uppercase text-neutral-400 mb-1">Confirm Password</label>
-                                      <div className="relative">
-                                        <input
-                                          type="password"
-                                          value={editPasswordConfirm}
-                                          onChange={(e) => setEditPasswordConfirm(e.target.value)}
-                                          className={`w-full bg-neutral-950 border rounded-lg p-2 text-xs focus:border-[#2563eb] outline-none pr-7 ${
-                                            editPasswordConfirm && editPassword !== editPasswordConfirm
-                                              ? "border-red-600 text-red-400"
-                                              : editPasswordConfirm && editPassword === editPasswordConfirm && editPassword
-                                              ? "border-emerald-600 text-white"
-                                              : "border-neutral-800 text-white"
-                                          }`}
-                                          placeholder="Re-enter password"
-                                        />
-                                        {editPasswordConfirm && (
-                                          <div className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] font-bold">
-                                            {editPassword === editPasswordConfirm
-                                              ? <span className="text-emerald-400">✓</span>
-                                              : <span className="text-red-500">✗</span>
-                                            }
-                                          </div>
-                                        )}
-                                      </div>
-                                      {editPasswordConfirm && editPassword !== editPasswordConfirm && (
-                                        <span className="text-[8px] text-red-500 mt-0.5 block">Passwords do not match</span>
-                                      )}
-                                    </div>
-                                  </div>
-
-                                  {/* Profile Picture + Accent Color side by side */}
-                                  <div className="grid grid-cols-2 gap-3">
-                                    {/* Profile Picture */}
-                                    <div>
-                                      <label className="block text-[9px] uppercase text-neutral-400 mb-1">Profile Picture</label>
-                                      <div className="grid grid-cols-4 gap-1.5 bg-neutral-950 border border-neutral-800 p-2 rounded-lg">
-                                        {["preset-1", "preset-2", "preset-3", "preset-4", "preset-5", "preset-6", "preset-7", "preset-8"].map((presetId) => (
-                                          <button
-                                            key={presetId}
-                                            type="button"
-                                            onClick={() => setEditAvatarUrl(presetId)}
-                                            className="p-0.5 rounded-full relative flex items-center justify-center transition-all hover:scale-105 active:scale-95 border border-transparent shrink-0"
-                                            style={{
-                                              boxShadow: editAvatarUrl === presetId ? `0 0 6px ${editColor}` : "none",
-                                              borderColor: editAvatarUrl === presetId ? "rgba(255,255,255,0.4)" : "transparent"
-                                            }}
-                                          >
-                                            <AvatarRenderer avatarUrl={presetId} name={editName || "VV"} size="sm" color={editColor} />
-                                          </button>
-                                        ))}
-                                      </div>
-                                    </div>
-
-                                    {/* Accent Color — 2 rows of 5 */}
-                                    <div>
-                                      <label className="block text-[9px] uppercase text-neutral-400 mb-1">Accent Color</label>
-                                      <div className="bg-neutral-950 border border-neutral-800 p-2 rounded-lg">
-                                        <div className="grid grid-cols-5 gap-1.5">
-                                          {ACCENT_COLORS.slice(0, 5).map(c => (
-                                            <button
-                                              key={c.value}
-                                              type="button"
-                                              onClick={() => setEditColor(c.value)}
-                                              className="w-6 h-6 rounded-full border border-transparent transition-transform hover:scale-110 active:scale-95 mx-auto block"
-                                              style={{
-                                                backgroundColor: c.value,
-                                                boxShadow: editColor.toLowerCase() === c.value.toLowerCase() ? `0 0 6px ${c.value}` : "none",
-                                                borderColor: editColor.toLowerCase() === c.value.toLowerCase() ? "white" : "transparent"
-                                              }}
-                                              title={c.name}
-                                            />
-                                          ))}
-                                        </div>
-                                        <div className="grid grid-cols-5 gap-1.5 mt-1.5">
-                                          {ACCENT_COLORS.slice(5).map(c => (
-                                            <button
-                                              key={c.value}
-                                              type="button"
-                                              onClick={() => setEditColor(c.value)}
-                                              className="w-6 h-6 rounded-full border border-transparent transition-transform hover:scale-110 active:scale-95 mx-auto block"
-                                              style={{
-                                                backgroundColor: c.value,
-                                                boxShadow: editColor.toLowerCase() === c.value.toLowerCase() ? `0 0 6px ${c.value}` : "none",
-                                                borderColor: editColor.toLowerCase() === c.value.toLowerCase() ? "white" : "transparent"
-                                              }}
-                                              title={c.name}
-                                            />
-                                          ))}
-                                          {/* Custom Color Picker */}
-                                          {(() => {
-                                            const isPreset = ACCENT_COLORS.some(c => c.value.toLowerCase() === editColor.toLowerCase());
-                                            return (
-                                              <div 
-                                                className="w-6 h-6 rounded-full border relative flex items-center justify-center transition-all cursor-pointer hover:scale-110 active:scale-95 overflow-hidden mx-auto"
-                                                style={{ 
-                                                  backgroundColor: isPreset ? "#1e1e1e" : editColor,
-                                                  borderColor: !isPreset ? "#ffffff" : "rgba(255,255,255,0.1)",
-                                                  boxShadow: !isPreset ? `0 0 6px ${editColor}` : "none"
-                                                }}
-                                                title="Custom Color Picker"
-                                              >
-                                                <input 
-                                                  type="color" 
-                                                  value={isPreset ? "#2563eb" : editColor}
-                                                  onChange={(e) => setEditColor(e.target.value)}
-                                                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-                                                />
-                                                {isPreset ? (
-                                                  <Palette size={9} className="text-neutral-400" />
-                                                ) : (
-                                                  <Check size={9} className="text-black font-black" />
-                                                )}
-                                              </div>
-                                            );
-                                          })()}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <div className="flex gap-2 justify-end pt-2 border-t border-neutral-800">
-                                    <button
-                                      type="button"
-                                      onClick={() => setEditingUserId(null)}
-                                        className="px-3 py-1.5 bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer text-[10px]"
-                                    >
-                                      Cancel
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={async () => {
-                                        if (editPassword && editPassword !== editPasswordConfirm) {
-                                          alert("Passwords do not match. Please confirm the password correctly.");
-                                          return;
-                                        }
-                                        const success = await handleUpdateUser(userUid, {
-                                          displayName: editName,
-                                          username: editUsername,
-                                          role: editRole,
-                                          preferredColor: editColor,
-                                          avatarUrl: editAvatarUrl,
-                                          email: editEmail,
-                                          password: editPassword
-                                        });
-                                        if (success) {
-                                          setEditingUserId(null);
-                                          setEditPasswordConfirm("");
-                                        }
-                                      }}
-                                      className="px-3 py-1.5 bg-[#2563eb] hover:bg-[#b5e000] text-black font-extrabold rounded-lg transition-all cursor-pointer text-[10px]"
-                                    >
-                                      Save Settings
-                                    </button>
-                                  </div>
-                                </div>
-                              );
-                            }
-
-                            return (
-                              <div 
-                                key={userUid}
-                                className="bg-neutral-950/60 border border-neutral-850 hover:border-neutral-750 p-3 rounded-xl flex items-center justify-between gap-3 transition-all"
-                              >
-                                <div className="flex items-center gap-3 min-w-0">
-                                  <AvatarRenderer avatarUrl={user.avatarUrl} name={user.displayName || user.name || "User"} size="md" color={user.preferredColor || "#2563eb"} />
-                                  <div className="min-w-0">
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-bold text-white text-xs truncate max-w-[130px]">{user.displayName || user.name || "User"}</span>
-                                      {isSelf && (
-                                        <span className="text-[7.5px] font-mono text-[#2563eb] px-1 bg-[#2563eb]/10 border border-[#2563eb]/25 rounded uppercase">
-                                          Self
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div className="text-[9.5px] text-neutral-500 font-mono flex flex-wrap gap-x-1.5 items-center">
-                                      {user.username && (
-                                        <span className="text-neutral-400">@{user.username}</span>
-                                      )}
-                                      {user.email && (
-                                        <>
-                                          <span className="text-neutral-700 select-none">•</span>
-                                          <span className="truncate max-w-[120px]">{user.email}</span>
-                                        </>
-                                      )}
-                                    </div>
-                                    <div className="flex items-center gap-1.5 mt-1">
-                                      {user.role === "Admin" ? (
-                                        <span className="px-1 py-0.2 rounded border border-[#2563eb]/30 text-[#2563eb] bg-[#2563eb]/10 text-[8px] uppercase tracking-wider font-bold font-mono">
-                                          Admin
-                                        </span>
-                                      ) : (
-                                        <span className="px-1 py-0.2 rounded border border-neutral-800 text-neutral-400 bg-neutral-900/40 text-[8px] uppercase tracking-wider font-bold font-mono">
-                                          User
-                                        </span>
-                                      )}
-                                      <div className="flex items-center gap-1">
-                                        <span className="text-[8px] text-neutral-600 font-mono">Accent:</span>
-                                        <span className="w-2.5 h-2.5 rounded-full border border-white/10" style={{ backgroundColor: user.preferredColor || "#2563eb" }}></span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="flex items-center gap-1 shrink-0">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleViewUserBag(user)}
-                                    className="p-1 px-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-750 text-neutral-355 hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black cursor-pointer"
-                                    title="View & Edit Bag"
-                                  >
-                                    <ShoppingBag size={10} />
-                                    <span>Show Bag</span>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => startEditingUser(user)}
-                                    className="p-1 px-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-750 text-[#2563eb] hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black cursor-pointer"
-                                    title="Edit User Settings"
-                                  >
-                                    <Pencil size={10} />
-                                    <span>Edit</span>
-                                  </button>
-                                  {!isSelf && (
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        if (confirm(`Are you absolutely sure you want to delete user ${user.displayName || user.name || "this user"}? This will also purge their custom specifications and locker storage permanently.`)) {
-                                          handleDeleteUser(userUid);
-                                        }
-                                      }}
-                                      className="p-1.5 rounded-lg bg-neutral-900 hover:bg-rose-950/50 border border-neutral-800 hover:border-rose-900 text-neutral-555 hover:text-rose-450 transition-colors cursor-pointer"
-                                      title="Delete User"
-                                    >
-                                      <Trash2 size={10} />
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {dbPanelTab === "browse" && (
-                  <div className="space-y-4">
-                    
-                    {/* Database Header */}
-                    <div className="flex items-center justify-between text-[11px] font-mono border-b border-neutral-850 pb-2.5 flex-wrap gap-2">
-                      <div className="flex items-center gap-1.5 text-neutral-400 font-bold">
-                        <BallVaultIcon className="w-3.5 h-3.5 text-[#2563eb]" />
-                        <span className="uppercase font-bold">Ball Vault</span>
-                      </div>
-                    </div>
+                <div className="space-y-4">
 
 
                     {/* Database Search Filter control */}
@@ -2189,7 +1516,6 @@ export default function App() {
                     )}
 
                   </div>
-                )}
               </div>
 
             </div>
@@ -2446,7 +1772,56 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs font-mono">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs font-mono">
+                  <div>
+                    <label className="block text-[9px] uppercase text-neutral-400 mb-1">Ball Play-Number</label>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4].map((num) => (
+                        <button
+                          key={num}
+                          type="button"
+                          disabled={modalPkgType === 'box'}
+                          onClick={() => {
+                            setModalPlayNumber(num);
+                            setModalCustomNumberInput("");
+                          }}
+                          className={`flex-1 text-center py-1 rounded text-[11px] font-mono font-bold border transition-all cursor-pointer ${
+                            modalPkgType === 'box'
+                              ? "bg-neutral-950 text-neutral-600 border-neutral-900 cursor-not-allowed opacity-50"
+                              : modalPlayNumber === num && modalCustomNumberInput === ""
+                              ? "bg-[#2563eb] border-[#2563eb] text-black"
+                              : "bg-neutral-950 border-neutral-850 text-neutral-300 hover:border-neutral-700"
+                          }`}
+                        >
+                          {num}
+                        </button>
+                      ))}
+                      <input
+                        type="text"
+                        maxLength={2}
+                        disabled={modalPkgType === 'box'}
+                        value={modalPkgType === 'box' ? "" : modalCustomNumberInput}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, "");
+                          setModalCustomNumberInput(val);
+                          if (val === "") {
+                            setModalPlayNumber(1);
+                          } else {
+                            setModalPlayNumber(parseInt(val, 10));
+                          }
+                        }}
+                        placeholder={modalPkgType === 'box' ? "—" : "##"}
+                        className={`w-9 text-center py-1 font-mono text-xs border rounded transition-all focus:outline-none focus:border-neutral-500 ${
+                          modalPkgType === 'box'
+                            ? "border-neutral-800 bg-neutral-950 text-neutral-600 cursor-not-allowed opacity-55"
+                            : modalCustomNumberInput !== ""
+                            ? "bg-[#2563eb] text-black border-[#2563eb] font-bold"
+                            : "bg-neutral-950 border-neutral-800 text-neutral-400"
+                        }`}
+                        title={modalPkgType === 'box' ? "Not customizable for boxes" : "Enter any 2-digit number"}
+                      />
+                    </div>
+                  </div>
                   <div>
                     <label className="block text-[9px] uppercase text-neutral-400 mb-1">Condition</label>
                     <select
@@ -2486,6 +1861,11 @@ export default function App() {
                       ? modalQty * 3
                       : modalQty;
 
+                    const matchedCatalogItem = catalog.find(
+                      item => item.model === modalSelectedModel && item.color === modalSelectedColor
+                    );
+                    const customImage = matchedCatalogItem?.customImage;
+
                     const newBall: GolfBall = {
                       id: `OWNED-${modalSelectedModel.toUpperCase().replace(/\s+/g, "_")}-${modalSelectedColor.toUpperCase().replace(/\s+/g, "_")}-${Date.now()}`,
                       model: modalSelectedModel,
@@ -2493,13 +1873,16 @@ export default function App() {
                       quantity: calculatedQty,
                       condition: modalCondition,
                       packageType: modalPkgType,
-                      customNumber: 1,
+                      customNumber: modalPkgType === 'box' ? 1 : modalPlayNumber,
                       notes: modalNotes.trim() || "Added by Admin",
                       version: "Standard Edition",
-                      dateAdded: today
+                      dateAdded: today,
+                      customImage
                     };
                     setSelectedUserBalls(prev => [newBall, ...prev]);
                     setModalNotes("");
+                    setModalPlayNumber(1);
+                    setModalCustomNumberInput("");
                   }}
                   className="w-full py-2 bg-[#2563eb] hover:bg-[#b5e000] text-black font-extrabold rounded-lg text-xs uppercase tracking-wider transition-all cursor-pointer"
                 >
@@ -2654,6 +2037,731 @@ export default function App() {
            </div>
          </div>
        )}
+
+      {/* Vault Manager Modal */}
+      {isVaultManagerOpen && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center p-5 border-b border-neutral-800 bg-neutral-950/60">
+              <div>
+                <h2 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#2563eb]"></span>
+                  Vault Manager
+                </h2>
+                <p className="text-[10px] text-neutral-400 mt-0.5 font-mono">
+                  Prune and edit existing designs to prevent duplicate similar entries.
+                </p>
+              </div>
+              <button 
+                onClick={() => {
+                  setIsVaultManagerOpen(false);
+                  setEditingItem(null);
+                }}
+                className="text-neutral-400 hover:text-white p-1 hover:bg-neutral-800 rounded-lg transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto flex-grow space-y-6" id="register-missing-database-panel">
+              {/* Inner admin toggle buttons */}
+              <div className="flex gap-2 p-1 bg-neutral-950/60 border border-neutral-850 rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowXlsImporter(false);
+                    setEditingItem(null);
+                  }}
+                  className={`flex-1 py-2 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    !showXlsImporter
+                      ? "bg-neutral-900 text-[#2563eb] border border-neutral-800"
+                      : "text-neutral-550 hover:text-neutral-350"
+                  }`}
+                >
+                  <PlusSquare className="w-3.5 h-3.5 text-[#2563eb]" />
+                  <span>Single Form</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowXlsImporter(true);
+                    setEditingItem(null);
+                  }}
+                  className={`flex-1 py-2 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    showXlsImporter
+                      ? "bg-neutral-900 text-[#2563eb] border border-neutral-800"
+                      : "text-neutral-550 hover:text-neutral-350"
+                  }`}
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Excel / XLS Bulk</span>
+                </button>
+              </div>
+
+              {!showXlsImporter ? (
+                <AddMissingBallForm 
+                  onAddCatalogItem={handleAddCatalogItem} 
+                  onUpdateCatalogItem={handleUpdateCatalogItem}
+                  editItem={editingItem}
+                  onCancelEdit={() => setEditingItem(null)}
+                />
+              ) : (
+                <XlsImporter onImportItems={handleXlsImportCatalogItems} />
+              )}
+
+              {/* Registry Manager List Header */}
+              <div className="border-t border-neutral-800 pt-5 space-y-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h4 className="font-sans font-black text-white text-xs uppercase tracking-wider text-[#2563eb] font-extrabold">
+                      Existing Catalog Templates
+                    </h4>
+                    <p className="text-[10px] text-neutral-400">
+                      Search and manage specification templates already in the vault.
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
+                    <span className="text-[9px] bg-neutral-950 border border-neutral-850 text-neutral-400 px-2 py-0.5 rounded font-mono">
+                      {catalog.length} TEMPLATES
+                    </span>
+                    {catalog.length > 0 && (
+                      showDeleteAllCatalogConfirm ? (
+                        <div className="flex items-center gap-1 bg-rose-950/30 border border-rose-900/60 rounded-md p-0.5 animate-pulse">
+                          <span className="text-[8px] font-mono text-rose-300 px-1 uppercase font-bold">Wipe?</span>
+                          <button
+                            type="button"
+                            onClick={handleDeleteAllCatalog}
+                            className="px-1.5 py-0.5 bg-rose-600 hover:bg-rose-500 text-white text-[8px] font-mono rounded font-bold cursor-pointer transition-all"
+                          >
+                            Yes
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setShowDeleteAllCatalogConfirm(false)}
+                            className="px-1 text-[8px] font-mono text-neutral-400 hover:text-white rounded cursor-pointer transition-all"
+                          >
+                            No
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setShowDeleteAllCatalogConfirm(true)}
+                          className="text-[9px] font-mono text-neutral-500 hover:text-rose-400 border border-neutral-850 hover:border-rose-950/40 bg-neutral-950/30 px-1.5 py-0.5 rounded transition-all cursor-pointer"
+                        >
+                          Delete All
+                        </button>
+                      )
+                    )}
+                  </div>
+                </div>
+
+                {/* Admin filter input */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" size={13} />
+                  <input
+                    type="text"
+                    placeholder="Search database templates..."
+                    value={adminSearchQuery}
+                    onChange={(e) => setAdminSearchQuery(e.target.value)}
+                    className="w-full bg-neutral-950 hover:bg-neutral-900/60 border border-neutral-850 rounded-xl px-9 py-2 text-xs text-white placeholder-neutral-550 outline-none focus:border-neutral-750 transition-all font-mono"
+                  />
+                </div>
+
+                {/* Admin items list */}
+                <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1 font-sans">
+                  {catalog
+                    .filter(item => {
+                      const q = adminSearchQuery.toLowerCase();
+                      return item.model.toLowerCase().includes(q) || item.color.toLowerCase().includes(q);
+                    })
+                    .map((item) => (
+                      <div 
+                        key={item.id}
+                        className={`flex items-center justify-between p-2.5 rounded-xl border transition-all ${
+                          editingItem?.id === item.id 
+                            ? "bg-neutral-900 border-[#2563eb]" 
+                            : "bg-neutral-950/60 hover:bg-neutral-900/80 border-neutral-850"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="w-8 h-8 rounded-full bg-black/40 border border-neutral-950 flex items-center justify-center shrink-0 overflow-hidden">
+                            <BallVisual 
+                              color={item.color} 
+                              model={item.model} 
+                              size="sm" 
+                              className="!w-8 !h-8 shadow-none border-none" 
+                              customImage={item.customImage} 
+                            />
+                          </span>
+                          <div className="truncate">
+                            <div className="flex items-center gap-1.5">
+                              <h5 className="font-bold text-xs text-white truncate max-w-[120px] md:max-w-[160px]">
+                                {item.model}
+                              </h5>
+                            </div>
+                            <p className="text-[10px] text-neutral-400 truncate mt-0.5 flex flex-wrap gap-x-2 items-center">
+                              <span className="font-medium text-neutral-300">{item.color}</span>
+                              {item.notes && (
+                                <>
+                                  <span className="text-neutral-600 font-mono select-none">•</span>
+                                  <span className="text-neutral-400 italic text-[10px] truncate max-w-[150px] md:max-w-[280px]" title={item.notes}>
+                                    {item.notes}
+                                  </span>
+                                </>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0 ml-2">
+                          {deleteConfirmId === item.id ? (
+                            <div className="flex items-center gap-1 bg-rose-950/40 border border-rose-900/60 rounded-md p-0.5 animate-pulse">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  handleDeleteCatalogItem(item.id);
+                                  setDeleteConfirmId(null);
+                                }}
+                                className="py-1 px-1.5 text-[8px] font-mono font-black uppercase text-rose-400 hover:text-white rounded transition-all cursor-pointer"
+                                title="Confirm delete specification template"
+                              >
+                                Delete?
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeleteConfirmId(null)}
+                                className="px-1 text-[9px] text-neutral-400 hover:text-white rounded transition-all cursor-pointer font-bold"
+                                title="Cancel"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setShowXlsImporter(false); // force switch to form
+                                  setEditingItem(item);
+                                  // Smoothly scroll to top of database panel inside the modal
+                                  const el = document.getElementById("register-missing-database-panel");
+                                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                                }}
+                                className="p-1 px-2 rounded-md bg-neutral-900 hover:bg-neutral-800 border border-neutral-850 hover:border-neutral-750 text-[#2563eb] hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black shrink-0 cursor-pointer"
+                                title="Edit Entry Specs"
+                              >
+                                <Pencil size={11} />
+                                <span>Edit</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeleteConfirmId(item.id)}
+                                className="p-1 rounded-md bg-neutral-900 hover:bg-rose-950/50 border border-neutral-850 hover:border-rose-900 text-neutral-555 hover:text-rose-455 transition-colors cursor-pointer"
+                                title="Delete Specification"
+                              >
+                                <Trash2 size={11} />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+
+                  {catalog.length === 0 ? (
+                    <div className="py-8 px-4 text-center border border-dashed border-neutral-850 rounded-xl bg-neutral-950/10 text-neutral-500 text-xs">
+                      Ball Vault templates list is empty. Create some above or use Excel Bulk Import!
+                    </div>
+                  ) : (
+                    catalog.filter(item => {
+                      const q = adminSearchQuery.toLowerCase();
+                      return item.model.toLowerCase().includes(q) || item.color.toLowerCase().includes(q);
+                    }).length === 0 && (
+                      <div className="py-6 text-center border border-dashed border-neutral-850 rounded-xl bg-neutral-950/10 text-neutral-500 text-xs">
+                        No templates match "{adminSearchQuery}"
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Manager Modal */}
+      {isUserManagerOpen && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center p-5 border-b border-neutral-800 bg-neutral-950/60">
+              <div>
+                <h2 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#2563eb]"></span>
+                  User Manager
+                </h2>
+                <p className="text-[10px] text-neutral-400 mt-0.5 font-mono">
+                  Manage registered user accounts, edit profiles, and view/edit locker bags.
+                </p>
+              </div>
+              <button 
+                onClick={() => {
+                  setIsUserManagerOpen(false);
+                  setEditingUserId(null);
+                }}
+                className="text-neutral-400 hover:text-white p-1 hover:bg-neutral-800 rounded-lg transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto flex-grow space-y-6">
+              {isLoadingUsers ? (
+                <div className="py-12 text-center text-neutral-500 font-mono text-xs flex flex-col items-center justify-center gap-2">
+                  <RefreshCw className="animate-spin text-[#2563eb] w-6 h-6" />
+                  <span>Querying user accounts...</span>
+                </div>
+              ) : usersError ? (
+                <div className="py-6 text-center text-rose-400 bg-rose-950/20 border border-rose-900/40 rounded-xl font-mono text-xs p-4">
+                  <AlertTriangle className="w-6 h-6 mx-auto mb-2 text-rose-500" />
+                  <span>{usersError}</span>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="text-[10px] font-mono text-neutral-500 uppercase flex justify-between items-center">
+                    <span>Registered Accounts ({usersList.length})</span>
+                    <button onClick={fetchUsers} className="text-[#2563eb] hover:underline flex items-center gap-1 cursor-pointer">
+                      <RefreshCw size={10} /> Reload
+                    </button>
+                  </div>
+
+                  <div className="space-y-3 max-h-[550px] overflow-y-auto pr-1">
+                    {[...usersList].sort((a, b) => {
+                      const isSelfA = (a.uid || a.id) === currentUser?.uid;
+                      const isSelfB = (b.uid || b.id) === currentUser?.uid;
+                      if (isSelfA && !isSelfB) return -1;
+                      if (!isSelfA && isSelfB) return 1;
+                      
+                      const roleA = a.role || "User";
+                      const roleB = b.role || "User";
+                      if (roleA === "Admin" && roleB !== "Admin") return -1;
+                      if (roleA !== "Admin" && roleB === "Admin") return 1;
+                      
+                      const nameA = (a.displayName || a.name || "").trim().toLowerCase();
+                      const nameB = (b.displayName || b.name || "").trim().toLowerCase();
+                      if (nameA < nameB) return -1;
+                      if (nameA > nameB) return 1;
+                      
+                      const userA = (a.username || "").trim().toLowerCase();
+                      const userB = (b.username || "").trim().toLowerCase();
+                      if (userA < userB) return -1;
+                      if (userA > userB) return 1;
+                      
+                      const idA = a.uid || a.id || "";
+                      const idB = b.uid || b.id || "";
+                      return idA.localeCompare(idB);
+                    }).map((user) => {
+                      const userUid = user.uid || user.id;
+                      const isSelf = userUid === currentUser?.uid;
+                      const isEditing = editingUserId === userUid;
+
+                      if (isEditing) {
+                        return (
+                          <div key={userUid} className="bg-neutral-900 border border-[#2563eb] rounded-xl p-4 space-y-4 font-mono text-xs">
+                            <div className="flex items-center gap-3 border-b border-neutral-800 pb-3">
+                              <AvatarRenderer avatarUrl={editAvatarUrl} name={editName} size="md" color={editColor} />
+                              <div>
+                                <span className="text-white font-bold block">Editing User Profile</span>
+                                <span className="text-neutral-555 text-[10px]">ID: {userUid}</span>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-[9px] uppercase text-neutral-400 mb-1">Display Name</label>
+                                <input
+                                  type="text"
+                                  value={editName}
+                                  onChange={(e) => setEditName(e.target.value)}
+                                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none"
+                                  placeholder="Name"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[9px] uppercase text-neutral-400 mb-1">Username</label>
+                                <input
+                                  type="text"
+                                  value={editUsername}
+                                  onChange={(e) => setEditUsername(e.target.value)}
+                                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none"
+                                  placeholder="username"
+                                />
+                              </div>
+                            </div>
+
+                            {/* System Role + Email Address */}
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-[9px] uppercase text-neutral-400 mb-1">System Role</label>
+                                <select
+                                  value={editRole}
+                                  onChange={(e) => setEditRole(e.target.value as "Admin" | "User")}
+                                  disabled={isSelf}
+                                  className="w-full bg-neutral-950 text-neutral-300 border border-neutral-800 rounded-lg p-2 text-xs focus:border-[#2563eb] outline-none cursor-pointer disabled:opacity-50"
+                                >
+                                  <option value="User">User</option>
+                                  <option value="Admin">Admin</option>
+                                </select>
+                                {isSelf && <span className="text-[8px] text-amber-500 mt-1 block font-bold">You cannot demote yourself</span>}
+                              </div>
+                              <div>
+                                <label className="block text-[9px] uppercase text-neutral-400 mb-1">Email Address</label>
+                                <input
+                                  type="email"
+                                  value={editEmail}
+                                  onChange={(e) => setEditEmail(e.target.value)}
+                                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none"
+                                  placeholder="email@domain.com"
+                                />
+                              </div>
+                            </div>
+
+                            {/* New Password + Confirm Password */}
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-[9px] uppercase text-neutral-400 mb-1">New Password</label>
+                                <div className="relative">
+                                  <input
+                                    type="password"
+                                    value={editPassword}
+                                    onChange={(e) => setEditPassword(e.target.value)}
+                                    onFocus={() => setEditPasswordFocused(true)}
+                                    onBlur={() => setTimeout(() => setEditPasswordFocused(false), 200)}
+                                    className={`w-full bg-neutral-950 border rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none ${editPassword && editPasswordConfirm && editPassword !== editPasswordConfirm ? "border-red-600" : "border-neutral-800"}`}
+                                    placeholder="Leave blank to keep"
+                                  />
+                                  {editPasswordFocused && (
+                                    <div className="absolute z-20 left-0 right-0 mt-1 bg-neutral-950 border border-neutral-800 rounded-xl p-3 shadow-2xl space-y-1.5 font-mono text-[9px] text-left">
+                                      <div className="text-[8px] uppercase text-neutral-500 font-bold mb-1">Password Requirements:</div>
+                                      <div className="flex items-center gap-1.5">
+                                        <span className={editPassword.length >= 8 ? "text-emerald-400 font-bold" : "text-neutral-600"}>
+                                          {editPassword.length >= 8 ? "✓" : "○"}
+                                        </span>
+                                        <span className={editPassword.length >= 8 ? "text-emerald-300" : "text-neutral-400"}>At least 8 characters</span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5">
+                                        <span className={/[A-Z]/.test(editPassword) ? "text-emerald-400 font-bold" : "text-neutral-600"}>
+                                          {/[A-Z]/.test(editPassword) ? "✓" : "○"}
+                                        </span>
+                                        <span className={/[A-Z]/.test(editPassword) ? "text-emerald-300" : "text-neutral-400"}>One uppercase letter</span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5">
+                                        <span className={/[a-z]/.test(editPassword) ? "text-emerald-400 font-bold" : "text-neutral-600"}>
+                                          {/[a-z]/.test(editPassword) ? "✓" : "○"}
+                                        </span>
+                                        <span className={/[a-z]/.test(editPassword) ? "text-emerald-300" : "text-neutral-400"}>One lowercase letter</span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5">
+                                        <span className={/[0-9]/.test(editPassword) ? "text-emerald-400 font-bold" : "text-neutral-600"}>
+                                          {/[0-9]/.test(editPassword) ? "✓" : "○"}
+                                        </span>
+                                        <span className={/[0-9]/.test(editPassword) ? "text-emerald-300" : "text-neutral-400"}>One number</span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5">
+                                        <span className={/[!@#$%^&*(),.?":{}|<>]/.test(editPassword) ? "text-emerald-400 font-bold" : "text-neutral-600"}>
+                                          {/[!@#$%^&*(),.?":{}|<>]/.test(editPassword) ? "✓" : "○"}
+                                        </span>
+                                        <span className={/[!@#$%^&*(),.?":{}|<>]/.test(editPassword) ? "text-emerald-300" : "text-neutral-400"}>One special character</span>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <div>
+                                <label className="block text-[9px] uppercase text-neutral-400 mb-1">Confirm Password</label>
+                                <div className="relative">
+                                  <input
+                                    type="password"
+                                    value={editPasswordConfirm}
+                                    onChange={(e) => setEditPasswordConfirm(e.target.value)}
+                                    className={`w-full bg-neutral-950 border rounded-lg p-2 text-xs focus:border-[#2563eb] outline-none pr-7 ${
+                                      editPasswordConfirm && editPassword !== editPasswordConfirm
+                                        ? "border-red-600 text-red-400"
+                                        : editPasswordConfirm && editPassword === editPasswordConfirm && editPassword
+                                        ? "border-emerald-600 text-white"
+                                        : "border-neutral-800 text-white"
+                                    }`}
+                                    placeholder="Re-enter password"
+                                  />
+                                  {editPasswordConfirm && (
+                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] font-bold">
+                                      {editPassword === editPasswordConfirm
+                                        ? <span className="text-emerald-400">✓</span>
+                                        : <span className="text-red-500">✗</span>
+                                      }
+                                    </div>
+                                  )}
+                                </div>
+                                {editPasswordConfirm && editPassword !== editPasswordConfirm && (
+                                  <span className="text-[8px] text-red-500 mt-0.5 block">Passwords do not match</span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Profile Picture + Accent Color side by side */}
+                            <div className="grid grid-cols-2 gap-3">
+                              {/* Profile Picture */}
+                              <div>
+                                <label className="block text-[9px] uppercase text-neutral-400 mb-1">Profile Picture</label>
+                                <div className="grid grid-cols-4 gap-1.5 bg-neutral-950 border border-neutral-800 p-2 rounded-lg">
+                                  {["preset-1", "preset-2", "preset-3", "preset-4", "preset-5", "preset-6", "preset-7", "preset-8"].map((presetId) => (
+                                    <button
+                                      key={presetId}
+                                      type="button"
+                                      onClick={() => setEditAvatarUrl(presetId)}
+                                      className="p-0.5 rounded-full relative flex items-center justify-center transition-all hover:scale-105 active:scale-95 border border-transparent shrink-0"
+                                      style={{
+                                        boxShadow: editAvatarUrl === presetId ? `0 0 6px ${editColor}` : "none",
+                                        borderColor: editAvatarUrl === presetId ? "rgba(255,255,255,0.4)" : "transparent"
+                                      }}
+                                    >
+                                      <AvatarRenderer avatarUrl={presetId} name={editName || "VV"} size="sm" color={editColor} />
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Accent Color — 2 rows of 5 */}
+                              <div>
+                                <label className="block text-[9px] uppercase text-neutral-400 mb-1">Accent Color</label>
+                                <div className="bg-neutral-950 border border-neutral-800 p-2 rounded-lg">
+                                  <div className="grid grid-cols-5 gap-1.5">
+                                    {ACCENT_COLORS.slice(0, 5).map(c => (
+                                      <button
+                                        key={c.value}
+                                        type="button"
+                                        onClick={() => setEditColor(c.value)}
+                                        className="w-6 h-6 rounded-full border border-transparent transition-transform hover:scale-110 active:scale-95 mx-auto block cursor-pointer"
+                                        style={{
+                                          backgroundColor: c.value,
+                                          boxShadow: editColor.toLowerCase() === c.value.toLowerCase() ? `0 0 6px ${c.value}` : "none",
+                                          borderColor: editColor.toLowerCase() === c.value.toLowerCase() ? "white" : "transparent"
+                                        }}
+                                        title={c.name}
+                                      />
+                                    ))}
+                                  </div>
+                                  <div className="grid grid-cols-5 gap-1.5 mt-1.5">
+                                    {ACCENT_COLORS.slice(5).map(c => (
+                                      <button
+                                        key={c.value}
+                                        type="button"
+                                        onClick={() => setEditColor(c.value)}
+                                        className="w-6 h-6 rounded-full border border-transparent transition-transform hover:scale-110 active:scale-95 mx-auto block cursor-pointer"
+                                        style={{
+                                          backgroundColor: c.value,
+                                          boxShadow: editColor.toLowerCase() === c.value.toLowerCase() ? `0 0 6px ${c.value}` : "none",
+                                          borderColor: editColor.toLowerCase() === c.value.toLowerCase() ? "white" : "transparent"
+                                        }}
+                                        title={c.name}
+                                      />
+                                    ))}
+                                    {/* Custom Color Picker */}
+                                    {(() => {
+                                      const isPreset = ACCENT_COLORS.some(c => c.value.toLowerCase() === editColor.toLowerCase());
+                                      return (
+                                        <div 
+                                          className="w-6 h-6 rounded-full border relative flex items-center justify-center transition-all cursor-pointer hover:scale-110 active:scale-95 overflow-hidden mx-auto"
+                                          style={{ 
+                                            backgroundColor: isPreset ? "#1e1e1e" : editColor,
+                                            borderColor: !isPreset ? "#ffffff" : "rgba(255,255,255,0.1)",
+                                            boxShadow: !isPreset ? `0 0 6px ${editColor}` : "none"
+                                          }}
+                                          title="Custom Color Picker"
+                                        >
+                                          <input 
+                                            type="color" 
+                                            value={isPreset ? "#2563eb" : editColor}
+                                            onChange={(e) => setEditColor(e.target.value)}
+                                            className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                                          />
+                                          {isPreset ? (
+                                            <Palette size={9} className="text-neutral-400" />
+                                          ) : (
+                                            <Check size={9} className="text-black font-black" />
+                                          )}
+                                        </div>
+                                      );
+                                    })()}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex gap-2 justify-end pt-2 border-t border-neutral-800">
+                              <button
+                                type="button"
+                                onClick={() => setEditingUserId(null)}
+                                className="px-3 py-1.5 bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer text-[10px]"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  if (editPassword && editPassword !== editPasswordConfirm) {
+                                    alert("Passwords do not match. Please confirm the password correctly.");
+                                    return;
+                                  }
+                                  const success = await handleUpdateUser(userUid, {
+                                    displayName: editName,
+                                    username: editUsername,
+                                    role: editRole,
+                                    preferredColor: editColor,
+                                    avatarUrl: editAvatarUrl,
+                                    email: editEmail,
+                                    password: editPassword
+                                  });
+                                  if (success) {
+                                    setEditingUserId(null);
+                                    setEditPasswordConfirm("");
+                                  }
+                                }}
+                                className="px-3 py-1.5 bg-[#2563eb] hover:bg-[#b5e000] text-black font-extrabold rounded-lg transition-all cursor-pointer text-[10px]"
+                              >
+                                Save Settings
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div 
+                          key={userUid}
+                          className="bg-neutral-950/60 border border-neutral-850 hover:border-neutral-750 p-3 rounded-xl flex items-center justify-between gap-3 transition-all"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <AvatarRenderer avatarUrl={user.avatarUrl} name={user.displayName || user.name || "User"} size="md" color={user.preferredColor || "#2563eb"} />
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-white text-xs truncate max-w-[130px]">{user.displayName || user.name || "User"}</span>
+                                {isSelf && (
+                                  <span className="text-[7.5px] font-mono text-[#2563eb] px-1 bg-[#2563eb]/10 border border-[#2563eb]/25 rounded uppercase">
+                                    Self
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[9.5px] text-neutral-500 font-mono flex flex-wrap gap-x-1.5 items-center">
+                                {user.username && (
+                                  <span className="text-neutral-400">@{user.username}</span>
+                                )}
+                                {user.email && (
+                                  <>
+                                    <span className="text-neutral-700 select-none">•</span>
+                                    <span className="truncate max-w-[120px]">{user.email}</span>
+                                  </>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1.5 mt-1">
+                                {user.role === "Admin" ? (
+                                  <span className="px-1 py-0.2 rounded border border-[#2563eb]/30 text-[#2563eb] bg-[#2563eb]/10 text-[8px] uppercase tracking-wider font-bold font-mono">
+                                    Admin
+                                  </span>
+                                ) : (
+                                  <span className="px-1 py-0.2 rounded border border-neutral-800 text-neutral-400 bg-neutral-900/40 text-[8px] uppercase tracking-wider font-bold font-mono">
+                                    User
+                                  </span>
+                                )}
+                                <div className="flex items-center gap-1">
+                                  <span className="text-[8px] text-neutral-600 font-mono">Accent:</span>
+                                  <span className="w-2.5 h-2.5 rounded-full border border-white/10" style={{ backgroundColor: user.preferredColor || "#2563eb" }}></span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleViewUserBag(user)}
+                              className="p-1 px-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-750 text-neutral-355 hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black cursor-pointer"
+                              title="View & Edit Bag"
+                            >
+                              <ShoppingBag size={10} />
+                              <span>Show Bag</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => startEditingUser(user)}
+                              className="p-1 px-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-750 text-[#2563eb] hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black cursor-pointer"
+                              title="Edit User Settings"
+                            >
+                              <Pencil size={10} />
+                              <span>Edit</span>
+                            </button>
+                            {!isSelf && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setDeletingUserId(userUid);
+                                }}
+                                className="p-1.5 rounded-lg bg-neutral-900 hover:bg-rose-950/50 border border-neutral-800 hover:border-rose-900 text-neutral-555 hover:text-rose-455 transition-colors cursor-pointer"
+                                title="Delete User"
+                              >
+                                <Trash2 size={10} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Styled Deletion Confirmation Modal */}
+      {deletingUserId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-neutral-900 border border-rose-950/50 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 space-y-6 animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-sm font-black text-rose-400 uppercase tracking-wider flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-rose-500" />
+              Confirm Delete User
+            </h3>
+            <p className="text-xs text-neutral-350 font-mono leading-relaxed">
+              Are you absolutely sure you want to delete user <span className="text-white font-bold font-sans">
+                {usersList.find(u => (u.uid || u.id) === deletingUserId)?.displayName || "this user"}
+              </span>? This will also purge their custom specifications and locker storage permanently.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => setDeletingUserId(null)}
+                className="px-4 py-2 bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-all cursor-pointer text-xs font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  handleDeleteUser(deletingUserId);
+                  setDeletingUserId(null);
+                }}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-extrabold rounded-xl transition-all cursor-pointer text-xs uppercase tracking-wider"
+              >
+                Confirm Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
        {/* Toast Notification */}
        {toast && (

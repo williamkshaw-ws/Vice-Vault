@@ -192,9 +192,6 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
                   value={pkgType === 'box' ? "" : customNumberInput}
                   onChange={(e) => {
                     const val = e.target.value.replace(/[^0-9]/g, "");
-                    if (val !== "" && !["1", "2", "3", "4"].includes(val.charAt(0))) {
-                      return;
-                    }
                     setCustomNumberInput(val);
                     if (val === "") {
                       setPlayNumber(1);
