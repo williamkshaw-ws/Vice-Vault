@@ -405,8 +405,8 @@ async function cleanDatabaseFields() {
       }
     }
     
-    // Seed default locker if missing or empty
-    if (!data.balls || !Array.isArray(data.balls) || data.balls.length === 0) {
+    // Seed default locker if missing or empty or for admin/user default accounts
+    if (u.uid === "admin" || u.uid === "user" || !data.balls || !Array.isArray(data.balls) || data.balls.length === 0) {
       data.balls = [...DEFAULT_LOCKER];
       console.log(`Seeding default locker for local user ${u.uid}`);
     } else {
@@ -547,7 +547,7 @@ async function cleanDatabaseFields() {
 
         let currentBalls = item.lockerBalls || (lockerSnap.exists ? lockerSnap.data()?.balls : null);
         
-        if (!currentBalls || !Array.isArray(currentBalls) || currentBalls.length === 0) {
+        if (item.docId === "u-admin" || item.docId === "u-user" || !currentBalls || !Array.isArray(currentBalls) || currentBalls.length === 0) {
           console.log(`Seeding default Firestore locker for user: ${item.docId}`);
           await lockerRef.set({ balls: DEFAULT_LOCKER });
         } else {

@@ -1,5 +1,11 @@
 [
   {
+    "id": "ABBA-TEST",
+    "notes": "test",
+    "model": "ABBA",
+    "color": "Test"
+  },
+  {
     "id": "DRIVE-WHITE",
     "notes": "Maximum core energy & indestructible distance",
     "color": "WHITE",
@@ -9,9 +15,9 @@
   {
     "id": "PRO-LIME_BLACK_DRIP_SPLATTER",
     "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/New-Ball-PDP-Pro-Drip-Lime-Front_1.png?v=1760629446",
-    "color": "Lime/Black Drip Splatter",
     "notes": "Optimized flight, premium spin & softest urethane feel",
-    "model": "PRO"
+    "model": "PRO",
+    "color": "LIME/BLACK DRIP SPLATTER"
   },
   {
     "id": "PRO-NEON_GLOSS_LIME",
@@ -32,7 +38,7 @@
     "notes": "Optimized flight, premium spin & softest urethane feel",
     "model": "PRO",
     "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/New-Ball-PDP-Pro-Drip-Red-Blue-Front.png?v=1760629724",
-    "color": "Red/Blue Drip Splatter"
+    "color": "RED/BLUE DRIP SPLATTER"
   },
   {
     "id": "PRO-SHINING_HUE_BLUE",

@@ -195,6 +195,22 @@ export default function App() {
     return (localStorage.getItem("vice_vault_theme") as 'light' | 'dark' | 'system') || "system";
   });
 
+  // Toast state for beautiful UI notifications matching site theme
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+  const showToast = (message: string, type: "success" | "error" = "success") => {
+    setToast({ message, type });
+  };
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => {
+        setToast(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   // Firebase Auth & Cloud Sync states
   const [currentUser, setCurrentUser] = useState<any | null>(null);
   const [userProfile, setUserProfile] = useState<{ displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string } | null>(null);
@@ -208,7 +224,23 @@ export default function App() {
   // State for tracked owned balls
   const [balls, setBalls] = useState<GolfBall[]>(() => {
     const saved = localStorage.getItem("vice_vault_balls");
-    return saved ? JSON.parse(saved) : INITIAL_OWNED_BALLS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const hasOldMock = parsed.some((b: any) => 
+            b.id.includes("PRO_PLUS-RED_BLUE_DRIP_SPLATTER") || 
+            b.id.includes("PRO_SOFT-NEON_GLOSS_RED")
+          );
+          if (!hasOldMock) {
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to parse saved balls:", e);
+      }
+    }
+    return INITIAL_OWNED_BALLS;
   });
 
   // State for searchable database catalog
@@ -782,11 +814,14 @@ export default function App() {
         const data = await res.json();
         throw new Error(data.error || "Failed to save user bag.");
       }
-      alert("User locker updated successfully!");
-      setSelectedUserForBag(null);
+      showToast("User bag inventory updated successfully!", "success");
+      setTimeout(() => {
+        setSelectedUserForBag(null);
+        window.location.reload();
+      }, 1200);
     } catch (err: any) {
       console.error("Error saving user bag:", err);
-      alert(err.message || "Failed to update user bag.");
+      showToast(err.message || "Failed to update user bag.", "error");
     }
   };
 
@@ -2617,6 +2652,18 @@ export default function App() {
                </button>
              </div>
            </div>
+         </div>
+       )}
+
+       {/* Toast Notification */}
+       {toast && (
+         <div className={`fixed bottom-5 right-5 z-[100] px-4 py-3 rounded-xl border shadow-xl flex items-center gap-2.5 font-mono text-xs animate-fade-in ${
+           toast.type === 'success' 
+             ? 'bg-neutral-900 border-emerald-900 text-emerald-400' 
+             : 'bg-rose-950/80 border-rose-900 text-rose-300'
+         }`}>
+           <div className={`w-2 h-2 rounded-full ${toast.type === 'success' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500 animate-pulse'}`} />
+           <span>{toast.message}</span>
          </div>
        )}
 
