@@ -286,23 +286,7 @@ export default function App() {
         return;
       }
 
-      if (isFirebaseConfigured && db) {
-        const { doc, writeBatch } = await import("firebase/firestore");
-        const batch = writeBatch(db);
-        for (const item of filteredNewItems) {
-          const id = sanitizeId(item.model, item.color);
-          const docRef = doc(db, "catalog", id);
-          const itemData = {
-            model: item.model.trim(),
-            color: item.color.trim(),
-            notes: item.notes ? item.notes.trim() : "",
-            customImage: item.customImage || null
-          };
-          batch.set(docRef, itemData);
-          itemsWithIds.push({ id, ...itemData } as CatalogItem);
-        }
-        await batch.commit();
-      } else if (currentUser) {
+      if (currentUser) {
         for (const item of filteredNewItems) {
           const res = await fetch("/api/catalog", {
             method: "POST",
@@ -352,20 +336,7 @@ export default function App() {
       const updatedColor = (updatedFields.color !== undefined ? updatedFields.color.trim() : originalItem.color);
       const newId = sanitizeId(updatedModel, updatedColor);
 
-      if (isFirebaseConfigured && db) {
-        const { doc, setDoc, deleteDoc } = await import("firebase/firestore");
-        const docData = {
-          model: updatedModel,
-          color: updatedColor,
-          notes: updatedFields.notes !== undefined ? updatedFields.notes.trim() : (originalItem.notes || ""),
-          customImage: updatedFields.customImage !== undefined ? updatedFields.customImage : (originalItem.customImage || null)
-        };
-        
-        if (newId !== id) {
-          await deleteDoc(doc(db, "catalog", id));
-        }
-        await setDoc(doc(db, "catalog", newId), docData);
-      } else if (currentUser) {
+      if (currentUser) {
         const res = await fetch(`/api/catalog/${id}`, {
           method: "PUT",
           headers: {
@@ -422,10 +393,7 @@ export default function App() {
   // Safe removal of registered catalog templates
   const handleDeleteCatalogItem = async (id: string) => {
     try {
-      if (isFirebaseConfigured && db) {
-        const { doc, deleteDoc } = await import("firebase/firestore");
-        await deleteDoc(doc(db, "catalog", id));
-      } else if (currentUser) {
+      if (currentUser) {
         const res = await fetch(`/api/catalog/${id}`, {
           method: "DELETE",
           headers: {
@@ -755,12 +723,12 @@ export default function App() {
       return;
     }
 
-    if (!isFirebaseConfigured || !auth || currentUser?.isMock) {
+    if (currentUser) {
       try {
         const res = await fetch(`/api/users/${userId}`, {
           method: "DELETE",
           headers: {
-            "x-user-id": currentUser?.uid || ""
+            "x-user-id": currentUser.uid
           }
         });
         const data = await res.json();
@@ -771,16 +739,6 @@ export default function App() {
         setUsersList(prev => prev.filter(u => u.uid !== userId && u.id !== userId));
       } catch (err: any) {
         alert(err.message || "Error deleting user");
-      }
-    } else {
-      try {
-        const { doc, deleteDoc } = await import("firebase/firestore");
-        if (db) {
-          await deleteDoc(doc(db, "users", userId));
-          setUsersList(prev => prev.filter(u => u.uid !== userId && u.id !== userId));
-        }
-      } catch (err: any) {
-        alert(err.message || "Error deleting user from Firestore");
       }
     }
   };
@@ -941,22 +899,7 @@ export default function App() {
       }
 
       let itemWithId: CatalogItem;
-      if (isFirebaseConfigured && db) {
-        itemWithId = {
-          id,
-          model: newItem.model.trim(),
-          color: newItem.color.trim(),
-          notes: newItem.notes ? newItem.notes.trim() : "",
-          customImage: newItem.customImage || null
-        };
-        const { doc, setDoc } = await import("firebase/firestore");
-        await setDoc(doc(db, "catalog", id), {
-          model: newItem.model.trim(),
-          color: newItem.color.trim(),
-          notes: newItem.notes ? newItem.notes.trim() : "",
-          customImage: newItem.customImage || null
-        });
-      } else if (currentUser) {
+      if (currentUser) {
         const res = await fetch("/api/catalog", {
           method: "POST",
           headers: {
@@ -1036,13 +979,7 @@ export default function App() {
   // Wipe entire Catalog templates list
   const handleDeleteAllCatalog = async () => {
     try {
-      if (isFirebaseConfigured && db) {
-        const { doc, deleteDoc } = await import("firebase/firestore");
-        // Delete all current items in local catalog state from the DB.
-        for (const item of catalog) {
-          await deleteDoc(doc(db, "catalog", item.id));
-        }
-      } else if (currentUser) {
+      if (currentUser) {
         for (const item of catalog) {
           await fetch(`/api/catalog/${item.id}`, {
             method: "DELETE",
