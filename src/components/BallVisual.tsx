@@ -42,7 +42,7 @@ export default function BallVisual({
   if (customImage) {
     return (
       <div 
-        className={`relative inline-flex items-center justify-center rounded-full aspect-square border shadow-md select-none overflow-hidden ${sizeClasses[size]} ${className}`}
+        className={`relative inline-flex items-center justify-center rounded-full aspect-square border shadow-md select-none overflow-hidden shrink-0 ${sizeClasses[size]} ${className}`}
         id={`golfball-custom-${size}`}
         style={{
           boxShadow: size === "xl" 
@@ -320,7 +320,7 @@ export default function BallVisual({
 
   return (
     <div 
-      className={`relative inline-flex items-center justify-center rounded-full aspect-square border shadow-md select-none overflow-hidden ${sizeClasses[size]} ${className}`}
+      className={`relative inline-flex items-center justify-center rounded-full aspect-square border shadow-md select-none overflow-hidden shrink-0 ${sizeClasses[size]} ${className}`}
       style={{ 
         background: config.bg,
         boxShadow: size === "xl" 

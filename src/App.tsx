@@ -318,6 +318,25 @@ export default function App() {
   // Toggle for Spreadsheet bulk importer in admin
   const [showXlsImporter, setShowXlsImporter] = useState(false);
 
+  // Prevent background scrolling when a modal overlay is open
+  useEffect(() => {
+    const isAnyModalOpen = !!(
+      isUserManagerOpen ||
+      isVaultManagerOpen ||
+      selectedUserForBag ||
+      authModalOpen ||
+      deletingUserId
+    );
+    if (isAnyModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isUserManagerOpen, isVaultManagerOpen, selectedUserForBag, authModalOpen, deletingUserId]);
+
   // Add multiple catalog items from Excel/Spreadsheet import
   const handleXlsImportCatalogItems = async (newItems: Omit<CatalogItem, "id">[]) => {
     try {
@@ -1910,7 +1929,7 @@ export default function App() {
                         const displayQty = Math.max(1, Math.round(ball.quantity / pkgUnit));
 
                         return (
-                          <div key={ball.id} className="bg-neutral-950 border border-neutral-850 p-3 rounded-xl flex items-center justify-between gap-3 text-xs font-mono">
+                          <div key={ball.id} className="bg-neutral-950 border border-neutral-850 p-3 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
                             <div className="flex items-center gap-3">
                               <BallVisual color={ball.color} model={ball.model} size="sm" />
                               <div>
@@ -1919,7 +1938,7 @@ export default function App() {
                               </div>
                             </div>
                             
-                            <div className="flex items-center gap-3">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-end border-t border-neutral-900/60 pt-2 sm:border-t-0 sm:pt-0">
                               {/* Qty Stepper */}
                               <div className="flex items-center bg-neutral-900 border border-neutral-800 rounded-lg p-0.5">
                                 <button
