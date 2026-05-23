@@ -354,27 +354,27 @@ export default function AuthModal({
 
     const finalAvatar = selectedPreset;
 
-    if (!isFirebaseConfigured || !auth) {
-      try {
-        const res = await fetch("/api/auth/signup", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            email,
-            password,
-            username: cleanUsername,
-            displayName: displayName.trim(),
-            avatarUrl: finalAvatar,
-            preferredColor
-          })
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || "Failed to create account.");
-        }
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          username: cleanUsername,
+          displayName: displayName.trim(),
+          avatarUrl: finalAvatar,
+          preferredColor
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to create account.");
+      }
 
+      if (!isFirebaseConfigured || !auth) {
         localStorage.setItem("vice_vault_mock_user", JSON.stringify(data));
         setSuccessMsg("Local account created!");
         setTimeout(() => {
@@ -383,48 +383,16 @@ export default function AuthModal({
           setIsLoading(false);
         }, 1000);
         return;
-      } catch (err: any) {
-        setError(err.message || "Failed to create local account.");
-        setIsLoading(false);
-        return;
       }
-    }
 
-    try {
-      // Check if username is already taken on the backend server
-      const resolveRes = await fetch(`/api/auth/resolve-email?username=${encodeURIComponent(cleanUsername)}`);
-      if (resolveRes.ok) {
-        setError("This username is already taken. Please choose another username.");
-        setIsLoading(false);
-        return;
-      }
-    } catch (err) {
-      console.warn("Failed to check username availability, proceeding anyway:", err);
-    }
+      // Real Firebase environment: sign in the user client-side now that the server created their Auth/Firestore record
+      await signInWithEmailAndPassword(auth, email, password);
 
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // Update Firebase Profile displayName & photoURL
-      await updateProfile(user, { 
-        displayName: displayName,
-        photoURL: finalAvatar
-      });
-
-      // Save user record to firestore user settings
-      if (db) {
-        const userDocId = `u-${cleanUsername}`;
-        await setDoc(doc(db, "users", userDocId), {
-          uid: user.uid,
-          authUid: user.uid,
-          username: cleanUsername,
-          displayName: displayName,
-          role: cleanUsername === "admin" ? "Admin" : "User",
-          preferredColor: preferredColor,
-          avatarUrl: finalAvatar,
-          createdAt: new Date().toISOString(),
-          email: user.email || email
+      // Ensure client-side user profile displayName and photoURL match
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, { 
+          displayName: displayName.trim(),
+          photoURL: finalAvatar
         });
       }
 

@@ -50,7 +50,14 @@ async function checkLockerExists(uid) {
       });
     }
     const db = admin.firestore();
-    const doc = await db.collection("users").doc(uid).collection("data").doc("locker").get();
+    let docId = uid;
+    if (!uid.startsWith("u-")) {
+      const snap = await db.collection("users").where("uid", "==", uid).get();
+      if (!snap.empty) {
+        docId = snap.docs[0].id;
+      }
+    }
+    const doc = await db.collection("users").doc(docId).collection("data").doc("locker").get();
     return doc.exists;
   } else {
     const lockerPath = path.join(DATA_DIR, 'users_data', `${uid}.json`);
@@ -89,6 +96,20 @@ async function runTests() {
           credential: admin.credential.cert(serviceAccount)
         });
       }
+
+      // Clean up Firebase Auth users
+      for (const email of ['admin@vault.com', 'user@vault.com']) {
+        try {
+          const authUser = await admin.auth().getUserByEmail(email);
+          console.log(`Deleting Auth user: ${email} (${authUser.uid})`);
+          await admin.auth().deleteUser(authUser.uid);
+        } catch (authErr) {
+          if (authErr.code !== 'auth/user-not-found') {
+            console.error(`Error deleting Auth user ${email}:`, authErr);
+          }
+        }
+      }
+
       const db = admin.firestore();
       const snapshot = await db.collection("users").get();
       const deletePromises = [];
@@ -111,9 +132,9 @@ async function runTests() {
         }
       });
       await Promise.all(deletePromises);
-      console.log('Firestore user cleanup complete.');
+      console.log('Firestore and Auth user cleanup complete.');
     } catch (err) {
-      console.error('Error cleaning up Firestore users:', err);
+      console.error('Error cleaning up Firestore/Auth users:', err);
     }
   }
 

@@ -956,8 +956,25 @@ app.post("/api/auth/signup", async (req, res) => {
     return res.status(400).json({ error: "This username is already taken." });
   }
 
+  let authUid = `u-${cleanUsername}`;
+  if (isFirebaseAdminInitialized) {
+    try {
+      const userRecord = await admin.auth().createUser({
+        email: emailLower,
+        password: password,
+        displayName: displayName.trim()
+      });
+      authUid = userRecord.uid;
+      console.log(`Created Firebase Auth user for ${emailLower} with UID: ${authUid}`);
+    } catch (authErr: any) {
+      console.error("Failed to create Firebase Auth user:", authErr);
+      return res.status(400).json({ error: authErr.message || "Failed to create user in Firebase Auth." });
+    }
+  }
+
   const newUser: UserProfile = {
     uid: `u-${cleanUsername}`,
+    authUid: authUid,
     displayName: displayName.trim(),
     email: emailLower,
     password: hashPassword(password), // Store hashed password
@@ -972,14 +989,14 @@ app.post("/api/auth/signup", async (req, res) => {
 
   // Return the session user profile (without password)
   const clientUser = {
-    uid: newUser.uid,
+    uid: isFirebaseAdminInitialized ? authUid : newUser.uid,
     email: newUser.email,
     displayName: newUser.displayName,
     photoURL: newUser.avatarUrl,
     username: newUser.username,
     preferredColor: newUser.preferredColor,
     role: newUser.role,
-    isMock: true
+    isMock: !isFirebaseAdminInitialized
   };
 
   res.status(211).json(clientUser);

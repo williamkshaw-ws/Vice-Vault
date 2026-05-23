@@ -503,17 +503,25 @@ export default function App() {
               userDocId = fallbackDocId;
             }
 
-            // 2. Load inventory documents using the standard user doc ID
-            const lockerDoc = await getDoc(doc(db, "users", userDocId, "data", "locker"));
-
+            // 2. Load locker documents using the server API instead of client-side Firestore
+            const lockerRes = await fetch(`/api/users/${user.uid}/locker`);
             let finalBalls = balls;
-
-            if (lockerDoc.exists()) {
-              finalBalls = lockerDoc.data().balls || [];
-            } else {
-              await setDoc(doc(db, "users", userDocId, "data", "locker"), { balls });
+            if (lockerRes.ok) {
+              const lockerData = await lockerRes.json();
+              if (lockerData && lockerData.balls !== null) {
+                finalBalls = lockerData.balls;
+              } else {
+                // If locker doesn't exist on server, upload current client balls (migration of guest data)
+                await fetch(`/api/users/${user.uid}/locker`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "x-user-id": user.uid
+                  },
+                  body: JSON.stringify({ balls })
+                });
+              }
             }
-
             setBalls(finalBalls);
           }
         } catch (err) {
@@ -744,25 +752,19 @@ export default function App() {
   // Sync to localStorage, Firestore, or Express Server depending on login state
   useEffect(() => {
     if (currentUser && isCloudDataLoaded) {
-      if (currentUser.isMock) {
-        fetch(`/api/users/${currentUser.uid}/locker`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-user-id": currentUser.uid
-          },
-          body: JSON.stringify({ balls })
-        }).catch(err => console.error("Error writing locker to server:", err));
-      } else if (db) {
-        const username = userProfile?.username;
-        const docId = username ? `u-${username}` : currentUser.uid;
-        const lockerRef = doc(db, "users", docId, "data", "locker");
-        setDoc(lockerRef, { balls }).catch(err => console.error("Error writing locker to Firestore:", err));
-      }
+      // Sync locker via the backend server API for both mock and real Firebase users
+      fetch(`/api/users/${currentUser.uid}/locker`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": currentUser.uid
+        },
+        body: JSON.stringify({ balls })
+      }).catch(err => console.error("Error writing locker to server:", err));
     } else if (!currentUser) {
       localStorage.setItem("vice_vault_balls", JSON.stringify(balls));
     }
-  }, [balls, currentUser, isCloudDataLoaded, userProfile]);
+  }, [balls, currentUser, isCloudDataLoaded]);
 
 
 
