@@ -1,10 +1,10 @@
 [
   {
-    "id": "DRIVE-PURE_GLOSS_WHITE",
+    "id": "DRIVE-WHITE",
     "notes": "Maximum core energy & indestructible distance",
-    "model": "DRIVE",
+    "color": "WHITE",
     "customImage": "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Drive_White_Front_Zoom.jpg?v=1709810929",
-    "color": "Pure Gloss White"
+    "model": "DRIVE"
   },
   {
     "id": "PRO-LIME_BLACK_DRIP_SPLATTER",
@@ -23,16 +23,9 @@
   {
     "id": "PRO-NEON_GLOSS_RED",
     "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_neon_red_th_ecb9923b-f473-478e-bfa3-8fa1e5a76358.png?v=1711374486",
-    "color": "Neon Gloss Red",
     "notes": "Optimized flight, premium spin & softest urethane feel",
-    "model": "PRO"
-  },
-  {
-    "id": "PRO-PURE_GLOSS_WHITE",
-    "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_white_th_35dcf74c-c5a3-4467-aa5a-c9adf7b01bc0.png?v=1711374990",
-    "color": "Pure Gloss White",
-    "notes": "Optimized flight, premium spin & softest urethane feel",
-    "model": "PRO"
+    "model": "PRO",
+    "color": "NEON GLOSS RED"
   },
   {
     "id": "PRO-RED_BLUE_DRIP_SPLATTER",
@@ -47,6 +40,13 @@
     "model": "PRO",
     "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_ice_blue_frontalView.jpg?v=1774431946",
     "color": "Shining Hue Blue"
+  },
+  {
+    "id": "PRO-WHITE",
+    "notes": "Optimized flight, premium spin & softest urethane feel",
+    "color": "WHITE",
+    "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_white_th_35dcf74c-c5a3-4467-aa5a-c9adf7b01bc0.png?v=1711374990",
+    "model": "PRO"
   },
   {
     "id": "PRO-YELLOW_TEAL_DRIP_SPLATTER",

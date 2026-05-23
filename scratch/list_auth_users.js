@@ -14,20 +14,20 @@ if (fs.existsSync(serviceAccountPath)) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
   });
-  const auth = admin.auth();
-  auth.listUsers(1000)
-    .then(result => {
-      console.log("Firebase Auth Users:");
-      result.users.forEach(user => {
-        console.log(`- Email: ${user.email}, UID: ${user.uid}, CreatedAt: ${user.metadata.creationTime}`);
+  
+  admin.auth().listUsers(1000)
+    .then(listUsersResult => {
+      console.log("Current Users in Firebase Auth:");
+      listUsersResult.users.forEach(userRecord => {
+        console.log(`Email: ${userRecord.email}, UID: ${userRecord.uid}, DisplayName: ${userRecord.displayName}`);
       });
       process.exit(0);
     })
     .catch(err => {
-      console.error("Error listing Auth users:", err);
+      console.error("Error reading Auth users:", err);
       process.exit(1);
     });
 } else {
-  console.log("No service-account.json found");
+  console.log("No service-account.json found at", serviceAccountPath);
   process.exit(1);
 }
