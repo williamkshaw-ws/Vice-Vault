@@ -496,28 +496,10 @@ export default function App() {
                   email: profileData.email,
                   uid: profileData.uid
                 };
-                userDocId = `u-${profileData.username}`;
+                userDocId = profileData.uid.startsWith("u-") ? profileData.uid : `u-${profileData.username}`;
               }
             } catch (apiErr) {
-              console.error("Failed to fetch user profile from API, falling back to local query:", apiErr);
-            }
-          }
-
-          if (db && !userDocData) {
-            // Fallback query by uid if API is unreachable
-            const qUid = query(collection(db, "users"), where("uid", "==", user.uid));
-            const qUidSnap = await getDocs(qUid);
-            if (!qUidSnap.empty) {
-              userDocData = qUidSnap.docs[0].data();
-              userDocId = qUidSnap.docs[0].id;
-            } else if (user.email) {
-              // Try email backup
-              const qEmail = query(collection(db, "users"), where("email", "==", user.email.toLowerCase()));
-              const qEmailSnap = await getDocs(qEmail);
-              if (!qEmailSnap.empty) {
-                userDocData = qEmailSnap.docs[0].data();
-                userDocId = qEmailSnap.docs[0].id;
-              }
+              console.error("Failed to fetch user profile from API:", apiErr);
             }
           }
 
@@ -535,51 +517,22 @@ export default function App() {
               } as any);
               setAccentColor(userDocData.preferredColor || "#2563eb");
             } else {
-              // Auto-derive u-USERNAME and create a default profile doc in Firestore
+              console.warn("User profile data not resolved from backend API. Initializing basic fallback profile.");
               const rawUsername = user.displayName || user.email?.split("@")[0] || "user";
               const cleanUsername = rawUsername.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
-              const docId = `u-${cleanUsername}`;
-
-              // Check if username is already taken in users collection. If so, append suffix
-              let finalDocId = docId;
-              let suffix = 1;
-              let exists = true;
-              while (exists) {
-                const docSnap = await getDoc(doc(db, "users", finalDocId));
-                if (docSnap.exists()) {
-                  finalDocId = `${docId}_${suffix}`;
-                  suffix++;
-                } else {
-                  exists = false;
-                }
-              }
-
-              const derivedUsername = finalDocId.replace(/^u-/, "");
-              const defaultProfile = {
-                uid: user.uid,
-                authUid: user.uid,
-                displayName: user.displayName || derivedUsername,
-                username: derivedUsername,
+              const fallbackDocId = `u-${cleanUsername}`;
+              
+              setUserProfile({
+                displayName: user.displayName || cleanUsername,
+                username: cleanUsername,
                 avatarUrl: user.photoURL || "preset-1",
                 preferredColor: "#2563eb",
-                role: derivedUsername === "admin" ? "Admin" : "User",
+                role: cleanUsername === "admin" ? "Admin" : "User",
                 createdAt: new Date().toISOString(),
                 email: user.email || ""
-              };
-
-              await setDoc(doc(db, "users", finalDocId), defaultProfile);
-              
-              userDocId = finalDocId;
-              userDocData = defaultProfile;
-
-              setUserProfile({
-                displayName: defaultProfile.displayName,
-                username: defaultProfile.username,
-                avatarUrl: defaultProfile.avatarUrl,
-                preferredColor: defaultProfile.preferredColor,
-                role: defaultProfile.role as any
-              });
-              setAccentColor(defaultProfile.preferredColor);
+              } as any);
+              setAccentColor("#2563eb");
+              userDocId = fallbackDocId;
             }
 
             // 2. Load inventory documents using the standard user doc ID

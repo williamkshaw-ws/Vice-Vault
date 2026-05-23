@@ -1083,8 +1083,53 @@ app.post("/api/users/:uid/locker", async (req, res) => {
 // Fetch user profile details (Name, Username, avatarUrl, preferredColor, role)
 app.get("/api/users/:id/profile", async (req, res) => {
   const { id } = req.params;
+  const resolvedId = await resolveUserDocId(id);
   const users = await getUsersList();
-  const user = users.find(u => u.uid === id);
+  let user = users.find(u => u.uid === resolvedId);
+  
+  if (!user && isFirebaseAdminInitialized && dbAdmin && !id.startsWith("u-")) {
+    try {
+      const userRecord = await admin.auth().getUser(id);
+      const email = userRecord.email || "";
+      const displayName = userRecord.displayName || email.split("@")[0] || "user";
+      const cleanUsername = cleanUsernameString(displayName) || "user";
+      
+      // Generate a unique doc ID
+      let baseUsername = cleanUsername.toLowerCase();
+      let docId = `u-${baseUsername}`;
+      let suffix = 1;
+      while (users.some(u => u.uid === docId)) {
+        docId = `u-${baseUsername}_${suffix}`;
+        suffix++;
+      }
+
+      const derivedUsername = docId.substring(2);
+      const defaultProfile = {
+        uid: id,
+        authUid: id,
+        displayName: displayName,
+        username: derivedUsername,
+        avatarUrl: userRecord.photoURL || "preset-1",
+        preferredColor: "#2563eb",
+        role: derivedUsername === "admin" ? "Admin" : "User",
+        createdAt: new Date().toISOString(),
+        email: email
+      };
+
+      await dbAdmin.collection("users").doc(docId).set(defaultProfile);
+      await dbAdmin.collection("users").doc(docId).collection("data").doc("locker").set({ balls: [] });
+      console.log(`Auto-created Firestore profile document ${docId} and locker for Auth user ${id}`);
+      
+      user = {
+        ...defaultProfile,
+        uid: docId,
+        avatarUrl: defaultProfile.avatarUrl
+      } as any;
+    } catch (err: any) {
+      console.error(`Failed to auto-create profile for user ${id}:`, err);
+    }
+  }
+
   if (!user) {
     return res.status(404).json({ error: "User not found." });
   }
@@ -1096,7 +1141,7 @@ app.get("/api/users/:id/profile", async (req, res) => {
     username: user.username,
     preferredColor: user.preferredColor,
     role: user.role,
-    isMock: true
+    isMock: false
   };
   res.json(clientUser);
 });
@@ -1118,32 +1163,33 @@ app.patch("/api/users/:id/profile", async (req, res) => {
     return res.status(400).json({ error: "Username must contain letters, numbers, or underscores." });
   }
 
+  const resolvedId = await resolveUserDocId(id);
   const users = await getUsersList();
   
   // Find target user
-  const user = users.find(u => u.uid === id);
+  const user = users.find(u => u.uid === resolvedId);
   if (!user) {
     return res.status(404).json({ error: "User not found." });
   }
 
   // Check if username is already taken by someone else
   const usernameLower = cleanUsername.toLowerCase();
-  const usernameExists = users.some(u => u.uid !== id && u.username?.toLowerCase() === usernameLower);
+  const usernameExists = users.some(u => u.uid !== resolvedId && u.username?.toLowerCase() === usernameLower);
   if (usernameExists) {
     return res.status(400).json({ error: "This username is already taken by another account." });
   }
 
   // Update profile fields
   user.displayName = displayName.trim();
-  const oldDocId = id;
-  let newDocId = id;
+  const oldDocId = resolvedId;
+  let newDocId = resolvedId;
   if (username !== undefined) {
     const cleanUsername = cleanUsernameString(username);
     if (!cleanUsername) {
       return res.status(400).json({ error: "Username must contain letters, numbers, or underscores." });
     }
     // Check if username is already taken by someone else
-    const usernameExists = users.some(u => u.uid !== id && u.username?.toLowerCase() === cleanUsername);
+    const usernameExists = users.some(u => u.uid !== resolvedId && u.username?.toLowerCase() === cleanUsername);
     if (usernameExists) {
       return res.status(400).json({ error: "This username is already taken by another account." });
     }
@@ -1316,8 +1362,9 @@ app.patch("/api/users/:id/role", async (req, res) => {
     return res.status(403).json({ error: "Unauthorized. Only administrators can change roles." });
   }
 
+  const resolvedId = await resolveUserDocId(id);
   const users = await getUsersList();
-  const targetUser = users.find(u => u.uid === id);
+  const targetUser = users.find(u => u.uid === resolvedId);
   if (!targetUser) {
     return res.status(404).json({ error: "User not found" });
   }
@@ -1337,8 +1384,10 @@ app.patch("/api/users/:id", async (req, res) => {
     return res.status(403).json({ error: "Access Denied. Only Admin users can update user details." });
   }
 
+  const resolvedId = await resolveUserDocId(id);
+  const resolvedActingId = await resolveUserDocId(actingUserId);
   const users = await getUsersList();
-  const targetUser = users.find(u => u.uid === id);
+  const targetUser = users.find(u => u.uid === resolvedId);
   if (!targetUser) {
     return res.status(404).json({ error: "User not found" });
   }
@@ -1355,7 +1404,7 @@ app.patch("/api/users/:id", async (req, res) => {
   }
 
   // Self-demotion check
-  if (id === actingUserId && normalizedRole !== undefined && normalizedRole !== "Admin") {
+  if (resolvedId === resolvedActingId && normalizedRole !== undefined && normalizedRole !== "Admin") {
     return res.status(400).json({ error: "Self-protection safeguard: You cannot demote yourself from Admin." });
   }
 
@@ -1366,15 +1415,15 @@ app.patch("/api/users/:id", async (req, res) => {
     targetUser.displayName = displayName.trim();
   }
 
-  const oldDocId = id;
-  let newDocId = id;
+  const oldDocId = resolvedId;
+  let newDocId = resolvedId;
   if (username !== undefined) {
     const cleanUsername = cleanUsernameString(username);
     if (!cleanUsername) {
       return res.status(400).json({ error: "Username must contain letters, numbers, or underscores." });
     }
     // Check if username is already taken by someone else
-    const usernameExists = users.some(u => u.uid !== id && u.username?.toLowerCase() === cleanUsername);
+    const usernameExists = users.some(u => u.uid !== resolvedId && u.username?.toLowerCase() === cleanUsername);
     if (usernameExists) {
       return res.status(400).json({ error: "This username is already taken by another account." });
     }
@@ -1505,13 +1554,16 @@ app.delete("/api/users/:id", async (req, res) => {
     return res.status(403).json({ error: "Access Denied. Only Admin users can delete user accounts." });
   }
 
+  const resolvedId = await resolveUserDocId(id);
+  const resolvedActingId = await resolveUserDocId(actingUserId);
+
   // Self-deletion check
-  if (id === actingUserId) {
+  if (resolvedId === resolvedActingId) {
     return res.status(400).json({ error: "Self-protection safeguard: You cannot delete your own admin account." });
   }
 
   const users = await getUsersList();
-  const targetUser = users.find(u => u.uid === id);
+  const targetUser = users.find(u => u.uid === resolvedId);
   if (!targetUser) {
     return res.status(404).json({ error: "User not found" });
   }
@@ -1530,7 +1582,7 @@ app.delete("/api/users/:id", async (req, res) => {
     }
   }
 
-  const success = await deleteUserFromDb(id);
+  const success = await deleteUserFromDb(resolvedId);
   if (!success) {
     return res.status(404).json({ error: "User not found" });
   }

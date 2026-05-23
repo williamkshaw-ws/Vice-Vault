@@ -23,10 +23,8 @@ service cloud.firestore {
     match /users/{userId} {
       // Allow user to get/write their own profile if they are logged in and their Auth UID matches the document's internal uid field
       allow read, write: if (request.auth != null && (
-        // For existing documents (read/update/delete)
-        (resource != null && resource.data.uid == request.auth.uid) ||
-        // For new/modified documents (create/write)
-        (request.resource != null && request.resource.data.uid == request.auth.uid)
+        (resource == null || resource.data.uid == request.auth.uid) &&
+        (request.resource == null || request.resource.data.uid == request.auth.uid)
       )) || isAdmin();
 
       // Rules for nested user collections (e.g., users/{userId}/data/locker)

@@ -391,6 +391,18 @@ export default function AuthModal({
     }
 
     try {
+      // Check if username is already taken on the backend server
+      const resolveRes = await fetch(`/api/auth/resolve-email?username=${encodeURIComponent(cleanUsername)}`);
+      if (resolveRes.ok) {
+        setError("This username is already taken. Please choose another username.");
+        setIsLoading(false);
+        return;
+      }
+    } catch (err) {
+      console.warn("Failed to check username availability, proceeding anyway:", err);
+    }
+
+    try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
