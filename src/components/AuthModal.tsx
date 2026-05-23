@@ -520,68 +520,35 @@ export default function AuthModal({
         }
       }
 
-      if (db) {
-        const oldUsername = userProfile?.username || currentUser.username || "";
-        const oldDocId = `u-${oldUsername}`;
-        const newDocId = `u-${cleanUsername}`;
+      const updateData: any = {
+        displayName: displayName.trim(),
+        username: cleanUsername,
+        avatarUrl: finalAvatar,
+        preferredColor: preferredColor
+      };
 
-        if (cleanUsername !== oldUsername && oldUsername) {
-          const oldDocRef = doc(db, "users", oldDocId);
-          const newDocRef = doc(db, "users", newDocId);
-
-          const newProfileData = {
-            uid: currentUser.uid,
-            authUid: currentUser.uid,
-            displayName: displayName.trim(),
-            username: cleanUsername,
-            avatarUrl: finalAvatar,
-            preferredColor: preferredColor,
-            role: userProfile?.role || "User",
-            createdAt: userProfile?.createdAt || new Date().toISOString(),
-            email: currentUser.email || userProfile?.email || ""
-          };
-
-          await setDoc(newDocRef, newProfileData);
-
-          const oldLockerRef = doc(db, "users", oldDocId, "data", "locker");
-          const newLockerRef = doc(db, "users", newDocId, "data", "locker");
-
-          const lockerSnap = await getDoc(oldLockerRef);
-          if (lockerSnap.exists()) {
-            await setDoc(newLockerRef, lockerSnap.data());
-          }
-
-          try {
-            await deleteDoc(oldLockerRef);
-          } catch (e) {
-            console.error("Failed to delete old locker subcollection:", e);
-          }
-          try {
-            await deleteDoc(oldDocRef);
-          } catch (e) {
-            console.error("Failed to delete old user document:", e);
-          }
-        } else {
-          const docId = `u-${cleanUsername}`;
-          await setDoc(doc(db, "users", docId), {
-            displayName: displayName.trim(),
-            username: cleanUsername,
-            avatarUrl: finalAvatar,
-            preferredColor: preferredColor
-          }, { merge: true });
-        }
+      const res = await fetch(`/api/users/${currentUser.uid}/profile`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(updateData)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to update profile settings.");
       }
 
       setSuccessMsg("Settings updated successfully!");
       setTimeout(() => {
         onProfileUpdate?.({
-          uid: currentUser.uid,
-          email: currentUser.email,
+          uid: data.uid,
+          email: data.email || currentUser.email,
           displayName: displayName,
           photoURL: finalAvatar,
           username: cleanUsername,
           preferredColor: preferredColor,
-          role: userProfile?.role || "User"
+          role: data.role || userProfile?.role || "User"
         });
         onClose();
         setIsLoading(false);
