@@ -35,7 +35,10 @@ import {
   Palette,
   Check,
   Lock,
-  Mail
+  Mail,
+  X,
+  Eye,
+  ShoppingBag
 } from "lucide-react";
 
 import { auth, db, isFirebaseConfigured } from "./firebase";
@@ -226,6 +229,18 @@ export default function App() {
   const [usersList, setUsersList] = useState<any[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [usersError, setUsersError] = useState<string | null>(null);
+
+  // State for viewing/editing user bags
+  const [selectedUserForBag, setSelectedUserForBag] = useState<any | null>(null);
+  const [selectedUserBalls, setSelectedUserBalls] = useState<any[]>([]);
+  const [isLoadingSelectedUserBalls, setIsLoadingSelectedUserBalls] = useState(false);
+  const [bagModalErrorMessage, setBagModalErrorMessage] = useState<string | null>(null);
+  const [modalSelectedModel, setModalSelectedModel] = useState("");
+  const [modalSelectedColor, setModalSelectedColor] = useState("");
+  const [modalQty, setModalQty] = useState(12);
+  const [modalPkgType, setModalPkgType] = useState<"ea" | "sleeve" | "box">("box");
+  const [modalCondition, setModalCondition] = useState<BallCondition>(BallCondition.NEW);
+  const [modalNotes, setModalNotes] = useState("");
 
   // User Editing States
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
@@ -725,6 +740,56 @@ export default function App() {
     }
   };
 
+  const handleViewUserBag = async (user: any) => {
+    setSelectedUserForBag(user);
+    setIsLoadingSelectedUserBalls(true);
+    setBagModalErrorMessage(null);
+    setModalSelectedModel("");
+    setModalSelectedColor("");
+    setModalQty(12);
+    setModalPkgType("box");
+    setModalCondition(BallCondition.NEW);
+    setModalNotes("");
+    try {
+      const res = await fetch(`/api/users/${user.uid || user.id}/locker`);
+      if (res.ok) {
+        const data = await res.json();
+        setSelectedUserBalls(data.balls || []);
+      } else {
+        setSelectedUserBalls([]);
+      }
+    } catch (err: any) {
+      console.error("Failed to load user locker:", err);
+      setBagModalErrorMessage(err.message || "Failed to load user bag");
+      setSelectedUserBalls([]);
+    } finally {
+      setIsLoadingSelectedUserBalls(false);
+    }
+  };
+
+  const handleSaveUserBag = async () => {
+    if (!selectedUserForBag) return;
+    try {
+      const res = await fetch(`/api/users/${selectedUserForBag.uid || selectedUserForBag.id}/locker`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": currentUser?.uid || ""
+        },
+        body: JSON.stringify({ balls: selectedUserBalls })
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to save user bag.");
+      }
+      alert("User locker updated successfully!");
+      setSelectedUserForBag(null);
+    } catch (err: any) {
+      console.error("Error saving user bag:", err);
+      alert(err.message || "Failed to update user bag.");
+    }
+  };
+
   const startEditingUser = (user: any) => {
     setEditingUserId(user.uid || user.id);
     setEditName(user.displayName || user.name || "");
@@ -1181,7 +1246,7 @@ export default function App() {
                             className="w-full text-left px-2.5 py-2 hover:bg-neutral-900 rounded-lg text-[#2563eb] hover:text-white transition-colors flex items-center gap-2 cursor-pointer border border-transparent font-bold"
                           >
                             <Settings size={12} className="text-[#2563eb]" />
-                            <span>Vault Admin</span>
+                            <span>Vault Manager</span>
                           </button>
                           <div className="border-b border-neutral-900 my-1"></div>
                         </>
@@ -1319,7 +1384,7 @@ export default function App() {
                       <div className="flex items-center gap-1.5 text-[#2563eb]">
                         <Settings className="w-3.5 h-3.5 text-[#2563eb] shrink-0" />
                         <span className="text-[10px] font-mono uppercase font-black tracking-wider">
-                          {editingItem ? "Change Catalog Specifications Editor" : "Catalog Specifications Editor"}
+                          {editingItem ? "Change Vault Manager Specs" : "Vault Manager"}
                         </span>
                       </div>
                       <button
@@ -1383,7 +1448,7 @@ export default function App() {
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <h4 className="font-sans font-black text-white text-xs uppercase tracking-wider text-[#2563eb] font-extrabold">
-                            Registry Catalog Manager
+                            Vault Manager
                           </h4>
                           <p className="text-[10px] text-neutral-400">
                             Prune and edit existing designs to prevent duplicate similar entries.
@@ -1562,7 +1627,7 @@ export default function App() {
                     <div className="flex items-center justify-between border-b border-neutral-850 pb-3">
                       <div className="flex items-center gap-1.5 text-[#2563eb]">
                         <User className="w-3.5 h-3.5 text-[#2563eb] shrink-0" />
-                        <span className="text-[10px] font-mono uppercase font-black tracking-wider">User Registry Manager</span>
+                        <span className="text-[10px] font-mono uppercase font-black tracking-wider">User Manager</span>
                       </div>
                       <button
                         type="button"
@@ -1944,6 +2009,15 @@ export default function App() {
                                 <div className="flex items-center gap-1 shrink-0">
                                   <button
                                     type="button"
+                                    onClick={() => handleViewUserBag(user)}
+                                    className="p-1 px-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-750 text-neutral-355 hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black cursor-pointer"
+                                    title="View & Edit Locker Bag"
+                                  >
+                                    <ShoppingBag size={10} />
+                                    <span>Show Bag</span>
+                                  </button>
+                                  <button
+                                    type="button"
                                     onClick={() => startEditingUser(user)}
                                     className="p-1 px-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-750 text-[#2563eb] hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black cursor-pointer"
                                     title="Edit User Settings"
@@ -2250,11 +2324,251 @@ export default function App() {
             avatarUrl: mockUser.photoURL,
             preferredColor: mockUser.preferredColor,
             role: mockUser.role
-          });
+                          });
           setAccentColor(mockUser.preferredColor);
         }}
       />
 
-    </div>
-  );
-}
+      {/* Selected User Bag Manager Modal */}
+      {selectedUserForBag && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200 animate-fade-in">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center p-5 border-b border-neutral-800">
+              <div>
+                <h2 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#2563eb]"></span>
+                  Bag Manager for {selectedUserForBag.displayName || selectedUserForBag.name || "User"}
+                </h2>
+                <p className="text-[10px] text-neutral-400 mt-0.5 font-mono">
+                  @{selectedUserForBag.username || "user"} • {selectedUserForBag.email}
+                </p>
+              </div>
+              <button 
+                onClick={() => setSelectedUserForBag(null)}
+                className="text-neutral-400 hover:text-white p-1 hover:bg-neutral-800 rounded-lg transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto flex-grow space-y-6">
+              {bagModalErrorMessage && (
+                <div className="p-3 bg-red-950/30 border border-red-900/50 rounded-xl text-red-200 text-xs font-mono">
+                  {bagModalErrorMessage}
+                </div>
+              )}
+
+              {/* Add Ball to Bag Section */}
+              <div className="bg-neutral-950/40 border border-neutral-850 p-4 rounded-xl space-y-4">
+                <h3 className="text-xs font-mono font-black uppercase text-neutral-300">Add Ball to User's Bag</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs font-mono">
+                  <div>
+                    <label className="block text-[9px] uppercase text-neutral-400 mb-1">Select Catalog Ball Design</label>
+                    <select
+                      value={`${modalSelectedModel}|${modalSelectedColor}`}
+                      onChange={(e) => {
+                        const [m, c] = e.target.value.split("|");
+                        setModalSelectedModel(m || "");
+                        setModalSelectedColor(c || "");
+                      }}
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none cursor-pointer font-sans"
+                    >
+                      <option value="">-- Choose a Ball Design --</option>
+                      {catalog.map((item) => (
+                        <option key={item.id} value={`${item.model}|${item.color}`}>
+                          {item.model} ({item.color})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[9px] uppercase text-neutral-400 mb-1">Quantity (total balls)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={modalQty}
+                        onChange={(e) => setModalQty(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] uppercase text-neutral-400 mb-1">Packaging</label>
+                      <select
+                        value={modalPkgType}
+                        onChange={(e) => setModalPkgType(e.target.value as any)}
+                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none cursor-pointer font-sans"
+                      >
+                        <option value="ea">Individual (ea)</option>
+                        <option value="sleeve">Sleeve (3 balls)</option>
+                        <option value="box">Dozen Box (12 balls)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs font-mono">
+                  <div>
+                    <label className="block text-[9px] uppercase text-neutral-400 mb-1">Condition</label>
+                    <select
+                      value={modalCondition}
+                      onChange={(e) => setModalCondition(e.target.value as any)}
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none cursor-pointer font-sans"
+                    >
+                      <option value={BallCondition.NEW}>{BallCondition.NEW}</option>
+                      <option value={BallCondition.MINT}>{BallCondition.MINT}</option>
+                      <option value={BallCondition.PLAYED}>{BallCondition.PLAYED}</option>
+                      <option value={BallCondition.SHAG}>{BallCondition.SHAG}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] uppercase text-neutral-400 mb-1">Design Notes / Custom Info</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Lucky ball, standard, custom logo"
+                      value={modalNotes}
+                      onChange={(e) => setModalNotes(e.target.value)}
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none font-sans"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!modalSelectedModel || !modalSelectedColor) {
+                      alert("Please select a ball design from the Catalog.");
+                      return;
+                    }
+                    const today = new Date().toLocaleDateString();
+                    const newBall: GolfBall = {
+                      id: `OWNED-${modalSelectedModel.toUpperCase().replace(/\s+/g, "_")}-${modalSelectedColor.toUpperCase().replace(/\s+/g, "_")}-${Date.now()}`,
+                      model: modalSelectedModel,
+                      color: modalSelectedColor,
+                      quantity: modalQty,
+                      condition: modalCondition,
+                      packageType: modalPkgType,
+                      customNumber: 1,
+                      notes: modalNotes.trim() || "Added by Admin",
+                      version: "Standard Edition",
+                      dateAdded: today
+                    };
+                    setSelectedUserBalls(prev => [newBall, ...prev]);
+                    setModalNotes("");
+                  }}
+                  className="w-full py-2 bg-[#2563eb] hover:bg-[#b5e000] text-black font-extrabold rounded-lg text-xs uppercase tracking-wider transition-all cursor-pointer"
+                >
+                  + Add Ball to Locker
+                </button>
+               </div>
+
+               {/* User Bag Inventory List */}
+               <div className="space-y-3">
+                 <h3 className="text-xs font-mono font-black uppercase text-neutral-300">Locker Inventory ({selectedUserBalls.length} Items)</h3>
+                 {isLoadingSelectedUserBalls ? (
+                   <div className="py-8 text-center text-xs text-neutral-500 font-mono flex items-center justify-center gap-2">
+                     <RefreshCw className="animate-spin text-[#2563eb]" size={14} />
+                     <span>Loading locker data...</span>
+                   </div>
+                 ) : selectedUserBalls.length === 0 ? (
+                   <div className="py-8 text-center bg-neutral-950/20 border border-dashed border-neutral-850 rounded-xl text-xs text-neutral-500 font-mono">
+                     This user's bag is empty.
+                   </div>
+                 ) : (
+                   <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                     {selectedUserBalls.map((ball) => (
+                       <div key={ball.id} className="bg-neutral-950 border border-neutral-850 p-3 rounded-xl flex items-center justify-between gap-3 text-xs font-mono">
+                         <div className="flex items-center gap-3">
+                           <BallVisual color={ball.color} model={ball.model} size="sm" />
+                           <div>
+                             <span className="text-white font-bold block">{ball.model}</span>
+                             <span className="text-neutral-450 block text-[10px]">{ball.color} • {ball.packageType || "ea"}</span>
+                           </div>
+                         </div>
+                         
+                         <div className="flex items-center gap-3">
+                           {/* Qty Stepper */}
+                           <div className="flex items-center bg-neutral-900 border border-neutral-800 rounded-lg p-0.5">
+                             <button
+                               type="button"
+                               onClick={() => {
+                                 setSelectedUserBalls(prev => prev.map(b => b.id === ball.id ? { ...b, quantity: Math.max(1, b.quantity - 1) } : b));
+                               }}
+                               className="px-2 py-0.5 text-neutral-400 hover:text-white font-extrabold cursor-pointer"
+                             >
+                               -
+                             </button>
+                             <span className="px-2 text-white font-bold text-[11px]">{ball.quantity}</span>
+                             <button
+                               type="button"
+                               onClick={() => {
+                                 setSelectedUserBalls(prev => prev.map(b => b.id === ball.id ? { ...b, quantity: b.quantity + 1 } : b));
+                               }}
+                               className="px-2 py-0.5 text-neutral-400 hover:text-white font-extrabold cursor-pointer"
+                             >
+                               +
+                             </button>
+                           </div>
+
+                           {/* Condition Select */}
+                           <select
+                             value={ball.condition}
+                             onChange={(e) => {
+                               const newCond = e.target.value as any;
+                               setSelectedUserBalls(prev => prev.map(b => b.id === ball.id ? { ...b, condition: newCond } : b));
+                             }}
+                             className="bg-neutral-900 border border-neutral-800 text-neutral-300 rounded px-1.5 py-1 text-[10px] focus:outline-none focus:border-[#2563eb] cursor-pointer font-sans"
+                           >
+                             <option value={BallCondition.NEW}>{BallCondition.NEW}</option>
+                             <option value={BallCondition.MINT}>{BallCondition.MINT}</option>
+                             <option value={BallCondition.PLAYED}>{BallCondition.PLAYED}</option>
+                             <option value={BallCondition.SHAG}>{BallCondition.SHAG}</option>
+                           </select>
+
+                           <button
+                             type="button"
+                             onClick={() => {
+                               setSelectedUserBalls(prev => prev.filter(b => b.id !== ball.id));
+                             }}
+                             className="p-1.5 text-neutral-500 hover:text-rose-450 hover:bg-neutral-900 rounded transition-colors cursor-pointer"
+                             title="Remove Ball Stack"
+                           >
+                             <Trash2 size={13} />
+                           </button>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 )}
+               </div>
+             </div>
+
+             {/* Modal Footer */}
+             <div className="flex gap-2 justify-end p-5 border-t border-neutral-800 bg-neutral-950/60">
+               <button
+                 type="button"
+                 onClick={() => setSelectedUserForBag(null)}
+                 className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-all cursor-pointer text-xs font-bold font-sans"
+               >
+                 Cancel
+               </button>
+               <button
+                 type="button"
+                 disabled={isLoadingSelectedUserBalls}
+                 onClick={handleSaveUserBag}
+                 className="px-4 py-2 bg-[#2563eb] hover:bg-[#b5e000] text-black font-extrabold rounded-xl transition-all cursor-pointer text-xs uppercase tracking-wider font-sans"
+               >
+                 Save Locker Bag
+               </button>
+             </div>
+           </div>
+         </div>
+       )}
+
+     </div>
+   );
+ }

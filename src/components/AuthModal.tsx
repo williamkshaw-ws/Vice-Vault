@@ -209,6 +209,7 @@ export default function AuthModal({
   // Auth Form State
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
   const [preferredColor, setPreferredColor] = useState("#2563eb");
@@ -231,6 +232,7 @@ export default function AuthModal({
     if (isOpen) {
       setError(null);
       setSuccessMsg(null);
+      setConfirmPassword("");
       setNewPassword("");
       setNewPasswordConfirm("");
       
@@ -261,7 +263,7 @@ export default function AuthModal({
         setSelectedPreset("preset-1");
       }
     }
-  }, [isOpen, currentUser, userProfile]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -347,6 +349,10 @@ export default function AuthModal({
     }
     if (!isStrongPassword(password)) {
       setError("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match. Please confirm your password.");
       return;
     }
     setError(null);
@@ -767,6 +773,21 @@ export default function AuthModal({
                       </div>
                     </div>
                   )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-mono uppercase text-neutral-400 mb-1.5">Verify Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-555" size={12} />
+                  <input
+                    type="password"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#2563eb] transition-all font-mono"
+                    placeholder="Verify password"
+                  />
                 </div>
               </div>
                     {/* Profile Picture / Avatar Selector */}

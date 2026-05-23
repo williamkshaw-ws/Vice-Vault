@@ -105,7 +105,7 @@ export default function AddMissingBallForm({
     if (editItem) {
       onUpdateCatalogItem(editItem.id, {
         model: model.trim().toUpperCase(),
-        color: color.trim().toUpperCase(),
+        color: color.trim(),
         notes: finalNotes,
         customImage,
       });
