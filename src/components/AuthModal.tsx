@@ -30,7 +30,7 @@ interface AuthModalProps {
 }
 
 const ACCENT_COLORS = [
-  { name: "Neon Lime", value: "#ccff00" },
+  { name: "Sporty Lime", value: "#7cb300" },
   { name: "Neon Red", value: "#ff3366" },
   { name: "Gold", value: "#d4af37" },
   { name: "Cyan Blue", value: "#00e5ff" },
@@ -54,7 +54,7 @@ export function AvatarRenderer({
   avatarUrl, 
   name, 
   size = "md", 
-  color = "#ccff00" 
+  color = "#7cb300" 
 }: { 
   avatarUrl?: string; 
   name: string; 
@@ -211,7 +211,7 @@ export default function AuthModal({
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
-  const [preferredColor, setPreferredColor] = useState("#ccff00");
+  const [preferredColor, setPreferredColor] = useState("#7cb300");
   const [newPassword, setNewPassword] = useState("");
   const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
   
@@ -239,7 +239,7 @@ export default function AuthModal({
         
         const nameVal = userProfile?.displayName || currentUser.displayName || "";
         const usernameVal = userProfile?.username || currentUser.username || "";
-        const colorVal = userProfile?.preferredColor || currentUser.preferredColor || "#ccff00";
+        const colorVal = userProfile?.preferredColor || currentUser.preferredColor || "#7cb300";
         const avatarVal = userProfile?.avatarUrl || currentUser.photoURL || "preset-1";
         
         setDisplayName(nameVal);
@@ -257,7 +257,7 @@ export default function AuthModal({
         setPassword("");
         setDisplayName("");
         setUsername("");
-        setPreferredColor("#ccff00");
+        setPreferredColor("#7cb300");
         setSelectedPreset("preset-1");
       }
     }
@@ -594,8 +594,8 @@ export default function AuthModal({
         <div className="flex justify-between items-center p-5 border-b border-neutral-850">
           <div>
             <h2 className="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#ccff00] animate-pulse"></span>
-              {tab === "signin" && "Vice Vault Login"}
+              <span className="w-2.5 h-2.5 rounded-full bg-[#7cb300] animate-pulse"></span>
+              {tab === "signin" && "Golf Ball Vault Login"}
               {tab === "signup" && "Create Vault Account"}
               {tab === "settings" && "Profile Settings"}
             </h2>
@@ -619,7 +619,7 @@ export default function AuthModal({
               onClick={() => setTab("signin")}
               className={`flex-1 py-2 text-xs font-mono uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
                 tab === "signin" 
-                  ? "bg-neutral-900 text-[#ccff00] font-bold" 
+                  ? "bg-neutral-900 text-[#7cb300] font-bold" 
                   : "text-neutral-400 hover:text-neutral-200"
               }`}
             >
@@ -629,7 +629,7 @@ export default function AuthModal({
               onClick={() => setTab("signup")}
               className={`flex-1 py-2 text-xs font-mono uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
                 tab === "signup" 
-                  ? "bg-neutral-900 text-[#ccff00] font-bold" 
+                  ? "bg-neutral-900 text-[#7cb300] font-bold" 
                   : "text-neutral-400 hover:text-neutral-200"
               }`}
             >
@@ -667,7 +667,7 @@ export default function AuthModal({
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white placeholder-neutral-550 focus:outline-none focus:border-[#ccff00] focus:ring-1 focus:ring-[#ccff00] transition-all font-mono"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white placeholder-neutral-550 focus:outline-none focus:border-[#7cb300] focus:ring-1 focus:ring-[#7cb300] transition-all font-mono"
                     placeholder="name@domain.com or username"
                   />
                 </div>
@@ -682,7 +682,7 @@ export default function AuthModal({
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#ccff00] focus:ring-1 focus:ring-[#ccff00] transition-all font-mono"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#7cb300] focus:ring-1 focus:ring-[#7cb300] transition-all font-mono"
                     placeholder="••••••••"
                   />
                 </div>
@@ -691,7 +691,7 @@ export default function AuthModal({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 bg-[#ccff00] text-black font-extrabold rounded-xl text-xs uppercase tracking-wider hover:bg-[#b5e000] active:scale-98 transition-all cursor-pointer flex justify-center items-center gap-2 mt-6 shadow-lg shadow-[#ccff00]/10"
+                className="w-full py-3 bg-[#7cb300] text-black font-extrabold rounded-xl text-xs uppercase tracking-wider hover:bg-[#b5e000] active:scale-98 transition-all cursor-pointer flex justify-center items-center gap-2 mt-6 shadow-lg shadow-[#7cb300]/10"
               >
                 {isLoading ? (
                   <>
@@ -704,7 +704,7 @@ export default function AuthModal({
               </button>
 
               <p className="text-[10px] text-neutral-500 text-center mt-4 font-mono">
-                No account? <button type="button" onClick={() => setTab("signup")} className="text-[#ccff00] underline hover:text-white cursor-pointer bg-transparent border-0 p-0">Create one now</button>
+                No account? <button type="button" onClick={() => setTab("signup")} className="text-[#7cb300] underline hover:text-white cursor-pointer bg-transparent border-0 p-0">Create one now</button>
               </p>
             </form>
           )}
@@ -720,7 +720,7 @@ export default function AuthModal({
                   <span className="text-neutral-550 text-[10px] font-mono block truncate">
                     @{username ? username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "") : "username"}
                   </span>
-                  <span className="text-[9px] text-[#ccff00] uppercase font-mono tracking-wider mt-0.5 block">Live Preview</span>
+                  <span className="text-[9px] text-[#7cb300] uppercase font-mono tracking-wider mt-0.5 block">Live Preview</span>
                 </div>
               </div>
 
@@ -734,7 +734,7 @@ export default function AuthModal({
                       required
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
-                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#ccff00] transition-all font-mono"
+                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#7cb300] transition-all font-mono"
                       placeholder="John Doe"
                     />
                   </div>
@@ -749,7 +749,7 @@ export default function AuthModal({
                       required
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-8 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#ccff00] transition-all font-mono"
+                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-8 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#7cb300] transition-all font-mono"
                       placeholder="johndoe"
                     />
                   </div>
@@ -765,7 +765,7 @@ export default function AuthModal({
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#ccff00] transition-all font-mono"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#7cb300] transition-all font-mono"
                     placeholder="name@domain.com"
                   />
                 </div>
@@ -782,7 +782,7 @@ export default function AuthModal({
                     onChange={(e) => setPassword(e.target.value)}
                     onFocus={() => setPasswordFocused(true)}
                     onBlur={() => setTimeout(() => setPasswordFocused(false), 200)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#ccff00] transition-all font-mono"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#7cb300] transition-all font-mono"
                     placeholder="Enter password"
                   />
                   {passwordFocused && (
@@ -869,7 +869,7 @@ export default function AuthModal({
                       title={c.name}
                     >
                       {preferredColor.toLowerCase() === c.value.toLowerCase() && (
-                        <Check size={12} className={c.value === "#ccff00" || c.value === "#00e5ff" || c.value === "#00f5d4" ? "text-black font-black" : "text-white"} />
+                        <Check size={12} className={c.value === "#7cb300" || c.value === "#00e5ff" || c.value === "#00f5d4" ? "text-black font-black" : "text-white"} />
                       )}
                     </button>
                   ))}
@@ -888,7 +888,7 @@ export default function AuthModal({
                       >
                         <input 
                           type="color" 
-                          value={isPreset ? "#ccff00" : preferredColor}
+                          value={isPreset ? "#7cb300" : preferredColor}
                           onChange={(e) => setPreferredColor(e.target.value)}
                           className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
                         />
@@ -906,7 +906,7 @@ export default function AuthModal({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 bg-[#ccff00] text-black font-extrabold rounded-xl text-xs uppercase tracking-wider hover:bg-[#b5e000] active:scale-98 transition-all cursor-pointer flex justify-center items-center gap-2 mt-6 shadow-lg shadow-[#ccff00]/10"
+                className="w-full py-3 bg-[#7cb300] text-black font-extrabold rounded-xl text-xs uppercase tracking-wider hover:bg-[#b5e000] active:scale-98 transition-all cursor-pointer flex justify-center items-center gap-2 mt-6 shadow-lg shadow-[#7cb300]/10"
               >
                 {isLoading ? (
                   <>
@@ -919,7 +919,7 @@ export default function AuthModal({
               </button>
 
               <p className="text-[10px] text-neutral-500 text-center mt-4 font-mono">
-                Already registered? <button type="button" onClick={() => setTab("signin")} className="text-[#ccff00] underline hover:text-white cursor-pointer bg-transparent border-0 p-0">Access your vault account</button>
+                Already registered? <button type="button" onClick={() => setTab("signin")} className="text-[#7cb300] underline hover:text-white cursor-pointer bg-transparent border-0 p-0">Access your vault account</button>
               </p>
             </form>
           )}
@@ -935,7 +935,7 @@ export default function AuthModal({
                   <span className="text-neutral-550 text-[10px] font-mono block truncate">
                     @{username ? username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "") : "username"}
                   </span>
-                  <span className="text-[9px] text-[#ccff00] uppercase font-mono tracking-wider mt-0.5 block">Live Preview</span>
+                  <span className="text-[9px] text-[#7cb300] uppercase font-mono tracking-wider mt-0.5 block">Live Preview</span>
                 </div>
               </div>
 
@@ -949,7 +949,7 @@ export default function AuthModal({
                       required
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
-                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#ccff00] transition-all font-mono"
+                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#7cb300] transition-all font-mono"
                       placeholder="John Doe"
                     />
                   </div>
@@ -964,7 +964,7 @@ export default function AuthModal({
                       required
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-8 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#ccff00] transition-all font-mono"
+                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-8 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#7cb300] transition-all font-mono"
                       placeholder="johndoe"
                     />
                   </div>
@@ -994,7 +994,7 @@ export default function AuthModal({
                     onChange={(e) => setNewPassword(e.target.value)}
                     onFocus={() => setNewPasswordFocused(true)}
                     onBlur={() => setTimeout(() => setNewPasswordFocused(false), 200)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#ccff00] transition-all font-mono"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#7cb300] transition-all font-mono"
                     placeholder="Enter new password"
                   />
                   {newPasswordFocused && (
@@ -1044,7 +1044,7 @@ export default function AuthModal({
                     type="password"
                     value={newPasswordConfirm}
                     onChange={(e) => setNewPasswordConfirm(e.target.value)}
-                    className={`w-full bg-neutral-950 border rounded-xl py-2 pl-9 pr-9 text-xs focus:outline-none focus:border-[#ccff00] transition-all font-mono ${
+                    className={`w-full bg-neutral-950 border rounded-xl py-2 pl-9 pr-9 text-xs focus:outline-none focus:border-[#7cb300] transition-all font-mono ${
                       newPasswordConfirm && newPassword && newPassword !== newPasswordConfirm
                         ? "border-red-600 text-red-400"
                         : newPasswordConfirm && newPassword && newPassword === newPasswordConfirm
@@ -1114,7 +1114,7 @@ export default function AuthModal({
                       title={c.name}
                     >
                       {preferredColor.toLowerCase() === c.value.toLowerCase() && (
-                        <Check size={12} className={c.value === "#ccff00" || c.value === "#00e5ff" || c.value === "#00f5d4" ? "text-black font-black" : "text-white"} />
+                        <Check size={12} className={c.value === "#7cb300" || c.value === "#00e5ff" || c.value === "#00f5d4" ? "text-black font-black" : "text-white"} />
                       )}
                     </button>
                   ))}
@@ -1133,7 +1133,7 @@ export default function AuthModal({
                       >
                         <input 
                           type="color" 
-                          value={isPreset ? "#ccff00" : preferredColor}
+                          value={isPreset ? "#7cb300" : preferredColor}
                           onChange={(e) => setPreferredColor(e.target.value)}
                           className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
                         />
@@ -1151,7 +1151,7 @@ export default function AuthModal({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 bg-[#ccff00] text-black font-extrabold rounded-xl text-xs uppercase tracking-wider hover:bg-[#b5e000] active:scale-98 transition-all cursor-pointer flex justify-center items-center gap-2 mt-6 shadow-lg shadow-[#ccff00]/10"
+                className="w-full py-3 bg-[#7cb300] text-black font-extrabold rounded-xl text-xs uppercase tracking-wider hover:bg-[#b5e000] active:scale-98 transition-all cursor-pointer flex justify-center items-center gap-2 mt-6 shadow-lg shadow-[#7cb300]/10"
               >
                 {isLoading ? (
                   <>

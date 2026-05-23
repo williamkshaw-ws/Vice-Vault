@@ -100,7 +100,7 @@ const DEFAULT_USERS: UserProfile[] = [
     email: "admin@vault.com",
     username: "admin",
     role: "Admin",
-    preferredColor: "#ccff00",
+    preferredColor: "#7cb300",
     avatarUrl: "preset-1",
     password: hashPassword("AdminPass123!"),
     createdAt: new Date().toISOString()
@@ -111,7 +111,7 @@ const DEFAULT_USERS: UserProfile[] = [
     email: "user@vault.com",
     username: "user",
     role: "User",
-    preferredColor: "#ccff00",
+    preferredColor: "#7cb300",
     avatarUrl: "preset-1",
     password: hashPassword("AdminPass123!"),
     createdAt: new Date().toISOString()
@@ -950,7 +950,7 @@ app.post("/api/auth/signup", async (req, res) => {
     email: emailLower,
     password: hashPassword(password), // Store hashed password
     username: cleanUsername,
-    preferredColor: preferredColor || "#ccff00",
+    preferredColor: preferredColor || "#7cb300",
     avatarUrl: avatarUrl || "preset-1",
     role: cleanUsername === "admin" ? "Admin" : "User",
     createdAt: new Date().toISOString()

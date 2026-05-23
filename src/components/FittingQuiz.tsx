@@ -47,7 +47,7 @@ export default function FittingQuiz({ onAddBall }: FittingQuizProps) {
   const recommendedColor = getDefaultColorForModel(recommendation.model);
 
   const handleAddRecommended = (qty: number) => {
-    const notes = `Fitted via Vice Vault Assistant. Distance: ${
+    const notes = `Fitted via Golf Ball Vault Assistant. Distance: ${
       distance === "long" ? ">250 yds" : distance === "medium" ? "220-250 yds" : "<220 yds"
     }, Highlight: ${priority.toUpperCase()}`;
     

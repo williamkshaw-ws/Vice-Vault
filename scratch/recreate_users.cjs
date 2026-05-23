@@ -25,7 +25,7 @@ const usersToCreate = [
     username: 'admin',
     displayName: 'System Admin',
     role: 'Admin',
-    preferredColor: '#ccff00',
+    preferredColor: '#7cb300',
     avatarUrl: 'preset-1',
     createdAt: '2026-05-22T17:03:24.324Z'
   },
@@ -35,7 +35,7 @@ const usersToCreate = [
     username: 'user',
     displayName: 'System User',
     role: 'User',
-    preferredColor: '#ccff00',
+    preferredColor: '#7cb300',
     avatarUrl: 'preset-1',
     createdAt: '2026-05-22T17:03:24.325Z'
   }
