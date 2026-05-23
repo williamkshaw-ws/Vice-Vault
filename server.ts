@@ -132,8 +132,8 @@ const DEFAULT_LOCKER = [
     dateAdded: "5/12/2026"
   },
   {
-    id: "OWNED-PRO_PLUS-RED_BLUE_DRIP_SPLATTER-STANDARD_EDITION-NEAR_MINT_SCUFFED_0-EA-V2",
-    model: "PRO PLUS",
+    id: "OWNED-PRO-RED_BLUE_DRIP_SPLATTER-STANDARD_EDITION-NEAR_MINT_SCUFFED_0-EA-V2",
+    model: "PRO",
     color: "Red/Blue Drip Splatter",
     quantity: 6,
     condition: "Near-Mint / Scuffed-0",
@@ -144,9 +144,9 @@ const DEFAULT_LOCKER = [
     dateAdded: "5/14/2026"
   },
   {
-    id: "OWNED-PRO_SOFT-NEON_GLOSS_RED-STANDARD_EDITION-PLAYED_SCUFFED_1-SLEEVE-V3",
-    model: "PRO SOFT",
-    color: "Neon Gloss Red",
+    id: "OWNED-PRO_PLUS-NEON_GLOSS_LIME-STANDARD_EDITION-PLAYED_SCUFFED_1-SLEEVE-V3",
+    model: "PRO PLUS",
+    color: "Neon Gloss Lime",
     quantity: 3,
     condition: "Played / Scuffed-1",
     packageType: "sleeve",

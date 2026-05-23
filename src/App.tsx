@@ -147,8 +147,8 @@ const INITIAL_OWNED_BALLS: GolfBall[] = [
     dateAdded: "5/12/2026"
   },
   {
-    id: "OWNED-PRO_PLUS-RED_BLUE_DRIP_SPLATTER-STANDARD_EDITION-NEAR_MINT_SCUFFED_0-EA-V2",
-    model: BallModel.PRO_PLUS,
+    id: "OWNED-PRO-RED_BLUE_DRIP_SPLATTER-STANDARD_EDITION-NEAR_MINT_SCUFFED_0-EA-V2",
+    model: BallModel.PRO,
     color: "Red/Blue Drip Splatter",
     quantity: 6,
     condition: BallCondition.MINT,
@@ -159,9 +159,9 @@ const INITIAL_OWNED_BALLS: GolfBall[] = [
     dateAdded: "5/14/2026"
   },
   {
-    id: "OWNED-PRO_SOFT-NEON_GLOSS_RED-STANDARD_EDITION-PLAYED_SCUFFED_1-SLEEVE-V3",
-    model: BallModel.PRO_SOFT,
-    color: "Neon Gloss Red",
+    id: "OWNED-PRO_PLUS-NEON_GLOSS_LIME-STANDARD_EDITION-PLAYED_SCUFFED_1-SLEEVE-V3",
+    model: BallModel.PRO_PLUS,
+    color: "Neon Gloss Lime",
     quantity: 3,
     condition: BallCondition.PLAYED,
     packageType: "sleeve",
@@ -2011,7 +2011,7 @@ export default function App() {
                                     type="button"
                                     onClick={() => handleViewUserBag(user)}
                                     className="p-1 px-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-750 text-neutral-355 hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black cursor-pointer"
-                                    title="View & Edit Locker Bag"
+                                    title="View & Edit Bag"
                                   >
                                     <ShoppingBag size={10} />
                                     <span>Show Bag</span>
@@ -2387,7 +2387,7 @@ export default function App() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[9px] uppercase text-neutral-400 mb-1">Quantity (total balls)</label>
+                      <label className="block text-[9px] uppercase text-neutral-400 mb-1">Quantity</label>
                       <input
                         type="number"
                         min="1"
@@ -2445,11 +2445,17 @@ export default function App() {
                       return;
                     }
                     const today = new Date().toLocaleDateString();
+                    const calculatedQty = modalPkgType === "box"
+                      ? modalQty * 12
+                      : modalPkgType === "sleeve"
+                      ? modalQty * 3
+                      : modalQty;
+
                     const newBall: GolfBall = {
                       id: `OWNED-${modalSelectedModel.toUpperCase().replace(/\s+/g, "_")}-${modalSelectedColor.toUpperCase().replace(/\s+/g, "_")}-${Date.now()}`,
                       model: modalSelectedModel,
                       color: modalSelectedColor,
-                      quantity: modalQty,
+                      quantity: calculatedQty,
                       condition: modalCondition,
                       packageType: modalPkgType,
                       customNumber: 1,
@@ -2462,13 +2468,13 @@ export default function App() {
                   }}
                   className="w-full py-2 bg-[#2563eb] hover:bg-[#b5e000] text-black font-extrabold rounded-lg text-xs uppercase tracking-wider transition-all cursor-pointer"
                 >
-                  + Add Ball to Locker
+                  + Add Ball to Bag
                 </button>
                </div>
 
                {/* User Bag Inventory List */}
                <div className="space-y-3">
-                 <h3 className="text-xs font-mono font-black uppercase text-neutral-300">Locker Inventory ({selectedUserBalls.length} Items)</h3>
+                 <h3 className="text-xs font-mono font-black uppercase text-neutral-300">Bag Inventory ({selectedUserBalls.length} Items)</h3>
                  {isLoadingSelectedUserBalls ? (
                    <div className="py-8 text-center text-xs text-neutral-500 font-mono flex items-center justify-center gap-2">
                      <RefreshCw className="animate-spin text-[#2563eb]" size={14} />
@@ -2480,68 +2486,113 @@ export default function App() {
                    </div>
                  ) : (
                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
-                     {selectedUserBalls.map((ball) => (
-                       <div key={ball.id} className="bg-neutral-950 border border-neutral-850 p-3 rounded-xl flex items-center justify-between gap-3 text-xs font-mono">
-                         <div className="flex items-center gap-3">
-                           <BallVisual color={ball.color} model={ball.model} size="sm" />
-                           <div>
-                             <span className="text-white font-bold block">{ball.model}</span>
-                             <span className="text-neutral-450 block text-[10px]">{ball.color} • {ball.packageType || "ea"}</span>
-                           </div>
-                         </div>
-                         
-                         <div className="flex items-center gap-3">
-                           {/* Qty Stepper */}
-                           <div className="flex items-center bg-neutral-900 border border-neutral-800 rounded-lg p-0.5">
-                             <button
-                               type="button"
-                               onClick={() => {
-                                 setSelectedUserBalls(prev => prev.map(b => b.id === ball.id ? { ...b, quantity: Math.max(1, b.quantity - 1) } : b));
-                               }}
-                               className="px-2 py-0.5 text-neutral-400 hover:text-white font-extrabold cursor-pointer"
-                             >
-                               -
-                             </button>
-                             <span className="px-2 text-white font-bold text-[11px]">{ball.quantity}</span>
-                             <button
-                               type="button"
-                               onClick={() => {
-                                 setSelectedUserBalls(prev => prev.map(b => b.id === ball.id ? { ...b, quantity: b.quantity + 1 } : b));
-                               }}
-                               className="px-2 py-0.5 text-neutral-400 hover:text-white font-extrabold cursor-pointer"
-                             >
-                               +
-                             </button>
-                           </div>
+                     {selectedUserBalls.map((ball) => {
+                        const currentPkg = ball.packageType || "ea";
+                        const pkgUnit = currentPkg === "box" ? 12 : currentPkg === "sleeve" ? 3 : 1;
+                        const displayQty = Math.max(1, Math.round(ball.quantity / pkgUnit));
 
-                           {/* Condition Select */}
-                           <select
-                             value={ball.condition}
-                             onChange={(e) => {
-                               const newCond = e.target.value as any;
-                               setSelectedUserBalls(prev => prev.map(b => b.id === ball.id ? { ...b, condition: newCond } : b));
-                             }}
-                             className="bg-neutral-900 border border-neutral-800 text-neutral-300 rounded px-1.5 py-1 text-[10px] focus:outline-none focus:border-[#2563eb] cursor-pointer font-sans"
-                           >
-                             <option value={BallCondition.NEW}>{BallCondition.NEW}</option>
-                             <option value={BallCondition.MINT}>{BallCondition.MINT}</option>
-                             <option value={BallCondition.PLAYED}>{BallCondition.PLAYED}</option>
-                             <option value={BallCondition.SHAG}>{BallCondition.SHAG}</option>
-                           </select>
+                        return (
+                          <div key={ball.id} className="bg-neutral-950 border border-neutral-850 p-3 rounded-xl flex items-center justify-between gap-3 text-xs font-mono">
+                            <div className="flex items-center gap-3">
+                              <BallVisual color={ball.color} model={ball.model} size="sm" />
+                              <div>
+                                <span className="text-white font-bold block">{ball.model}</span>
+                                <span className="text-neutral-450 block text-[10px]">{ball.color} • {currentPkg === "box" ? "box" : currentPkg === "sleeve" ? "sleeve" : "ea"}</span>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-3">
+                              {/* Qty Stepper */}
+                              <div className="flex items-center bg-neutral-900 border border-neutral-800 rounded-lg p-0.5">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedUserBalls(prev => prev.map(b => {
+                                      if (b.id === ball.id) {
+                                        const step = b.packageType === "box" ? 12 : b.packageType === "sleeve" ? 3 : 1;
+                                        return { ...b, quantity: Math.max(step, b.quantity - step) };
+                                      }
+                                      return b;
+                                    }));
+                                  }}
+                                  className="px-2 py-0.5 text-neutral-400 hover:text-white font-extrabold cursor-pointer"
+                                >
+                                  -
+                                </button>
+                                <span className="px-2 text-white font-bold text-[11px] min-w-[14px] text-center">{displayQty}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedUserBalls(prev => prev.map(b => {
+                                      if (b.id === ball.id) {
+                                        const step = b.packageType === "box" ? 12 : b.packageType === "sleeve" ? 3 : 1;
+                                        return { ...b, quantity: b.quantity + step };
+                                      }
+                                      return b;
+                                    }));
+                                  }}
+                                  className="px-2 py-0.5 text-neutral-400 hover:text-white font-extrabold cursor-pointer"
+                                >
+                                  +
+                                </button>
+                              </div>
 
-                           <button
-                             type="button"
-                             onClick={() => {
-                               setSelectedUserBalls(prev => prev.filter(b => b.id !== ball.id));
-                             }}
-                             className="p-1.5 text-neutral-500 hover:text-rose-450 hover:bg-neutral-900 rounded transition-colors cursor-pointer"
-                             title="Remove Ball Stack"
-                           >
-                             <Trash2 size={13} />
-                           </button>
-                         </div>
-                       </div>
-                     ))}
+                              {/* Packaging Type Selector */}
+                              <select
+                                value={currentPkg}
+                                onChange={(e) => {
+                                  const newPkg = e.target.value as 'ea' | 'sleeve' | 'box';
+                                  setSelectedUserBalls(prev => prev.map(b => {
+                                    if (b.id === ball.id) {
+                                      const oldPkg = b.packageType || "ea";
+                                      const oldUnit = oldPkg === "box" ? 12 : oldPkg === "sleeve" ? 3 : 1;
+                                      const pkgCount = Math.max(1, Math.round(b.quantity / oldUnit));
+                                      const newUnit = newPkg === "box" ? 12 : newPkg === "sleeve" ? 3 : 1;
+                                      return {
+                                        ...b,
+                                        packageType: newPkg,
+                                        quantity: pkgCount * newUnit
+                                      };
+                                    }
+                                    return b;
+                                  }));
+                                }}
+                                className="bg-neutral-900 border border-neutral-800 text-neutral-300 rounded px-1.5 py-1 text-[10px] focus:outline-none focus:border-[#2563eb] cursor-pointer font-sans"
+                              >
+                                <option value="ea">Ball (ea)</option>
+                                <option value="sleeve">Sleeve (3)</option>
+                                <option value="box">Box (12)</option>
+                              </select>
+
+                              {/* Condition Select */}
+                              <select
+                                value={ball.condition}
+                                onChange={(e) => {
+                                  const newCond = e.target.value as any;
+                                  setSelectedUserBalls(prev => prev.map(b => b.id === ball.id ? { ...b, condition: newCond } : b));
+                                }}
+                                className="bg-neutral-900 border border-neutral-800 text-neutral-300 rounded px-1.5 py-1 text-[10px] focus:outline-none focus:border-[#2563eb] cursor-pointer font-sans"
+                              >
+                                <option value={BallCondition.NEW}>{BallCondition.NEW}</option>
+                                <option value={BallCondition.MINT}>{BallCondition.MINT}</option>
+                                <option value={BallCondition.PLAYED}>{BallCondition.PLAYED}</option>
+                                <option value={BallCondition.SHAG}>{BallCondition.SHAG}</option>
+                              </select>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedUserBalls(prev => prev.filter(b => b.id !== ball.id));
+                                }}
+                                className="p-1.5 text-neutral-500 hover:text-rose-450 hover:bg-neutral-900 rounded transition-colors cursor-pointer"
+                                title="Remove Ball Stack"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
                    </div>
                  )}
                </div>
@@ -2562,7 +2613,7 @@ export default function App() {
                  onClick={handleSaveUserBag}
                  className="px-4 py-2 bg-[#2563eb] hover:bg-[#b5e000] text-black font-extrabold rounded-xl transition-all cursor-pointer text-xs uppercase tracking-wider font-sans"
                >
-                 Save Locker Bag
+                 Save Bag Inventory
                </button>
              </div>
            </div>

@@ -365,7 +365,7 @@ export default function OwnedBallCard({
         <div className="absolute inset-0 bg-neutral-950/95 flex flex-col items-center justify-center p-3 text-center z-10 animate-fade-in backdrop-blur-sm">
           <Trash2 className="w-5 h-5 text-rose-500 mb-1 animate-bounce" />
           <h4 className="text-white font-sans font-black text-xs uppercase tracking-wider">
-            Remove from Locker?
+            Remove from Bag?
           </h4>
           <p className="text-[10px] text-neutral-400 mt-0.5 max-w-[220px] leading-snug">
             Delete <strong>{ball.model} ({ball.color})</strong> from your list?
