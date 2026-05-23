@@ -242,7 +242,7 @@ export default function BallVisual({
   const config = getColorConfigs();
 
   const isCustomModel = !Object.values(BallModel).includes(model as BallModel);
-  const brandLabel = model && model.trim().toUpperCase() === "LOGO" ? "vice" : (isCustomModel ? (typeof model === 'string' ? model.split(" ")[0].toUpperCase().substring(0, 8) : "CUSTOM") : "vice");
+  const brandLabel = model && model.trim().toUpperCase() === "LOGO" ? "gbv" : (isCustomModel ? (typeof model === 'string' ? model.split(" ")[0].toUpperCase().substring(0, 8) : "CUSTOM") : "gbv");
 
   // Alignment line text based on model
   const renderAlignmentLine = () => {
