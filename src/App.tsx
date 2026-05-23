@@ -625,56 +625,30 @@ export default function App() {
     if (!currentUser) return;
     setIsLoadingUsers(true);
     setUsersError(null);
-    if (!isFirebaseConfigured || !auth || currentUser.isMock) {
-      try {
-        const res = await fetch("/api/users", {
-          headers: {
-            "x-user-id": currentUser.uid
-          }
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || "Failed to fetch users");
+    try {
+      const res = await fetch("/api/users", {
+        headers: {
+          "x-user-id": currentUser.uid
         }
-        // Normalize each user to have both id & uid, and name & displayName for compatibility
-        const normalized = data.map((u: any) => ({
-          ...u,
-          id: u.uid || u.id,
-          uid: u.uid || u.id,
-          name: u.displayName || u.name,
-          displayName: u.displayName || u.name,
-          role: (u.role && u.role.toLowerCase() === "admin") ? "Admin" : "User"
-        }));
-        setUsersList(normalized);
-      } catch (err: any) {
-        setUsersError(err.message || "Failed to fetch users");
-      } finally {
-        setIsLoadingUsers(false);
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to fetch users");
       }
-    } else {
-      try {
-        const { collection, getDocs } = await import("firebase/firestore");
-        if (db) {
-          const querySnapshot = await getDocs(collection(db, "users"));
-          const users: any[] = [];
-          querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            users.push({
-              id: doc.id,
-              uid: doc.id,
-              ...data,
-              name: data.displayName || data.name || "User",
-              displayName: data.displayName || data.name || "User",
-              role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User"
-            });
-          });
-          setUsersList(users);
-        }
-      } catch (err: any) {
-        setUsersError(err.message || "Failed to fetch users from Firestore");
-      } finally {
-        setIsLoadingUsers(false);
-      }
+      // Normalize each user to have both id & uid, and name & displayName for compatibility
+      const normalized = data.map((u: any) => ({
+        ...u,
+        id: u.uid || u.id,
+        uid: u.uid || u.id,
+        name: u.displayName || u.name,
+        displayName: u.displayName || u.name,
+        role: (u.role && u.role.toLowerCase() === "admin") ? "Admin" : "User"
+      }));
+      setUsersList(normalized);
+    } catch (err: any) {
+      setUsersError(err.message || "Failed to fetch users");
+    } finally {
+      setIsLoadingUsers(false);
     }
   };
 
