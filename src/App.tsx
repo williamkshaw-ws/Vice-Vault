@@ -2434,7 +2434,7 @@ export default function App() {
                       Existing Catalog
                     </h4>
                     <p className="text-[10px] text-neutral-400">
-                      Search and manage specifications already in the vault.
+                      Search and manage balls that are already in the vault
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1.5 shrink-0">
