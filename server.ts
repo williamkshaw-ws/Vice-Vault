@@ -636,6 +636,32 @@ if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
             await dbAdmin!.collection("users").doc(uid).set({ uid, ...data });
           }
         }
+
+        // Seed default users in Firebase Auth if they don't exist
+        for (const user of DEFAULT_USERS) {
+          if (user.email) {
+            try {
+              await admin.auth().getUserByEmail(user.email);
+            } catch (authErr: any) {
+              if (authErr.code === 'auth/user-not-found') {
+                console.log(`Seeding missing Firebase Auth user: ${user.email}`);
+                try {
+                  const authUser = await admin.auth().createUser({
+                    uid: user.uid,
+                    email: user.email,
+                    password: "AdminPass123!",
+                    displayName: user.displayName
+                  });
+                  await dbAdmin!.collection("users").doc(user.uid).set({
+                    authUid: authUser.uid
+                  }, { merge: true });
+                } catch (createErr) {
+                  console.error(`Failed to seed Firebase Auth user ${user.email}:`, createErr);
+                }
+              }
+            }
+          }
+        }
         
         console.log("Synchronizing Firestore catalog collection...");
         

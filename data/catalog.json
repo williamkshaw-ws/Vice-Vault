@@ -1,11 +1,5 @@
 [
   {
-    "id": "ABBA-TEST",
-    "notes": "test",
-    "model": "ABBA",
-    "color": "Test"
-  },
-  {
     "id": "DRIVE-WHITE",
     "notes": "Maximum core energy & indestructible distance",
     "color": "WHITE",
