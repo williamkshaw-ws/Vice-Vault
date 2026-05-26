@@ -205,13 +205,13 @@ export default function AddMissingBallForm({
              {/* Name */}
              <div>
                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
-                 Name (Beastin', Divot Dudes) <span className="text-[#2563eb]">*</span>
+                 Name (Beastin', Nicklaus) <span className="text-[#2563eb]">*</span>
                </label>
                <input
                  type="text"
                  required
                  maxLength={40}
-                 placeholder="e.g. Beastin', Divot Dudes, Standard"
+                 placeholder="e.g. Beastin', Nicklaus, Standard"
                  value={name}
                  onChange={(e) => setName(e.target.value)}
                  className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
@@ -222,13 +222,13 @@ export default function AddMissingBallForm({
              {/* Color */}
              <div>
                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
-                 Color (white, red, neon drip) <span className="text-[#2563eb]">*</span>
+                 Color (Red, Drip, Shade) <span className="text-[#2563eb]">*</span>
                </label>
                <input
                  type="text"
                  required
                  maxLength={40}
-                 placeholder="e.g. White, Neon Lime, Red"
+                 placeholder="e.g. Red, Drip, Shade"
                  value={color}
                  onChange={(e) => setColor(e.target.value)}
                  className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
@@ -242,7 +242,7 @@ export default function AddMissingBallForm({
              {/* Variation */}
              <div>
                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
-                 Variation (different ball designs if needed)
+                 Variation (Different Ball Designs)
                </label>
                <input
                  type="text"
