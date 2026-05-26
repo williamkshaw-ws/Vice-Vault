@@ -187,7 +187,7 @@ export default function AddMissingBallForm({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
              {/* Model Name */}
              <div>
-               <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
+               <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold whitespace-nowrap">
                  Model (Pro, Tour, Soft) <span className="text-[#2563eb]">*</span>
                </label>
                <input
@@ -204,7 +204,7 @@ export default function AddMissingBallForm({
 
              {/* Name */}
              <div>
-               <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
+               <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold whitespace-nowrap">
                  Name (Beastin', Nicklaus) <span className="text-[#2563eb]">*</span>
                </label>
                <input
@@ -221,7 +221,7 @@ export default function AddMissingBallForm({
  
              {/* Color */}
              <div>
-               <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
+               <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold whitespace-nowrap">
                  Color (Red, Drip, Shade) <span className="text-[#2563eb]">*</span>
                </label>
                <input
@@ -241,7 +241,7 @@ export default function AddMissingBallForm({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              {/* Variation */}
              <div>
-               <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
+               <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold whitespace-nowrap">
                  Variation (Different Ball Designs)
                </label>
                <input
@@ -257,7 +257,7 @@ export default function AddMissingBallForm({
 
              {/* Year */}
              <div>
-               <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
+               <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold whitespace-nowrap">
                  Year (release year)
                </label>
                <input
