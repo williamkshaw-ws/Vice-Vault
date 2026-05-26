@@ -38,7 +38,8 @@ import {
   Mail,
   X,
   Eye,
-  ShoppingBag
+  ShoppingBag,
+  FileText
 } from "lucide-react";
 
 import { auth, db, isFirebaseConfigured } from "./firebase";
@@ -216,13 +217,19 @@ export default function App() {
 
   // Firebase Auth & Cloud Sync states
   const [currentUser, setCurrentUser] = useState<any | null>(null);
-  const [userProfile, setUserProfile] = useState<{ displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; shareBag?: boolean } | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [isLoadingCloudData, setIsLoadingCloudData] = useState(false);
   const [isCloudDataLoaded, setIsCloudDataLoaded] = useState(false);
   const [accentColor, setAccentColor] = useState("#2563eb");
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [guestDropdownOpen, setGuestDropdownOpen] = useState(false);
+
+  // Shared Locker states
+  const [sharedLockerOwner, setSharedLockerOwner] = useState<any | null>(null);
+  const [sharedLockerBalls, setSharedLockerBalls] = useState<any[]>([]);
+  const [sharedLockerError, setSharedLockerError] = useState<string | null>(null);
+  const [isSharedViewLoading, setIsSharedViewLoading] = useState(false);
 
   // State for tracked owned balls
   const [balls, setBalls] = useState<GolfBall[]>(() => {
@@ -336,6 +343,34 @@ export default function App() {
       document.body.style.overflow = "";
     };
   }, [isUserManagerOpen, isVaultManagerOpen, selectedUserForBag, authModalOpen, deletingUserId]);
+
+  // Load shared locker data if share username is in query param
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const shareUsername = params.get("share");
+    if (shareUsername) {
+      setIsSharedViewLoading(true);
+      fetch(`/api/share/${encodeURIComponent(shareUsername)}`)
+        .then(async (res) => {
+          const data = await res.json();
+          if (res.ok) {
+            setSharedLockerOwner(data.profile);
+            setSharedLockerBalls(data.balls);
+            if (data.profile.preferredColor) {
+              setAccentColor(data.profile.preferredColor);
+            }
+          } else {
+            setSharedLockerError(data.error || "This locker is private or does not exist.");
+          }
+        })
+        .catch((err) => {
+          setSharedLockerError("Failed to connect to server. Please try again.");
+        })
+        .finally(() => {
+          setIsSharedViewLoading(false);
+        });
+    }
+  }, []);
 
   // Add multiple catalog items from Excel/Spreadsheet import
   const handleXlsImportCatalogItems = async (newItems: Omit<CatalogItem, "id">[]) => {
@@ -503,7 +538,8 @@ export default function App() {
           username: parsed.username || "",
           avatarUrl: parsed.photoURL || "initials",
           preferredColor: parsed.preferredColor || "#2563eb",
-          role: (parsed.role && parsed.role.toLowerCase() === "admin") ? "Admin" : "User"
+          role: (parsed.role && parsed.role.toLowerCase() === "admin") ? "Admin" : "User",
+          shareBag: !!parsed.shareBag
         });
         setAccentColor(parsed.preferredColor || "#2563eb");
         setIsCloudDataLoaded(false);
@@ -536,7 +572,8 @@ export default function App() {
                   preferredColor: profileData.preferredColor,
                   role: profileData.role,
                   email: profileData.email,
-                  uid: profileData.uid
+                  uid: profileData.uid,
+                  shareBag: profileData.shareBag
                 };
                 userDocId = profileData.uid.startsWith("u-") ? profileData.uid : `u-${profileData.username}`;
               }
@@ -555,7 +592,8 @@ export default function App() {
                 preferredColor: userDocData.preferredColor || "#2563eb",
                 role: (userDocData.role && userDocData.role.toLowerCase() === "admin") ? "Admin" : "User",
                 createdAt: userDocData.createdAt,
-                email: userDocData.email || user.email || ""
+                email: userDocData.email || user.email || "",
+                shareBag: !!userDocData.shareBag
               } as any);
               setAccentColor(userDocData.preferredColor || "#2563eb");
             } else {
@@ -571,7 +609,8 @@ export default function App() {
                 preferredColor: "#2563eb",
                 role: cleanUsername === "admin" ? "Admin" : "User",
                 createdAt: new Date().toISOString(),
-                email: user.email || ""
+                email: user.email || "",
+                shareBag: false
               } as any);
               setAccentColor("#2563eb");
               userDocId = fallbackDocId;
@@ -669,7 +708,8 @@ export default function App() {
                 username: data.username || "",
                 avatarUrl: data.photoURL || "initials",
                 preferredColor: data.preferredColor || "#2563eb",
-                role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User"
+                role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User",
+                shareBag: !!data.shareBag
               });
               setAccentColor(data.preferredColor || "#2563eb");
               // Keep local storage up to date with latest server-side profile
@@ -760,9 +800,10 @@ export default function App() {
         setUserProfile({
           displayName: data.displayName,
           username: data.username,
-          avatarUrl: data.avatarUrl,
+          avatarUrl: data.photoURL || data.avatarUrl,
           preferredColor: data.preferredColor,
-          role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User"
+          role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User",
+          shareBag: !!data.shareBag
         });
         setAccentColor(data.preferredColor);
       }
@@ -1166,6 +1207,237 @@ export default function App() {
   const eaCount = balls.filter(b => b.packageType === "ea" || !b.packageType).reduce((sum, b) => sum + b.quantity, 0);
   const sleeveCount = balls.filter(b => b.packageType === "sleeve").reduce((sum, b) => sum + Math.round(b.quantity / 3), 0);
   const boxCount = balls.filter(b => b.packageType === "box").reduce((sum, b) => sum + Math.round(b.quantity / 12), 0);
+
+  // Check if we are viewing a shared locker link
+  const params = new URLSearchParams(window.location.search);
+  const shareUsername = params.get("share");
+  const isSharedView = !!shareUsername;
+
+  if (isSharedView) {
+    if (isSharedViewLoading) {
+      return (
+        <div className="min-h-screen bg-black flex flex-col justify-center items-center p-4">
+          <div className="text-center space-y-3 font-mono text-xs text-neutral-500">
+            <RefreshCw className="animate-spin text-[#2563eb] mx-auto" size={24} />
+            <span>Loading shared locker profile...</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (sharedLockerError) {
+      return (
+        <div className="min-h-screen bg-black flex flex-col justify-center items-center p-4">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-8 max-w-md w-full text-center space-y-6 shadow-2xl animate-fade-in">
+            <div className="w-14 h-14 rounded-full bg-rose-950/40 border border-rose-900/60 flex items-center justify-center text-rose-500 mx-auto">
+              <AlertTriangle size={24} />
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-sans font-black text-white text-lg uppercase tracking-wider">Locker Access Blocked</h3>
+              <p className="text-xs text-neutral-400 font-mono leading-relaxed">
+                {sharedLockerError}
+              </p>
+            </div>
+            <a
+              href="/"
+              className="block w-full py-2.5 bg-[#2563eb] hover:bg-[#3b82f6] text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-all text-center font-mono"
+            >
+              Go to Golf Ball Vault
+            </a>
+          </div>
+        </div>
+      );
+    }
+
+    if (sharedLockerOwner) {
+      return (
+        <div className="min-h-screen transition-all duration-300 font-sans bg-black text-neutral-100 selection:bg-[#2563eb] selection:text-black flex flex-col" id="shared-locker-view">
+          <style>{`
+            :root {
+              --theme-accent-color: ${accentColor};
+              --theme-accent-color-rgb: ${hexToRgb(accentColor)};
+            }
+            .text-\\[\\#2563eb\\] { color: var(--theme-accent-color) !important; }
+            .bg-\\[\\#2563eb\\] { background-color: var(--theme-accent-color) !important; }
+            .border-\\[\\#2563eb\\] { border-color: var(--theme-accent-color) !important; }
+            .bg-\\[\\#2563eb\\]\\/10 { background-color: rgba(var(--theme-accent-color-rgb), 0.1) !important; }
+            .border-\\[\\#2563eb\\]\\/20 { border-color: rgba(var(--theme-accent-color-rgb), 0.2) !important; }
+          `}</style>
+
+          <header className="sticky top-0 z-30 shadow-sm border-b border-neutral-850 bg-neutral-950">
+            <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#2563eb]"></span>
+                <span className="font-sans font-black text-sm text-white uppercase tracking-widest">Golf Ball Vault</span>
+              </div>
+              <a
+                href="/"
+                className="text-[10px] font-mono font-black uppercase text-neutral-400 hover:text-white px-3 py-1.5 border border-neutral-800 hover:border-neutral-750 bg-neutral-900 rounded-lg transition-colors"
+              >
+                Build Your Own Vault
+              </a>
+            </div>
+          </header>
+
+          <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8 space-y-6">
+            {/* Owner Banner */}
+            <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-3xl flex items-center gap-4 relative overflow-hidden shadow-xl">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#2563eb]/10 rounded-full blur-3xl pointer-events-none" />
+              <AvatarRenderer avatarUrl={sharedLockerOwner.avatarUrl} name={sharedLockerOwner.displayName || "User"} size="lg" color={sharedLockerOwner.preferredColor || "#2563eb"} />
+              <div className="min-w-0 flex-1">
+                <h2 className="text-lg font-black text-white truncate leading-tight font-sans">{sharedLockerOwner.displayName}'s Locker</h2>
+                <p className="text-xs text-neutral-400 font-mono mt-0.5 font-bold">@{sharedLockerOwner.username}</p>
+                <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 rounded-full bg-[#2563eb]/10 border border-[#2563eb]/20 text-[9px] font-mono font-bold text-[#2563eb] uppercase tracking-wider">
+                  Public Share View
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Metrics display */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-mono text-neutral-500 uppercase block tracking-wider font-bold">Total Owned Balls</span>
+                  <span className="font-sans font-black text-2xl text-white tracking-tight">
+                    {sharedLockerBalls.reduce((sum, b) => sum + b.quantity, 0)}
+                  </span>
+                </div>
+                <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
+                  <GolfBallStackIcon className="w-[22px] h-[22px]" />
+                </div>
+              </div>
+
+              <div className="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-mono text-neutral-500 uppercase block tracking-wider font-bold">Unique Balls</span>
+                  <span className="font-sans font-black text-2xl text-white tracking-tight">
+                    {new Set(sharedLockerBalls.map(b => `${b.model.trim().toLowerCase()}|${b.color.trim().toLowerCase()}|${(b.version || "Standard Edition").trim().toLowerCase()}`)).size}
+                  </span>
+                </div>
+                <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
+                  <GolfBallOutlineIcon className="w-5 h-5" />
+                </div>
+              </div>
+            </div>
+
+            {/* Bag Inventory */}
+            <div className="space-y-4">
+              <h3 className="font-sans font-black text-white text-sm uppercase tracking-wider flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 text-neutral-400" />
+                Bag Inventory ({sharedLockerBalls.length} Items)
+              </h3>
+
+              {sharedLockerBalls.length === 0 ? (
+                <div className="py-20 text-center rounded-3xl border border-neutral-850 bg-neutral-950/20 text-neutral-500 font-mono text-xs">
+                  This user's bag is empty.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4">
+                  {sharedLockerBalls.map((ball) => {
+                    const currentPkg = ball.packageType || "ea";
+                    const displayQty = ball.packageType === "box" 
+                      ? Math.max(1, Math.round(ball.quantity / 12)) 
+                      : ball.packageType === "sleeve" 
+                      ? Math.max(1, Math.round(ball.quantity / 3)) 
+                      : ball.quantity;
+
+                    return (
+                      <div 
+                        key={ball.id} 
+                        className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 flex gap-4 hover:border-neutral-750 transition-all duration-300 relative overflow-hidden"
+                      >
+                        {/* Ball Visual representation */}
+                        <div className="flex-shrink-0 flex flex-col items-center justify-center p-1 bg-neutral-950 rounded-xl border border-neutral-850 h-22 w-22 shadow-inner relative">
+                          <BallVisual 
+                            color={ball.color} 
+                            model={ball.model} 
+                            number={ball.packageType === 'box' ? undefined : ball.customNumber} 
+                            size="md" 
+                            customImage={ball.customImage}
+                          />
+                          {ball.packageType !== 'box' && (
+                            <div className="absolute -bottom-1 text-[8px] font-mono uppercase bg-neutral-950 border border-neutral-800 text-neutral-400 px-1.5 py-0.5 rounded leading-none scale-90">
+                              #{ball.customNumber}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Content details */}
+                        <div className="flex-1 min-w-0 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="text-[9px] font-mono tracking-widest text-[#2563eb] uppercase font-black">
+                                {ball.model}
+                              </span>
+                              <span className={`text-[8px] px-1 py-0.2 rounded font-mono font-bold uppercase border tracking-wider scale-95 ${
+                                ball.packageType === 'box'
+                                  ? "bg-blue-950/40 border-blue-900/60 text-blue-400"
+                                  : ball.packageType === 'sleeve'
+                                  ? "bg-purple-950/40 border-purple-900/60 text-purple-400"
+                                  : "bg-teal-950/40 border-teal-900/60 text-teal-400"
+                              }`}>
+                                {ball.packageType === 'box' ? 'Box' : ball.packageType === 'sleeve' ? 'Sleeve' : 'Ball'}
+                              </span>
+                            </div>
+                            <h4 className="font-sans font-black text-white text-base leading-tight truncate mt-0.5">
+                              {ball.color}
+                            </h4>
+
+                            {/* Condition badge */}
+                            <div className="mt-2 flex items-center gap-2 text-[10px] font-mono">
+                              <span className="text-neutral-500 uppercase">Condition:</span>
+                              <span className="text-neutral-300 font-bold border border-neutral-850 bg-neutral-950/40 px-2 py-0.5 rounded">
+                                {ball.condition}
+                              </span>
+                            </div>
+
+                            {/* Version badge */}
+                            <div className="mt-1 flex items-center gap-2 text-[10px] font-mono">
+                              <span className="text-neutral-500 uppercase">Version:</span>
+                              <span className="text-neutral-300 font-bold border border-neutral-850 bg-neutral-950/40 px-2 py-0.5 rounded">
+                                {ball.version || "Standard Edition"}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Quantity display */}
+                          <div className="mt-3 flex items-center justify-between gap-3 border-t border-neutral-850/60 pt-3 font-mono">
+                            <div className="flex-1 min-w-0 pr-1 flex items-center gap-1.5 text-xs text-neutral-455">
+                              <FileText className="w-3.5 h-3.5 text-neutral-500 flex-shrink-0" />
+                              <span className="italic truncate text-[11px] font-sans">
+                                {ball.notes || "No custom notes recorded."}
+                              </span>
+                            </div>
+                            <div className="px-3 py-1 bg-neutral-950 rounded-lg border border-neutral-850 text-xs font-mono font-black text-[#2563eb] shrink-0">
+                              <span>
+                                {displayQty}{" "}
+                                <span className="text-[10px] text-neutral-500 font-normal">
+                                  {ball.packageType === "box" 
+                                    ? (displayQty === 1 ? "Box" : "Boxes") 
+                                    : ball.packageType === "sleeve" 
+                                    ? (displayQty === 1 ? "Sleeve" : "Sleeves") 
+                                    : (displayQty === 1 ? "Ball" : "Balls")}
+                                </span>
+                                {ball.packageType !== "ea" && (
+                                  <span className="text-[9px] text-neutral-450 font-normal ml-1.5 font-sans">
+                                    ({ball.quantity} balls)
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </main>
+        </div>
+      );
+    }
+  }
 
   return (
     <div className="min-h-screen transition-all duration-300 font-sans bg-black text-neutral-100 selection:bg-[#2563eb] selection:text-black" id="vice-vault-app">
@@ -1692,7 +1964,8 @@ export default function App() {
             username: updatedUser.username,
             avatarUrl: updatedUser.photoURL,
             preferredColor: updatedUser.preferredColor,
-            role: updatedUser.role
+            role: updatedUser.role,
+            shareBag: !!updatedUser.shareBag
           });
           setAccentColor(updatedUser.preferredColor);
         }}
@@ -1703,7 +1976,8 @@ export default function App() {
             username: mockUser.username,
             avatarUrl: mockUser.photoURL,
             preferredColor: mockUser.preferredColor,
-            role: mockUser.role
+            role: mockUser.role,
+            shareBag: !!mockUser.shareBag
                           });
           setAccentColor(mockUser.preferredColor);
         }}

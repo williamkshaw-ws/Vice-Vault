@@ -29,6 +29,7 @@ interface UserProfile {
   password?: string;
   username?: string;
   authUid?: string;
+  shareBag?: boolean;
 }
 
 interface CatalogItem {
@@ -103,6 +104,7 @@ const DEFAULT_USERS: UserProfile[] = [
     preferredColor: "#2563eb",
     avatarUrl: "preset-1",
     password: hashPassword("AdminPass123!"),
+    shareBag: true,
     createdAt: new Date().toISOString()
   },
   {
@@ -114,6 +116,7 @@ const DEFAULT_USERS: UserProfile[] = [
     preferredColor: "#2563eb",
     avatarUrl: "preset-1",
     password: hashPassword("AdminPass123!"),
+    shareBag: false,
     createdAt: new Date().toISOString()
   }
 ];
@@ -1025,6 +1028,7 @@ app.post("/api/auth/signup", async (req, res) => {
     username: newUser.username,
     preferredColor: newUser.preferredColor,
     role: newUser.role,
+    shareBag: false,
     isMock: !isFirebaseAdminInitialized
   };
 
@@ -1101,6 +1105,7 @@ app.post("/api/auth/signin", async (req, res) => {
     username: user.username,
     preferredColor: user.preferredColor,
     role: user.role,
+    shareBag: !!user.shareBag,
     isMock: true
   };
 
@@ -1112,6 +1117,38 @@ app.get("/api/users/:uid/locker", async (req, res) => {
   const { uid } = req.params;
   const balls = await getUserLocker(uid);
   res.json({ balls });
+});
+
+// Public endpoint for sharing user bags
+app.get("/api/share/:username", async (req, res) => {
+  const { username } = req.params;
+  if (!username || !username.trim()) {
+    return res.status(400).json({ error: "Username is required." });
+  }
+
+  const cleanUser = username.trim().toLowerCase();
+  const users = await getUsersList();
+  const user = users.find(u => u.username?.toLowerCase() === cleanUser);
+
+  if (!user) {
+    return res.status(404).json({ error: "User not found." });
+  }
+
+  if (!user.shareBag) {
+    return res.status(403).json({ error: "This user's bag is private." });
+  }
+
+  const balls = await getUserLocker(user.uid);
+  res.json({
+    success: true,
+    profile: {
+      displayName: user.displayName,
+      username: user.username,
+      avatarUrl: user.avatarUrl,
+      preferredColor: user.preferredColor
+    },
+    balls
+  });
 });
 
 app.post("/api/users/:uid/locker", async (req, res) => {
@@ -1187,6 +1224,7 @@ app.get("/api/users/:id/profile", async (req, res) => {
     username: user.username,
     preferredColor: user.preferredColor,
     role: user.role,
+    shareBag: !!user.shareBag,
     isMock: false
   };
   res.json(clientUser);
@@ -1195,7 +1233,7 @@ app.get("/api/users/:id/profile", async (req, res) => {
 // Update user profile details (Name, Username, avatarUrl, preferredColor)
 app.patch("/api/users/:id/profile", async (req, res) => {
   const { id } = req.params;
-  const { displayName, username, avatarUrl, preferredColor, password } = req.body;
+  const { displayName, username, avatarUrl, preferredColor, password, shareBag } = req.body;
 
   if (!displayName || !displayName.trim()) {
     return res.status(400).json({ error: "Display name is required." });
@@ -1248,6 +1286,9 @@ app.patch("/api/users/:id/profile", async (req, res) => {
   }
   if (preferredColor !== undefined) {
     user.preferredColor = preferredColor;
+  }
+  if (shareBag !== undefined) {
+    user.shareBag = !!shareBag;
   }
   if (password !== undefined && password !== "") {
     if (!isStrongPassword(password)) {
@@ -1313,6 +1354,7 @@ app.patch("/api/users/:id/profile", async (req, res) => {
     username: user.username,
     preferredColor: user.preferredColor,
     role: user.role,
+    shareBag: !!user.shareBag,
     isMock: true
   };
 
@@ -1642,6 +1684,40 @@ app.delete("/api/users/:id", async (req, res) => {
 app.get("/api/catalog", async (req, res) => {
   const catalog = await getGlobalCatalog();
   res.json(catalog);
+
+  // Background check: ensure default users exist in Firebase Auth
+  if (isFirebaseAdminInitialized) {
+    (async () => {
+      try {
+        for (const user of DEFAULT_USERS) {
+          if (user.email) {
+            try {
+              await admin.auth().getUserByEmail(user.email);
+            } catch (authErr: any) {
+              if (authErr.code === 'auth/user-not-found') {
+                console.log(`Dynamically re-seeding missing Firebase Auth user: ${user.email}`);
+                try {
+                  const authUser = await admin.auth().createUser({
+                    uid: user.uid,
+                    email: user.email,
+                    password: "AdminPass123!",
+                    displayName: user.displayName
+                  });
+                  await dbAdmin!.collection("users").doc(user.uid).set({
+                    authUid: authUser.uid
+                  }, { merge: true });
+                } catch (createErr) {
+                  console.error(`Failed to seed Firebase Auth user ${user.email}:`, createErr);
+                }
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error in background Firebase Auth user seed:", err);
+      }
+    })();
+  }
 });
 
 // POST: Add new design to catalog (Admin only)

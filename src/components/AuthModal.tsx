@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor } from "lucide-react";
+import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor, Copy } from "lucide-react";
 import {
   auth,
   db,
@@ -23,7 +23,7 @@ interface AuthModalProps {
   onClose: () => void;
   onMockLogin?: (user: any) => void;
   currentUser?: any;
-  userProfile?: { displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; createdAt?: string; email?: string } | null;
+  userProfile?: { displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; createdAt?: string; email?: string; shareBag?: boolean } | null;
   onProfileUpdate?: (updatedUser: any) => void;
   theme?: 'light' | 'dark' | 'system';
   onThemeChange?: (theme: 'light' | 'dark' | 'system') => void;
@@ -215,6 +215,8 @@ export default function AuthModal({
   const [preferredColor, setPreferredColor] = useState("#2563eb");
   const [newPassword, setNewPassword] = useState("");
   const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
+  const [shareBag, setShareBag] = useState(false);
+  const [copied, setCopied] = useState(false);
   
   // Avatar Selection State
   const [selectedPreset, setSelectedPreset] = useState("preset-1");
@@ -243,10 +245,12 @@ export default function AuthModal({
         const usernameVal = userProfile?.username || currentUser.username || "";
         const colorVal = userProfile?.preferredColor || currentUser.preferredColor || "#2563eb";
         const avatarVal = userProfile?.avatarUrl || currentUser.photoURL || "preset-1";
+        const shareBagVal = userProfile?.shareBag || currentUser.shareBag || false;
         
         setDisplayName(nameVal);
         setUsername(usernameVal);
         setPreferredColor(colorVal);
+        setShareBag(shareBagVal);
         
         if (avatarVal.startsWith("preset-")) {
           setSelectedPreset(avatarVal);
@@ -261,6 +265,7 @@ export default function AuthModal({
         setUsername("");
         setPreferredColor("#2563eb");
         setSelectedPreset("preset-1");
+        setShareBag(false);
       }
     }
   }, [isOpen]);
@@ -448,7 +453,8 @@ export default function AuthModal({
           displayName: displayName.trim(),
           username: cleanUsername,
           avatarUrl: finalAvatar,
-          preferredColor
+          preferredColor,
+          shareBag
         };
         if (newPassword) {
           updateData.password = newPassword;
@@ -498,7 +504,8 @@ export default function AuthModal({
         displayName: displayName.trim(),
         username: cleanUsername,
         avatarUrl: finalAvatar,
-        preferredColor: preferredColor
+        preferredColor: preferredColor,
+        shareBag
       };
 
       const res = await fetch(`/api/users/${currentUser.uid}/profile`, {
@@ -522,7 +529,8 @@ export default function AuthModal({
           photoURL: finalAvatar,
           username: cleanUsername,
           preferredColor: preferredColor,
-          role: data.role || userProfile?.role || "User"
+          role: data.role || userProfile?.role || "User",
+          shareBag: data.shareBag
         });
         onClose();
         setIsLoading(false);
@@ -1061,6 +1069,64 @@ export default function AuthModal({
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Locker Sharing Section */}
+              <div className="bg-neutral-950/30 border border-neutral-850 p-3.5 rounded-xl space-y-3 font-mono text-xs">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-white font-bold block">Public Locker Sharing</span>
+                    <span className="text-neutral-550 text-[10px] block mt-0.5">Allow others to view your golf bag</span>
+                  </div>
+                  
+                  {/* Toggle Switch */}
+                  <label className="relative inline-flex items-center cursor-pointer select-none">
+                    <input 
+                      type="checkbox" 
+                      checked={shareBag} 
+                      onChange={(e) => setShareBag(e.target.checked)} 
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-neutral-400 peer-checked:after:bg-black after:border-neutral-800 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-neutral-600 peer-checked:bg-[#2563eb]"></div>
+                  </label>
+                </div>
+
+                {shareBag ? (
+                  <div className="space-y-2 pt-1 border-t border-neutral-900/60">
+                    <span className="text-[10px] text-neutral-400 uppercase tracking-wider block">Your Public Share Link</span>
+                    <div className="flex gap-2">
+                      <div className="flex-1 bg-neutral-950 border border-neutral-850 rounded-lg p-2 text-[10.5px] text-neutral-300 truncate select-all flex items-center gap-1.5 font-mono">
+                        <LinkIcon size={12} className="text-[#2563eb] shrink-0" />
+                        <span>{window.location.origin}/?share={username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "")}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const link = `${window.location.origin}/?share=${username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "")}`;
+                          try {
+                            await navigator.clipboard.writeText(link);
+                            setCopied(true);
+                            setTimeout(() => setCopied(false), 2000);
+                          } catch (err) {
+                            console.error("Failed to copy link:", err);
+                          }
+                        }}
+                        className={`p-2 border rounded-lg transition-all cursor-pointer flex items-center justify-center shrink-0 ${
+                          copied
+                            ? "bg-emerald-950/30 border-emerald-900/50 text-emerald-400"
+                            : "bg-neutral-900 hover:bg-[#2563eb] hover:text-black border-neutral-850 hover:border-transparent text-neutral-400"
+                        }`}
+                        title={copied ? "Copied!" : "Copy Share Link"}
+                      >
+                        {copied ? <Check size={13} /> : <Copy size={13} />}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-[10px] text-neutral-550 italic pt-1 border-t border-neutral-900/60">
+                    Sharing is currently disabled. Toggle on to generate a public viewer link.
+                  </div>
+                )}
               </div>
 
               <div>

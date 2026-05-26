@@ -86,5 +86,6 @@ export interface UserProfile {
   role: "Admin" | "User";
   preferredColor: string;
   avatarUrl?: string;
+  shareBag?: boolean;
   createdAt: string;
 }
