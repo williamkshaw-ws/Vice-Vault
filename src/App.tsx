@@ -176,10 +176,20 @@ const INITIAL_OWNED_BALLS: GolfBall[] = [
   }
 ];
 
-function sanitizeId(model: string, color: string): string {
-  const modelPart = model.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "");
-  const colorPart = color.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "");
-  return `${modelPart}-${colorPart}`;
+function sanitizeId(model: string, color: string, name?: string, variation?: string, year?: string): string {
+  const clean = (s: string) => s.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  const modelPart = clean(model);
+  const colorPart = clean(color);
+  const namePart = name ? clean(name) : "";
+  const varPart = variation ? clean(variation) : "";
+  const yearPart = year ? clean(year) : "";
+  
+  let base = modelPart;
+  if (namePart) base += `-${namePart}`;
+  base += `-${colorPart}`;
+  if (varPart) base += `-${varPart}`;
+  if (yearPart) base += `-${yearPart}`;
+  return base;
 }
 
 
@@ -286,7 +296,6 @@ export default function App() {
   const [modalPkgType, setModalPkgType] = useState<"ea" | "sleeve" | "box">("box");
   const [modalCondition, setModalCondition] = useState<BallCondition>(BallCondition.NEW);
   const [modalNotes, setModalNotes] = useState("");
-  const [modalYear, setModalYear] = useState("");
   const [modalPlayNumber, setModalPlayNumber] = useState<number>(1);
   const [modalCustomNumberInput, setModalCustomNumberInput] = useState<string>("");
 
@@ -384,7 +393,7 @@ export default function App() {
       
       const filteredNewItems: Omit<CatalogItem, "id">[] = [];
       for (const item of newItems) {
-        const id = sanitizeId(item.model, item.color);
+        const id = sanitizeId(item.model, item.color, item.name, item.variation || item.notes, item.year);
         if (!seenIds.has(id) && !catalogIds.has(id)) {
           seenIds.add(id);
           filteredNewItems.push(item);
@@ -406,8 +415,10 @@ export default function App() {
             },
             body: JSON.stringify({
               model: item.model,
+              name: item.name || "",
               color: item.color,
-              notes: item.notes,
+              variation: item.variation || item.notes,
+              year: item.year,
               customImage: item.customImage
             })
           });
@@ -418,11 +429,14 @@ export default function App() {
         }
       } else {
         filteredNewItems.forEach((item) => {
-          const id = sanitizeId(item.model, item.color);
+          const id = sanitizeId(item.model, item.color, item.name, item.variation || item.notes, item.year);
           itemsWithIds.push({
             id,
             model: item.model.trim(),
+            name: item.name ? item.name.trim() : "",
             color: item.color.trim(),
+            variation: item.variation ? item.variation.trim() : undefined,
+            year: item.year ? item.year.trim() : undefined,
             notes: item.notes ? item.notes.trim() : "",
             customImage: item.customImage
           });
@@ -443,8 +457,11 @@ export default function App() {
       if (!originalItem) throw new Error("Original item not found");
 
       const updatedModel = (updatedFields.model !== undefined ? updatedFields.model.trim() : originalItem.model);
+      const updatedName = (updatedFields.name !== undefined ? updatedFields.name.trim() : (originalItem.name || ""));
       const updatedColor = (updatedFields.color !== undefined ? updatedFields.color.trim() : originalItem.color);
-      const newId = sanitizeId(updatedModel, updatedColor);
+      const updatedVariation = (updatedFields.variation !== undefined ? updatedFields.variation.trim() : (originalItem.variation || ""));
+      const updatedYear = (updatedFields.year !== undefined ? updatedFields.year.trim() : (originalItem.year || ""));
+      const newId = sanitizeId(updatedModel, updatedColor, updatedName, updatedVariation, updatedYear);
 
       if (currentUser) {
         const res = await fetch(`/api/catalog/${id}`, {
@@ -455,8 +472,10 @@ export default function App() {
           },
           body: JSON.stringify({
             model: updatedModel,
+            name: updatedName,
             color: updatedColor,
-            notes: updatedFields.notes,
+            variation: updatedVariation,
+            year: updatedYear,
             customImage: updatedFields.customImage
           })
         });
@@ -470,7 +489,10 @@ export default function App() {
         const newItem: CatalogItem = {
           id: newId,
           model: updatedModel,
+          name: updatedName,
           color: updatedColor,
+          variation: updatedVariation || undefined,
+          year: updatedYear || undefined,
           notes: updatedFields.notes !== undefined ? updatedFields.notes.trim() : originalItem.notes,
           customImage: updatedFields.customImage !== undefined ? updatedFields.customImage : originalItem.customImage
         };
@@ -486,6 +508,7 @@ export default function App() {
                 ...ball,
                 model: updatedModel.toUpperCase(),
                 color: updatedColor,
+                year: updatedYear || undefined,
                 customImage: updatedFields.customImage !== undefined ? updatedFields.customImage : ball.customImage,
               };
             }
@@ -856,7 +879,6 @@ export default function App() {
     setModalPkgType("box");
     setModalCondition(BallCondition.NEW);
     setModalNotes("");
-    setModalYear("");
     try {
       const res = await fetch(`/api/users/${user.uid || user.id}/locker`);
       if (res.ok) {
@@ -1042,10 +1064,10 @@ export default function App() {
   // Add missing ball to Catalog Database
   const handleAddCatalogItem = async (newItem: Omit<CatalogItem, "id">) => {
     try {
-      const id = sanitizeId(newItem.model, newItem.color);
+      const id = sanitizeId(newItem.model, newItem.color, newItem.name, newItem.variation, newItem.year);
       const exists = catalog.some(c => c.id === id);
       if (exists) {
-        alert("A design spec with this Model and Color already exists in the Catalog.");
+        alert("A design spec with this Model, Name, and Color already exists in the Catalog.");
         return;
       }
 
@@ -1059,8 +1081,10 @@ export default function App() {
           },
           body: JSON.stringify({
             model: newItem.model,
+            name: newItem.name,
             color: newItem.color,
-            notes: newItem.notes,
+            variation: newItem.variation,
+            year: newItem.year,
             customImage: newItem.customImage
           })
         });
@@ -1074,7 +1098,10 @@ export default function App() {
         itemWithId = {
           id,
           model: newItem.model.trim(),
+          name: newItem.name ? newItem.name.trim() : "",
           color: newItem.color.trim(),
+          variation: newItem.variation ? newItem.variation.trim() : undefined,
+          year: newItem.year ? newItem.year.trim() : undefined,
           notes: newItem.notes ? newItem.notes.trim() : "",
           customImage: newItem.customImage
         };
@@ -1170,8 +1197,11 @@ export default function App() {
     const query = searchQuery.toLowerCase();
     const matchesSearch = 
       item.model.toLowerCase().includes(query) ||
+      (item.name && item.name.toLowerCase().includes(query)) ||
       item.color.toLowerCase().includes(query) ||
-      (item.notes && item.notes.toLowerCase().includes(query));
+      (item.variation && item.variation.toLowerCase().includes(query)) ||
+      (item.notes && item.notes.toLowerCase().includes(query)) ||
+      (item.year && item.year.toLowerCase().includes(query));
 
     const matchesBrand = 
       selectedBrandFilter === "ALL" || 
@@ -1186,21 +1216,32 @@ export default function App() {
   ).sort();
 
   // Sort Catalog alphabetically by Model, then by Color, then by Design Notes (Notes)
+  // Sort Catalog alphabetically by Model, then by Name, then by Color, then by Variation (Notes), then by Year
   const sortedCatalog = [...filteredCatalog].sort((a, b) => {
     const modelA = a.model.trim().toLowerCase();
     const modelB = b.model.trim().toLowerCase();
     if (modelA < modelB) return -1;
     if (modelA > modelB) return 1;
 
+    const nameA = (a.name || "").trim().toLowerCase();
+    const nameB = (b.name || "").trim().toLowerCase();
+    if (nameA < nameB) return -1;
+    if (nameA > nameB) return 1;
+
     const colorA = a.color.trim().toLowerCase();
     const colorB = b.color.trim().toLowerCase();
     if (colorA < colorB) return -1;
     if (colorA > colorB) return 1;
 
-    const notesA = (a.notes || "").trim().toLowerCase();
-    const notesB = (b.notes || "").trim().toLowerCase();
-    if (notesA < notesB) return -1;
-    if (notesA > notesB) return 1;
+    const varA = (a.variation || a.notes || "").trim().toLowerCase();
+    const varB = (b.variation || b.notes || "").trim().toLowerCase();
+    if (varA < varB) return -1;
+    if (varA > varB) return 1;
+
+    const yearA = (a.year || "").trim().toLowerCase();
+    const yearB = (b.year || "").trim().toLowerCase();
+    if (yearA < yearB) return -1;
+    if (yearA > yearB) return 1;
 
     return 0;
   });
@@ -1208,7 +1249,7 @@ export default function App() {
   // Calculate high level statistics for Locker
   const totalOwnedCount = balls.reduce((sum, b) => sum + b.quantity, 0);
   const totalUniqueModels = new Set(
-    balls.map(b => `${b.model.trim().toLowerCase()}|${b.color.trim().toLowerCase()}|${(b.version || "Standard Edition").trim().toLowerCase()}`)
+    balls.map(b => `${b.model.trim().toLowerCase()}|${b.color.trim().toLowerCase()}|${(b.year || "").trim().toLowerCase()}`)
   ).size;
 
   const eaCount = balls.filter(b => b.packageType === "ea" || !b.packageType).reduce((sum, b) => sum + b.quantity, 0);
@@ -2076,7 +2117,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3.5 text-xs font-mono">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs font-mono">
                   <div>
                     <label className="block text-[9px] uppercase text-neutral-400 mb-1">Ball Play-Number</label>
                     <div className="flex gap-1">
@@ -2140,16 +2181,6 @@ export default function App() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[9px] uppercase text-neutral-400 mb-1">Year (Optional)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. 2026"
-                      value={modalYear}
-                      onChange={(e) => setModalYear(e.target.value)}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none font-sans"
-                    />
-                  </div>
-                  <div>
                     <label className="block text-[9px] uppercase text-neutral-400 mb-1">Design Notes / Custom Info</label>
                     <input
                       type="text"
@@ -2189,13 +2220,12 @@ export default function App() {
                       packageType: modalPkgType,
                       customNumber: modalPkgType === 'box' ? 1 : modalPlayNumber,
                       notes: modalNotes.trim() || "Added by Admin",
-                      year: modalYear.trim() || undefined,
+                      year: matchedCatalogItem?.year || undefined,
                       dateAdded: today,
                       customImage
                     };
                     setSelectedUserBalls(prev => [newBall, ...prev]);
                     setModalNotes("");
-                    setModalYear("");
                     setModalPlayNumber(1);
                     setModalCustomNumberInput("");
                   }}
@@ -2490,7 +2520,12 @@ export default function App() {
                   {catalog
                     .filter(item => {
                       const q = adminSearchQuery.toLowerCase();
-                      return item.model.toLowerCase().includes(q) || item.color.toLowerCase().includes(q);
+                      return item.model.toLowerCase().includes(q) || 
+                             item.color.toLowerCase().includes(q) ||
+                             (item.name && item.name.toLowerCase().includes(q)) ||
+                             (item.variation && item.variation.toLowerCase().includes(q)) ||
+                             (item.notes && item.notes.toLowerCase().includes(q)) ||
+                             (item.year && item.year.toLowerCase().includes(q));
                     })
                     .map((item) => (
                       <div 
@@ -2512,18 +2547,23 @@ export default function App() {
                             />
                           </span>
                           <div className="truncate">
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-1.5 flex-wrap">
                               <h5 className="font-bold text-xs text-white truncate max-w-[120px] md:max-w-[160px]">
-                                {item.model}
+                                {item.model}{item.name ? ` - ${item.name}` : ''}
                               </h5>
+                              {item.year && (
+                                <span className="text-[9px] font-mono bg-neutral-900 border border-neutral-800 text-neutral-400 px-1.5 py-0.5 rounded leading-none scale-90 select-none">
+                                  {item.year}
+                                </span>
+                              )}
                             </div>
                             <p className="text-[10px] text-neutral-400 truncate mt-0.5 flex flex-wrap gap-x-2 items-center">
                               <span className="font-medium text-neutral-300">{item.color}</span>
-                              {item.notes && (
+                              {(item.variation || item.notes) && (
                                 <>
                                   <span className="text-neutral-600 font-mono select-none">•</span>
-                                  <span className="text-neutral-400 italic text-[10px] truncate max-w-[150px] md:max-w-[280px]" title={item.notes}>
-                                    {item.notes}
+                                  <span className="text-neutral-400 italic text-[10px] truncate max-w-[150px] md:max-w-[280px]" title={item.variation || item.notes}>
+                                    {item.variation || item.notes}
                                   </span>
                                 </>
                               )}
@@ -2592,7 +2632,12 @@ export default function App() {
                   ) : (
                     catalog.filter(item => {
                       const q = adminSearchQuery.toLowerCase();
-                      return item.model.toLowerCase().includes(q) || item.color.toLowerCase().includes(q);
+                      return item.model.toLowerCase().includes(q) || 
+                             item.color.toLowerCase().includes(q) ||
+                             (item.name && item.name.toLowerCase().includes(q)) ||
+                             (item.variation && item.variation.toLowerCase().includes(q)) ||
+                             (item.notes && item.notes.toLowerCase().includes(q)) ||
+                             (item.year && item.year.toLowerCase().includes(q));
                     }).length === 0 && (
                       <div className="py-6 text-center border border-dashed border-neutral-850 rounded-xl bg-neutral-950/10 text-neutral-500 text-xs">
                         No balls match "{adminSearchQuery}"

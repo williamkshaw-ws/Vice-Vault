@@ -47,7 +47,6 @@ export default function OwnedBallCard({
     [1, 2, 3, 4].includes(ball.customNumber) ? "" : String(ball.customNumber || "")
   );
   const [editCondition, setEditCondition] = useState<BallCondition>(ball.condition);
-  const [editYear, setEditYear] = useState<string>(ball.year || "");
   const [editNotes, setEditNotes] = useState<string>(currentNotes);
 
   const startEditing = () => {
@@ -57,7 +56,6 @@ export default function OwnedBallCard({
     setEditPlayNumber(ball.customNumber || 1);
     setEditCustomNumberInput([1, 2, 3, 4].includes(ball.customNumber) ? "" : String(ball.customNumber || ""));
     setEditCondition(ball.condition);
-    setEditYear(ball.year || "");
     setEditNotes(notes);
     setIsEditing(true);
   };
@@ -68,7 +66,6 @@ export default function OwnedBallCard({
       packageType: editPkgType,
       customNumber: editPkgType === 'box' ? 1 : editPlayNumber,
       condition: editCondition,
-      year: editYear.trim(),
       notes: editNotes.trim(),
     });
     setIsEditing(false);
@@ -137,7 +134,7 @@ export default function OwnedBallCard({
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {/* Play Number */}
           <div>
             <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
@@ -210,19 +207,7 @@ export default function OwnedBallCard({
             </select>
           </div>
 
-          {/* Year Input */}
-          <div>
-            <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1 font-bold">
-              Year (Optional)
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. 2026"
-              value={editYear}
-              onChange={(e) => setEditYear(e.target.value)}
-              className="w-full bg-neutral-950 text-xs py-1.5 px-2 rounded text-neutral-300 font-bold border border-neutral-850 focus:border-[#2563eb] outline-none"
-            />
-          </div>
+
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end mt-3">

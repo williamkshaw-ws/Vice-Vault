@@ -32,7 +32,6 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
   const [playNumber, setPlayNumber] = useState<number>(1);
   const [customNumberInput, setCustomNumberInput] = useState<string>("");
   const [condition, setCondition] = useState<BallCondition>(BallCondition.NEW);
-  const [year, setYear] = useState("");
   const [notes, setNotes] = useState("");
   const [justAdded, setJustAdded] = useState(false);
 
@@ -48,7 +47,7 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
       condition,
       item.customImage,
       pkgType,
-      year.trim()
+      item.year
     );
 
     setJustAdded(true);
@@ -57,7 +56,6 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
       setIsOpen(false);
       // Reset form controls
       setNotes("");
-      setYear("");
       setPlayNumber(1);
       setCustomNumberInput("");
     }, 1200);
@@ -107,16 +105,23 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
         <div className="flex-1 min-w-0 flex flex-col justify-center">
           <div>
             <div className="flex items-start justify-between gap-2">
-              <div className="truncate">
-                <h4 className="font-sans font-black text-white text-base leading-tight truncate" title={item.model}>
-                  {item.model}
-                </h4>
+              <div className="truncate font-sans">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h4 className="font-sans font-black text-white text-base leading-tight truncate" title={item.model}>
+                    {item.model}{item.name ? ` - ${item.name}` : ''}
+                  </h4>
+                  {item.year && (
+                    <span className="text-[9px] font-mono font-bold bg-neutral-950 border border-neutral-850 text-neutral-450 px-1 py-0.5 rounded select-none scale-90 leading-none">
+                      {item.year}
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-[#2563eb] font-mono font-medium truncate mt-0.5">
                   {item.color}
                 </p>
-                {item.notes && (
-                  <p className="text-[10px] text-neutral-400 font-mono mt-1 break-words line-clamp-2 italic leading-tight" title={item.notes}>
-                    "{item.notes}"
+                {(item.variation || item.notes) && (
+                  <p className="text-[10px] text-neutral-400 font-mono mt-1 break-words line-clamp-2 italic leading-tight" title={item.variation || item.notes}>
+                    "{item.variation || item.notes}"
                   </p>
                 )}
               </div>
@@ -156,7 +161,7 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
             <span>Add to My Bag</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Play Number */}
             <div>
               <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
@@ -230,19 +235,6 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
               </select>
             </div>
 
-            {/* Year Option Input */}
-            <div>
-              <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1 font-bold">
-                Year (Optional)
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. 2026"
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
-                className="w-full bg-neutral-950 text-xs py-1.5 px-2 rounded text-neutral-350 font-bold border border-neutral-850 focus:border-[#2563eb] outline-none"
-              />
-            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">

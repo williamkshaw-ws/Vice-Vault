@@ -21,8 +21,10 @@ export default function AddMissingBallForm({
   onCancelEdit
 }: AddMissingBallFormProps) {
   const [model, setModel] = useState("");
+  const [name, setName] = useState("");
   const [color, setColor] = useState("");
-  const [notes, setNotes] = useState("");
+  const [variation, setVariation] = useState("");
+  const [year, setYear] = useState("");
   const [customImage, setCustomImage] = useState<string | undefined>(undefined);
   
   // Visual feedback states
@@ -34,13 +36,17 @@ export default function AddMissingBallForm({
   React.useEffect(() => {
     if (editItem) {
       setModel(editItem.model);
+      setName(editItem.name || "");
       setColor(editItem.color);
-      setNotes(editItem.notes || "");
+      setVariation(editItem.variation || editItem.notes || "");
+      setYear(editItem.year || "");
       setCustomImage(editItem.customImage);
     } else {
       setModel("");
+      setName("");
       setColor("");
-      setNotes("");
+      setVariation("");
+      setYear("");
       setCustomImage(undefined);
     }
   }, [editItem]);
@@ -95,20 +101,23 @@ export default function AddMissingBallForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!model.trim() || !color.trim()) {
-      alert("Please provide both Model Name and Color / Finish.");
+    if (!model.trim() || !name.trim() || !color.trim()) {
+      alert("Please provide Model, Name, and Color.");
       return;
     }
 
-    const finalNotes = notes.trim() || "Standard Design";
+    const payload = {
+      model: model.trim().toUpperCase(),
+      name: name.trim(),
+      color: color.trim(),
+      variation: variation.trim() || undefined,
+      year: year.trim() || undefined,
+      notes: variation.trim() || undefined,
+      customImage,
+    };
 
     if (editItem) {
-      onUpdateCatalogItem(editItem.id, {
-        model: model.trim().toUpperCase(),
-        color: color.trim(),
-        notes: finalNotes,
-        customImage,
-      });
+      onUpdateCatalogItem(editItem.id, payload);
 
       setSuccess(true);
       setTimeout(() => {
@@ -116,12 +125,7 @@ export default function AddMissingBallForm({
         if (onCancelEdit) onCancelEdit();
       }, 1200);
     } else {
-      onAddCatalogItem({
-        model: model.trim().toUpperCase(),
-        color: color.trim(),
-        notes: finalNotes,
-        customImage,
-      });
+      onAddCatalogItem(payload);
 
       // Flash success state
       setSuccess(true);
@@ -129,8 +133,10 @@ export default function AddMissingBallForm({
         setSuccess(false);
         // Reset form variables
         setModel("");
+        setName("");
         setColor("");
-        setNotes("");
+        setVariation("");
+        setYear("");
         setCustomImage(undefined);
       }, 1500);
     }
@@ -177,54 +183,91 @@ export default function AddMissingBallForm({
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* First Row: Model, Name, Color (All Required) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
              {/* Model Name */}
              <div>
                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
-                 Model / Brand Name <span className="text-[#2563eb]">*</span>
+                 Model (like Pro, Tour, Soft) <span className="text-[#2563eb]">*</span>
                </label>
                <input
                  type="text"
                  required
                  maxLength={40}
-                 placeholder="e.g. PRO GLOSS, PRO PLUS MATTE"
+                 placeholder="e.g. PRO, TOUR, PRO SOFT"
                  value={model}
                  onChange={(e) => setModel(e.target.value)}
                  className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
                  id="missing-model-input"
                />
              </div>
- 
-             {/* Cover / Color */}
+
+             {/* Name */}
              <div>
                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
-                 Color & Finish <span className="text-[#2563eb]">*</span>
+                 Name (like Beastin', Divot Dudes) <span className="text-[#2563eb]">*</span>
                </label>
                <input
                  type="text"
                  required
                  maxLength={40}
-                 placeholder="e.g. Coral Drip Splatter, Jet Black"
+                 placeholder="e.g. Beastin', Divot Dudes, Standard"
+                 value={name}
+                 onChange={(e) => setName(e.target.value)}
+                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
+                 id="missing-name-input"
+               />
+             </div>
+ 
+             {/* Color */}
+             <div>
+               <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
+                 Color (white, red, neon drip) <span className="text-[#2563eb]">*</span>
+               </label>
+               <input
+                 type="text"
+                 required
+                 maxLength={40}
+                 placeholder="e.g. White, Neon Lime, Red"
                  value={color}
                  onChange={(e) => setColor(e.target.value)}
                  className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
                  id="missing-color-input"
                />
              </div>
- 
-             {/* Design Notes */}
+          </div>
+
+          {/* Second Row: Variation, Year (Both Optional) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             {/* Variation */}
              <div>
                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
-                 Design Notes
+                 Variation (different ball designs if needed)
                </label>
                <input
                  type="text"
                  maxLength={80}
-                 placeholder="e.g. Matte series, customized side stamp"
-                 value={notes}
-                 onChange={(e) => setNotes(e.target.value)}
+                 placeholder="e.g. matte finish, customized side stamp"
+                 value={variation}
+                 onChange={(e) => setVariation(e.target.value)}
                  className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
-                 id="missing-notes-input"
+                 id="missing-variation-input"
+               />
+             </div>
+
+             {/* Year */}
+             <div>
+               <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
+                 Year (release year)
+               </label>
+               <input
+                 type="text"
+                 maxLength={10}
+                 placeholder="e.g. 2026, 2024"
+                 value={year}
+                 onChange={(e) => setYear(e.target.value)}
+                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
+                 id="missing-year-input"
                />
              </div>
           </div>
@@ -304,8 +347,10 @@ export default function AddMissingBallForm({
                 } else {
                   // Reset form fields
                   setModel("");
+                  setName("");
                   setColor("");
-                  setNotes("");
+                  setVariation("");
+                  setYear("");
                   setCustomImage(undefined);
                 }
               }}

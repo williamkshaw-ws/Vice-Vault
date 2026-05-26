@@ -63,9 +63,12 @@ function decryptUsername(token: string): string | null {
 interface CatalogItem {
   id: string;
   model: string;
+  name?: string;
   color: string;
-  notes?: string;
+  variation?: string;
+  year?: string;
   customImage?: string;
+  notes?: string;
 }
 
 function isStrongPassword(password: string): boolean {
@@ -192,10 +195,20 @@ const DEFAULT_LOCKER = [
 ];
 
 
-function sanitizeId(model: string, color: string): string {
-  const modelPart = model.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "");
-  const colorPart = color.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "");
-  return `${modelPart}-${colorPart}`;
+function sanitizeId(model: string, color: string, name?: string, variation?: string, year?: string): string {
+  const clean = (s: string) => s.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  const modelPart = clean(model);
+  const colorPart = clean(color);
+  const namePart = name ? clean(name) : "";
+  const varPart = variation ? clean(variation) : "";
+  const yearPart = year ? clean(year) : "";
+  
+  let base = modelPart;
+  if (namePart) base += `-${namePart}`;
+  base += `-${colorPart}`;
+  if (varPart) base += `-${varPart}`;
+  if (yearPart) base += `-${yearPart}`;
+  return base;
 }
 
 // Dynamically build DEFAULT_IMAGES mapping from SCRAPED_BALLS for compatibility
@@ -715,7 +728,7 @@ if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
         
         updatedSnap.forEach(doc => {
           const data = doc.data();
-          const newId = sanitizeId(data.model || "", data.color || "");
+          const newId = sanitizeId(data.model || "", data.color || "", data.name, data.variation, data.year);
           if (doc.id !== newId) {
             console.log(`Migrating legacy catalog doc ID in Firestore: ${doc.id} -> ${newId}`);
             batch.set(catalogRef.doc(newId), data);
@@ -748,13 +761,15 @@ if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
     const localCatalog = loadCatalog();
     const migratedCatalog: CatalogItem[] = [];
     for (const item of localCatalog) {
-      const newId = sanitizeId(item.model, item.color);
+      const newId = sanitizeId(item.model, item.color, item.name, item.variation, item.year);
       if (!migratedCatalog.some(c => c.id === newId)) {
         migratedCatalog.push({
           id: newId,
           model: item.model.trim(),
+          name: item.name ? item.name.trim() : undefined,
           color: item.color.trim(),
-          notes: item.notes || (item as any).tagline || "",
+          variation: item.variation || item.notes || "",
+          year: item.year,
           customImage: item.customImage
         });
       }
@@ -1764,17 +1779,19 @@ app.post("/api/catalog", async (req, res) => {
     return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
   }
 
-  const { model, color, notes, customImage } = req.body;
-  if (!model || !color) {
-    return res.status(400).json({ error: "Model and color specifications are required." });
+  const { model, name, color, variation, year, customImage } = req.body;
+  if (!model || !name || !color) {
+    return res.status(400).json({ error: "Model, Name, and Color specifications are required." });
   }
 
-  const newId = sanitizeId(model, color);
+  const newId = sanitizeId(model, color, name, variation, year);
   const newItem: CatalogItem = {
     id: newId,
     model: model.trim(),
+    name: name.trim(),
     color: color.trim(),
-    notes: notes !== undefined ? notes.trim() : undefined,
+    variation: variation !== undefined ? variation.trim() : undefined,
+    year: year !== undefined ? year.trim() : undefined,
     customImage
   };
 
@@ -1790,7 +1807,7 @@ app.put("/api/catalog/:id", async (req, res) => {
   }
 
   const { id } = req.params;
-  const { model, color, notes, customImage } = req.body;
+  const { model, name, color, variation, year, customImage } = req.body;
 
   const catalog = await getGlobalCatalog();
   const currentItem = catalog.find(item => item.id === id);
@@ -1799,14 +1816,20 @@ app.put("/api/catalog/:id", async (req, res) => {
   }
 
   const updatedModel = model ? model.trim() : currentItem.model;
+  const updatedName = name ? name.trim() : (currentItem.name || "");
   const updatedColor = color ? color.trim() : currentItem.color;
-  const newId = sanitizeId(updatedModel, updatedColor);
+  const updatedVariation = variation !== undefined ? variation.trim() : currentItem.variation;
+  const updatedYear = year !== undefined ? year.trim() : currentItem.year;
+
+  const newId = sanitizeId(updatedModel, updatedColor, updatedName, updatedVariation, updatedYear);
 
   const updatedItem: CatalogItem = {
     id: newId,
     model: updatedModel,
+    name: updatedName,
     color: updatedColor,
-    notes: notes !== undefined ? notes.trim() : currentItem.notes,
+    variation: updatedVariation,
+    year: updatedYear,
     customImage: customImage !== undefined ? customImage : currentItem.customImage
   };
 

@@ -62,9 +62,12 @@ export interface CourseLog {
 export interface CatalogItem {
   id: string;
   model: string;
+  name?: string;
   color: string;
-  notes?: string;
+  variation?: string;
+  year?: string;
   customImage?: string;
+  notes?: string;
 }
 
 export interface FittingRecommendation {
