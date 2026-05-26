@@ -188,7 +188,7 @@ export default function AddMissingBallForm({
              {/* Model Name */}
              <div>
                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
-                 Model (like Pro, Tour, Soft) <span className="text-[#2563eb]">*</span>
+                 Model (Pro, Tour, Soft) <span className="text-[#2563eb]">*</span>
                </label>
                <input
                  type="text"
@@ -205,7 +205,7 @@ export default function AddMissingBallForm({
              {/* Name */}
              <div>
                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
-                 Name (like Beastin', Divot Dudes) <span className="text-[#2563eb]">*</span>
+                 Name (Beastin', Divot Dudes) <span className="text-[#2563eb]">*</span>
                </label>
                <input
                  type="text"

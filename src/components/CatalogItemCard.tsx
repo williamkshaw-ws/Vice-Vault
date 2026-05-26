@@ -106,16 +106,9 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
           <div>
             <div className="flex items-start justify-between gap-2">
               <div className="truncate font-sans">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <h4 className="font-sans font-black text-white text-base leading-tight truncate" title={item.model}>
-                    {item.model}{item.name ? ` - ${item.name}` : ''}
-                  </h4>
-                  {item.year && (
-                    <span className="text-[9px] font-mono font-bold bg-neutral-950 border border-neutral-850 text-neutral-450 px-1 py-0.5 rounded select-none scale-90 leading-none">
-                      {item.year}
-                    </span>
-                  )}
-                </div>
+                <h4 className="font-sans font-black text-white text-base leading-tight truncate" title={item.model}>
+                  {item.model}{item.name ? ` - ${item.name}` : ''}
+                </h4>
                 <p className="text-xs text-[#2563eb] font-mono font-medium truncate mt-0.5">
                   {item.color}
                 </p>
@@ -123,6 +116,11 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
                   <p className="text-[10px] text-neutral-400 font-mono mt-1 break-words line-clamp-2 italic leading-tight" title={item.variation || item.notes}>
                     "{item.variation || item.notes}"
                   </p>
+                )}
+                {item.year && (
+                  <span className="inline-block text-[9px] font-mono font-bold bg-neutral-950 border border-neutral-850 text-neutral-450 px-1.5 py-0.5 rounded select-none mt-1 leading-none">
+                    {item.year}
+                  </span>
                 )}
               </div>
 
