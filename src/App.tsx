@@ -217,7 +217,7 @@ export default function App() {
 
   // Firebase Auth & Cloud Sync states
   const [currentUser, setCurrentUser] = useState<any | null>(null);
-  const [userProfile, setUserProfile] = useState<{ displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; shareBag?: boolean } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; shareBag?: boolean; shareToken?: string } | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [isLoadingCloudData, setIsLoadingCloudData] = useState(false);
   const [isCloudDataLoaded, setIsCloudDataLoaded] = useState(false);
@@ -360,7 +360,7 @@ export default function App() {
               setAccentColor(data.profile.preferredColor);
             }
           } else {
-            setSharedLockerError(data.error || "This locker is private or does not exist.");
+            setSharedLockerError(data.error || "This bag is private or does not exist.");
           }
         })
         .catch((err) => {
@@ -539,7 +539,8 @@ export default function App() {
           avatarUrl: parsed.photoURL || "initials",
           preferredColor: parsed.preferredColor || "#2563eb",
           role: (parsed.role && parsed.role.toLowerCase() === "admin") ? "Admin" : "User",
-          shareBag: !!parsed.shareBag
+          shareBag: !!parsed.shareBag,
+          shareToken: parsed.shareToken
         });
         setAccentColor(parsed.preferredColor || "#2563eb");
         setIsCloudDataLoaded(false);
@@ -573,7 +574,8 @@ export default function App() {
                   role: profileData.role,
                   email: profileData.email,
                   uid: profileData.uid,
-                  shareBag: profileData.shareBag
+                  shareBag: profileData.shareBag,
+                  shareToken: profileData.shareToken
                 };
                 userDocId = profileData.uid.startsWith("u-") ? profileData.uid : `u-${profileData.username}`;
               }
@@ -593,7 +595,8 @@ export default function App() {
                 role: (userDocData.role && userDocData.role.toLowerCase() === "admin") ? "Admin" : "User",
                 createdAt: userDocData.createdAt,
                 email: userDocData.email || user.email || "",
-                shareBag: !!userDocData.shareBag
+                shareBag: !!userDocData.shareBag,
+                shareToken: userDocData.shareToken
               } as any);
               setAccentColor(userDocData.preferredColor || "#2563eb");
             } else {
@@ -709,7 +712,8 @@ export default function App() {
                 avatarUrl: data.photoURL || "initials",
                 preferredColor: data.preferredColor || "#2563eb",
                 role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User",
-                shareBag: !!data.shareBag
+                shareBag: !!data.shareBag,
+                shareToken: data.shareToken
               });
               setAccentColor(data.preferredColor || "#2563eb");
               // Keep local storage up to date with latest server-side profile
@@ -803,7 +807,8 @@ export default function App() {
           avatarUrl: data.photoURL || data.avatarUrl,
           preferredColor: data.preferredColor,
           role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User",
-          shareBag: !!data.shareBag
+          shareBag: !!data.shareBag,
+          shareToken: data.shareToken
         });
         setAccentColor(data.preferredColor);
       }
@@ -1219,7 +1224,7 @@ export default function App() {
         <div className="min-h-screen bg-black flex flex-col justify-center items-center p-4">
           <div className="text-center space-y-3 font-mono text-xs text-neutral-500">
             <RefreshCw className="animate-spin text-[#2563eb] mx-auto" size={24} />
-            <span>Loading shared locker profile...</span>
+            <span>Loading shared bag...</span>
           </div>
         </div>
       );
@@ -1233,9 +1238,9 @@ export default function App() {
               <AlertTriangle size={24} />
             </div>
             <div className="space-y-2">
-              <h3 className="font-sans font-black text-white text-lg uppercase tracking-wider">Locker Access Blocked</h3>
+              <h3 className="font-sans font-black text-white text-lg uppercase tracking-wider">Bag Access Blocked</h3>
               <p className="text-xs text-neutral-400 font-mono leading-relaxed">
-                {sharedLockerError}
+                {sharedLockerError === "Locker not found or set to private" ? "This bag is private or does not exist." : sharedLockerError}
               </p>
             </div>
             <a
@@ -1285,7 +1290,7 @@ export default function App() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#2563eb]/10 rounded-full blur-3xl pointer-events-none" />
               <AvatarRenderer avatarUrl={sharedLockerOwner.avatarUrl} name={sharedLockerOwner.displayName || "User"} size="lg" color={sharedLockerOwner.preferredColor || "#2563eb"} />
               <div className="min-w-0 flex-1">
-                <h2 className="text-lg font-black text-white truncate leading-tight font-sans">{sharedLockerOwner.displayName}'s Locker</h2>
+                <h2 className="text-lg font-black text-white truncate leading-tight font-sans">{sharedLockerOwner.displayName}'s Bag</h2>
                 <p className="text-xs text-neutral-400 font-mono mt-0.5 font-bold">@{sharedLockerOwner.username}</p>
                 <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 rounded-full bg-[#2563eb]/10 border border-[#2563eb]/20 text-[9px] font-mono font-bold text-[#2563eb] uppercase tracking-wider">
                   Public Share View
@@ -1965,7 +1970,8 @@ export default function App() {
             avatarUrl: updatedUser.photoURL,
             preferredColor: updatedUser.preferredColor,
             role: updatedUser.role,
-            shareBag: !!updatedUser.shareBag
+            shareBag: !!updatedUser.shareBag,
+            shareToken: updatedUser.shareToken
           });
           setAccentColor(updatedUser.preferredColor);
         }}
@@ -1977,8 +1983,9 @@ export default function App() {
             avatarUrl: mockUser.photoURL,
             preferredColor: mockUser.preferredColor,
             role: mockUser.role,
-            shareBag: !!mockUser.shareBag
-                          });
+            shareBag: !!mockUser.shareBag,
+            shareToken: mockUser.shareToken
+          });
           setAccentColor(mockUser.preferredColor);
         }}
       />

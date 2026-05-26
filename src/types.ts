@@ -87,5 +87,6 @@ export interface UserProfile {
   preferredColor: string;
   avatarUrl?: string;
   shareBag?: boolean;
+  shareToken?: string;
   createdAt: string;
 }

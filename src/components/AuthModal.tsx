@@ -23,7 +23,7 @@ interface AuthModalProps {
   onClose: () => void;
   onMockLogin?: (user: any) => void;
   currentUser?: any;
-  userProfile?: { displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; createdAt?: string; email?: string; shareBag?: boolean } | null;
+  userProfile?: { displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; createdAt?: string; email?: string; shareBag?: boolean; shareToken?: string } | null;
   onProfileUpdate?: (updatedUser: any) => void;
   theme?: 'light' | 'dark' | 'system';
   onThemeChange?: (theme: 'light' | 'dark' | 'system') => void;
@@ -1075,7 +1075,7 @@ export default function AuthModal({
               <div className="bg-neutral-950/30 border border-neutral-850 p-3.5 rounded-xl space-y-3 font-mono text-xs">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-white font-bold block">Public Locker Sharing</span>
+                    <span className="text-white font-bold block">Share your bag</span>
                     <span className="text-neutral-550 text-[10px] block mt-0.5">Allow others to view your golf bag</span>
                   </div>
                   
@@ -1097,12 +1097,12 @@ export default function AuthModal({
                     <div className="flex gap-2">
                       <div className="flex-1 bg-neutral-950 border border-neutral-850 rounded-lg p-2 text-[10.5px] text-neutral-300 truncate select-all flex items-center gap-1.5 font-mono">
                         <LinkIcon size={12} className="text-[#2563eb] shrink-0" />
-                        <span>{window.location.origin}/?share={username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "")}</span>
+                        <span>{window.location.origin}/?share={userProfile?.shareToken || currentUser?.shareToken || ""}</span>
                       </div>
                       <button
                         type="button"
                         onClick={async () => {
-                          const link = `${window.location.origin}/?share=${username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "")}`;
+                          const link = `${window.location.origin}/?share=${userProfile?.shareToken || currentUser?.shareToken || ""}`;
                           try {
                             await navigator.clipboard.writeText(link);
                             setCopied(true);

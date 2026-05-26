@@ -30,6 +30,29 @@ interface UserProfile {
   username?: string;
   authUid?: string;
   shareBag?: boolean;
+  shareToken?: string;
+}
+
+const SECRET_KEY = crypto.scryptSync("ViceVaultSecretKey_2026", "salt", 32);
+const IV = Buffer.alloc(16, 0); // static IV is stable for URL obfuscation
+
+function encryptUsername(username: string): string {
+  if (!username) return "";
+  const cipher = crypto.createCipheriv("aes-256-cbc", SECRET_KEY, IV);
+  let encrypted = cipher.update(username, "utf-8", "hex");
+  encrypted += cipher.final("hex");
+  return encrypted;
+}
+
+function decryptUsername(encrypted: string): string | null {
+  try {
+    const decipher = crypto.createDecipheriv("aes-256-cbc", SECRET_KEY, IV);
+    let decrypted = decipher.update(encrypted, "hex", "utf-8");
+    decrypted += decipher.final("utf-8");
+    return decrypted;
+  } catch (err) {
+    return null;
+  }
 }
 
 interface CatalogItem {
@@ -1029,6 +1052,7 @@ app.post("/api/auth/signup", async (req, res) => {
     preferredColor: newUser.preferredColor,
     role: newUser.role,
     shareBag: false,
+    shareToken: encryptUsername(newUser.username || ""),
     isMock: !isFirebaseAdminInitialized
   };
 
@@ -1106,6 +1130,7 @@ app.post("/api/auth/signin", async (req, res) => {
     preferredColor: user.preferredColor,
     role: user.role,
     shareBag: !!user.shareBag,
+    shareToken: encryptUsername(user.username || ""),
     isMock: true
   };
 
@@ -1120,15 +1145,19 @@ app.get("/api/users/:uid/locker", async (req, res) => {
 });
 
 // Public endpoint for sharing user bags
-app.get("/api/share/:username", async (req, res) => {
-  const { username } = req.params;
-  if (!username || !username.trim()) {
-    return res.status(400).json({ error: "Username is required." });
+app.get("/api/share/:token", async (req, res) => {
+  const { token } = req.params;
+  if (!token || !token.trim()) {
+    return res.status(400).json({ error: "Share token is required." });
   }
 
-  const cleanUser = username.trim().toLowerCase();
+  const decryptedUsername = decryptUsername(token.trim());
+  if (!decryptedUsername) {
+    return res.status(400).json({ error: "Invalid share link." });
+  }
+
   const users = await getUsersList();
-  const user = users.find(u => u.username?.toLowerCase() === cleanUser);
+  const user = users.find(u => u.username?.toLowerCase() === decryptedUsername.toLowerCase());
 
   if (!user) {
     return res.status(404).json({ error: "User not found." });
@@ -1145,7 +1174,8 @@ app.get("/api/share/:username", async (req, res) => {
       displayName: user.displayName,
       username: user.username,
       avatarUrl: user.avatarUrl,
-      preferredColor: user.preferredColor
+      preferredColor: user.preferredColor,
+      shareToken: token
     },
     balls
   });
@@ -1225,6 +1255,7 @@ app.get("/api/users/:id/profile", async (req, res) => {
     preferredColor: user.preferredColor,
     role: user.role,
     shareBag: !!user.shareBag,
+    shareToken: encryptUsername(user.username || ""),
     isMock: false
   };
   res.json(clientUser);
@@ -1355,6 +1386,7 @@ app.patch("/api/users/:id/profile", async (req, res) => {
     preferredColor: user.preferredColor,
     role: user.role,
     shareBag: !!user.shareBag,
+    shareToken: encryptUsername(user.username || ""),
     isMock: true
   };
 
