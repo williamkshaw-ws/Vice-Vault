@@ -136,7 +136,7 @@ function BallVaultIcon({ className = "w-4 h-4 text-neutral-400" }: { className?:
 // Initial owned mockup data to make the app look stunning right away
 const INITIAL_OWNED_BALLS: GolfBall[] = [
   {
-    id: "OWNED-PRO-PURE_GLOSS_WHITE-STANDARD_EDITION-BRAND_NEW-BOX-V1",
+    id: "OWNED-PRO-PURE_GLOSS_WHITE-BRAND_NEW-BOX-V1",
     model: BallModel.PRO,
     color: "Pure Gloss White",
     quantity: 12,
@@ -144,12 +144,12 @@ const INITIAL_OWNED_BALLS: GolfBall[] = [
     packageType: "box",
     customNumber: 1,
     notes: "Tournament dozen box. Extreme wedge backspin control.",
-    version: "Standard Edition",
+    year: "2026",
     dateAdded: "5/12/2026",
     customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_white_th_35dcf74c-c5a3-4467-aa5a-c9adf7b01bc0.png?v=1711374990"
   },
   {
-    id: "OWNED-PRO-RED_BLUE_DRIP_SPLATTER-STANDARD_EDITION-NEAR_MINT_SCUFFED_0-EA-V2",
+    id: "OWNED-PRO-RED_BLUE_DRIP_SPLATTER-NEAR_MINT_SCUFFED_0-EA-V2",
     model: BallModel.PRO,
     color: "Red/Blue Drip Splatter",
     quantity: 6,
@@ -157,12 +157,12 @@ const INITIAL_OWNED_BALLS: GolfBall[] = [
     packageType: "ea",
     customNumber: 77,
     notes: "My lucky splattered golf balls.",
-    version: "Standard Edition",
+    year: "2026",
     dateAdded: "5/14/2026",
     customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/New-Ball-PDP-Pro-Drip-Red-Blue-Front.png?v=1760629724"
   },
   {
-    id: "OWNED-PRO_PLUS-NEON_GLOSS_LIME-STANDARD_EDITION-PLAYED_SCUFFED_1-SLEEVE-V3",
+    id: "OWNED-PRO_PLUS-NEON_GLOSS_LIME-PLAYED_SCUFFED_1-SLEEVE-V3",
     model: BallModel.PRO_PLUS,
     color: "Neon Gloss Lime",
     quantity: 3,
@@ -170,7 +170,7 @@ const INITIAL_OWNED_BALLS: GolfBall[] = [
     packageType: "sleeve",
     customNumber: 3,
     notes: "Practice round balls. Extremely responsive feel.",
-    version: "Standard Edition",
+    year: "2026",
     dateAdded: "5/15/2026",
     customImage: "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Pro_Plus_Neon_Lime_Front_Zoom.jpg?v=1709811032"
   }
@@ -286,6 +286,7 @@ export default function App() {
   const [modalPkgType, setModalPkgType] = useState<"ea" | "sleeve" | "box">("box");
   const [modalCondition, setModalCondition] = useState<BallCondition>(BallCondition.NEW);
   const [modalNotes, setModalNotes] = useState("");
+  const [modalYear, setModalYear] = useState("");
   const [modalPlayNumber, setModalPlayNumber] = useState<number>(1);
   const [modalCustomNumberInput, setModalCustomNumberInput] = useState<string>("");
 
@@ -855,6 +856,7 @@ export default function App() {
     setModalPkgType("box");
     setModalCondition(BallCondition.NEW);
     setModalNotes("");
+    setModalYear("");
     try {
       const res = await fetch(`/api/users/${user.uid || user.id}/locker`);
       if (res.ok) {
@@ -987,19 +989,19 @@ export default function App() {
     condition: BallCondition,
     customImage?: string,
     packageType?: 'ea' | 'sleeve' | 'box',
-    version?: string
+    year?: string
   ) => {
     const today = new Date().toLocaleDateString();
     
     setBalls((prev) => {
       const resolvedPkgType = packageType || (qty >= 12 ? 'box' : qty >= 3 ? 'sleeve' : 'ea');
-      // Check if matching ball stack exists to merge (model, color, packageType, version, condition, and design notes matching)
+      // Check if matching ball stack exists to merge (model, color, packageType, year, condition, and design notes matching)
       const existingIdx = prev.findIndex(b => 
         b.model.trim().toLowerCase() === model.trim().toLowerCase() &&
         b.color.trim().toLowerCase() === color.trim().toLowerCase() &&
         b.notes.trim().toLowerCase() === notes.trim().toLowerCase() &&
         b.condition === condition &&
-        (b.version || "Standard Edition").trim().toLowerCase() === (version || "Standard Edition").trim().toLowerCase() &&
+        (b.year || "").trim().toLowerCase() === (year || "").trim().toLowerCase() &&
         (b.packageType || (b.quantity >= 12 ? 'box' : b.quantity >= 3 ? 'sleeve' : 'ea')) === resolvedPkgType
       );
 
@@ -1014,13 +1016,13 @@ export default function App() {
         const sanitizeSegment = (s: string) => s.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "");
         const modelPart = sanitizeSegment(model);
         const colorPart = sanitizeSegment(color);
-        const versionPart = sanitizeSegment(version || "Standard Edition");
+        const yearPart = year ? sanitizeSegment(year) : "ANY";
         const conditionPart = sanitizeSegment(condition);
         const pkgPart = sanitizeSegment(resolvedPkgType);
         const randomPart = Math.random().toString(36).substr(2, 4).toUpperCase();
 
         const newBall: GolfBall = {
-          id: `OWNED-${modelPart}-${colorPart}-${versionPart}-${conditionPart}-${pkgPart}-${randomPart}`,
+          id: `OWNED-${modelPart}-${colorPart}-${yearPart}-${conditionPart}-${pkgPart}-${randomPart}`,
           model,
           color,
           quantity: qty,
@@ -1028,7 +1030,7 @@ export default function App() {
           packageType: resolvedPkgType,
           customNumber: customNum,
           notes: notes || "",
-          version: version || "Standard Edition",
+          year: year || undefined,
           dateAdded: today,
           customImage
         };
@@ -1316,7 +1318,7 @@ export default function App() {
                 <div>
                   <span className="text-[10px] font-mono text-neutral-500 uppercase block tracking-wider font-bold">Unique Balls</span>
                   <span className="font-sans font-black text-2xl text-white tracking-tight">
-                    {new Set(sharedLockerBalls.map(b => `${b.model.trim().toLowerCase()}|${b.color.trim().toLowerCase()}|${(b.version || "Standard Edition").trim().toLowerCase()}`)).size}
+                    {new Set(sharedLockerBalls.map(b => `${b.model.trim().toLowerCase()}|${b.color.trim().toLowerCase()}|${(b.year || "").trim().toLowerCase()}`)).size}
                   </span>
                 </div>
                 <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
@@ -1396,13 +1398,15 @@ export default function App() {
                               </span>
                             </div>
 
-                            {/* Version badge */}
-                            <div className="mt-1 flex items-center gap-2 text-[10px] font-mono">
-                              <span className="text-neutral-500 uppercase">Version:</span>
-                              <span className="text-neutral-300 font-bold border border-neutral-850 bg-neutral-950/40 px-2 py-0.5 rounded">
-                                {ball.version || "Standard Edition"}
-                              </span>
-                            </div>
+                            {/* Year Display */}
+                            {ball.year && (
+                              <div className="mt-1 flex items-center gap-2 text-[10px] font-mono">
+                                <span className="text-neutral-550 uppercase">Year:</span>
+                                <span className="text-neutral-300 font-bold border border-neutral-850 bg-neutral-950/40 px-2 py-0.5 rounded">
+                                  {ball.year}
+                                </span>
+                              </div>
+                            )}
                           </div>
 
                           {/* Quantity display */}
@@ -2072,7 +2076,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs font-mono">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3.5 text-xs font-mono">
                   <div>
                     <label className="block text-[9px] uppercase text-neutral-400 mb-1">Ball Play-Number</label>
                     <div className="flex gap-1">
@@ -2087,7 +2091,7 @@ export default function App() {
                           }}
                           className={`flex-1 text-center py-1 rounded text-[11px] font-mono font-bold border transition-all cursor-pointer ${
                             modalPkgType === 'box'
-                              ? "bg-neutral-950 text-neutral-600 border-neutral-900 cursor-not-allowed opacity-50"
+                              ? "bg-neutral-950 text-neutral-600 border-neutral-900 cursor-not-allowed opacity-55"
                               : modalPlayNumber === num && modalCustomNumberInput === ""
                               ? "bg-[#2563eb] border-[#2563eb] text-black"
                               : "bg-neutral-950 border-neutral-850 text-neutral-300 hover:border-neutral-700"
@@ -2136,6 +2140,16 @@ export default function App() {
                     </select>
                   </div>
                   <div>
+                    <label className="block text-[9px] uppercase text-neutral-400 mb-1">Year (Optional)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 2026"
+                      value={modalYear}
+                      onChange={(e) => setModalYear(e.target.value)}
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none font-sans"
+                    />
+                  </div>
+                  <div>
                     <label className="block text-[9px] uppercase text-neutral-400 mb-1">Design Notes / Custom Info</label>
                     <input
                       type="text"
@@ -2175,12 +2189,13 @@ export default function App() {
                       packageType: modalPkgType,
                       customNumber: modalPkgType === 'box' ? 1 : modalPlayNumber,
                       notes: modalNotes.trim() || "Added by Admin",
-                      version: "Standard Edition",
+                      year: modalYear.trim() || undefined,
                       dateAdded: today,
                       customImage
                     };
                     setSelectedUserBalls(prev => [newBall, ...prev]);
                     setModalNotes("");
+                    setModalYear("");
                     setModalPlayNumber(1);
                     setModalCustomNumberInput("");
                   }}
@@ -2416,15 +2431,15 @@ export default function App() {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h4 className="font-sans font-black text-white text-xs uppercase tracking-wider text-[#2563eb] font-extrabold">
-                      Existing Catalog Templates
+                      Existing Catalog
                     </h4>
                     <p className="text-[10px] text-neutral-400">
-                      Search and manage specification templates already in the vault.
+                      Search and manage specifications already in the vault.
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1.5 shrink-0">
                     <span className="text-[9px] bg-neutral-950 border border-neutral-850 text-neutral-400 px-2 py-0.5 rounded font-mono">
-                      {catalog.length} TEMPLATES
+                      {catalog.length} BALLS
                     </span>
                     {catalog.length > 0 && (
                       showDeleteAllCatalogConfirm ? (
@@ -2463,7 +2478,7 @@ export default function App() {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" size={13} />
                   <input
                     type="text"
-                    placeholder="Search database templates..."
+                    placeholder="Search database..."
                     value={adminSearchQuery}
                     onChange={(e) => setAdminSearchQuery(e.target.value)}
                     className="w-full bg-neutral-950 hover:bg-neutral-900/60 border border-neutral-850 rounded-xl px-9 py-2 text-xs text-white placeholder-neutral-550 outline-none focus:border-neutral-750 transition-all font-mono"
@@ -2526,7 +2541,7 @@ export default function App() {
                                   setDeleteConfirmId(null);
                                 }}
                                 className="py-1 px-1.5 text-[8px] font-mono font-black uppercase text-rose-400 hover:text-white rounded transition-all cursor-pointer"
-                                title="Confirm delete specification template"
+                                title="Confirm delete specification"
                               >
                                 Delete?
                               </button>
@@ -2572,7 +2587,7 @@ export default function App() {
 
                   {catalog.length === 0 ? (
                     <div className="py-8 px-4 text-center border border-dashed border-neutral-850 rounded-xl bg-neutral-950/10 text-neutral-500 text-xs">
-                      Ball Vault templates list is empty. Create some above or use Excel Bulk Import!
+                      Ball Vault list is empty. Create some above or use Excel Bulk Import!
                     </div>
                   ) : (
                     catalog.filter(item => {
@@ -2580,7 +2595,7 @@ export default function App() {
                       return item.model.toLowerCase().includes(q) || item.color.toLowerCase().includes(q);
                     }).length === 0 && (
                       <div className="py-6 text-center border border-dashed border-neutral-850 rounded-xl bg-neutral-950/10 text-neutral-500 text-xs">
-                        No templates match "{adminSearchQuery}"
+                        No balls match "{adminSearchQuery}"
                       </div>
                     )
                   )}

@@ -47,17 +47,17 @@ export default function OwnedBallCard({
     [1, 2, 3, 4].includes(ball.customNumber) ? "" : String(ball.customNumber || "")
   );
   const [editCondition, setEditCondition] = useState<BallCondition>(ball.condition);
-  const [editVersion, setEditVersion] = useState<string>(currentVersion);
+  const [editYear, setEditYear] = useState<string>(ball.year || "");
   const [editNotes, setEditNotes] = useState<string>(currentNotes);
 
   const startEditing = () => {
-    const { version, notes } = getVersionAndNotes(ball);
+    const { notes } = getVersionAndNotes(ball);
     setEditQty(ball.quantity);
     setEditPkgType(ball.packageType || 'ea');
     setEditPlayNumber(ball.customNumber || 1);
     setEditCustomNumberInput([1, 2, 3, 4].includes(ball.customNumber) ? "" : String(ball.customNumber || ""));
     setEditCondition(ball.condition);
-    setEditVersion(version);
+    setEditYear(ball.year || "");
     setEditNotes(notes);
     setIsEditing(true);
   };
@@ -68,7 +68,7 @@ export default function OwnedBallCard({
       packageType: editPkgType,
       customNumber: editPkgType === 'box' ? 1 : editPlayNumber,
       condition: editCondition,
-      version: editVersion,
+      year: editYear.trim(),
       notes: editNotes.trim(),
     });
     setIsEditing(false);
@@ -210,24 +210,18 @@ export default function OwnedBallCard({
             </select>
           </div>
 
-          {/* Version Dropdown */}
+          {/* Year Input */}
           <div>
             <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1 font-bold">
-              Version
+              Year (Optional)
             </label>
-            <select
-              value={editVersion}
-              onChange={(e) => setEditVersion(e.target.value)}
-              className="w-full bg-neutral-950 text-xs py-1.5 px-2 rounded text-neutral-300 font-bold border border-neutral-850 focus:border-neutral-750 outline-none cursor-pointer"
-            >
-              <option value="Standard Edition">Standard Edition</option>
-              <option value="2024/25 Release">2024/25 Release</option>
-              <option value="2022/23 Release">2022/23 Release</option>
-              <option value="Vintage Series">Vintage Series</option>
-              <option value="Special Logo Print">Special Logo Print</option>
-              <option value="Practice / X-Out">Practice / X-Out</option>
-              <option value="Refurbished">Refurbished</option>
-            </select>
+            <input
+              type="text"
+              placeholder="e.g. 2026"
+              value={editYear}
+              onChange={(e) => setEditYear(e.target.value)}
+              className="w-full bg-neutral-950 text-xs py-1.5 px-2 rounded text-neutral-300 font-bold border border-neutral-850 focus:border-[#2563eb] outline-none"
+            />
           </div>
         </div>
 
@@ -460,13 +454,15 @@ export default function OwnedBallCard({
               </span>
             </div>
 
-            {/* Version Display */}
-            <div className="mt-1.5 flex items-center gap-2">
-              <span className="text-[10px] font-mono text-neutral-500 uppercase">Version:</span>
-              <span className="text-[10px] py-0.5 px-2 rounded font-bold border border-neutral-800 bg-neutral-950 text-neutral-300 select-none">
-                {currentVersion}
-              </span>
-            </div>
+            {/* Year Display */}
+            {ball.year && (
+              <div className="mt-1.5 flex items-center gap-2">
+                <span className="text-[10px] font-mono text-neutral-500 uppercase">Year:</span>
+                <span className="text-[10px] py-0.5 px-2 rounded font-bold border border-neutral-800 bg-neutral-950 text-neutral-300 select-none">
+                  {ball.year}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="mt-2 text-[10px] text-neutral-400 font-mono flex items-center gap-2">

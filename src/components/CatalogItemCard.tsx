@@ -21,7 +21,7 @@ interface CatalogItemCardProps {
     condition: BallCondition,
     customImage?: string,
     packageType?: 'ea' | 'sleeve' | 'box',
-    version?: string
+    year?: string
   ) => void;
 }
 
@@ -32,7 +32,7 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
   const [playNumber, setPlayNumber] = useState<number>(1);
   const [customNumberInput, setCustomNumberInput] = useState<string>("");
   const [condition, setCondition] = useState<BallCondition>(BallCondition.NEW);
-  const [versionTag, setVersionTag] = useState("Standard Edition");
+  const [year, setYear] = useState("");
   const [notes, setNotes] = useState("");
   const [justAdded, setJustAdded] = useState(false);
 
@@ -48,7 +48,7 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
       condition,
       item.customImage,
       pkgType,
-      versionTag
+      year.trim()
     );
 
     setJustAdded(true);
@@ -57,7 +57,7 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
       setIsOpen(false);
       // Reset form controls
       setNotes("");
-      setVersionTag("Standard Edition");
+      setYear("");
       setPlayNumber(1);
       setCustomNumberInput("");
     }, 1200);
@@ -230,24 +230,18 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
               </select>
             </div>
 
-            {/* Version Option Note Dropdown */}
+            {/* Year Option Input */}
             <div>
               <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1 font-bold">
-                Version
+                Year (Optional)
               </label>
-              <select
-                value={versionTag}
-                onChange={(e) => setVersionTag(e.target.value)}
-                className="w-full bg-neutral-950 text-xs py-1.5 px-2 rounded text-neutral-350 font-bold border border-neutral-850 focus:border-neutral-700 outline-none cursor-pointer"
-              >
-                <option value="Standard Edition">Standard Edition</option>
-                <option value="2024/25 Release">2024/25 Release</option>
-                <option value="2022/23 Release">2022/23 Release</option>
-                <option value="Vintage Series">Vintage Series</option>
-                <option value="Special Logo Print">Special Logo Print</option>
-                <option value="Practice / X-Out">Practice / X-Out</option>
-                <option value="Refurbished">Refurbished</option>
-              </select>
+              <input
+                type="text"
+                placeholder="e.g. 2026"
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                className="w-full bg-neutral-950 text-xs py-1.5 px-2 rounded text-neutral-350 font-bold border border-neutral-850 focus:border-[#2563eb] outline-none"
+              />
             </div>
           </div>
 
