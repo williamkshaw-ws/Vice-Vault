@@ -33,23 +33,28 @@ interface UserProfile {
   shareToken?: string;
 }
 
-const SECRET_KEY = crypto.scryptSync("ViceVaultSecretKey_2026", "salt", 32);
-const IV = Buffer.alloc(16, 0); // static IV is stable for URL obfuscation
+const OB_KEY = "ViceVaultSecretObfuscationKey_2026";
 
 function encryptUsername(username: string): string {
   if (!username) return "";
-  const cipher = crypto.createCipheriv("aes-256-cbc", SECRET_KEY, IV);
-  let encrypted = cipher.update(username, "utf-8", "hex");
-  encrypted += cipher.final("hex");
-  return encrypted;
+  const buffer = Buffer.from(username, "utf-8");
+  const keyBuf = Buffer.from(OB_KEY, "utf-8");
+  const result = Buffer.alloc(buffer.length);
+  for (let i = 0; i < buffer.length; i++) {
+    result[i] = buffer[i] ^ keyBuf[i % keyBuf.length];
+  }
+  return result.toString("base64url");
 }
 
-function decryptUsername(encrypted: string): string | null {
+function decryptUsername(token: string): string | null {
   try {
-    const decipher = crypto.createDecipheriv("aes-256-cbc", SECRET_KEY, IV);
-    let decrypted = decipher.update(encrypted, "hex", "utf-8");
-    decrypted += decipher.final("utf-8");
-    return decrypted;
+    const buffer = Buffer.from(token, "base64url");
+    const keyBuf = Buffer.from(OB_KEY, "utf-8");
+    const result = Buffer.alloc(buffer.length);
+    for (let i = 0; i < buffer.length; i++) {
+      result[i] = buffer[i] ^ keyBuf[i % keyBuf.length];
+    }
+    return result.toString("utf-8");
   } catch (err) {
     return null;
   }
