@@ -156,40 +156,76 @@ const DEFAULT_USERS: UserProfile[] = [
 
 const DEFAULT_LOCKER = [
   {
-    id: "OWNED-PRO-PURE_GLOSS_WHITE-STANDARD_EDITION-BRAND_NEW-EA",
-    model: "PRO",
-    color: "Pure Gloss White",
+    id: "OWNED-PRO_PLUS-LIMITED_EDITION_GOLD-STANDARD_EDITION-BRAND_NEW-EA-V4",
+    model: "PRO PLUS",
+    color: "Limited Edition Gold",
     quantity: 1,
     condition: "Brand New",
     packageType: "ea",
     customNumber: 1,
     version: "Standard Edition",
-    dateAdded: "5/28/2026",
-    customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_white_th_35dcf74c-c5a3-4467-aa5a-c9adf7b01bc0.png?v=1711374990"
+    dateAdded: "5/18/2026",
+    customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/Vice_Pro-Plus_Gold-4.png?v=1752227365"
   },
   {
-    id: "OWNED-PRO_PLUS-NEON_GLOSS_LIME-STANDARD_EDITION-NEAR_MINT-SLEEVE",
-    model: "PRO PLUS",
-    color: "Neon Gloss Lime",
+    id: "OWNED-PRO-SHINING_HUE_BLUE-STANDARD_EDITION-NEAR_MINT-SLEEVE-V5",
+    model: "PRO",
+    color: "Shining Hue Blue",
     quantity: 3,
     condition: "Near-Mint / Scuffed-0",
     packageType: "sleeve",
-    customNumber: 3,
+    customNumber: 4,
     version: "Standard Edition",
-    dateAdded: "5/28/2026",
-    customImage: "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Pro_Plus_Neon_Lime_Front_Zoom.jpg?v=1709811032"
+    dateAdded: "5/20/2026",
+    customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_ice_blue_frontalView.jpg?v=1774431946"
   },
   {
-    id: "OWNED-PRO_SOFT-NEON_GLOSS_RED-STANDARD_EDITION-BRAND_NEW-BOX",
+    id: "OWNED-TOUR-PURE_GLOSS_WHITE-STANDARD_EDITION-PLAYED-BOX-V6",
+    model: "TOUR",
+    color: "Pure Gloss White",
+    quantity: 12,
+    condition: "Played / Scuffed-1",
+    packageType: "box",
+    customNumber: 2,
+    version: "Standard Edition",
+    dateAdded: "5/22/2026",
+    customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vice-golf-PDP-Tour-White-Front.jpg?v=1716672682"
+  },
+  {
+    id: "OWNED-DRIVE-PURE_GLOSS_WHITE-STANDARD_EDITION-SHAG-EA-V7",
+    model: "DRIVE",
+    color: "Pure Gloss White",
+    quantity: 2,
+    condition: "Shag / Water Ball",
+    packageType: "ea",
+    customNumber: 1,
+    version: "Standard Edition",
+    dateAdded: "5/23/2026",
+    customImage: "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Drive_White_Front_Zoom.jpg?v=1709810929"
+  },
+  {
+    id: "OWNED-PRO_SOFT-NEON_GLOSS_LIME-STANDARD_EDITION-BRAND_NEW-BOX-V8",
     model: "PRO SOFT",
-    color: "Neon Gloss Red",
+    color: "Neon Gloss Lime",
     quantity: 12,
     condition: "Brand New",
     packageType: "box",
-    customNumber: 77,
+    customNumber: 3,
     version: "Standard Edition",
-    dateAdded: "5/28/2026",
-    customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/pro_soft_red_3.png?v=1774447120"
+    dateAdded: "5/24/2026",
+    customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_soft_lime_exploded.jpg?v=1774352579"
+  },
+  {
+    id: "OWNED-PRO_AIR-LIME_BLACK_DRIP_SPLATTER-STANDARD_EDITION-NEAR_MINT-SLEEVE-V9",
+    model: "PRO AIR",
+    color: "Lime/Black Drip Splatter",
+    quantity: 3,
+    condition: "Near-Mint / Scuffed-0",
+    packageType: "sleeve",
+    customNumber: 1,
+    version: "Standard Edition",
+    dateAdded: "5/25/2026",
+    customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/Vice-Golf-Pro-Air-Neon-Drip-Ball-Front-Cut.png?v=1726668730"
   }
 ];
 
