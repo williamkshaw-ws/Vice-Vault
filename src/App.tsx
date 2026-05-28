@@ -139,7 +139,7 @@ const INITIAL_OWNED_BALLS: GolfBall[] = [];
 
 const filterLegacyBalls = (ballsList: any[]): GolfBall[] => {
   if (!Array.isArray(ballsList)) return [];
-  return ballsList.filter((b: any) => b && b.id && !/-V[4-9]$/.test(b.id));
+  return ballsList.filter((b: any) => b && b.id && !/-V\d+$/.test(b.id));
 };
 
 
@@ -2236,16 +2236,7 @@ export default function App() {
                       <option value={BallCondition.SHAG}>{BallCondition.SHAG}</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-[9px] uppercase text-neutral-400 mb-1">Design Notes / Custom Info</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Lucky ball, standard, custom logo"
-                      value={modalNotes}
-                      onChange={(e) => setModalNotes(e.target.value)}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none font-sans"
-                    />
-                  </div>
+
                 </div>
 
                 <button
