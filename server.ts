@@ -161,7 +161,6 @@ const DEFAULT_LOCKER = [
     condition: "Brand New",
     packageType: "box",
     customNumber: 1,
-    notes: "Tournament dozen box. Extreme wedge backspin control.",
     version: "Standard Edition",
     dateAdded: "5/12/2026",
     customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_white_th_35dcf74c-c5a3-4467-aa5a-c9adf7b01bc0.png?v=1711374990"
@@ -174,7 +173,6 @@ const DEFAULT_LOCKER = [
     condition: "Near-Mint / Scuffed-0",
     packageType: "ea",
     customNumber: 77,
-    notes: "My lucky splattered golf balls.",
     version: "Standard Edition",
     dateAdded: "5/14/2026",
     customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/New-Ball-PDP-Pro-Drip-Red-Blue-Front.png?v=1760629724"
@@ -187,7 +185,6 @@ const DEFAULT_LOCKER = [
     condition: "Played / Scuffed-1",
     packageType: "sleeve",
     customNumber: 3,
-    notes: "Practice round balls. Extremely responsive feel.",
     version: "Standard Edition",
     dateAdded: "5/15/2026",
     customImage: "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Pro_Plus_Neon_Lime_Front_Zoom.jpg?v=1709811032"

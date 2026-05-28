@@ -1,7 +1,6 @@
 [
   {
     "id": "DRIVE-WHITE",
-    "notes": "Maximum core energy & indestructible distance",
     "color": "WHITE",
     "customImage": "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Drive_White_Front_Zoom.jpg?v=1709810929",
     "model": "DRIVE"
@@ -9,7 +8,6 @@
   {
     "id": "PRO-LIME_BLACK_DRIP_SPLATTER",
     "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/New-Ball-PDP-Pro-Drip-Lime-Front_1.png?v=1760629446",
-    "notes": "Optimized flight, premium spin & softest urethane feel",
     "model": "PRO",
     "color": "LIME/BLACK DRIP SPLATTER"
   },
@@ -17,54 +15,46 @@
     "id": "PRO-NEON_GLOSS_LIME",
     "customImage": "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Pro_Neon_Lime_Front_Zoom.jpg?v=1709811015",
     "color": "Neon Gloss Lime",
-    "notes": "Optimized flight, premium spin & softest urethane feel",
     "model": "PRO"
   },
   {
     "id": "PRO-NEON_GLOSS_RED",
     "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_neon_red_th_ecb9923b-f473-478e-bfa3-8fa1e5a76358.png?v=1711374486",
-    "notes": "Optimized flight, premium spin & softest urethane feel",
     "model": "PRO",
     "color": "NEON GLOSS RED"
   },
   {
     "id": "PRO-RED_BLUE_DRIP_SPLATTER",
-    "notes": "Optimized flight, premium spin & softest urethane feel",
     "model": "PRO",
     "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/New-Ball-PDP-Pro-Drip-Red-Blue-Front.png?v=1760629724",
     "color": "RED/BLUE DRIP SPLATTER"
   },
   {
     "id": "PRO-SHINING_HUE_BLUE",
-    "notes": "Optimized flight, premium spin & softest urethane feel",
     "model": "PRO",
     "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_ice_blue_frontalView.jpg?v=1774431946",
     "color": "Shining Hue Blue"
   },
   {
     "id": "PRO-WHITE",
-    "notes": "Optimized flight, premium spin & softest urethane feel",
     "color": "WHITE",
     "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_white_th_35dcf74c-c5a3-4467-aa5a-c9adf7b01bc0.png?v=1711374990",
     "model": "PRO"
   },
   {
     "id": "PRO-YELLOW_TEAL_DRIP_SPLATTER",
-    "notes": "Optimized flight, premium spin & softest urethane feel",
     "model": "PRO",
     "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_drip_yellow_green_sashimi.png?v=1774433556",
     "color": "Yellow / Teal Drip Splatter"
   },
   {
     "id": "PRO_AIR-LIME_BLACK_DRIP_SPLATTER",
-    "notes": "Ultra lightweight core, high launch & optimized speed",
     "model": "PRO AIR",
     "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/Vice-Golf-Pro-Air-Neon-Drip-Ball-Front-Cut.png?v=1726668730",
     "color": "Lime/Black Drip Splatter"
   },
   {
     "id": "PRO_AIR-NEON_GLOSS_LIME",
-    "notes": "Ultra lightweight core, high launch & optimized speed",
     "model": "PRO AIR",
     "customImage": "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Pro_Air_Neon_Lime_Front_Zoom.jpg?v=1709810992",
     "color": "Neon Gloss Lime"
@@ -73,54 +63,46 @@
     "id": "PRO_AIR-PURE_GLOSS_WHITE",
     "customImage": "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Pro_Air_White_Front_Zoom.jpg?v=1709810992",
     "color": "Pure Gloss White",
-    "notes": "Ultra lightweight core, high launch & optimized speed",
     "model": "PRO AIR"
   },
   {
     "id": "PRO_PLUS-LIME_BLACK_DRIP_SPLATTER",
     "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/New-Ball-PDP-ProPlus-Drip-Lime-Front.png?v=1760630522",
     "color": "Lime/Black Drip Splatter",
-    "notes": "Maximum distance, high spin & ultimate speed",
     "model": "PRO PLUS"
   },
   {
     "id": "PRO_PLUS-LIMITED_EDITION_GOLD",
     "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/Vice_Pro-Plus_Gold-4.png?v=1752227365",
     "color": "Limited Edition Gold",
-    "notes": "Maximum distance, high spin & ultimate speed",
     "model": "PRO PLUS"
   },
   {
     "id": "PRO_PLUS-NEON_GLOSS_LIME",
     "customImage": "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Pro_Plus_Neon_Lime_Front_Zoom.jpg?v=1709811032",
     "color": "Neon Gloss Lime",
-    "notes": "Maximum distance, high spin & ultimate speed",
     "model": "PRO PLUS"
   },
   {
     "id": "PRO_PLUS-PURE_GLOSS_WHITE",
-    "notes": "Maximum distance, high spin & ultimate speed",
     "model": "PRO PLUS",
     "customImage": "https://cdn.shopify.com/s/files/1/0563/0227/2645/files/vicegolf_ball_pro_white_th_acadea3d-cc1d-4376-a696-0bd93d44cd49.png?v=1762199211&width=100&height=100&crop=center",
     "color": "Pure Gloss White"
   },
   {
     "id": "PRO_SOFT-NEON_GLOSS_LIME",
-    "notes": "Extra quiet core, magnificent matte visual series",
     "model": "PRO SOFT",
     "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_soft_lime_exploded.jpg?v=1774352579",
     "color": "Neon Gloss Lime"
   },
   {
     "id": "PRO_SOFT-NEON_GLOSS_RED",
-    "notes": "Extra quiet core, magnificent matte visual series",
     "model": "PRO SOFT",
     "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/pro_soft_red_3.png?v=1774447120",
     "color": "Neon Gloss Red"
   },
   {
     "id": "PRO_SOFT-PURE_GLOSS_WHITE",
-    "notes": "Extra quiet core, magnificent matte visual series",
     "model": "PRO SOFT",
     "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/pro_soft_white.png?v=1774447514",
     "color": "Pure Gloss White"
@@ -129,7 +111,6 @@
     "id": "TOUR-PURE_GLOSS_WHITE",
     "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vice-golf-PDP-Tour-White-Front.jpg?v=1716672682",
     "color": "Pure Gloss White",
-    "notes": "Balanced premium play & indestructible durability",
     "model": "TOUR"
   }
 ]
