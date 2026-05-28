@@ -1,7 +1,7 @@
 [
   {
-    "id": "DRIVE-WHITE",
-    "color": "WHITE",
+    "id": "DRIVE-PURE_GLOSS_WHITE",
+    "color": "Pure Gloss White",
     "customImage": "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Drive_White_Front_Zoom.jpg?v=1709810929",
     "model": "DRIVE"
   },
@@ -36,8 +36,8 @@
     "color": "Shining Hue Blue"
   },
   {
-    "id": "PRO-WHITE",
-    "color": "WHITE",
+    "id": "PRO-PURE_GLOSS_WHITE",
+    "color": "Pure Gloss White",
     "customImage": "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_white_th_35dcf74c-c5a3-4467-aa5a-c9adf7b01bc0.png?v=1711374990",
     "model": "PRO"
   },

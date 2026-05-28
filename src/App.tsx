@@ -136,121 +136,43 @@ function BallVaultIcon({ className = "w-4 h-4 text-neutral-400" }: { className?:
 // Initial owned mockup data to make the app look stunning right away
 const INITIAL_OWNED_BALLS: GolfBall[] = [
   {
-    id: "OWNED-PRO-PURE_GLOSS_WHITE-BRAND_NEW-BOX-V1",
+    id: "OWNED-PRO-PURE_GLOSS_WHITE-NEW-EA",
     model: BallModel.PRO,
     color: "Pure Gloss White",
-    quantity: 12,
-    condition: BallCondition.NEW,
-    packageType: "box",
-    customNumber: 1,
-    notes: "Tournament dozen box. Extreme wedge backspin control.",
-    year: "2026",
-    dateAdded: "5/12/2026",
-    customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_white_th_35dcf74c-c5a3-4467-aa5a-c9adf7b01bc0.png?v=1711374990"
-  },
-  {
-    id: "OWNED-PRO-RED_BLUE_DRIP_SPLATTER-NEAR_MINT_SCUFFED_0-EA-V2",
-    model: BallModel.PRO,
-    color: "Red/Blue Drip Splatter",
-    quantity: 6,
-    condition: BallCondition.MINT,
-    packageType: "ea",
-    customNumber: 77,
-    notes: "My lucky splattered golf balls.",
-    year: "2026",
-    dateAdded: "5/14/2026",
-    customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/New-Ball-PDP-Pro-Drip-Red-Blue-Front.png?v=1760629724"
-  },
-  {
-    id: "OWNED-PRO_PLUS-NEON_GLOSS_LIME-PLAYED_SCUFFED_1-SLEEVE-V3",
-    model: BallModel.PRO_PLUS,
-    color: "Neon Gloss Lime",
-    quantity: 3,
-    condition: BallCondition.PLAYED,
-    packageType: "sleeve",
-    customNumber: 3,
-    notes: "Practice round balls. Extremely responsive feel.",
-    year: "2026",
-    dateAdded: "5/15/2026",
-    customImage: "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Pro_Plus_Neon_Lime_Front_Zoom.jpg?v=1709811032"
-  },
-  {
-    id: "OWNED-PRO_PLUS-LIMITED_EDITION_GOLD-BRAND_NEW-EA-V4",
-    model: BallModel.PRO_PLUS,
-    color: "Limited Edition Gold",
     quantity: 1,
     condition: BallCondition.NEW,
     packageType: "ea",
     customNumber: 1,
-    notes: "Golden anniversary edition. Ultra premium feel.",
+    notes: "Classic flagship tour-level ball.",
     year: "2026",
-    dateAdded: "5/18/2026",
-    customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/Vice_Pro-Plus_Gold-4.png?v=1752227365"
+    dateAdded: "5/28/2026",
+    customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_white_th_35dcf74c-c5a3-4467-aa5a-c9adf7b01bc0.png?v=1711374990"
   },
   {
-    id: "OWNED-PRO-SHINING_HUE_BLUE-NEAR_MINT-SLEEVE-V5",
-    model: BallModel.PRO,
-    color: "Shining Hue Blue",
+    id: "OWNED-PRO_PLUS-NEON_GLOSS_LIME-MINT-SLEEVE",
+    model: BallModel.PRO_PLUS,
+    color: "Neon Gloss Lime",
     quantity: 3,
     condition: BallCondition.MINT,
     packageType: "sleeve",
-    customNumber: 4,
-    notes: "Eye-catching blue hue. Great in low light.",
+    customNumber: 3,
+    notes: "Vibrant high-visibility neon lime.",
     year: "2026",
-    dateAdded: "5/20/2026",
-    customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_ice_blue_frontalView.jpg?v=1774431946"
+    dateAdded: "5/28/2026",
+    customImage: "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Pro_Plus_Neon_Lime_Front_Zoom.jpg?v=1709811032"
   },
   {
-    id: "OWNED-TOUR-PURE_GLOSS_WHITE-PLAYED-BOX-V6",
-    model: BallModel.TOUR,
-    color: "Pure Gloss White",
-    quantity: 12,
-    condition: BallCondition.PLAYED,
-    packageType: "box",
-    customNumber: 2,
-    notes: "Sturdy tour performance. Very durable cover.",
-    year: "2026",
-    dateAdded: "5/22/2026",
-    customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vice-golf-PDP-Tour-White-Front.jpg?v=1716672682"
-  },
-  {
-    id: "OWNED-DRIVE-PURE_GLOSS_WHITE-SHAG-EA-V7",
-    model: BallModel.DRIVE,
-    color: "Pure Gloss White",
-    quantity: 2,
-    condition: BallCondition.SHAG,
-    packageType: "ea",
-    customNumber: 1,
-    notes: "Maximum core distance engine. straight rollout.",
-    year: "2026",
-    dateAdded: "5/23/2026",
-    customImage: "https://cdn.shopify.com/s/files/1/0832/9235/6897/files/PDP_Drive_White_Front_Zoom.jpg?v=1709810929"
-  },
-  {
-    id: "OWNED-PRO_SOFT-NEON_GLOSS_LIME-BRAND_NEW-BOX-V8",
+    id: "OWNED-PRO_SOFT-NEON_GLOSS_RED-NEW-BOX",
     model: BallModel.PRO_SOFT,
-    color: "Neon Gloss Lime",
+    color: "Neon Gloss Red",
     quantity: 12,
     condition: BallCondition.NEW,
     packageType: "box",
-    customNumber: 3,
-    notes: "Matte neon cover. Extremely soft compression.",
+    customNumber: 77,
+    notes: "Extra quiet core, magnificent matte series.",
     year: "2026",
-    dateAdded: "5/24/2026",
-    customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vicegolf_ball_pro_soft_lime_exploded.jpg?v=1774352579"
-  },
-  {
-    id: "OWNED-PRO_AIR-LIME_BLACK_DRIP_SPLATTER-NEAR_MINT-SLEEVE-V9",
-    model: BallModel.PRO_AIR,
-    color: "Lime/Black Drip Splatter",
-    quantity: 3,
-    condition: BallCondition.MINT,
-    packageType: "sleeve",
-    customNumber: 1,
-    notes: "Vibrant custom drip graphics.",
-    year: "2026",
-    dateAdded: "5/25/2026",
-    customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/Vice-Golf-Pro-Air-Neon-Drip-Ball-Front-Cut.png?v=1726668730"
+    dateAdded: "5/28/2026",
+    customImage: "https://cdn.shopify.com/s/files/1/0835/8445/0850/files/pro_soft_red_3.png?v=1774447120"
   }
 ];
 
