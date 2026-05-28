@@ -14,8 +14,10 @@ interface XlsImporterProps {
 
 interface TempImportRow {
   model: string;
+  name: string;
   color: string;
-  notes: string;
+  variation: string;
+  year: string;
   customImage?: string;
   customImageSleeve?: string;
   customImageBox?: string;
@@ -31,14 +33,12 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
     color: string;
     variation: string;
     year: string;
-    notes: string;
   }>({
     model: "",
     name: "",
     color: "",
     variation: "",
     year: "",
-    notes: "",
   });
   const [isDragActive, setIsDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +49,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
     setFile(null);
     setParsedRows([]);
     setHeaders([]);
-    setColumnMapping({ model: "", name: "", color: "", variation: "", year: "", notes: "" });
+    setColumnMapping({ model: "", name: "", color: "", variation: "", year: "" });
     setError(null);
     setSuccessCount(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -101,7 +101,6 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
         let detectedColorCol = "";
         let detectedVariationCol = "";
         let detectedYearCol = "";
-        let detectedNotesCol = "";
 
         detectedHeaders.forEach((h) => {
           const lh = h.toLowerCase();
@@ -119,9 +118,6 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
           }
           if (lh === "year" || lh.includes("season") || lh.includes("date")) {
             if (!detectedYearCol) detectedYearCol = h;
-          }
-          if (lh.includes("note") || lh.includes("tagline") || lh.includes("desc") || lh.includes("detail") || lh.includes("comment") || lh.includes("history")) {
-            if (!detectedNotesCol) detectedNotesCol = h;
           }
         });
 
@@ -143,10 +139,6 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
           const found = detectedHeaders.find(h => h.toLowerCase() === "year");
           detectedYearCol = found || "";
         }
-        if (!detectedNotesCol) {
-          const found = detectedHeaders.find(h => h.toLowerCase() === "notes" || h.toLowerCase() === "description");
-          detectedNotesCol = found || "";
-        }
 
         setColumnMapping({
           model: detectedModelCol,
@@ -154,7 +146,6 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
           color: detectedColorCol,
           variation: detectedVariationCol,
           year: detectedYearCol,
-          notes: detectedNotesCol,
         });
 
         // Store rows for previewing
@@ -164,8 +155,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
           detectedNameCol,
           detectedColorCol,
           detectedVariationCol,
-          detectedYearCol,
-          detectedNotesCol
+          detectedYearCol
         );
 
       } catch (err: any) {
@@ -182,8 +172,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
     nameCol: string,
     colorCol: string,
     variationCol: string,
-    yearCol: string,
-    notesCol: string
+    yearCol: string
   ) => {
     const formatted: TempImportRow[] = rawJson
       .map((row) => {
@@ -192,7 +181,6 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
         const cVal = row[colorCol] !== undefined && row[colorCol] !== null ? String(row[colorCol]).trim() : "";
         const varVal = variationCol && row[variationCol] !== undefined && row[variationCol] !== null ? String(row[variationCol]).trim() : "";
         const yVal = yearCol && row[yearCol] !== undefined && row[yearCol] !== null ? String(row[yearCol]).trim() : "";
-        const nVal = notesCol && row[notesCol] !== undefined && row[notesCol] !== null ? String(row[notesCol]).trim() : "";
 
         // Reconstruct ball image chunks
         let customImage = "";
@@ -239,7 +227,6 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
           color: cVal,
           variation: varVal,
           year: yVal,
-          notes: nVal,
           customImage: customImage || undefined,
           customImageSleeve: customImageSleeve || undefined,
           customImageBox: customImageBox || undefined
@@ -251,7 +238,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
   };
 
   const handleMappingChange = (
-    key: "model" | "name" | "color" | "variation" | "year" | "notes",
+    key: "model" | "name" | "color" | "variation" | "year",
     selectedHeader: string
   ) => {
     const nextMapping = { ...columnMapping, [key]: selectedHeader };
@@ -272,8 +259,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
             nextMapping.name,
             nextMapping.color,
             nextMapping.variation,
-            nextMapping.year,
-            nextMapping.notes
+            nextMapping.year
           );
         } catch (err) {}
       };
@@ -283,7 +269,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
 
   const handleRowChange = (
     index: number,
-    key: "model" | "name" | "color" | "variation" | "year" | "notes",
+    key: "model" | "name" | "color" | "variation" | "year",
     value: string
   ) => {
     setParsedRows((prev) =>
@@ -341,10 +327,6 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
         customImageBox: row.customImageBox
       };
 
-      if (row.notes.trim()) {
-        item.notes = row.notes.trim();
-      }
-
       return item;
     });
 
@@ -375,7 +357,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
         <Info className="w-4 h-4 text-lime-400 shrink-0 mt-0.5" />
         <div>
           <span className="font-bold text-neutral-200 block mb-0.5">Expected Column Headers:</span>
-          Ideally, include columns like <strong className="text-white font-mono">Model</strong> (e.g. Pro Plus), <strong className="text-white font-mono">Color</strong> (e.g. Neon Lime Splatter), and <strong className="text-white font-mono">Design Notes</strong> (e.g. Matte finish, high spin). If named differently, you can map columns manually.
+          Ideally, include columns like <strong className="text-white font-mono">Model</strong> (e.g. Pro Plus), and <strong className="text-white font-mono">Color</strong> (e.g. Neon Lime Splatter). If named differently, you can map columns manually.
         </div>
       </div>
 
@@ -551,23 +533,6 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-[10px] font-mono text-neutral-400 uppercase mb-1">
-                  Design Notes Column:
-                </label>
-                <select
-                  value={columnMapping.notes}
-                  onChange={(e) => handleMappingChange("notes", e.target.value)}
-                  className="w-full bg-neutral-900 border border-neutral-800 py-1.5 px-2 rounded-md text-xs text-white outline-none cursor-pointer focus:border-emerald-500"
-                >
-                  <option value="">-- Ignore / Skip --</option>
-                  {headers.map((h) => (
-                    <option key={h} value={h}>
-                      {h}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </div>
           </div>
 
@@ -581,7 +546,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
             <div className="max-h-[250px] overflow-y-auto border border-neutral-850 rounded-xl bg-neutral-950/60 divide-y divide-neutral-850 pr-1">
               {parsedRows.map((row, idx) => (
                 <div key={idx} className="flex items-center justify-between p-2 gap-2 text-xs">
-                  <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 flex-1">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 flex-1">
                     <input
                       type="text"
                       value={row.model}
@@ -616,13 +581,6 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
                       onChange={(e) => handleRowChange(idx, "year", e.target.value)}
                       placeholder="Year"
                       className="bg-transparent border-0 text-neutral-450 focus:bg-neutral-900 focus:ring-1 focus:ring-emerald-500 rounded py-0.5 px-1 truncate placeholder-neutral-600 outline-none w-full text-xs font-mono"
-                    />
-                    <input
-                      type="text"
-                      value={row.notes}
-                      onChange={(e) => handleRowChange(idx, "notes", e.target.value)}
-                      placeholder="Notes"
-                      className="bg-transparent border-0 text-neutral-500 italic focus:bg-neutral-900 focus:ring-1 focus:ring-emerald-500 rounded py-0.5 px-1 truncate placeholder-neutral-600 outline-none w-full text-xs"
                     />
                   </div>
 

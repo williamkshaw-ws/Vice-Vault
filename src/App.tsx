@@ -137,6 +137,11 @@ function BallVaultIcon({ className = "w-4 h-4 text-neutral-400" }: { className?:
 // Initial owned mockup data to make the app look stunning right away
 const INITIAL_OWNED_BALLS: GolfBall[] = [];
 
+const filterLegacyBalls = (ballsList: any[]): GolfBall[] => {
+  if (!Array.isArray(ballsList)) return [];
+  return ballsList.filter((b: any) => b && b.id && !/-V[4-9]$/.test(b.id));
+};
+
 
 function sanitizeId(model: string, color: string, name?: string, variation?: string, year?: string): string {
   const clean = (s: string) => s.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "");
@@ -210,13 +215,7 @@ export default function App() {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          const hasOldMock = parsed.some((b: any) => 
-            b.id.includes("PRO_PLUS-RED_BLUE_DRIP_SPLATTER") || 
-            b.id.includes("PRO_SOFT-NEON_GLOSS_RED")
-          );
-          if (!hasOldMock) {
-            return parsed;
-          }
+          return filterLegacyBalls(parsed);
         }
       } catch (e) {
         console.error("Failed to parse saved balls:", e);
@@ -585,6 +584,20 @@ export default function App() {
 
   // Firebase Auth listener and Cloud sync loader
   useEffect(() => {
+    // Clean local storage once of any legacy mock balls to prevent uploading back
+    const saved = localStorage.getItem("vice_vault_balls");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const filtered = filterLegacyBalls(parsed);
+          if (filtered.length !== parsed.length) {
+            localStorage.setItem("vice_vault_balls", JSON.stringify(filtered));
+          }
+        }
+      } catch (e) {}
+    }
+
     // 1. Check for local mock user on mount
     const savedMockUser = localStorage.getItem("vice_vault_mock_user");
     if (savedMockUser) {
@@ -679,11 +692,11 @@ export default function App() {
 
             // 2. Load locker documents using the server API instead of client-side Firestore
             const lockerRes = await fetch(`/api/users/${user.uid}/locker`);
-            let finalBalls = balls;
+            let finalBalls = filterLegacyBalls(balls);
             if (lockerRes.ok) {
               const lockerData = await lockerRes.json();
               if (lockerData && lockerData.balls !== null) {
-                finalBalls = lockerData.balls;
+                finalBalls = filterLegacyBalls(lockerData.balls);
               } else {
                 // If locker doesn't exist on server, upload current client balls (migration of guest data)
                 await fetch(`/api/users/${user.uid}/locker`, {
@@ -692,7 +705,7 @@ export default function App() {
                     "Content-Type": "application/json",
                     "x-user-id": user.uid
                   },
-                  body: JSON.stringify({ balls })
+                  body: JSON.stringify({ balls: filterLegacyBalls(balls) })
                 });
               }
             }
@@ -713,7 +726,7 @@ export default function App() {
           setUserDropdownOpen(false);
 
           const savedBalls = localStorage.getItem("vice_vault_balls");
-          setBalls(savedBalls ? JSON.parse(savedBalls) : INITIAL_OWNED_BALLS);
+          setBalls(savedBalls ? filterLegacyBalls(JSON.parse(savedBalls)) : INITIAL_OWNED_BALLS);
         }
       }
     });
@@ -783,7 +796,7 @@ export default function App() {
           if (res.ok) {
             const data = await res.json();
             if (data && data.balls !== null) {
-              setBalls(data.balls);
+              setBalls(filterLegacyBalls(data.balls));
             }
           }
         })
@@ -917,7 +930,7 @@ export default function App() {
       const res = await fetch(`/api/users/${user.uid || user.id}/locker`);
       if (res.ok) {
         const data = await res.json();
-        setSelectedUserBalls(data.balls || []);
+        setSelectedUserBalls(filterLegacyBalls(data.balls || []));
       } else {
         setSelectedUserBalls([]);
       }
@@ -1725,7 +1738,7 @@ export default function App() {
                             setUserDropdownOpen(false);
 
                             const savedBalls = localStorage.getItem("vice_vault_balls");
-                            setBalls(savedBalls ? JSON.parse(savedBalls) : INITIAL_OWNED_BALLS);
+                            setBalls(savedBalls ? filterLegacyBalls(JSON.parse(savedBalls)) : INITIAL_OWNED_BALLS);
                           } catch (err) {
                             console.error("Sign out error:", err);
                           }
@@ -1867,22 +1880,22 @@ export default function App() {
                     {sortedCatalog.length === 0 ? (
                       <div className="py-12 text-center rounded-xl border border-dashed border-neutral-850 bg-neutral-950/20">
                         <Database className="w-8 h-8 text-neutral-700 mx-auto mb-2" />
-                        <h4 className="font-bold text-neutral-400 text-sm">No balls found in registry</h4>
+                        <h4 className="font-bold text-neutral-400 text-sm">No balls found in the vault</h4>
                         <p className="text-xs text-neutral-500 max-w-xs mx-auto mt-1">
                           {currentUser 
-                            ? `We didn't find any designs fitting "${searchQuery}". Register your custom brand or missing color design inside the Add Missing Ball tab!`
+                            ? `We didn't find any designs fitting "${searchQuery}".`
                             : `We didn't find any designs fitting "${searchQuery}".`}
                         </p>
-                        {currentUser && (
+                        {userProfile?.role === "Admin" && (
                           <button
                             onClick={() => {
-                              setDbPanelTab("register");
-                              // Fallback seed
-                              if (searchQuery) setDbPanelTab("register");
+                              setIsVaultManagerOpen(true);
+                              setShowXlsImporter(false);
+                              setEditingItem(null);
                             }}
                             className="mt-3 text-xs font-bold text-[#2563eb] hover:underline inline-flex items-center gap-1"
                           >
-                            Register "{searchQuery || 'Custom Ball'}" now <ChevronRight className="w-3 h-3" />
+                            Register a new one <ChevronRight className="w-3 h-3" />
                           </button>
                         )}
                       </div>
