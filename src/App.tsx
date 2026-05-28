@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { GolfBall, CatalogItem, BallModel, BallColor, BallCondition } from "./types";
 import { VICE_BALLS_SPECS, COLOR_STYLES, SCRAPED_BALLS } from "./constants";
 import CatalogItemCard from "./components/CatalogItemCard";
@@ -1270,68 +1270,86 @@ export default function App() {
   };
 
   // FILTERED CATALOG items based on search word and model filter tag
-  const filteredCatalog = catalog.filter((item) => {
-    const query = searchQuery.toLowerCase();
-    const matchesSearch = 
-      item.model.toLowerCase().includes(query) ||
-      (item.name && item.name.toLowerCase().includes(query)) ||
-      item.color.toLowerCase().includes(query) ||
-      (item.variation && item.variation.toLowerCase().includes(query)) ||
-      (item.notes && item.notes.toLowerCase().includes(query)) ||
-      (item.year && item.year.toLowerCase().includes(query));
+  const filteredCatalog = useMemo(() => {
+    return catalog.filter((item) => {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch = 
+        item.model.toLowerCase().includes(query) ||
+        (item.name && item.name.toLowerCase().includes(query)) ||
+        item.color.toLowerCase().includes(query) ||
+        (item.variation && item.variation.toLowerCase().includes(query)) ||
+        (item.notes && item.notes.toLowerCase().includes(query)) ||
+        (item.year && item.year.toLowerCase().includes(query));
 
-    const matchesBrand = 
-      selectedBrandFilter === "ALL" || 
-      item.model === selectedBrandFilter;
+      const matchesBrand = 
+        selectedBrandFilter === "ALL" || 
+        item.model === selectedBrandFilter;
 
-    return matchesSearch && matchesBrand;
-  });
+      return matchesSearch && matchesBrand;
+    });
+  }, [catalog, searchQuery, selectedBrandFilter]);
 
   // Unique models actually present in the registry catalog for the Filter Model buttons
-  const registeredModels: string[] = Array.from<string>(
-    new Set<string>(catalog.map(item => item.model))
-  ).sort();
+  const registeredModels = useMemo(() => {
+    return Array.from<string>(
+      new Set<string>(catalog.map(item => item.model))
+    ).sort();
+  }, [catalog]);
 
-  // Sort Catalog alphabetically by Model, then by Color, then by Design Notes (Notes)
   // Sort Catalog alphabetically by Model, then by Name, then by Color, then by Variation (Notes), then by Year
-  const sortedCatalog = [...filteredCatalog].sort((a, b) => {
-    const modelA = a.model.trim().toLowerCase();
-    const modelB = b.model.trim().toLowerCase();
-    if (modelA < modelB) return -1;
-    if (modelA > modelB) return 1;
+  const sortedCatalog = useMemo(() => {
+    return [...filteredCatalog].sort((a, b) => {
+      const modelA = a.model.trim().toLowerCase();
+      const modelB = b.model.trim().toLowerCase();
+      if (modelA < modelB) return -1;
+      if (modelA > modelB) return 1;
 
-    const nameA = (a.name || "").trim().toLowerCase();
-    const nameB = (b.name || "").trim().toLowerCase();
-    if (nameA < nameB) return -1;
-    if (nameA > nameB) return 1;
+      const nameA = (a.name || "").trim().toLowerCase();
+      const nameB = (b.name || "").trim().toLowerCase();
+      if (nameA < nameB) return -1;
+      if (nameA > nameB) return 1;
 
-    const colorA = a.color.trim().toLowerCase();
-    const colorB = b.color.trim().toLowerCase();
-    if (colorA < colorB) return -1;
-    if (colorA > colorB) return 1;
+      const colorA = a.color.trim().toLowerCase();
+      const colorB = b.color.trim().toLowerCase();
+      if (colorA < colorB) return -1;
+      if (colorA > colorB) return 1;
 
-    const varA = (a.variation || a.notes || "").trim().toLowerCase();
-    const varB = (b.variation || b.notes || "").trim().toLowerCase();
-    if (varA < varB) return -1;
-    if (varA > varB) return 1;
+      const varA = (a.variation || a.notes || "").trim().toLowerCase();
+      const varB = (b.variation || b.notes || "").trim().toLowerCase();
+      if (varA < varB) return -1;
+      if (varA > varB) return 1;
 
-    const yearA = (a.year || "").trim().toLowerCase();
-    const yearB = (b.year || "").trim().toLowerCase();
-    if (yearA < yearB) return -1;
-    if (yearA > yearB) return 1;
+      const yearA = (a.year || "").trim().toLowerCase();
+      const yearB = (b.year || "").trim().toLowerCase();
+      if (yearA < yearB) return -1;
+      if (yearA > yearB) return 1;
 
-    return 0;
-  });
+      return 0;
+    });
+  }, [filteredCatalog]);
 
   // Calculate high level statistics for Locker
-  const totalOwnedCount = balls.reduce((sum, b) => sum + b.quantity, 0);
-  const totalUniqueModels = new Set(
-    balls.map(b => `${b.model.trim().toLowerCase()}|${b.color.trim().toLowerCase()}|${(b.year || "").trim().toLowerCase()}`)
-  ).size;
+  const totalOwnedCount = useMemo(() => {
+    return balls.reduce((sum, b) => sum + b.quantity, 0);
+  }, [balls]);
 
-  const eaCount = balls.filter(b => b.packageType === "ea" || !b.packageType).reduce((sum, b) => sum + b.quantity, 0);
-  const sleeveCount = balls.filter(b => b.packageType === "sleeve").reduce((sum, b) => sum + Math.round(b.quantity / 3), 0);
-  const boxCount = balls.filter(b => b.packageType === "box").reduce((sum, b) => sum + Math.round(b.quantity / 12), 0);
+  const totalUniqueModels = useMemo(() => {
+    return new Set(
+      balls.map(b => `${b.model.trim().toLowerCase()}|${b.color.trim().toLowerCase()}|${(b.year || "").trim().toLowerCase()}`)
+    ).size;
+  }, [balls]);
+
+  const eaCount = useMemo(() => {
+    return balls.filter(b => b.packageType === "ea" || !b.packageType).reduce((sum, b) => sum + b.quantity, 0);
+  }, [balls]);
+
+  const sleeveCount = useMemo(() => {
+    return balls.filter(b => b.packageType === "sleeve").reduce((sum, b) => sum + Math.round(b.quantity / 3), 0);
+  }, [balls]);
+
+  const boxCount = useMemo(() => {
+    return balls.filter(b => b.packageType === "box").reduce((sum, b) => sum + Math.round(b.quantity / 12), 0);
+  }, [balls]);
 
   // Check if we are viewing a shared locker link
   const params = new URLSearchParams(window.location.search);
