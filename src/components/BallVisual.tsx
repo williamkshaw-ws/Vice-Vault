@@ -457,15 +457,7 @@ export default function BallVisual({
           className="absolute inset-0 w-full h-full object-cover"
           referrerPolicy="no-referrer"
         />
-        {/* Dimple overlay on top of custom photo to make it look like a 3D golf ball! */}
-        <div 
-          className="absolute inset-0 opacity-[0.22] rounded-full mix-blend-overlay pointer-events-none"
-          style={{
-            backgroundImage: `radial-gradient(circle, #000 20%, transparent 25%)`,
-            backgroundSize: size === "xl" ? "12px 12px" : size === "lg" ? "8.5px 8.5px" : "6px 6px",
-            backgroundPosition: "center"
-          }}
-        />
+
 
         {/* Shading layer */}
         <div 
