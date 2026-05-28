@@ -223,61 +223,103 @@ export default function BallVisual({
 
   // --- RENDER BOX PACKAGING VISUAL ---
   if (packageType === "box") {
-    const { accentLight, accentDark, isDark } = getThemeColors();
+    const { accentLight, accentDark } = getThemeColors();
+    // Centered ball inside the box preview window
+    const ballCx = 38;
+    const ballCy = 62;
+    const ballR = 12;
+
     return (
       <div className={`relative inline-flex items-center justify-center shrink-0 ${sizeClasses[size]} ${className}`} id={`golfbox-${model}-${color}-${size}`}>
-        <svg viewBox="0 0 100 100" className="w-full h-full select-none pointer-events-none drop-shadow-[0_4px_6px_rgba(0,0,0,0.45)]">
+        <svg viewBox="0 0 100 100" className="w-full h-full select-none pointer-events-none">
           <defs>
-            <linearGradient id="topFace" x1="0" y1="0" x2="1" y2="1">
+            {/* Soft shadow filter */}
+            <filter id="boxShadowBlur" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="1.8" />
+            </filter>
+
+            {/* Packaging face gradients */}
+            <linearGradient id="boxTopFace" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#e0f2fe" />
+              <stop offset="100%" stopColor="#f8fafc" />
+            </linearGradient>
+            <linearGradient id="boxFrontFace" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#ffffff" />
-              <stop offset="100%" stopColor="#f3f4f6" />
+              <stop offset="100%" stopColor="#f1f5f9" />
             </linearGradient>
-            <linearGradient id="leftFace" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f3f4f6" />
-              <stop offset="100%" stopColor="#e5e7eb" />
+            <linearGradient id="boxRightFace" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#cbd5e1" />
+              <stop offset="100%" stopColor="#94a3b8" />
             </linearGradient>
-            <linearGradient id="rightFace" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#e5e7eb" />
-              <stop offset="100%" stopColor="#d1d5db" />
-            </linearGradient>
-            <linearGradient id="accentGrad" x1="0" y1="0" x2="1" y2="0">
+
+            {/* Dynamic theme accent for vertical stripe */}
+            <linearGradient id="stripeGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={accentLight} />
               <stop offset="100%" stopColor={accentDark} />
             </linearGradient>
-            <radialGradient id="ballWindowGrad" cx="35%" cy="35%" r="65%">
+
+            {/* Dynamic Ball Gradient inside preview window */}
+            <radialGradient id="boxBallInsideGrad" cx="35%" cy="35%" r="65%">
               <stop offset="0%" stopColor={accentLight === "#ffffff" ? "#ffffff" : accentLight} />
               <stop offset="55%" stopColor={accentLight === "#ffffff" ? "#eaeaea" : accentDark} />
               <stop offset="100%" stopColor={accentLight === "#ffffff" ? "#c8c8c8" : "#050505"} />
             </radialGradient>
+
+            {/* Clip path for custom image ball previews */}
+            <clipPath id="boxBallClip">
+              <circle cx={ballCx} cy={ballCy} r={ballR} />
+            </clipPath>
           </defs>
 
-          {/* Under-box shadow */}
-          <polygon points="10,61 35,81 90,61 70,85 25,85" fill="rgba(0,0,0,0.55)" opacity="0.75" />
+          {/* Under-box soft shadow */}
+          <polygon points="20,80 70,89 88,80 40,75" fill="rgba(15,23,42,0.25)" filter="url(#boxShadowBlur)" />
 
           {/* 3D Geometry */}
           {/* Top Face */}
-          <polygon points="10,35 65,15 90,35 35,55" fill="url(#topFace)" stroke="#d1d5db" strokeWidth="0.3" />
-          {/* Accent panel strip on Top Face */}
-          <polygon points="32,27 65,15 75,23 42,35" fill="url(#accentGrad)" opacity="0.9" />
-
-          {/* Left Front Face */}
-          <polygon points="10,35 35,55 35,80 10,60" fill="url(#leftFace)" stroke="#cccccc" strokeWidth="0.3" />
+          <polygon points="25,17 32,10 75,18 68,25" fill="url(#boxTopFace)" stroke="#475569" strokeWidth="1" strokeLinejoin="round" />
           
-          {/* Right Front Face */}
-          <polygon points="35,55 90,35 90,60 35,80" fill="url(#rightFace)" stroke="#babcbf" strokeWidth="0.3" />
-          {/* Accent Stripe on Right Face */}
-          <polygon points="45,55 52,52 52,77 45,80" fill="url(#accentGrad)" />
+          {/* Right Face */}
+          <polygon points="68,25 75,18 75,77 68,88" fill="url(#boxRightFace)" stroke="#475569" strokeWidth="1" strokeLinejoin="round" />
+          
+          {/* Front Face */}
+          <polygon points="25,17 68,25 68,88 25,78" fill="url(#boxFrontFace)" stroke="#475569" strokeWidth="1" strokeLinejoin="round" />
 
-          {/* Ball preview circle on Left Face */}
-          <circle cx="22.5" cy="54" r="8" fill="url(#ballWindowGrad)" stroke="#aaaaaa" strokeWidth="0.3" />
-          <circle cx="22.5" cy="54" r="8" fill="transparent" stroke="rgba(0,0,0,0.15)" strokeWidth="0.3" strokeDasharray="1 1.5" />
+          {/* Ball Shadow inside Box */}
+          <ellipse cx={ballCx} cy={ballCy + ballR - 1.5} rx={ballR + 1} ry={2.5} fill="rgba(15,23,42,0.18)" />
 
-          {/* Logo / Text on Top Face - Rich charcoal text for premium cardboard print look */}
-          <text x="27" y="47" fill="#171717" fontSize="7.5" fontWeight="900" fontFamily="sans-serif" letterSpacing="0.4" transform="rotate(20 27 47)">
-            {brandLabel}
+          {/* Ball Preview inside Box */}
+          {customImage ? (
+            <g>
+              <circle cx={ballCx} cy={ballCy} r={ballR} fill="#fff" stroke="#475569" strokeWidth="1" />
+              <image href={customImage} x={ballCx - ballR} y={ballCy - ballR} width={ballR * 2} height={ballR * 2} clipPath="url(#boxBallClip)" />
+              {/* Dimple overlay over custom image */}
+              <circle cx={ballCx} cy={ballCy} r={ballR} fill="transparent" stroke="rgba(0,0,0,0.1)" strokeWidth="0.8" strokeDasharray="1 1.5" clipPath="url(#boxBallClip)" />
+            </g>
+          ) : (
+            <g>
+              <circle cx={ballCx} cy={ballCy} r={ballR} fill="url(#boxBallInsideGrad)" stroke="#475569" strokeWidth="1" />
+              <circle cx={ballCx} cy={ballCy} r={ballR} fill="transparent" stroke="rgba(0,0,0,0.12)" strokeWidth="0.8" strokeDasharray="1 1.2" />
+            </g>
+          )}
+
+          {/* Vertical stripe / alignment window on the right */}
+          <rect x="60" y="27" width="2.5" height="48" rx="1.25" fill="url(#stripeGrad)" stroke="#475569" strokeWidth="0.8" />
+
+          {/* Flat Brand Texts (match reference image style: bold, clean black text, no skew) */}
+          <text x="32" y="32" fill="#1e293b" fontSize="6.5" fontWeight="900" fontFamily="sans-serif" letterSpacing="0.1">
+            PREMIUM
           </text>
-          <text x="29" y="52" fill={accentDark} fontSize="3" fontWeight="bold" fontFamily="monospace" transform="rotate(20 29 52)">
-            12 PACK
+          <text x="32" y="39" fill="#1e293b" fontSize="6.5" fontWeight="900" fontFamily="sans-serif" letterSpacing="0.1">
+            GOLF BALLS
+          </text>
+          
+          <text x="54" y="60" fill="#1e293b" fontSize="5.5" fontWeight="900" fontFamily="sans-serif">
+            QTY 12
+          </text>
+
+          {/* Model Name at bottom right */}
+          <text x="62" y="82" fill="#1e293b" fontSize="5.5" fontWeight="900" fontStyle="italic" fontFamily="sans-serif" textAnchor="end">
+            {model && model.trim().toUpperCase() !== "LOGO" ? model.trim().toUpperCase() : "PRO"}
           </text>
         </svg>
       </div>
@@ -286,68 +328,102 @@ export default function BallVisual({
 
   // --- RENDER SLEEVE PACKAGING VISUAL ---
   if (packageType === "sleeve") {
-    const { accentLight, accentDark, isDark } = getThemeColors();
+    const { accentLight, accentDark } = getThemeColors();
+    // Centered ball inside the sleeve preview window
+    const ballCx = 48;
+    const ballCy = 64;
+    const ballR = 10;
+
     return (
       <div className={`relative inline-flex items-center justify-center shrink-0 ${sizeClasses[size]} ${className}`} id={`golfsleeve-${model}-${color}-${size}`}>
-        <svg viewBox="0 0 100 100" className="w-full h-full select-none pointer-events-none drop-shadow-[0_4px_6px_rgba(0,0,0,0.45)]">
+        <svg viewBox="0 0 100 100" className="w-full h-full select-none pointer-events-none">
           <defs>
-            <linearGradient id="sleeveTop" x1="0" y1="0" x2="1" y2="1">
+            {/* Soft shadow filter */}
+            <filter id="sleeveShadowBlur" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="1.8" />
+            </filter>
+
+            {/* Packaging face gradients */}
+            <linearGradient id="sleeveTopFace" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#e0f2fe" />
+              <stop offset="100%" stopColor="#f8fafc" />
+            </linearGradient>
+            <linearGradient id="sleeveFrontFace" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#ffffff" />
-              <stop offset="100%" stopColor="#f3f4f6" />
+              <stop offset="100%" stopColor="#f1f5f9" />
             </linearGradient>
-            <linearGradient id="sleeveLeft" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f3f4f6" />
-              <stop offset="100%" stopColor="#e5e7eb" />
+            <linearGradient id="sleeveRightFace" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#cbd5e1" />
+              <stop offset="100%" stopColor="#94a3b8" />
             </linearGradient>
-            <linearGradient id="sleeveRight" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#e5e7eb" />
-              <stop offset="100%" stopColor="#d1d5db" />
-            </linearGradient>
-            <linearGradient id="sleeveAccent" x1="0" y1="0" x2="0" y2="1">
+
+            {/* Dynamic theme accent for vertical stripe */}
+            <linearGradient id="sleeveStripeGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={accentLight} />
               <stop offset="100%" stopColor={accentDark} />
             </linearGradient>
-            <radialGradient id="sleeveBallGrad" cx="35%" cy="35%" r="65%">
+
+            {/* Dynamic Ball Gradient inside preview window */}
+            <radialGradient id="sleeveBallInsideGrad" cx="35%" cy="35%" r="65%">
               <stop offset="0%" stopColor={accentLight === "#ffffff" ? "#ffffff" : accentLight} />
               <stop offset="55%" stopColor={accentLight === "#ffffff" ? "#eaeaea" : accentDark} />
               <stop offset="100%" stopColor={accentLight === "#ffffff" ? "#c8c8c8" : "#050505"} />
             </radialGradient>
+
+            {/* Clip path for custom image ball previews */}
+            <clipPath id="sleeveBallClip">
+              <circle cx={ballCx} cy={ballCy} r={ballR} />
+            </clipPath>
           </defs>
 
-          {/* Under-sleeve shadow */}
-          <ellipse cx="50" cy="85" rx="18" ry="5.5" fill="rgba(0,0,0,0.55)" opacity="0.8" />
+          {/* Under-sleeve soft shadow */}
+          <ellipse cx="50" cy="85" rx="18" ry="5.5" fill="rgba(15,23,42,0.25)" filter="url(#sleeveShadowBlur)" />
 
           {/* 3D Geometry */}
           {/* Top Face */}
-          <polygon points="35,30 50,22 65,30 50,38" fill="url(#sleeveTop)" stroke="#d1d5db" strokeWidth="0.3" />
-          
-          {/* Left Face */}
-          <polygon points="35,30 50,38 50,85 35,77" fill="url(#sleeveLeft)" stroke="#cccccc" strokeWidth="0.3" />
+          <polygon points="35,15 42,10 72,15 65,20" fill="url(#sleeveTopFace)" stroke="#475569" strokeWidth="1" strokeLinejoin="round" />
           
           {/* Right Face */}
-          <polygon points="50,38 65,30 65,77 50,85" fill="url(#sleeveRight)" stroke="#babcbf" strokeWidth="0.3" />
-          {/* Accent Stripe on Right Face */}
-          <polygon points="58,33 65,30 65,77 58,80" fill="url(#sleeveAccent)" opacity="0.95" />
-
-          {/* 3 stacked balls in transparent vertical column on Left Face */}
-          {/* Ball 1 */}
-          <circle cx="42.5" cy="45" r="4.8" fill="url(#sleeveBallGrad)" stroke="#aaaaaa" strokeWidth="0.25" />
-          <circle cx="42.5" cy="45" r="4.8" fill="transparent" stroke="rgba(0,0,0,0.12)" strokeWidth="0.25" strokeDasharray="0.8 1" />
+          <polygon points="65,20 72,15 72,80 65,85" fill="url(#sleeveRightFace)" stroke="#475569" strokeWidth="1" strokeLinejoin="round" />
           
-          {/* Ball 2 */}
-          <circle cx="42.5" cy="58" r="4.8" fill="url(#sleeveBallGrad)" stroke="#aaaaaa" strokeWidth="0.25" />
-          <circle cx="42.5" cy="58" r="4.8" fill="transparent" stroke="rgba(0,0,0,0.12)" strokeWidth="0.25" strokeDasharray="0.8 1" />
-          
-          {/* Ball 3 */}
-          <circle cx="42.5" cy="71" r="4.8" fill="url(#sleeveBallGrad)" stroke="#aaaaaa" strokeWidth="0.25" />
-          <circle cx="42.5" cy="71" r="4.8" fill="transparent" stroke="rgba(0,0,0,0.12)" strokeWidth="0.25" strokeDasharray="0.8 1" />
+          {/* Front Face */}
+          <polygon points="35,15 65,20 65,85 35,80" fill="url(#sleeveFrontFace)" stroke="#475569" strokeWidth="1" strokeLinejoin="round" />
 
-          {/* Rotated text on Right Face */}
-          <text x="54" y="58" fill="#171717" fontSize="5.5" fontWeight="900" fontFamily="sans-serif" transform="rotate(-90 54 58)" letterSpacing="0.6">
-            {brandLabel}
+          {/* Ball Shadow inside Sleeve */}
+          <ellipse cx={ballCx} cy={ballCy + ballR - 1.2} rx={ballR + 0.8} ry="2" fill="rgba(15,23,42,0.18)" />
+
+          {/* Ball Preview inside Sleeve */}
+          {customImage ? (
+            <g>
+              <circle cx={ballCx} cy={ballCy} r={ballR} fill="#fff" stroke="#475569" strokeWidth="1" />
+              <image href={customImage} x={ballCx - ballR} y={ballCy - ballR} width={ballR * 2} height={ballR * 2} clipPath="url(#sleeveBallClip)" />
+              <circle cx={ballCx} cy={ballCy} r={ballR} fill="transparent" stroke="rgba(0,0,0,0.1)" strokeWidth="0.8" strokeDasharray="1 1.5" clipPath="url(#sleeveBallClip)" />
+            </g>
+          ) : (
+            <g>
+              <circle cx={ballCx} cy={ballCy} r={ballR} fill="url(#sleeveBallInsideGrad)" stroke="#475569" strokeWidth="1" />
+              <circle cx={ballCx} cy={ballCy} r={ballR} fill="transparent" stroke="rgba(0,0,0,0.12)" strokeWidth="0.8" strokeDasharray="1 1.2" />
+            </g>
+          )}
+
+          {/* Vertical stripe / alignment window on the right */}
+          <rect x="58" y="24" width="2" height="42" rx="1.0" fill="url(#sleeveStripeGrad)" stroke="#475569" strokeWidth="0.8" />
+
+          {/* Flat Brand Texts */}
+          <text x="40" y="26" fill="#1e293b" fontSize="4.5" fontWeight="900" fontFamily="sans-serif" letterSpacing="0.05">
+            PREMIUM
           </text>
-          <text x="54" y="65" fill={accentDark} fontSize="2.5" fontWeight="bold" fontFamily="monospace" transform="rotate(-90 54 65)">
-            3 PACK
+          <text x="40" y="31" fill="#1e293b" fontSize="4.5" fontWeight="900" fontFamily="sans-serif" letterSpacing="0.05">
+            GOLF BALLS
+          </text>
+          
+          <text x="40" y="47" fill="#1e293b" fontSize="4" fontWeight="900" fontFamily="sans-serif">
+            QTY 3
+          </text>
+
+          {/* Model Name at bottom right */}
+          <text x="60" y="80" fill="#1e293b" fontSize="4" fontWeight="900" fontStyle="italic" fontFamily="sans-serif" textAnchor="end">
+            {model && model.trim().toUpperCase() !== "LOGO" ? model.trim().toUpperCase() : "PRO"}
           </text>
         </svg>
       </div>
