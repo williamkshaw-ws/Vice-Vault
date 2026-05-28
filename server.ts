@@ -782,7 +782,11 @@ if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
         
         saveCatalog(firestoreItems);
         console.log(`Catalog sync complete. Firestore and local catalog.json are in sync with ${firestoreItems.length} items.`);
-        await cleanDatabaseFields();
+        if (process.env.CLEAN_DB === "true") {
+          await cleanDatabaseFields();
+        } else {
+          console.log("Skipping database fields cleanup migration (CLEAN_DB environment variable is not true).");
+        }
       } catch (err) {
         console.error("Failed to sync initial Firestore data:", err);
       }
@@ -815,7 +819,11 @@ if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
     console.log(`Local catalog migration complete. File catalog.json is updated with ${migratedCatalog.length} items.`);
     (async () => {
       try {
-        await cleanDatabaseFields();
+        if (process.env.CLEAN_DB === "true") {
+          await cleanDatabaseFields();
+        } else {
+          console.log("Skipping database fields cleanup migration (CLEAN_DB environment variable is not true).");
+        }
       } catch (cleanErr) {
         console.error("Failed to run database fields cleanup:", cleanErr);
       }
