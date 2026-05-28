@@ -226,19 +226,19 @@ export default function BallVisual({
     const { accentLight, accentDark, isDark } = getThemeColors();
     return (
       <div className={`relative inline-flex items-center justify-center shrink-0 ${sizeClasses[size]} ${className}`} id={`golfbox-${model}-${color}-${size}`}>
-        <svg viewBox="0 0 100 100" className="w-full h-full select-none pointer-events-none drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)]">
+        <svg viewBox="0 0 100 100" className="w-full h-full select-none pointer-events-none drop-shadow-[0_4px_6px_rgba(0,0,0,0.45)]">
           <defs>
             <linearGradient id="topFace" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#2c2c2c" />
-              <stop offset="100%" stopColor="#181818" />
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="100%" stopColor="#f3f4f6" />
             </linearGradient>
             <linearGradient id="leftFace" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#1e1e1e" />
-              <stop offset="100%" stopColor="#0f0f0f" />
+              <stop offset="0%" stopColor="#f3f4f6" />
+              <stop offset="100%" stopColor="#e5e7eb" />
             </linearGradient>
             <linearGradient id="rightFace" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#171717" />
-              <stop offset="100%" stopColor="#080808" />
+              <stop offset="0%" stopColor="#e5e7eb" />
+              <stop offset="100%" stopColor="#d1d5db" />
             </linearGradient>
             <linearGradient id="accentGrad" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0%" stopColor={accentLight} />
@@ -256,28 +256,28 @@ export default function BallVisual({
 
           {/* 3D Geometry */}
           {/* Top Face */}
-          <polygon points="10,35 65,15 90,35 35,55" fill="url(#topFace)" stroke="#262626" strokeWidth="0.4" />
+          <polygon points="10,35 65,15 90,35 35,55" fill="url(#topFace)" stroke="#d1d5db" strokeWidth="0.3" />
           {/* Accent panel strip on Top Face */}
           <polygon points="32,27 65,15 75,23 42,35" fill="url(#accentGrad)" opacity="0.9" />
 
           {/* Left Front Face */}
-          <polygon points="10,35 35,55 35,80 10,60" fill="url(#leftFace)" stroke="#1a1a1a" strokeWidth="0.4" />
+          <polygon points="10,35 35,55 35,80 10,60" fill="url(#leftFace)" stroke="#cccccc" strokeWidth="0.3" />
           
           {/* Right Front Face */}
-          <polygon points="35,55 90,35 90,60 35,80" fill="url(#rightFace)" stroke="#141414" strokeWidth="0.4" />
+          <polygon points="35,55 90,35 90,60 35,80" fill="url(#rightFace)" stroke="#babcbf" strokeWidth="0.3" />
           {/* Accent Stripe on Right Face */}
           <polygon points="45,55 52,52 52,77 45,80" fill="url(#accentGrad)" />
 
           {/* Ball preview circle on Left Face */}
-          <circle cx="22.5" cy="54" r="8" fill="url(#ballWindowGrad)" stroke="#333" strokeWidth="0.3" />
+          <circle cx="22.5" cy="54" r="8" fill="url(#ballWindowGrad)" stroke="#aaaaaa" strokeWidth="0.3" />
           <circle cx="22.5" cy="54" r="8" fill="transparent" stroke="rgba(0,0,0,0.15)" strokeWidth="0.3" strokeDasharray="1 1.5" />
 
-          {/* Logo / Text on Top Face */}
-          <text x="27" y="47" fill={isDark ? "#ffffff" : "#000000"} fontSize="7.5" fontWeight="900" fontFamily="sans-serif" letterSpacing="0.4" transform="rotate(20 27 47)">
+          {/* Logo / Text on Top Face - Rich charcoal text for premium cardboard print look */}
+          <text x="27" y="47" fill="#171717" fontSize="7.5" fontWeight="900" fontFamily="sans-serif" letterSpacing="0.4" transform="rotate(20 27 47)">
             {brandLabel}
           </text>
-          <text x="29" y="52" fill={isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.6)"} fontSize="3" fontWeight="bold" fontFamily="monospace" transform="rotate(20 29 52)">
-            12 DOZEN
+          <text x="29" y="52" fill={accentDark} fontSize="3" fontWeight="bold" fontFamily="monospace" transform="rotate(20 29 52)">
+            12 PACK
           </text>
         </svg>
       </div>
@@ -292,16 +292,16 @@ export default function BallVisual({
         <svg viewBox="0 0 100 100" className="w-full h-full select-none pointer-events-none drop-shadow-[0_4px_6px_rgba(0,0,0,0.45)]">
           <defs>
             <linearGradient id="sleeveTop" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#2c2c2c" />
-              <stop offset="100%" stopColor="#181818" />
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="100%" stopColor="#f3f4f6" />
             </linearGradient>
             <linearGradient id="sleeveLeft" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#1e1e1e" />
-              <stop offset="100%" stopColor="#0a0a0a" />
+              <stop offset="0%" stopColor="#f3f4f6" />
+              <stop offset="100%" stopColor="#e5e7eb" />
             </linearGradient>
             <linearGradient id="sleeveRight" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#171717" />
-              <stop offset="100%" stopColor="#080808" />
+              <stop offset="0%" stopColor="#e5e7eb" />
+              <stop offset="100%" stopColor="#d1d5db" />
             </linearGradient>
             <linearGradient id="sleeveAccent" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={accentLight} />
@@ -319,35 +319,35 @@ export default function BallVisual({
 
           {/* 3D Geometry */}
           {/* Top Face */}
-          <polygon points="35,30 50,22 65,30 50,38" fill="url(#sleeveTop)" stroke="#262626" strokeWidth="0.4" />
+          <polygon points="35,30 50,22 65,30 50,38" fill="url(#sleeveTop)" stroke="#d1d5db" strokeWidth="0.3" />
           
           {/* Left Face */}
-          <polygon points="35,30 50,38 50,85 35,77" fill="url(#sleeveLeft)" stroke="#1a1a1a" strokeWidth="0.4" />
+          <polygon points="35,30 50,38 50,85 35,77" fill="url(#sleeveLeft)" stroke="#cccccc" strokeWidth="0.3" />
           
           {/* Right Face */}
-          <polygon points="50,38 65,30 65,77 50,85" fill="url(#sleeveRight)" stroke="#141414" strokeWidth="0.4" />
+          <polygon points="50,38 65,30 65,77 50,85" fill="url(#sleeveRight)" stroke="#babcbf" strokeWidth="0.3" />
           {/* Accent Stripe on Right Face */}
           <polygon points="58,33 65,30 65,77 58,80" fill="url(#sleeveAccent)" opacity="0.95" />
 
           {/* 3 stacked balls in transparent vertical column on Left Face */}
           {/* Ball 1 */}
-          <circle cx="42.5" cy="45" r="4.8" fill="url(#sleeveBallGrad)" stroke="#333" strokeWidth="0.25" />
+          <circle cx="42.5" cy="45" r="4.8" fill="url(#sleeveBallGrad)" stroke="#aaaaaa" strokeWidth="0.25" />
           <circle cx="42.5" cy="45" r="4.8" fill="transparent" stroke="rgba(0,0,0,0.12)" strokeWidth="0.25" strokeDasharray="0.8 1" />
           
           {/* Ball 2 */}
-          <circle cx="42.5" cy="58" r="4.8" fill="url(#sleeveBallGrad)" stroke="#333" strokeWidth="0.25" />
+          <circle cx="42.5" cy="58" r="4.8" fill="url(#sleeveBallGrad)" stroke="#aaaaaa" strokeWidth="0.25" />
           <circle cx="42.5" cy="58" r="4.8" fill="transparent" stroke="rgba(0,0,0,0.12)" strokeWidth="0.25" strokeDasharray="0.8 1" />
           
           {/* Ball 3 */}
-          <circle cx="42.5" cy="71" r="4.8" fill="url(#sleeveBallGrad)" stroke="#333" strokeWidth="0.25" />
+          <circle cx="42.5" cy="71" r="4.8" fill="url(#sleeveBallGrad)" stroke="#aaaaaa" strokeWidth="0.25" />
           <circle cx="42.5" cy="71" r="4.8" fill="transparent" stroke="rgba(0,0,0,0.12)" strokeWidth="0.25" strokeDasharray="0.8 1" />
 
           {/* Rotated text on Right Face */}
-          <text x="54" y="58" fill={isDark ? "#ffffff" : "#000000"} fontSize="5.5" fontWeight="900" fontFamily="sans-serif" transform="rotate(-90 54 58)" letterSpacing="0.6">
+          <text x="54" y="58" fill="#171717" fontSize="5.5" fontWeight="900" fontFamily="sans-serif" transform="rotate(-90 54 58)" letterSpacing="0.6">
             {brandLabel}
           </text>
-          <text x="54" y="65" fill={isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)"} fontSize="2.5" fontWeight="bold" fontFamily="monospace" transform="rotate(-90 54 65)">
-            3 SLEEVE
+          <text x="54" y="65" fill={accentDark} fontSize="2.5" fontWeight="bold" fontFamily="monospace" transform="rotate(-90 54 65)">
+            3 PACK
           </text>
         </svg>
       </div>
