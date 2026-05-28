@@ -25,9 +25,19 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
   const [file, setFile] = useState<File | null>(null);
   const [parsedRows, setParsedRows] = useState<TempImportRow[]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
-  const [columnMapping, setColumnMapping] = useState<{ model: string; color: string; notes: string }>({
+  const [columnMapping, setColumnMapping] = useState<{
+    model: string;
+    name: string;
+    color: string;
+    variation: string;
+    year: string;
+    notes: string;
+  }>({
     model: "",
+    name: "",
     color: "",
+    variation: "",
+    year: "",
     notes: "",
   });
   const [isDragActive, setIsDragActive] = useState(false);
@@ -39,7 +49,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
     setFile(null);
     setParsedRows([]);
     setHeaders([]);
-    setColumnMapping({ model: "", color: "", notes: "" });
+    setColumnMapping({ model: "", name: "", color: "", variation: "", year: "", notes: "" });
     setError(null);
     setSuccessCount(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -87,16 +97,28 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
 
         // Smart column mapping auto-detection
         let detectedModelCol = "";
+        let detectedNameCol = "";
         let detectedColorCol = "";
+        let detectedVariationCol = "";
+        let detectedYearCol = "";
         let detectedNotesCol = "";
 
         detectedHeaders.forEach((h) => {
           const lh = h.toLowerCase();
-          if (lh.includes("model") || lh.includes("brand") || lh.includes("ball") || lh.includes("name") || lh === "title") {
+          if (lh === "model" || lh.includes("brand") || lh === "ball" || lh === "title") {
             if (!detectedModelCol) detectedModelCol = h;
+          }
+          if (lh === "name" || lh.includes("label") || lh.includes("design name")) {
+            if (!detectedNameCol) detectedNameCol = h;
           }
           if (lh.includes("color") || lh.includes("finish") || lh.includes("shade") || lh.includes("style")) {
             if (!detectedColorCol) detectedColorCol = h;
+          }
+          if (lh.includes("variation") || lh.includes("type") || lh.includes("subcolor")) {
+            if (!detectedVariationCol) detectedVariationCol = h;
+          }
+          if (lh === "year" || lh.includes("season") || lh.includes("date")) {
+            if (!detectedYearCol) detectedYearCol = h;
           }
           if (lh.includes("note") || lh.includes("tagline") || lh.includes("desc") || lh.includes("detail") || lh.includes("comment") || lh.includes("history")) {
             if (!detectedNotesCol) detectedNotesCol = h;
@@ -105,27 +127,46 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
 
         // Fallbacks if no match discovered
         if (!detectedModelCol && detectedHeaders.length > 0) detectedModelCol = detectedHeaders[0];
-        
-        if (!detectedColorCol && detectedHeaders.length > 1) {
-          detectedColorCol = detectedHeaders[1];
-        } else if (!detectedColorCol && detectedHeaders.length > 0) {
-          detectedColorCol = detectedHeaders[0];
+        if (!detectedNameCol) {
+          const found = detectedHeaders.find(h => h.toLowerCase() === "name");
+          detectedNameCol = found || "";
         }
-
-        if (!detectedNotesCol && detectedHeaders.length > 2) {
-          detectedNotesCol = detectedHeaders[2];
-        } else if (!detectedNotesCol && detectedHeaders.length > 0) {
-          detectedNotesCol = detectedHeaders[0];
+        if (!detectedColorCol) {
+          const found = detectedHeaders.find(h => h.toLowerCase() === "color");
+          detectedColorCol = found || "";
+        }
+        if (!detectedVariationCol) {
+          const found = detectedHeaders.find(h => h.toLowerCase() === "variation");
+          detectedVariationCol = found || "";
+        }
+        if (!detectedYearCol) {
+          const found = detectedHeaders.find(h => h.toLowerCase() === "year");
+          detectedYearCol = found || "";
+        }
+        if (!detectedNotesCol) {
+          const found = detectedHeaders.find(h => h.toLowerCase() === "notes" || h.toLowerCase() === "description");
+          detectedNotesCol = found || "";
         }
 
         setColumnMapping({
           model: detectedModelCol,
+          name: detectedNameCol,
           color: detectedColorCol,
+          variation: detectedVariationCol,
+          year: detectedYearCol,
           notes: detectedNotesCol,
         });
 
         // Store rows for previewing
-        processRows(rawJson, detectedModelCol, detectedColorCol, detectedNotesCol);
+        processRows(
+          rawJson,
+          detectedModelCol,
+          detectedNameCol,
+          detectedColorCol,
+          detectedVariationCol,
+          detectedYearCol,
+          detectedNotesCol
+        );
 
       } catch (err: any) {
         setError(`Failed to read spreadsheet file: ${err.message || err}`);
@@ -135,12 +176,23 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
     reader.readAsArrayBuffer(uploadedFile);
   };
 
-  const processRows = (rawJson: Record<string, any>[], modelCol: string, colorCol: string, notesCol: string) => {
+  const processRows = (
+    rawJson: Record<string, any>[],
+    modelCol: string,
+    nameCol: string,
+    colorCol: string,
+    variationCol: string,
+    yearCol: string,
+    notesCol: string
+  ) => {
     const formatted: TempImportRow[] = rawJson
       .map((row) => {
         const mVal = row[modelCol] !== undefined && row[modelCol] !== null ? String(row[modelCol]).trim() : "";
+        const nameVal = nameCol && row[nameCol] !== undefined && row[nameCol] !== null ? String(row[nameCol]).trim() : "";
         const cVal = row[colorCol] !== undefined && row[colorCol] !== null ? String(row[colorCol]).trim() : "";
-        const nVal = row[notesCol] !== undefined && row[notesCol] !== null ? String(row[notesCol]).trim() : "";
+        const varVal = variationCol && row[variationCol] !== undefined && row[variationCol] !== null ? String(row[variationCol]).trim() : "";
+        const yVal = yearCol && row[yearCol] !== undefined && row[yearCol] !== null ? String(row[yearCol]).trim() : "";
+        const nVal = notesCol && row[notesCol] !== undefined && row[notesCol] !== null ? String(row[notesCol]).trim() : "";
 
         // Reconstruct ball image chunks
         let customImage = "";
@@ -183,7 +235,10 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
 
         return {
           model: mVal,
+          name: nameVal,
           color: cVal,
+          variation: varVal,
+          year: yVal,
           notes: nVal,
           customImage: customImage || undefined,
           customImageSleeve: customImageSleeve || undefined,
@@ -195,7 +250,10 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
     setParsedRows(formatted);
   };
 
-  const handleMappingChange = (key: "model" | "color" | "notes", selectedHeader: string) => {
+  const handleMappingChange = (
+    key: "model" | "name" | "color" | "variation" | "year" | "notes",
+    selectedHeader: string
+  ) => {
     const nextMapping = { ...columnMapping, [key]: selectedHeader };
     setColumnMapping(nextMapping);
 
@@ -208,14 +266,26 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
           const workbook = XLSX.read(data, { type: "array" });
           const worksheet = workbook.Sheets[workbook.SheetNames[0]];
           const rawJson = XLSX.utils.sheet_to_json<Record<string, any>>(worksheet);
-          processRows(rawJson, nextMapping.model, nextMapping.color, nextMapping.notes);
+          processRows(
+            rawJson,
+            nextMapping.model,
+            nextMapping.name,
+            nextMapping.color,
+            nextMapping.variation,
+            nextMapping.year,
+            nextMapping.notes
+          );
         } catch (err) {}
       };
       reader.readAsArrayBuffer(file);
     }
   };
 
-  const handleRowChange = (index: number, key: "model" | "color" | "notes", value: string) => {
+  const handleRowChange = (
+    index: number,
+    key: "model" | "name" | "color" | "variation" | "year" | "notes",
+    value: string
+  ) => {
     setParsedRows((prev) =>
       prev.map((row, idx) => (idx === index ? { ...row, [key]: value } : row))
     );
@@ -262,7 +332,10 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
     const itemsToImport: Omit<CatalogItem, "id">[] = parsedRows.map((row) => {
       const item: Omit<CatalogItem, "id"> = {
         model: row.model.trim().toUpperCase(),
+        name: row.name.trim() || undefined,
         color: row.color.trim(),
+        variation: row.variation.trim() || undefined,
+        year: row.year.trim() || undefined,
         customImage: row.customImage,
         customImageSleeve: row.customImageSleeve,
         customImageBox: row.customImageBox
@@ -397,6 +470,25 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
                   onChange={(e) => handleMappingChange("model", e.target.value)}
                   className="w-full bg-neutral-900 border border-neutral-800 py-1.5 px-2 rounded-md text-xs text-white outline-none cursor-pointer focus:border-emerald-500"
                 >
+                  <option value="">-- Ignore / Skip --</option>
+                  {headers.map((h) => (
+                    <option key={h} value={h}>
+                      {h}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-mono text-neutral-400 uppercase mb-1">
+                  Ball Name Column:
+                </label>
+                <select
+                  value={columnMapping.name}
+                  onChange={(e) => handleMappingChange("name", e.target.value)}
+                  className="w-full bg-neutral-900 border border-neutral-800 py-1.5 px-2 rounded-md text-xs text-white outline-none cursor-pointer focus:border-emerald-500"
+                >
+                  <option value="">-- Ignore / Skip --</option>
                   {headers.map((h) => (
                     <option key={h} value={h}>
                       {h}
@@ -414,6 +506,43 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
                   onChange={(e) => handleMappingChange("color", e.target.value)}
                   className="w-full bg-neutral-900 border border-neutral-800 py-1.5 px-2 rounded-md text-xs text-white outline-none cursor-pointer focus:border-emerald-500"
                 >
+                  <option value="">-- Ignore / Skip --</option>
+                  {headers.map((h) => (
+                    <option key={h} value={h}>
+                      {h}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-mono text-neutral-400 uppercase mb-1">
+                  Variation Column:
+                </label>
+                <select
+                  value={columnMapping.variation}
+                  onChange={(e) => handleMappingChange("variation", e.target.value)}
+                  className="w-full bg-neutral-900 border border-neutral-800 py-1.5 px-2 rounded-md text-xs text-white outline-none cursor-pointer focus:border-emerald-500"
+                >
+                  <option value="">-- Ignore / Skip --</option>
+                  {headers.map((h) => (
+                    <option key={h} value={h}>
+                      {h}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-mono text-neutral-400 uppercase mb-1">
+                  Year Column:
+                </label>
+                <select
+                  value={columnMapping.year}
+                  onChange={(e) => handleMappingChange("year", e.target.value)}
+                  className="w-full bg-neutral-900 border border-neutral-800 py-1.5 px-2 rounded-md text-xs text-white outline-none cursor-pointer focus:border-emerald-500"
+                >
+                  <option value="">-- Ignore / Skip --</option>
                   {headers.map((h) => (
                     <option key={h} value={h}>
                       {h}
@@ -431,6 +560,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
                   onChange={(e) => handleMappingChange("notes", e.target.value)}
                   className="w-full bg-neutral-900 border border-neutral-800 py-1.5 px-2 rounded-md text-xs text-white outline-none cursor-pointer focus:border-emerald-500"
                 >
+                  <option value="">-- Ignore / Skip --</option>
                   {headers.map((h) => (
                     <option key={h} value={h}>
                       {h}
@@ -448,30 +578,51 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
               <span className="text-neutral-500">Edit values inline if needed</span>
             </div>
 
-            <div className="max-h-[220px] overflow-y-auto border border-neutral-850 rounded-xl bg-neutral-950/60 divide-y divide-neutral-850 pr-1">
+            <div className="max-h-[250px] overflow-y-auto border border-neutral-850 rounded-xl bg-neutral-950/60 divide-y divide-neutral-850 pr-1">
               {parsedRows.map((row, idx) => (
                 <div key={idx} className="flex items-center justify-between p-2 gap-2 text-xs">
-                  <div className="grid grid-cols-3 gap-2 flex-1">
+                  <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 flex-1">
                     <input
                       type="text"
                       value={row.model}
                       onChange={(e) => handleRowChange(idx, "model", e.target.value)}
-                      placeholder="Model Name"
+                      placeholder="Model"
+                      className="bg-transparent border-0 font-bold text-white focus:bg-neutral-900 focus:ring-1 focus:ring-emerald-500 rounded py-0.5 px-1 truncate placeholder-neutral-600 outline-none w-full text-xs"
+                    />
+                    <input
+                      type="text"
+                      value={row.name}
+                      onChange={(e) => handleRowChange(idx, "name", e.target.value)}
+                      placeholder="Name"
                       className="bg-transparent border-0 font-bold text-white focus:bg-neutral-900 focus:ring-1 focus:ring-emerald-500 rounded py-0.5 px-1 truncate placeholder-neutral-600 outline-none w-full text-xs"
                     />
                     <input
                       type="text"
                       value={row.color}
                       onChange={(e) => handleRowChange(idx, "color", e.target.value)}
-                      placeholder="Color Name"
+                      placeholder="Color"
                       className="bg-transparent border-0 text-neutral-300 focus:bg-neutral-900 focus:ring-1 focus:ring-emerald-500 rounded py-0.5 px-1 truncate placeholder-neutral-600 outline-none w-full text-xs"
+                    />
+                    <input
+                      type="text"
+                      value={row.variation}
+                      onChange={(e) => handleRowChange(idx, "variation", e.target.value)}
+                      placeholder="Variation"
+                      className="bg-transparent border-0 text-neutral-400 focus:bg-neutral-900 focus:ring-1 focus:ring-emerald-500 rounded py-0.5 px-1 truncate placeholder-neutral-600 outline-none w-full text-xs"
+                    />
+                    <input
+                      type="text"
+                      value={row.year}
+                      onChange={(e) => handleRowChange(idx, "year", e.target.value)}
+                      placeholder="Year"
+                      className="bg-transparent border-0 text-neutral-450 focus:bg-neutral-900 focus:ring-1 focus:ring-emerald-500 rounded py-0.5 px-1 truncate placeholder-neutral-600 outline-none w-full text-xs font-mono"
                     />
                     <input
                       type="text"
                       value={row.notes}
                       onChange={(e) => handleRowChange(idx, "notes", e.target.value)}
-                      placeholder="Design Notes"
-                      className="bg-transparent border-0 text-neutral-400 italic focus:bg-neutral-900 focus:ring-1 focus:ring-emerald-500 rounded py-0.5 px-1 truncate placeholder-neutral-600 outline-none w-full text-xs"
+                      placeholder="Notes"
+                      className="bg-transparent border-0 text-neutral-500 italic focus:bg-neutral-900 focus:ring-1 focus:ring-emerald-500 rounded py-0.5 px-1 truncate placeholder-neutral-600 outline-none w-full text-xs"
                     />
                   </div>
 
