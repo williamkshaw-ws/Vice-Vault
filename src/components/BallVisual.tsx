@@ -304,23 +304,6 @@ export default function BallVisual({
 
           {/* Vertical stripe / alignment window on the right */}
           <rect x="60" y="27" width="2.5" height="48" rx="1.25" fill="url(#stripeGrad)" stroke="#475569" strokeWidth="0.8" />
-
-          {/* Flat Brand Texts (match reference image style: bold, clean black text, no skew) */}
-          <text x="32" y="32" fill="#1e293b" fontSize="6.5" fontWeight="900" fontFamily="sans-serif" letterSpacing="0.1">
-            PREMIUM
-          </text>
-          <text x="32" y="39" fill="#1e293b" fontSize="6.5" fontWeight="900" fontFamily="sans-serif" letterSpacing="0.1">
-            GOLF BALLS
-          </text>
-          
-          <text x="54" y="60" fill="#1e293b" fontSize="5.5" fontWeight="900" fontFamily="sans-serif">
-            QTY 12
-          </text>
-
-          {/* Model Name at bottom right */}
-          <text x="62" y="82" fill="#1e293b" fontSize="5.5" fontWeight="900" fontStyle="italic" fontFamily="sans-serif" textAnchor="end">
-            {model && model.trim().toUpperCase() !== "LOGO" ? model.trim().toUpperCase() : "PRO"}
-          </text>
         </svg>
       </div>
     );
@@ -408,23 +391,6 @@ export default function BallVisual({
 
           {/* Vertical stripe / alignment window on the right */}
           <rect x="58" y="24" width="2" height="42" rx="1.0" fill="url(#sleeveStripeGrad)" stroke="#475569" strokeWidth="0.8" />
-
-          {/* Flat Brand Texts */}
-          <text x="40" y="26" fill="#1e293b" fontSize="4.5" fontWeight="900" fontFamily="sans-serif" letterSpacing="0.05">
-            PREMIUM
-          </text>
-          <text x="40" y="31" fill="#1e293b" fontSize="4.5" fontWeight="900" fontFamily="sans-serif" letterSpacing="0.05">
-            GOLF BALLS
-          </text>
-          
-          <text x="40" y="47" fill="#1e293b" fontSize="4" fontWeight="900" fontFamily="sans-serif">
-            QTY 3
-          </text>
-
-          {/* Model Name at bottom right */}
-          <text x="60" y="80" fill="#1e293b" fontSize="4" fontWeight="900" fontStyle="italic" fontFamily="sans-serif" textAnchor="end">
-            {model && model.trim().toUpperCase() !== "LOGO" ? model.trim().toUpperCase() : "PRO"}
-          </text>
         </svg>
       </div>
     );
