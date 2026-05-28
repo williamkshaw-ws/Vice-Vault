@@ -331,6 +331,8 @@ export default function App() {
 
   // Search input filter inside Catalog Admin
   const [adminSearchQuery, setAdminSearchQuery] = useState("");
+  // Quick filter to narrow models inside Catalog Admin (Vault Manager)
+  const [adminBrandFilter, setAdminBrandFilter] = useState<string>("ALL");
 
   // Toggle for Spreadsheet bulk importer in admin
   const [showXlsImporter, setShowXlsImporter] = useState(false);
@@ -1121,8 +1123,6 @@ export default function App() {
         };
       }
       setCatalog((prev) => [itemWithId, ...prev]);
-      setDbPanelTab("browse");
-      setSearchQuery(newItem.model);
     } catch (err: any) {
       console.error("Error adding catalog item:", err);
       alert(err.message || "Failed to add catalog item.");
@@ -2427,8 +2427,10 @@ export default function App() {
                 onClick={() => {
                   setIsVaultManagerOpen(false);
                   setEditingItem(null);
+                  setAdminSearchQuery("");
+                  setAdminBrandFilter("ALL");
                 }}
-                className="text-neutral-400 hover:text-white p-1 hover:bg-neutral-800 rounded-lg transition-colors cursor-pointer"
+                className="text-neutral-400 hover:text-white p-1 hover:bg-neutral-850 rounded-lg transition-colors cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -2528,16 +2530,49 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Admin filter input */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" size={13} />
-                  <input
-                    type="text"
-                    placeholder="Search database..."
-                    value={adminSearchQuery}
-                    onChange={(e) => setAdminSearchQuery(e.target.value)}
-                    className="w-full bg-neutral-950 hover:bg-neutral-900/60 border border-neutral-850 rounded-xl px-9 py-2 text-xs text-white placeholder-neutral-550 outline-none focus:border-neutral-750 transition-all font-mono"
-                  />
+                {/* Admin filter input & Model filter */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" size={13} />
+                    <input
+                      type="text"
+                      placeholder="Search database..."
+                      value={adminSearchQuery}
+                      onChange={(e) => setAdminSearchQuery(e.target.value)}
+                      className="w-full bg-neutral-950 hover:bg-neutral-900/60 border border-neutral-850 rounded-xl px-9 py-2 text-xs text-white placeholder-neutral-550 outline-none focus:border-neutral-750 transition-all font-mono"
+                    />
+                    {adminSearchQuery && (
+                      <button
+                        onClick={() => setAdminSearchQuery("")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-neutral-550 hover:text-white"
+                      >
+                        CLEAR
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[10px] font-mono uppercase text-neutral-450 shrink-0">Filter model:</span>
+                    <div className="relative w-full sm:w-[180px]">
+                      <select
+                        value={adminBrandFilter}
+                        onChange={(e) => setAdminBrandFilter(e.target.value)}
+                        className="w-full bg-neutral-950 text-neutral-300 border border-neutral-850 hover:border-neutral-750 focus:border-[#2563eb] rounded-xl px-3 py-1.5 text-[11px] font-semibold outline-none transition-all cursor-pointer appearance-none pr-8 font-mono uppercase tracking-wider"
+                      >
+                        <option value="ALL">All Varieties</option>
+                        {registeredModels.map((m) => (
+                          <option key={m} value={m}>
+                            {m}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-550">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Admin items list */}
@@ -2545,12 +2580,19 @@ export default function App() {
                   {catalog
                     .filter(item => {
                       const q = adminSearchQuery.toLowerCase();
-                      return item.model.toLowerCase().includes(q) || 
-                             item.color.toLowerCase().includes(q) ||
-                             (item.name && item.name.toLowerCase().includes(q)) ||
-                             (item.variation && item.variation.toLowerCase().includes(q)) ||
-                             (item.notes && item.notes.toLowerCase().includes(q)) ||
-                             (item.year && item.year.toLowerCase().includes(q));
+                      const matchesSearch = 
+                        item.model.toLowerCase().includes(q) || 
+                        item.color.toLowerCase().includes(q) ||
+                        (item.name && item.name.toLowerCase().includes(q)) ||
+                        (item.variation && item.variation.toLowerCase().includes(q)) ||
+                        (item.notes && item.notes.toLowerCase().includes(q)) ||
+                        (item.year && item.year.toLowerCase().includes(q));
+
+                      const matchesBrand = 
+                        adminBrandFilter === "ALL" || 
+                        item.model === adminBrandFilter;
+
+                      return matchesSearch && matchesBrand;
                     })
                     .map((item) => (
                       <div 
@@ -2659,15 +2701,22 @@ export default function App() {
                   ) : (
                     catalog.filter(item => {
                       const q = adminSearchQuery.toLowerCase();
-                      return item.model.toLowerCase().includes(q) || 
-                             item.color.toLowerCase().includes(q) ||
-                             (item.name && item.name.toLowerCase().includes(q)) ||
-                             (item.variation && item.variation.toLowerCase().includes(q)) ||
-                             (item.notes && item.notes.toLowerCase().includes(q)) ||
-                             (item.year && item.year.toLowerCase().includes(q));
+                      const matchesSearch = 
+                        item.model.toLowerCase().includes(q) || 
+                        item.color.toLowerCase().includes(q) ||
+                        (item.name && item.name.toLowerCase().includes(q)) ||
+                        (item.variation && item.variation.toLowerCase().includes(q)) ||
+                        (item.notes && item.notes.toLowerCase().includes(q)) ||
+                        (item.year && item.year.toLowerCase().includes(q));
+
+                      const matchesBrand = 
+                        adminBrandFilter === "ALL" || 
+                        item.model === adminBrandFilter;
+
+                      return matchesSearch && matchesBrand;
                     }).length === 0 && (
                       <div className="py-6 text-center border border-dashed border-neutral-850 rounded-xl bg-neutral-950/10 text-neutral-500 text-xs">
-                        No balls match "{adminSearchQuery}"
+                        No balls match "{adminSearchQuery}"{adminBrandFilter !== "ALL" && ` under model "${adminBrandFilter}"`}
                       </div>
                     )
                   )}
