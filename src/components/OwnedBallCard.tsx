@@ -400,10 +400,10 @@ export default function OwnedBallCard({
                   </span>
                   <span className={`text-[8px] px-1 py-0.2 rounded font-mono font-bold uppercase border tracking-wider scale-95 ${
                     ball.packageType === 'box'
-                      ? "bg-blue-950/40 border-blue-900/60 text-blue-400"
+                      ? "bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-900/60 text-blue-700 dark:text-blue-400"
                       : ball.packageType === 'sleeve'
-                      ? "bg-purple-950/40 border-purple-900/60 text-purple-400"
-                      : "bg-teal-950/40 border-teal-900/60 text-teal-400"
+                      ? "bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-900/60 text-purple-700 dark:text-purple-400"
+                      : "bg-teal-50 dark:bg-teal-950/40 border-teal-200 dark:border-teal-900/60 text-teal-700 dark:text-teal-400"
                   }`}>
                     {ball.packageType === 'box' ? 'Box' : ball.packageType === 'sleeve' ? 'Sleeve' : 'Ball'}
                   </span>
