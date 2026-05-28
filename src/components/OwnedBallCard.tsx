@@ -378,6 +378,7 @@ export default function OwnedBallCard({
             number={ball.packageType === 'box' ? undefined : ball.customNumber} 
             size="md" 
             customImage={ball.customImage}
+            packageType={ball.packageType}
           />
           {ball.packageType !== 'box' && (
             <div className="absolute -bottom-1 text-[8px] font-mono uppercase bg-neutral-950 border border-neutral-800 text-neutral-400 px-1.5 py-0.5 rounded leading-none scale-90">

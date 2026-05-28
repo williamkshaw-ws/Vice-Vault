@@ -1402,6 +1402,7 @@ export default function App() {
                             number={ball.packageType === 'box' ? undefined : ball.customNumber} 
                             size="md" 
                             customImage={ball.customImage}
+                            packageType={ball.packageType}
                           />
                           {ball.packageType !== 'box' && (
                             <div className="absolute -bottom-1 text-[8px] font-mono uppercase bg-neutral-950 border border-neutral-800 text-neutral-400 px-1.5 py-0.5 rounded leading-none scale-90">
@@ -2257,7 +2258,7 @@ export default function App() {
                         return (
                           <div key={ball.id} className="bg-neutral-950 border border-neutral-850 p-3 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
                             <div className="flex items-center gap-3">
-                              <BallVisual color={ball.color} model={ball.model} size="sm" customImage={ball.customImage} />
+                              <BallVisual color={ball.color} model={ball.model} size="sm" customImage={ball.customImage} packageType={ball.packageType} />
                               <div>
                                 <span className="text-white font-bold block">{ball.model}</span>
                                 <span className="text-neutral-450 block text-[10px]">{ball.color} • {currentPkg === "box" ? "box" : currentPkg === "sleeve" ? "sleeve" : "ea"}</span>

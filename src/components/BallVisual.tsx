@@ -13,6 +13,7 @@ interface BallVisualProps {
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
   customImage?: string;
+  packageType?: "ea" | "sleeve" | "box";
 }
 
 export default function BallVisual({
@@ -21,7 +22,8 @@ export default function BallVisual({
   number,
   size = "md",
   className = "",
-  customImage
+  customImage,
+  packageType = "ea"
 }: BallVisualProps) {
   // Sizing styles
   const sizeClasses = {
@@ -38,60 +40,40 @@ export default function BallVisual({
     xl: { brand: "text-[30px] font-black tracking-[0.2em] leading-none mb-1", num: "text-[22px]" }
   };
 
-  // If there is anuploaded custom image, render it inside a 3D physical dimple bubble!
-  if (customImage) {
-    return (
-      <div 
-        className={`relative inline-flex items-center justify-center rounded-full aspect-square border shadow-md select-none overflow-hidden shrink-0 ${sizeClasses[size]} ${className}`}
-        id={`golfball-custom-${size}`}
-        style={{
-          boxShadow: size === "xl" 
-            ? "inset -12px -12px 30px rgba(0,0,0,0.55), inset 12px 12px 25px rgba(255,255,255,0.45), 0 10px 20px rgba(0,0,0,0.3)" 
-            : size === "lg"
-            ? "inset -8px -8px 20px rgba(0,0,0,0.5), inset 8px 8px 15px rgba(255,255,255,0.4), 0 6px 12px rgba(0,0,0,0.2)"
-            : "inset -4px -4px 10px rgba(0,0,0,0.45), inset 4px 4px 8px rgba(255,255,255,0.35), 0 4px 6px rgba(0,0,0,0.15)"
-        }}
-      >
-        <img 
-          src={customImage} 
-          alt="Custom ball design" 
-          className="absolute inset-0 w-full h-full object-cover"
-          referrerPolicy="no-referrer"
-        />
-        {/* Dimple overlay on top of custom photo to make it look like a 3D golf ball! */}
-        <div 
-          className="absolute inset-0 opacity-[0.22] rounded-full mix-blend-overlay pointer-events-none"
-          style={{
-            backgroundImage: `radial-gradient(circle, #000 20%, transparent 25%)`,
-            backgroundSize: size === "xl" ? "12px 12px" : size === "lg" ? "8.5px 8.5px" : "6px 6px",
-            backgroundPosition: "center"
-          }}
-        />
+  // Helper to resolve dynamically matched light/dark theme colors based on ball color word
+  const getThemeColors = () => {
+    const c = (typeof color === "string" ? color : "").toLowerCase().trim();
+    if (c.includes("lime") || c.includes("neon lime") || c.includes("neon_lime")) {
+      return { accentLight: "#e1ff00", accentDark: "#7da200", isDark: false };
+    }
+    if (c.includes("red") || c.includes("coral") || c.includes("pink")) {
+      return { accentLight: "#ff3b6c", accentDark: "#b3002d", isDark: true };
+    }
+    if (c.includes("blue") || c.includes("cyan") || c.includes("hue blue")) {
+      return { accentLight: "#2ef2ff", accentDark: "#00939d", isDark: false };
+    }
+    if (c.includes("gold")) {
+      return { accentLight: "#ffe66f", accentDark: "#997a00", isDark: false };
+    }
+    if (c.includes("orange")) {
+      return { accentLight: "#fb923c", accentDark: "#c2410c", isDark: true };
+    }
+    if (c.includes("purple") || c.includes("violet")) {
+      return { accentLight: "#d946ef", accentDark: "#6b21a8", isDark: true };
+    }
+    if (c.includes("black") || c.includes("charcoal")) {
+      return { accentLight: "#4b5563", accentDark: "#111827", isDark: true };
+    }
+    if (c.includes("yellow")) {
+      return { accentLight: "#ffea00", accentDark: "#aaaa00", isDark: false };
+    }
+    return { accentLight: "#ffffff", accentDark: "#cccccc", isDark: false };
+  };
 
+  const isCustomModel = !Object.values(BallModel).includes(model as BallModel);
+  const brandLabel = model && model.trim().toUpperCase() === "LOGO" ? "gbv" : (isCustomModel ? (typeof model === 'string' ? model.split(" ")[0].toUpperCase().substring(0, 8) : "CUSTOM") : "gbv");
 
-        {/* Shading layer */}
-        <div 
-          className="absolute inset-0 rounded-full pointer-events-none"
-          style={{
-            boxShadow: size === "xl" 
-              ? "inset -12px -12px 30px rgba(0,0,0,0.55), inset 12px 12px 25px rgba(255,255,255,0.45)" 
-              : size === "lg"
-              ? "inset -8px -8px 20px rgba(0,0,0,0.5), inset 8px 8px 15px rgba(255,255,255,0.4)"
-              : "inset -4px -4px 10px rgba(0,0,0,0.45), inset 4px 4px 8px rgba(255,255,255,0.35)"
-          }}
-        />
-        {/* Sphere highlight */}
-        <div 
-          className="absolute top-[4%] left-[10%] w-[35%] h-[35%] rounded-full opacity-50 pointer-events-none"
-          style={{
-            background: "radial-gradient(circle, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 75%)"
-          }}
-        />
-      </div>
-    );
-  }
-
-  // Get color configurations
+  // Get color configurations for single ball
   const getColorConfigs = () => {
     const c = (typeof color === "string" ? color : "").toLowerCase().trim();
 
@@ -218,7 +200,7 @@ export default function BallVisual({
       };
     }
 
-    // Default to white or dynamic color word if parsed from selector
+    // Default to white
     const cleanColor = c.replace(/drip|splash|splatter/g, "").trim();
     const validHexOrWord = /^(#[0-9a-fA-F]{3,8}|[a-zA-Z]+)$/.test(cleanColor) ? cleanColor : "white";
 
@@ -239,10 +221,193 @@ export default function BallVisual({
     };
   };
 
+  // --- RENDER BOX PACKAGING VISUAL ---
+  if (packageType === "box") {
+    const { accentLight, accentDark, isDark } = getThemeColors();
+    return (
+      <div className={`relative inline-flex items-center justify-center shrink-0 ${sizeClasses[size]} ${className}`} id={`golfbox-${model}-${color}-${size}`}>
+        <svg viewBox="0 0 100 100" className="w-full h-full select-none pointer-events-none drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)]">
+          <defs>
+            <linearGradient id="topFace" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#2c2c2c" />
+              <stop offset="100%" stopColor="#181818" />
+            </linearGradient>
+            <linearGradient id="leftFace" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#1e1e1e" />
+              <stop offset="100%" stopColor="#0f0f0f" />
+            </linearGradient>
+            <linearGradient id="rightFace" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#171717" />
+              <stop offset="100%" stopColor="#080808" />
+            </linearGradient>
+            <linearGradient id="accentGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor={accentLight} />
+              <stop offset="100%" stopColor={accentDark} />
+            </linearGradient>
+            <radialGradient id="ballWindowGrad" cx="35%" cy="35%" r="65%">
+              <stop offset="0%" stopColor={accentLight === "#ffffff" ? "#ffffff" : accentLight} />
+              <stop offset="55%" stopColor={accentLight === "#ffffff" ? "#eaeaea" : accentDark} />
+              <stop offset="100%" stopColor={accentLight === "#ffffff" ? "#c8c8c8" : "#050505"} />
+            </radialGradient>
+          </defs>
+
+          {/* Under-box shadow */}
+          <polygon points="10,61 35,81 90,61 70,85 25,85" fill="rgba(0,0,0,0.55)" opacity="0.75" />
+
+          {/* 3D Geometry */}
+          {/* Top Face */}
+          <polygon points="10,35 65,15 90,35 35,55" fill="url(#topFace)" stroke="#262626" strokeWidth="0.4" />
+          {/* Accent panel strip on Top Face */}
+          <polygon points="32,27 65,15 75,23 42,35" fill="url(#accentGrad)" opacity="0.9" />
+
+          {/* Left Front Face */}
+          <polygon points="10,35 35,55 35,80 10,60" fill="url(#leftFace)" stroke="#1a1a1a" strokeWidth="0.4" />
+          
+          {/* Right Front Face */}
+          <polygon points="35,55 90,35 90,60 35,80" fill="url(#rightFace)" stroke="#141414" strokeWidth="0.4" />
+          {/* Accent Stripe on Right Face */}
+          <polygon points="45,55 52,52 52,77 45,80" fill="url(#accentGrad)" />
+
+          {/* Ball preview circle on Left Face */}
+          <circle cx="22.5" cy="54" r="8" fill="url(#ballWindowGrad)" stroke="#333" strokeWidth="0.3" />
+          <circle cx="22.5" cy="54" r="8" fill="transparent" stroke="rgba(0,0,0,0.15)" strokeWidth="0.3" strokeDasharray="1 1.5" />
+
+          {/* Logo / Text on Top Face */}
+          <text x="27" y="47" fill={isDark ? "#ffffff" : "#000000"} fontSize="7.5" fontWeight="900" fontFamily="sans-serif" letterSpacing="0.4" transform="rotate(20 27 47)">
+            {brandLabel}
+          </text>
+          <text x="29" y="52" fill={isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.6)"} fontSize="3" fontWeight="bold" fontFamily="monospace" transform="rotate(20 29 52)">
+            12 DOZEN
+          </text>
+        </svg>
+      </div>
+    );
+  }
+
+  // --- RENDER SLEEVE PACKAGING VISUAL ---
+  if (packageType === "sleeve") {
+    const { accentLight, accentDark, isDark } = getThemeColors();
+    return (
+      <div className={`relative inline-flex items-center justify-center shrink-0 ${sizeClasses[size]} ${className}`} id={`golfsleeve-${model}-${color}-${size}`}>
+        <svg viewBox="0 0 100 100" className="w-full h-full select-none pointer-events-none drop-shadow-[0_4px_6px_rgba(0,0,0,0.45)]">
+          <defs>
+            <linearGradient id="sleeveTop" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#2c2c2c" />
+              <stop offset="100%" stopColor="#181818" />
+            </linearGradient>
+            <linearGradient id="sleeveLeft" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#1e1e1e" />
+              <stop offset="100%" stopColor="#0a0a0a" />
+            </linearGradient>
+            <linearGradient id="sleeveRight" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#171717" />
+              <stop offset="100%" stopColor="#080808" />
+            </linearGradient>
+            <linearGradient id="sleeveAccent" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={accentLight} />
+              <stop offset="100%" stopColor={accentDark} />
+            </linearGradient>
+            <radialGradient id="sleeveBallGrad" cx="35%" cy="35%" r="65%">
+              <stop offset="0%" stopColor={accentLight === "#ffffff" ? "#ffffff" : accentLight} />
+              <stop offset="55%" stopColor={accentLight === "#ffffff" ? "#eaeaea" : accentDark} />
+              <stop offset="100%" stopColor={accentLight === "#ffffff" ? "#c8c8c8" : "#050505"} />
+            </radialGradient>
+          </defs>
+
+          {/* Under-sleeve shadow */}
+          <ellipse cx="50" cy="85" rx="18" ry="5.5" fill="rgba(0,0,0,0.55)" opacity="0.8" />
+
+          {/* 3D Geometry */}
+          {/* Top Face */}
+          <polygon points="35,30 50,22 65,30 50,38" fill="url(#sleeveTop)" stroke="#262626" strokeWidth="0.4" />
+          
+          {/* Left Face */}
+          <polygon points="35,30 50,38 50,85 35,77" fill="url(#sleeveLeft)" stroke="#1a1a1a" strokeWidth="0.4" />
+          
+          {/* Right Face */}
+          <polygon points="50,38 65,30 65,77 50,85" fill="url(#sleeveRight)" stroke="#141414" strokeWidth="0.4" />
+          {/* Accent Stripe on Right Face */}
+          <polygon points="58,33 65,30 65,77 58,80" fill="url(#sleeveAccent)" opacity="0.95" />
+
+          {/* 3 stacked balls in transparent vertical column on Left Face */}
+          {/* Ball 1 */}
+          <circle cx="42.5" cy="45" r="4.8" fill="url(#sleeveBallGrad)" stroke="#333" strokeWidth="0.25" />
+          <circle cx="42.5" cy="45" r="4.8" fill="transparent" stroke="rgba(0,0,0,0.12)" strokeWidth="0.25" strokeDasharray="0.8 1" />
+          
+          {/* Ball 2 */}
+          <circle cx="42.5" cy="58" r="4.8" fill="url(#sleeveBallGrad)" stroke="#333" strokeWidth="0.25" />
+          <circle cx="42.5" cy="58" r="4.8" fill="transparent" stroke="rgba(0,0,0,0.12)" strokeWidth="0.25" strokeDasharray="0.8 1" />
+          
+          {/* Ball 3 */}
+          <circle cx="42.5" cy="71" r="4.8" fill="url(#sleeveBallGrad)" stroke="#333" strokeWidth="0.25" />
+          <circle cx="42.5" cy="71" r="4.8" fill="transparent" stroke="rgba(0,0,0,0.12)" strokeWidth="0.25" strokeDasharray="0.8 1" />
+
+          {/* Rotated text on Right Face */}
+          <text x="54" y="58" fill={isDark ? "#ffffff" : "#000000"} fontSize="5.5" fontWeight="900" fontFamily="sans-serif" transform="rotate(-90 54 58)" letterSpacing="0.6">
+            {brandLabel}
+          </text>
+          <text x="54" y="65" fill={isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)"} fontSize="2.5" fontWeight="bold" fontFamily="monospace" transform="rotate(-90 54 65)">
+            3 SLEEVE
+          </text>
+        </svg>
+      </div>
+    );
+  }
+
+  // --- RENDER SINGLE BALL VISUAL (DEFAULT) ---
   const config = getColorConfigs();
 
-  const isCustomModel = !Object.values(BallModel).includes(model as BallModel);
-  const brandLabel = model && model.trim().toUpperCase() === "LOGO" ? "gbv" : (isCustomModel ? (typeof model === 'string' ? model.split(" ")[0].toUpperCase().substring(0, 8) : "CUSTOM") : "gbv");
+  // If there is an uploaded custom image, render it inside a 3D physical dimple bubble!
+  if (customImage) {
+    return (
+      <div 
+        className={`relative inline-flex items-center justify-center rounded-full aspect-square border shadow-md select-none overflow-hidden shrink-0 ${sizeClasses[size]} ${className}`}
+        id={`golfball-custom-${size}`}
+        style={{
+          boxShadow: size === "xl" 
+            ? "inset -12px -12px 30px rgba(0,0,0,0.55), inset 12px 12px 25px rgba(255,255,255,0.45), 0 10px 20px rgba(0,0,0,0.3)" 
+            : size === "lg"
+            ? "inset -8px -8px 20px rgba(0,0,0,0.5), inset 8px 8px 15px rgba(255,255,255,0.4), 0 6px 12px rgba(0,0,0,0.2)"
+            : "inset -4px -4px 10px rgba(0,0,0,0.45), inset 4px 4px 8px rgba(255,255,255,0.35), 0 4px 6px rgba(0,0,0,0.15)"
+        }}
+      >
+        <img 
+          src={customImage} 
+          alt="Custom ball design" 
+          className="absolute inset-0 w-full h-full object-cover"
+          referrerPolicy="no-referrer"
+        />
+        {/* Dimple overlay on top of custom photo to make it look like a 3D golf ball! */}
+        <div 
+          className="absolute inset-0 opacity-[0.22] rounded-full mix-blend-overlay pointer-events-none"
+          style={{
+            backgroundImage: `radial-gradient(circle, #000 20%, transparent 25%)`,
+            backgroundSize: size === "xl" ? "12px 12px" : size === "lg" ? "8.5px 8.5px" : "6px 6px",
+            backgroundPosition: "center"
+          }}
+        />
+
+        {/* Shading layer */}
+        <div 
+          className="absolute inset-0 rounded-full pointer-events-none"
+          style={{
+            boxShadow: size === "xl" 
+              ? "inset -12px -12px 30px rgba(0,0,0,0.55), inset 12px 12px 25px rgba(255,255,255,0.45)" 
+              : size === "lg"
+              ? "inset -8px -8px 20px rgba(0,0,0,0.5), inset 8px 8px 15px rgba(255,255,255,0.4)"
+              : "inset -4px -4px 10px rgba(0,0,0,0.45), inset 4px 4px 8px rgba(255,255,255,0.35)"
+          }}
+        />
+        {/* Sphere highlight */}
+        <div 
+          className="absolute top-[4%] left-[10%] w-[35%] h-[35%] rounded-full opacity-50 pointer-events-none"
+          style={{
+            background: "radial-gradient(circle, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 75%)"
+          }}
+        />
+      </div>
+    );
+  }
 
   // Alignment line text based on model
   const renderAlignmentLine = () => {
@@ -273,12 +438,10 @@ export default function BallVisual({
   };
 
   // Generate pseudorandom coordinates for splatters
-  // In React 19, we'll keep random positioning deterministic based on the model and color indexes
   const getSplatterBlobs = () => {
     if (!config.hasDrips || !config.dripColors) return null;
     const colors = config.dripColors;
     
-    // Simple deterministic pseudo-random seeds
     const seedString = `${model}_${color}`;
     let hash = 0;
     for (let i = 0; i < seedString.length; i++) {
@@ -293,14 +456,12 @@ export default function BallVisual({
       const ySeed = Math.abs(Math.cos(hash + i * 19)) * 100;
       const rSeed = Math.abs(Math.sin(hash + i * 7)) * 100;
       
-      // Keep splatters strictly within the circular boundary of the ball
-      // Distance from center (50, 50) must be less than 44 to stay safe with radius of splatter included
-      const cx = 15 + (xSeed % 70); // range 15 to 85
-      const cy = 15 + (ySeed % 70); // range 15 to 85
+      const cx = 15 + (xSeed % 70); 
+      const cy = 15 + (ySeed % 70); 
       const dist = Math.sqrt((cx - 50) ** 2 + (cy - 50) ** 2);
       
       if (dist < 43) {
-        const r = 2 + (rSeed % 5.5); // scale radius
+        const r = 2 + (rSeed % 5.5);
         const blobColor = colors[i % colors.length];
         
         splatters.push(
