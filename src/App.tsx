@@ -8,6 +8,7 @@ import { GolfBall, CatalogItem, BallModel, BallColor, BallCondition } from "./ty
 import { VICE_BALLS_SPECS, COLOR_STYLES, SCRAPED_BALLS } from "./constants";
 import CatalogItemCard from "./components/CatalogItemCard";
 import AddMissingBallForm from "./components/AddMissingBallForm";
+import * as XLSX from "xlsx";
 import XlsImporter from "./components/XlsImporter";
 import OwnedBallCard from "./components/OwnedBallCard";
 import BallVisual from "./components/BallVisual";
@@ -489,6 +490,30 @@ export default function App() {
     } catch (err: any) {
       console.error("Error bulk importing catalog items:", err);
       alert(err.message || "Failed to bulk import catalog items.");
+    }
+  };
+
+  // Export catalog database items to Excel spreadsheet
+  const handleExportCatalogToExcel = () => {
+    try {
+      const dataToExport = catalog.map(item => ({
+        "Model": item.model,
+        "Name": item.name || "",
+        "Color": item.color,
+        "Variation": item.variation || "",
+        "Year": item.year || "",
+        "Ball Image": item.customImage || "",
+        "Sleeve Image": item.customImageSleeve || "",
+        "Box Image": item.customImageBox || ""
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(dataToExport);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Catalog Registry");
+      XLSX.writeFile(wb, "Vice_Golf_Ball_Catalog.xlsx");
+    } catch (err: any) {
+      console.error("Failed to export catalog to Excel:", err);
+      alert("Failed to export catalog: " + err.message);
     }
   };
 
@@ -2538,35 +2563,46 @@ export default function App() {
                     <span className="text-[9px] bg-neutral-950 border border-neutral-850 text-neutral-400 px-2 py-0.5 rounded font-mono">
                       {catalog.length} BALLS
                     </span>
-                    {catalog.length > 0 && (
-                      showDeleteAllCatalogConfirm ? (
-                        <div className="flex items-center gap-1 bg-rose-950/30 border border-rose-900/60 rounded-md p-0.5 animate-pulse">
-                          <span className="text-[8px] font-mono text-rose-300 px-1 uppercase font-bold">Wipe?</span>
-                          <button
-                            type="button"
-                            onClick={handleDeleteAllCatalog}
-                            className="px-1.5 py-0.5 bg-rose-600 hover:bg-rose-500 text-white text-[8px] font-mono rounded font-bold cursor-pointer transition-all"
-                          >
-                            Yes
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setShowDeleteAllCatalogConfirm(false)}
-                            className="px-1 text-[8px] font-mono text-neutral-400 hover:text-white rounded cursor-pointer transition-all"
-                          >
-                            No
-                          </button>
-                        </div>
-                      ) : (
+                    <div className="flex items-center gap-1.5">
+                      {catalog.length > 0 && (
                         <button
                           type="button"
-                          onClick={() => setShowDeleteAllCatalogConfirm(true)}
-                          className="text-[9px] font-mono text-neutral-500 hover:text-rose-400 border border-neutral-850 hover:border-rose-950/40 bg-neutral-950/30 px-1.5 py-0.5 rounded transition-all cursor-pointer"
+                          onClick={handleExportCatalogToExcel}
+                          className="text-[9px] font-mono text-neutral-400 hover:text-emerald-450 border border-neutral-850 hover:border-emerald-950/40 bg-neutral-950/30 px-2 py-0.5 rounded transition-all cursor-pointer flex items-center gap-1"
                         >
-                          Delete All
+                          <FileSpreadsheet className="w-3 h-3 text-emerald-450" /> Export Excel
                         </button>
-                      )
-                    )}
+                      )}
+                      {catalog.length > 0 && (
+                        showDeleteAllCatalogConfirm ? (
+                          <div className="flex items-center gap-1 bg-rose-950/30 border border-rose-900/60 rounded-md p-0.5 animate-pulse">
+                            <span className="text-[8px] font-mono text-rose-300 px-1 uppercase font-bold">Wipe?</span>
+                            <button
+                              type="button"
+                              onClick={handleDeleteAllCatalog}
+                              className="px-1.5 py-0.5 bg-rose-600 hover:bg-rose-500 text-white text-[8px] font-mono rounded font-bold cursor-pointer transition-all"
+                            >
+                              Yes
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setShowDeleteAllCatalogConfirm(false)}
+                              className="px-1 text-[8px] font-mono text-neutral-400 hover:text-white rounded cursor-pointer transition-all"
+                            >
+                              No
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setShowDeleteAllCatalogConfirm(true)}
+                            className="text-[9px] font-mono text-neutral-500 hover:text-rose-400 border border-neutral-850 hover:border-rose-950/40 bg-neutral-950/30 px-1.5 py-0.5 rounded transition-all cursor-pointer"
+                          >
+                            Delete All
+                          </button>
+                        )
+                      )}
+                    </div>
                   </div>
                 </div>
 
