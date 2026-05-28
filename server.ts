@@ -117,6 +117,7 @@ const DATA_DIR = path.join(process.cwd(), "data");
 const USERS_FILE = path.join(DATA_DIR, "users.json");
 const CATALOG_FILE = path.join(DATA_DIR, "catalog.json");
 const USERS_DATA_DIR = path.join(DATA_DIR, "users_data");
+const PRESERVED_IMAGES_FILE = path.join(DATA_DIR, "preserved_images.json");
 
 // Dynamic directory and file creation if not exists
 if (!fs.existsSync(DATA_DIR)) {
@@ -298,6 +299,80 @@ function saveCatalog(catalog: CatalogItem[]) {
   } catch (error) {
     console.error("Failed to write catalog file", error);
   }
+}
+
+interface PreservedImages {
+  customImage?: string;
+  customImageSleeve?: string;
+  customImageBox?: string;
+}
+
+function loadPreservedImagesLocal(): Record<string, PreservedImages> {
+  try {
+    if (fs.existsSync(PRESERVED_IMAGES_FILE)) {
+      const raw = fs.readFileSync(PRESERVED_IMAGES_FILE, "utf-8");
+      return JSON.parse(raw);
+    }
+  } catch (error) {
+    console.error("Error loading preserved images file", error);
+  }
+  return {};
+}
+
+function savePreservedImagesLocal(data: Record<string, PreservedImages>) {
+  try {
+    fs.writeFileSync(PRESERVED_IMAGES_FILE, JSON.stringify(data, null, 2), "utf-8");
+  } catch (error) {
+    console.error("Failed to write preserved images file", error);
+  }
+}
+
+async function preserveCatalogImages(
+  id: string,
+  customImage?: string,
+  customImageSleeve?: string,
+  customImageBox?: string
+) {
+  if (!customImage && !customImageSleeve && !customImageBox) return;
+
+  const updateObj: PreservedImages = {};
+  if (customImage) updateObj.customImage = customImage;
+  if (customImageSleeve) updateObj.customImageSleeve = customImageSleeve;
+  if (customImageBox) updateObj.customImageBox = customImageBox;
+
+  if (dbAdmin) {
+    try {
+      await dbAdmin.collection("preserved_images").doc(id).set(updateObj, { merge: true });
+    } catch (error) {
+      console.error("Firestore preserveCatalogImages failed:", error);
+    }
+  }
+
+  const localData = loadPreservedImagesLocal();
+  localData[id] = {
+    ...(localData[id] || {}),
+    ...updateObj
+  };
+  savePreservedImagesLocal(localData);
+}
+
+async function lookupPreservedImages(id: string): Promise<PreservedImages | null> {
+  if (dbAdmin) {
+    try {
+      const docSnap = await dbAdmin.collection("preserved_images").doc(id).get();
+      if (docSnap.exists) {
+        return docSnap.data() as PreservedImages;
+      }
+    } catch (error) {
+      console.error("Firestore lookupPreservedImages failed:", error);
+    }
+  }
+
+  const localData = loadPreservedImagesLocal();
+  if (localData[id]) {
+    return localData[id];
+  }
+  return null;
 }
 
 function getUserDataPath(uid: string): string {
@@ -1004,6 +1079,8 @@ async function getGlobalCatalog(): Promise<CatalogItem[]> {
 }
 
 async function saveGlobalCatalogItem(item: CatalogItem): Promise<void> {
+  await preserveCatalogImages(item.id, item.customImage, item.customImageSleeve, item.customImageBox);
+
   if (dbAdmin) {
     try {
       const { id, ...data } = item;
@@ -1830,6 +1907,20 @@ app.post("/api/catalog", async (req, res) => {
   }
 
   const newId = sanitizeId(model, color, name, variation, year);
+
+  let resolvedImage = customImage;
+  let resolvedImageSleeve = customImageSleeve;
+  let resolvedImageBox = customImageBox;
+
+  if (!resolvedImage || !resolvedImageSleeve || !resolvedImageBox) {
+    const preserved = await lookupPreservedImages(newId);
+    if (preserved) {
+      if (!resolvedImage) resolvedImage = preserved.customImage;
+      if (!resolvedImageSleeve) resolvedImageSleeve = preserved.customImageSleeve;
+      if (!resolvedImageBox) resolvedImageBox = preserved.customImageBox;
+    }
+  }
+
   const newItem: CatalogItem = {
     id: newId,
     model: model.trim(),
@@ -1837,9 +1928,9 @@ app.post("/api/catalog", async (req, res) => {
     color: color.trim(),
     variation: variation !== undefined ? variation.trim() : undefined,
     year: year !== undefined ? year.trim() : undefined,
-    customImage,
-    customImageSleeve,
-    customImageBox
+    customImage: resolvedImage,
+    customImageSleeve: resolvedImageSleeve,
+    customImageBox: resolvedImageBox
   };
 
   await saveGlobalCatalogItem(newItem);
@@ -1870,6 +1961,19 @@ app.put("/api/catalog/:id", async (req, res) => {
 
   const newId = sanitizeId(updatedModel, updatedColor, updatedName, updatedVariation, updatedYear);
 
+  let resolvedImage = customImage !== undefined ? customImage : currentItem.customImage;
+  let resolvedImageSleeve = customImageSleeve !== undefined ? customImageSleeve : currentItem.customImageSleeve;
+  let resolvedImageBox = customImageBox !== undefined ? customImageBox : currentItem.customImageBox;
+
+  if (!resolvedImage || !resolvedImageSleeve || !resolvedImageBox) {
+    const preserved = await lookupPreservedImages(newId);
+    if (preserved) {
+      if (!resolvedImage) resolvedImage = preserved.customImage;
+      if (!resolvedImageSleeve) resolvedImageSleeve = preserved.customImageSleeve;
+      if (!resolvedImageBox) resolvedImageBox = preserved.customImageBox;
+    }
+  }
+
   const updatedItem: CatalogItem = {
     id: newId,
     model: updatedModel,
@@ -1877,9 +1981,9 @@ app.put("/api/catalog/:id", async (req, res) => {
     color: updatedColor,
     variation: updatedVariation,
     year: updatedYear,
-    customImage: customImage !== undefined ? customImage : currentItem.customImage,
-    customImageSleeve: customImageSleeve !== undefined ? customImageSleeve : currentItem.customImageSleeve,
-    customImageBox: customImageBox !== undefined ? customImageBox : currentItem.customImageBox
+    customImage: resolvedImage,
+    customImageSleeve: resolvedImageSleeve,
+    customImageBox: resolvedImageBox
   };
 
   if (newId !== id) {

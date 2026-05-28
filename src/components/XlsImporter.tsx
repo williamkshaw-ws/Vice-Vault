@@ -16,6 +16,9 @@ interface TempImportRow {
   model: string;
   color: string;
   notes: string;
+  customImage?: string;
+  customImageSleeve?: string;
+  customImageBox?: string;
 }
 
 export default function XlsImporter({ onImportItems }: XlsImporterProps) {
@@ -138,10 +141,53 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
         const mVal = row[modelCol] !== undefined && row[modelCol] !== null ? String(row[modelCol]).trim() : "";
         const cVal = row[colorCol] !== undefined && row[colorCol] !== null ? String(row[colorCol]).trim() : "";
         const nVal = row[notesCol] !== undefined && row[notesCol] !== null ? String(row[notesCol]).trim() : "";
+
+        // Reconstruct ball image chunks
+        let customImage = "";
+        const ballKeys = Object.keys(row)
+          .filter((k) => k.toLowerCase().startsWith("ball image") || k.toLowerCase().startsWith("ballimage"))
+          .sort((a, b) => {
+            const numA = parseInt(a.replace(/\D/g, ""), 10) || 0;
+            const numB = parseInt(b.replace(/\D/g, ""), 10) || 0;
+            return numA - numB;
+          });
+        ballKeys.forEach((k) => {
+          if (row[k]) customImage += String(row[k]);
+        });
+
+        // Reconstruct sleeve image chunks
+        let customImageSleeve = "";
+        const sleeveKeys = Object.keys(row)
+          .filter((k) => k.toLowerCase().startsWith("sleeve image") || k.toLowerCase().startsWith("sleeveimage"))
+          .sort((a, b) => {
+            const numA = parseInt(a.replace(/\D/g, ""), 10) || 0;
+            const numB = parseInt(b.replace(/\D/g, ""), 10) || 0;
+            return numA - numB;
+          });
+        sleeveKeys.forEach((k) => {
+          if (row[k]) customImageSleeve += String(row[k]);
+        });
+
+        // Reconstruct box image chunks
+        let customImageBox = "";
+        const boxKeys = Object.keys(row)
+          .filter((k) => k.toLowerCase().startsWith("box image") || k.toLowerCase().startsWith("boximage"))
+          .sort((a, b) => {
+            const numA = parseInt(a.replace(/\D/g, ""), 10) || 0;
+            const numB = parseInt(b.replace(/\D/g, ""), 10) || 0;
+            return numA - numB;
+          });
+        boxKeys.forEach((k) => {
+          if (row[k]) customImageBox += String(row[k]);
+        });
+
         return {
           model: mVal,
           color: cVal,
           notes: nVal,
+          customImage: customImage || undefined,
+          customImageSleeve: customImageSleeve || undefined,
+          customImageBox: customImageBox || undefined
         };
       })
       .filter((row) => row.model.length > 0); // Need at least model name
@@ -217,6 +263,9 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
       const item: Omit<CatalogItem, "id"> = {
         model: row.model.trim().toUpperCase(),
         color: row.color.trim(),
+        customImage: row.customImage,
+        customImageSleeve: row.customImageSleeve,
+        customImageBox: row.customImageBox
       };
 
       if (row.notes.trim()) {

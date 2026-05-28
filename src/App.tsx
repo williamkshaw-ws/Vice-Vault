@@ -462,7 +462,9 @@ export default function App() {
               color: item.color,
               variation: item.variation || item.notes,
               year: item.year,
-              customImage: item.customImage
+              customImage: item.customImage,
+              customImageSleeve: item.customImageSleeve,
+              customImageBox: item.customImageBox
             })
           });
           if (res.ok) {
@@ -481,7 +483,9 @@ export default function App() {
             variation: item.variation ? item.variation.trim() : undefined,
             year: item.year ? item.year.trim() : undefined,
             notes: item.notes ? item.notes.trim() : "",
-            customImage: item.customImage
+            customImage: item.customImage,
+            customImageSleeve: item.customImageSleeve,
+            customImageBox: item.customImageBox
           });
         });
       }
@@ -496,16 +500,52 @@ export default function App() {
   // Export catalog database items to Excel spreadsheet
   const handleExportCatalogToExcel = () => {
     try {
-      const dataToExport = catalog.map(item => ({
-        "Model": item.model,
-        "Name": item.name || "",
-        "Color": item.color,
-        "Variation": item.variation || "",
-        "Year": item.year || "",
-        "Ball Image": item.customImage ? "Yes" : "No",
-        "Sleeve Image": item.customImageSleeve ? "Yes" : "No",
-        "Box Image": item.customImageBox ? "Yes" : "No"
-      }));
+      const chunkString = (str: string | undefined, limit = 30000) => {
+        if (!str) return [];
+        const chunks = [];
+        for (let i = 0; i < str.length; i += limit) {
+          chunks.push(str.slice(i, i + limit));
+        }
+        return chunks;
+      };
+
+      let maxBallChunks = 0;
+      let maxSleeveChunks = 0;
+      let maxBoxChunks = 0;
+
+      const mapped = catalog.map(item => {
+        const ballChunks = chunkString(item.customImage);
+        const sleeveChunks = chunkString(item.customImageSleeve);
+        const boxChunks = chunkString(item.customImageBox);
+
+        if (ballChunks.length > maxBallChunks) maxBallChunks = ballChunks.length;
+        if (sleeveChunks.length > maxSleeveChunks) maxSleeveChunks = sleeveChunks.length;
+        if (boxChunks.length > maxBoxChunks) maxBoxChunks = boxChunks.length;
+
+        return { item, ballChunks, sleeveChunks, boxChunks };
+      });
+
+      const dataToExport = mapped.map(({ item, ballChunks, sleeveChunks, boxChunks }) => {
+        const row: Record<string, any> = {
+          "Model": item.model,
+          "Name": item.name || "",
+          "Color": item.color,
+          "Variation": item.variation || "",
+          "Year": item.year || ""
+        };
+
+        for (let i = 0; i < maxBallChunks; i++) {
+          row[`Ball Image P${i + 1}`] = ballChunks[i] || "";
+        }
+        for (let i = 0; i < maxSleeveChunks; i++) {
+          row[`Sleeve Image P${i + 1}`] = sleeveChunks[i] || "";
+        }
+        for (let i = 0; i < maxBoxChunks; i++) {
+          row[`Box Image P${i + 1}`] = boxChunks[i] || "";
+        }
+
+        return row;
+      });
 
       const ws = XLSX.utils.json_to_sheet(dataToExport);
       const wb = XLSX.utils.book_new();
@@ -2570,7 +2610,7 @@ export default function App() {
                           onClick={handleExportCatalogToExcel}
                           className="text-[9px] font-mono text-neutral-400 hover:text-emerald-450 border border-neutral-850 hover:border-emerald-950/40 bg-neutral-950/30 px-2 py-0.5 rounded transition-all cursor-pointer flex items-center gap-1"
                         >
-                          <FileSpreadsheet className="w-3 h-3 text-emerald-450" /> EXPORT
+                          <FileSpreadsheet className="w-3 h-3 text-emerald-450" /> Export
                         </button>
                       )}
                       {catalog.length > 0 && (
