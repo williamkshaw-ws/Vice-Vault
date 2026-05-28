@@ -502,9 +502,9 @@ export default function App() {
         "Color": item.color,
         "Variation": item.variation || "",
         "Year": item.year || "",
-        "Ball Image": item.customImage || "",
-        "Sleeve Image": item.customImageSleeve || "",
-        "Box Image": item.customImageBox || ""
+        "Ball Image": item.customImage ? "Yes" : "No",
+        "Sleeve Image": item.customImageSleeve ? "Yes" : "No",
+        "Box Image": item.customImageBox ? "Yes" : "No"
       }));
 
       const ws = XLSX.utils.json_to_sheet(dataToExport);
@@ -2570,7 +2570,7 @@ export default function App() {
                           onClick={handleExportCatalogToExcel}
                           className="text-[9px] font-mono text-neutral-400 hover:text-emerald-450 border border-neutral-850 hover:border-emerald-950/40 bg-neutral-950/30 px-2 py-0.5 rounded transition-all cursor-pointer flex items-center gap-1"
                         >
-                          <FileSpreadsheet className="w-3 h-3 text-emerald-450" /> Export Excel
+                          <FileSpreadsheet className="w-3 h-3 text-emerald-450" /> EXPORT
                         </button>
                       )}
                       {catalog.length > 0 && (
