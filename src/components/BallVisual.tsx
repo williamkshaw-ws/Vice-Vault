@@ -48,13 +48,13 @@ export default function BallVisual({
   if (packageType === "box" && customImageBox) {
     return (
       <div 
-        className={`relative inline-flex items-center justify-center rounded-xl border border-neutral-800 shadow-md select-none overflow-hidden shrink-0 ${sizeClasses[size]} ${className}`}
+        className={`relative inline-flex items-center justify-center rounded-xl border border-neutral-800 shadow-md select-none overflow-hidden shrink-0 ${sizeClasses[size]} ${className} bg-neutral-950`}
         id={`golfbox-custom-${size}`}
       >
         <img 
           src={customImageBox} 
           alt="Custom Box Design" 
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain"
           referrerPolicy="no-referrer"
         />
       </div>
@@ -65,13 +65,13 @@ export default function BallVisual({
   if (packageType === "sleeve" && customImageSleeve) {
     return (
       <div 
-        className={`relative inline-flex items-center justify-center rounded-xl border border-neutral-800 shadow-md select-none overflow-hidden shrink-0 ${sizeClasses[size]} ${className}`}
+        className={`relative inline-flex items-center justify-center rounded-xl border border-neutral-800 shadow-md select-none overflow-hidden shrink-0 ${sizeClasses[size]} ${className} bg-neutral-950`}
         id={`golfsleeve-custom-${size}`}
       >
         <img 
           src={customImageSleeve} 
           alt="Custom Sleeve Design" 
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain"
           referrerPolicy="no-referrer"
         />
       </div>

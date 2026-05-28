@@ -319,7 +319,7 @@ export default function AddMissingBallForm({
                 />
                 {customImageSleeve ? (
                   <>
-                    <img src={customImageSleeve} className="absolute inset-0 w-full h-full object-cover rounded-xl opacity-40" />
+                    <img src={customImageSleeve} className="absolute inset-0 w-full h-full object-contain rounded-xl opacity-40 bg-neutral-950" />
                     <span className="relative z-10 text-[9px] font-black uppercase text-white bg-black/75 px-1 py-0.5 rounded-md leading-none">
                       Sleeve
                     </span>
@@ -361,7 +361,7 @@ export default function AddMissingBallForm({
                 />
                 {customImageBox ? (
                   <>
-                    <img src={customImageBox} className="absolute inset-0 w-full h-full object-cover rounded-xl opacity-40" />
+                    <img src={customImageBox} className="absolute inset-0 w-full h-full object-contain rounded-xl opacity-40 bg-neutral-950" />
                     <span className="relative z-10 text-[9px] font-black uppercase text-white bg-black/75 px-1 py-0.5 rounded-md leading-none">
                       Box
                     </span>
