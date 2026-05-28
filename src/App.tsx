@@ -245,6 +245,7 @@ export default function App() {
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [isUserManagerOpen, setIsUserManagerOpen] = useState(false);
   const [isVaultManagerOpen, setIsVaultManagerOpen] = useState(false);
+  const [isVaultProcessing, setIsVaultProcessing] = useState(false);
 
   // State for viewing/editing user bags
   const [selectedUserForBag, setSelectedUserForBag] = useState<any | null>(null);
@@ -347,6 +348,7 @@ export default function App() {
 
   // Add multiple catalog items from Excel/Spreadsheet import
   const handleXlsImportCatalogItems = async (newItems: Omit<CatalogItem, "id">[]) => {
+    setIsVaultProcessing(true);
     try {
       const itemsWithIds: CatalogItem[] = [];
       const seenIds = new Set<string>();
@@ -369,14 +371,14 @@ export default function App() {
       }
 
       if (currentUser) {
-        for (const item of filteredNewItems) {
-          const res = await fetch("/api/catalog", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-user-id": currentUser.uid
-            },
-            body: JSON.stringify({
+        const res = await fetch("/api/catalog/bulk", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-user-id": currentUser.uid
+          },
+          body: JSON.stringify({
+            items: filteredNewItems.map(item => ({
               model: item.model,
               name: item.name || "",
               color: item.color,
@@ -385,12 +387,18 @@ export default function App() {
               customImage: item.customImage,
               customImageSleeve: item.customImageSleeve,
               customImageBox: item.customImageBox
-            })
-          });
-          if (res.ok) {
-            const createdItem = await res.json();
-            itemsWithIds.push(createdItem);
+            }))
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data.items)) {
+            itemsWithIds.push(...data.items);
           }
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Failed to bulk import catalog items.");
         }
       } else {
         filteredNewItems.forEach((item) => {
@@ -414,6 +422,8 @@ export default function App() {
     } catch (err: any) {
       console.error("Error bulk importing catalog items:", err);
       alert(err.message || "Failed to bulk import catalog items.");
+    } finally {
+      setIsVaultProcessing(false);
     }
   };
 
@@ -766,6 +776,15 @@ export default function App() {
     fetchGlobalCatalog();
     return () => { active = false; };
   }, [isFirebaseConfigured, db, currentUser]);
+
+  // Synchronize catalog changes to localStorage for instant UI caching on refresh
+  useEffect(() => {
+    try {
+      localStorage.setItem("vice_vault_catalog", JSON.stringify(catalog));
+    } catch (e) {
+      console.warn("Failed to write catalog to localStorage:", e);
+    }
+  }, [catalog]);
 
   // Load mock user cloud data when mock user logs in or is loaded on mount
   useEffect(() => {
@@ -1209,15 +1228,18 @@ export default function App() {
 
   // Wipe entire Catalog templates list
   const handleDeleteAllCatalog = async () => {
+    setIsVaultProcessing(true);
     try {
       if (currentUser) {
-        for (const item of catalog) {
-          await fetch(`/api/catalog/${item.id}`, {
-            method: "DELETE",
-            headers: {
-              "x-user-id": currentUser.uid
-            }
-          });
+        const res = await fetch("/api/catalog/clear", {
+          method: "POST",
+          headers: {
+            "x-user-id": currentUser.uid
+          }
+        });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Failed to clear catalog items from server.");
         }
       }
       
@@ -1229,6 +1251,8 @@ export default function App() {
     } catch (err: any) {
       console.error("Error clearing catalog:", err);
       alert(err.message || "Failed to clear catalog.");
+    } finally {
+      setIsVaultProcessing(false);
     }
   };
 
@@ -2454,20 +2478,34 @@ export default function App() {
                 </p>
               </div>
               <button 
+                disabled={isVaultProcessing}
                 onClick={() => {
                   setIsVaultManagerOpen(false);
                   setEditingItem(null);
                   setAdminSearchQuery("");
                   setAdminBrandFilter("ALL");
                 }}
-                className="text-neutral-400 hover:text-white p-1 hover:bg-neutral-850 rounded-lg transition-colors cursor-pointer"
+                className={`p-1 rounded-lg transition-all ${
+                  isVaultProcessing
+                    ? "text-neutral-750 cursor-not-allowed"
+                    : "text-neutral-400 hover:text-white hover:bg-neutral-850 cursor-pointer"
+                }`}
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* Modal Content */}
-            <div className="p-6 overflow-y-auto flex-grow space-y-6" id="register-missing-database-panel">
+            <div className="p-6 overflow-y-auto flex-grow space-y-6 relative" id="register-missing-database-panel">
+              {isVaultProcessing && (
+                <div className="absolute inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center space-y-4 animate-fade-in p-6">
+                  <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="text-center space-y-1">
+                    <h3 className="text-white text-xs font-black uppercase tracking-wider">Syncing with the Ball Vault</h3>
+                    <p className="text-[10px] text-neutral-400 font-mono">Please keep this window open while we commit database changes...</p>
+                  </div>
+                </div>
+              )}
               {/* Inner admin toggle buttons */}
               <div className="flex gap-2 p-1 bg-neutral-950/60 border border-neutral-850 rounded-xl">
                 <button

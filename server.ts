@@ -1860,6 +1860,210 @@ app.post("/api/catalog", async (req, res) => {
   res.status(211).json(newItem);
 });
 
+// POST: Bulk add catalog items (Admin only)
+app.post("/api/catalog/bulk", async (req, res) => {
+  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  if (!(await verifyAdmin(actingUserId))) {
+    return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
+  }
+
+  const { items } = req.body;
+  if (!Array.isArray(items)) {
+    return res.status(400).json({ error: "An array of items is required under the 'items' key." });
+  }
+
+  const createdItems: CatalogItem[] = [];
+  const localCatalog = loadCatalog();
+  const localPreserved = loadPreservedImagesLocal();
+
+  if (dbAdmin) {
+    try {
+      let batch = dbAdmin.batch();
+      let opCount = 0;
+      const batches = [batch];
+
+      for (const item of items) {
+        const { model, name, color, variation, year, customImage, customImageSleeve, customImageBox } = item;
+        if (!model || !name || !color) continue;
+
+        const newId = sanitizeId(model, color, name, variation, year);
+
+        let resolvedImage = customImage;
+        let resolvedImageSleeve = customImageSleeve;
+        let resolvedImageBox = customImageBox;
+
+        if (!resolvedImage || !resolvedImageSleeve || !resolvedImageBox) {
+          const preserved = localPreserved[newId];
+          if (preserved) {
+            if (!resolvedImage) resolvedImage = preserved.customImage;
+            if (!resolvedImageSleeve) resolvedImageSleeve = preserved.customImageSleeve;
+            if (!resolvedImageBox) resolvedImageBox = preserved.customImageBox;
+          }
+        }
+
+        const newItem: CatalogItem = {
+          id: newId,
+          model: model.trim(),
+          name: name.trim(),
+          color: color.trim(),
+          variation: variation !== undefined ? variation.trim() : undefined,
+          year: year !== undefined ? year.trim() : undefined,
+          customImage: resolvedImage,
+          customImageSleeve: resolvedImageSleeve,
+          customImageBox: resolvedImageBox
+        };
+
+        // Add to Firestore catalog collection in batch
+        const catDocRef = dbAdmin.collection("catalog").doc(newId);
+        const { id, ...dataToSave } = newItem;
+        batch.set(catDocRef, dataToSave, { merge: true });
+        opCount++;
+
+        // Add to preserved images in batch if images exist
+        if (resolvedImage || resolvedImageSleeve || resolvedImageBox) {
+          const updateObj: PreservedImages = {};
+          if (resolvedImage) updateObj.customImage = resolvedImage;
+          if (resolvedImageSleeve) updateObj.customImageSleeve = resolvedImageSleeve;
+          if (resolvedImageBox) updateObj.customImageBox = resolvedImageBox;
+
+          const imgDocRef = dbAdmin.collection("preserved_images").doc(newId);
+          batch.set(imgDocRef, updateObj, { merge: true });
+          opCount++;
+        }
+
+        // Update in-memory fallback list
+        const idx = localCatalog.findIndex(c => c.id === newId);
+        if (idx > -1) {
+          localCatalog[idx] = newItem;
+        } else {
+          localCatalog.push(newItem);
+        }
+
+        if (resolvedImage || resolvedImageSleeve || resolvedImageBox) {
+          localPreserved[newId] = {
+            ...(localPreserved[newId] || {}),
+            ...(resolvedImage ? { customImage: resolvedImage } : {}),
+            ...(resolvedImageSleeve ? { customImageSleeve: resolvedImageSleeve } : {}),
+            ...(resolvedImageBox ? { customImageBox: resolvedImageBox } : {})
+          };
+        }
+
+        createdItems.push(newItem);
+
+        // Firestore limits batch writes to 500. We swap batch after 400 operations.
+        if (opCount >= 400) {
+          batch = dbAdmin.batch();
+          batches.push(batch);
+          opCount = 0;
+        }
+      }
+
+      // Commit batches in parallel
+      await Promise.all(batches.map(b => b.commit()));
+
+    } catch (error) {
+      console.error("Firestore bulk catalog save failed:", error);
+      return res.status(500).json({ error: "Failed to bulk save items in Firestore." });
+    }
+  } else {
+    // Non-Firestore local file fallback path
+    for (const item of items) {
+      const { model, name, color, variation, year, customImage, customImageSleeve, customImageBox } = item;
+      if (!model || !name || !color) continue;
+
+      const newId = sanitizeId(model, color, name, variation, year);
+
+      let resolvedImage = customImage;
+      let resolvedImageSleeve = customImageSleeve;
+      let resolvedImageBox = customImageBox;
+
+      if (!resolvedImage || !resolvedImageSleeve || !resolvedImageBox) {
+        const preserved = localPreserved[newId];
+        if (preserved) {
+          if (!resolvedImage) resolvedImage = preserved.customImage;
+          if (!resolvedImageSleeve) resolvedImageSleeve = preserved.customImageSleeve;
+          if (!resolvedImageBox) resolvedImageBox = preserved.customImageBox;
+        }
+      }
+
+      const newItem: CatalogItem = {
+        id: newId,
+        model: model.trim(),
+        name: name.trim(),
+        color: color.trim(),
+        variation: variation !== undefined ? variation.trim() : undefined,
+        year: year !== undefined ? year.trim() : undefined,
+        customImage: resolvedImage,
+        customImageSleeve: resolvedImageSleeve,
+        customImageBox: resolvedImageBox
+      };
+
+      const idx = localCatalog.findIndex(c => c.id === newId);
+      if (idx > -1) {
+        localCatalog[idx] = newItem;
+      } else {
+        localCatalog.push(newItem);
+      }
+
+      if (resolvedImage || resolvedImageSleeve || resolvedImageBox) {
+        localPreserved[newId] = {
+          ...(localPreserved[newId] || {}),
+          ...(resolvedImage ? { customImage: resolvedImage } : {}),
+          ...(resolvedImageSleeve ? { customImageSleeve: resolvedImageSleeve } : {}),
+          ...(resolvedImageBox ? { customImageBox: resolvedImageBox } : {})
+        };
+      }
+
+      createdItems.push(newItem);
+    }
+  }
+
+  // Save changes to local disk once
+  saveCatalog(localCatalog);
+  savePreservedImagesLocal(localPreserved);
+
+  res.json({ success: true, count: createdItems.length, items: createdItems });
+});
+
+// POST: Clear all catalog items (Admin only)
+app.post("/api/catalog/clear", async (req, res) => {
+  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  if (!(await verifyAdmin(actingUserId))) {
+    return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
+  }
+
+  if (dbAdmin) {
+    try {
+      const snapshot = await dbAdmin.collection("catalog").get();
+      if (!snapshot.empty) {
+        let batch = dbAdmin.batch();
+        let opCount = 0;
+        const batches = [batch];
+
+        snapshot.forEach(doc => {
+          batch.delete(doc.ref);
+          opCount++;
+          if (opCount >= 400) {
+            batch = dbAdmin.batch();
+            batches.push(batch);
+            opCount = 0;
+          }
+        });
+
+        await Promise.all(batches.map(b => b.commit()));
+      }
+    } catch (error) {
+      console.error("Firestore catalog clear failed:", error);
+      return res.status(500).json({ error: "Failed to clear Firestore catalog." });
+    }
+  }
+
+  // Save empty catalog locally
+  saveCatalog([]);
+
+  res.json({ success: true, message: "Successfully cleared all catalog designs." });
+});
+
 // PUT: Save changes to existing catalog design (Admin only)
 app.put("/api/catalog/:id", async (req, res) => {
   const actingUserId = req.headers["x-user-id"] as string | undefined;
