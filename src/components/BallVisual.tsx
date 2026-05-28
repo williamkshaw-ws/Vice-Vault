@@ -224,10 +224,10 @@ export default function BallVisual({
   // --- RENDER BOX PACKAGING VISUAL ---
   if (packageType === "box") {
     const { accentLight, accentDark } = getThemeColors();
-    // Centered ball inside the box preview window
-    const ballCx = 38;
-    const ballCy = 62;
-    const ballR = 12;
+    // Centered ball inside the box preview window (positioned on the left side of the wide box)
+    const ballCx = 32;
+    const ballCy = 60;
+    const ballR = 11;
 
     return (
       <div className={`relative inline-flex items-center justify-center shrink-0 ${sizeClasses[size]} ${className}`} id={`golfbox-${model}-${color}-${size}`}>
@@ -271,18 +271,18 @@ export default function BallVisual({
             </clipPath>
           </defs>
 
-          {/* Under-box soft shadow */}
-          <polygon points="20,80 70,89 88,80 40,75" fill="rgba(15,23,42,0.25)" filter="url(#boxShadowBlur)" />
+          {/* Under-box soft shadow (covers bottom-left 15,80 to bottom-right 75,90 to back-right 83,80) */}
+          <polygon points="12,82 76,93 88,82 30,78" fill="rgba(15,23,42,0.25)" filter="url(#boxShadowBlur)" />
 
-          {/* 3D Geometry */}
+          {/* 3D Geometry for a wide box lying on its side */}
           {/* Top Face */}
-          <polygon points="25,17 32,10 75,18 68,25" fill="url(#boxTopFace)" stroke="#475569" strokeWidth="1" strokeLinejoin="round" />
+          <polygon points="15,35 23,25 83,35 75,45" fill="url(#boxTopFace)" stroke="#475569" strokeWidth="1" strokeLinejoin="round" />
           
           {/* Right Face */}
-          <polygon points="68,25 75,18 75,77 68,88" fill="url(#boxRightFace)" stroke="#475569" strokeWidth="1" strokeLinejoin="round" />
+          <polygon points="75,45 83,35 83,80 75,90" fill="url(#boxRightFace)" stroke="#475569" strokeWidth="1" strokeLinejoin="round" />
           
           {/* Front Face */}
-          <polygon points="25,17 68,25 68,88 25,78" fill="url(#boxFrontFace)" stroke="#475569" strokeWidth="1" strokeLinejoin="round" />
+          <polygon points="15,35 75,45 75,90 15,80" fill="url(#boxFrontFace)" stroke="#475569" strokeWidth="1" strokeLinejoin="round" />
 
           {/* Ball Shadow inside Box */}
           <ellipse cx={ballCx} cy={ballCy + ballR - 1.5} rx={ballR + 1} ry={2.5} fill="rgba(15,23,42,0.18)" />
@@ -302,8 +302,8 @@ export default function BallVisual({
             </g>
           )}
 
-          {/* Vertical stripe / alignment window on the right */}
-          <rect x="60" y="27" width="2.5" height="48" rx="1.25" fill="url(#stripeGrad)" stroke="#475569" strokeWidth="0.8" />
+          {/* Vertical stripe / alignment window on the right side of front face */}
+          <rect x="62" y="41" width="2.5" height="42" rx="1.25" fill="url(#stripeGrad)" stroke="#475569" strokeWidth="0.8" />
         </svg>
       </div>
     );
