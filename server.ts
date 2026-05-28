@@ -1950,8 +1950,8 @@ app.post("/api/catalog/bulk", async (req, res) => {
 
         createdItems.push(newItem);
 
-        // Firestore limits batch writes to 500. We swap batch after 400 operations.
-        if (opCount >= 400) {
+        // Limit each batch to 10 operations (5 items max) to avoid exceeding the Firestore 10MB payload size limit for a single batch.
+        if (opCount >= 10) {
           batch = dbAdmin.batch();
           batches.push(batch);
           opCount = 0;
@@ -1961,9 +1961,9 @@ app.post("/api/catalog/bulk", async (req, res) => {
       // Commit batches in parallel
       await Promise.all(batches.map(b => b.commit()));
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Firestore bulk catalog save failed:", error);
-      return res.status(500).json({ error: "Failed to bulk save items in Firestore." });
+      return res.status(500).json({ error: `Failed to bulk save items in Firestore: ${error.message || error}` });
     }
   } else {
     // Non-Firestore local file fallback path
