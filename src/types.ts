@@ -45,6 +45,8 @@ export interface GolfBall {
   year?: string; // Optional year (e.g. 2026)
   dateAdded: string;
   customImage?: string; // Custom uploaded base64 image representation
+  customImageSleeve?: string; // Custom uploaded sleeve image
+  customImageBox?: string; // Custom uploaded box image
 }
 
 export interface CourseLog {
@@ -67,6 +69,8 @@ export interface CatalogItem {
   variation?: string;
   year?: string;
   customImage?: string;
+  customImageSleeve?: string;
+  customImageBox?: string;
   notes?: string;
 }
 

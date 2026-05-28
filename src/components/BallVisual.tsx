@@ -13,6 +13,8 @@ interface BallVisualProps {
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
   customImage?: string;
+  customImageSleeve?: string;
+  customImageBox?: string;
   packageType?: "ea" | "sleeve" | "box";
 }
 
@@ -23,6 +25,8 @@ export default function BallVisual({
   size = "md",
   className = "",
   customImage,
+  customImageSleeve,
+  customImageBox,
   packageType = "ea"
 }: BallVisualProps) {
   // Sizing styles
@@ -39,6 +43,40 @@ export default function BallVisual({
     lg: { brand: "text-[20px] font-black tracking-widest leading-none", num: "text-[15px]" },
     xl: { brand: "text-[30px] font-black tracking-[0.2em] leading-none mb-1", num: "text-[22px]" }
   };
+
+  // If a custom box image is uploaded and packageType is box, render it directly!
+  if (packageType === "box" && customImageBox) {
+    return (
+      <div 
+        className={`relative inline-flex items-center justify-center rounded-xl border border-neutral-800 shadow-md select-none overflow-hidden shrink-0 ${sizeClasses[size]} ${className}`}
+        id={`golfbox-custom-${size}`}
+      >
+        <img 
+          src={customImageBox} 
+          alt="Custom Box Design" 
+          className="absolute inset-0 w-full h-full object-cover"
+          referrerPolicy="no-referrer"
+        />
+      </div>
+    );
+  }
+
+  // If a custom sleeve image is uploaded and packageType is sleeve, render it directly!
+  if (packageType === "sleeve" && customImageSleeve) {
+    return (
+      <div 
+        className={`relative inline-flex items-center justify-center rounded-xl border border-neutral-800 shadow-md select-none overflow-hidden shrink-0 ${sizeClasses[size]} ${className}`}
+        id={`golfsleeve-custom-${size}`}
+      >
+        <img 
+          src={customImageSleeve} 
+          alt="Custom Sleeve Design" 
+          className="absolute inset-0 w-full h-full object-cover"
+          referrerPolicy="no-referrer"
+        />
+      </div>
+    );
+  }
 
   // Helper to resolve dynamically matched light/dark theme colors based on ball color word
   const getThemeColors = () => {

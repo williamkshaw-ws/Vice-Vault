@@ -21,7 +21,9 @@ interface CatalogItemCardProps {
     condition: BallCondition,
     customImage?: string,
     packageType?: 'ea' | 'sleeve' | 'box',
-    year?: string
+    year?: string,
+    customImageSleeve?: string,
+    customImageBox?: string
   ) => void;
 }
 
@@ -47,7 +49,9 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
       condition,
       item.customImage,
       pkgType,
-      item.year
+      item.year,
+      item.customImageSleeve,
+      item.customImageBox
     );
 
     setJustAdded(true);
@@ -98,6 +102,9 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
             model={item.model} 
             size="md" 
             customImage={item.customImage}
+            customImageSleeve={item.customImageSleeve}
+            customImageBox={item.customImageBox}
+            packageType={pkgType}
           />
         </div>
 

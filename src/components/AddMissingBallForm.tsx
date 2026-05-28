@@ -26,11 +26,15 @@ export default function AddMissingBallForm({
   const [variation, setVariation] = useState("");
   const [year, setYear] = useState("");
   const [customImage, setCustomImage] = useState<string | undefined>(undefined);
+  const [customImageSleeve, setCustomImageSleeve] = useState<string | undefined>(undefined);
+  const [customImageBox, setCustomImageBox] = useState<string | undefined>(undefined);
   
   // Visual feedback states
   const [isDragActive, setIsDragActive] = useState(false);
   const [success, setSuccess] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const ballInputRef = useRef<HTMLInputElement>(null);
+  const sleeveInputRef = useRef<HTMLInputElement>(null);
+  const boxInputRef = useRef<HTMLInputElement>(null);
 
   // Prefill fields when editing an item
   React.useEffect(() => {
@@ -41,6 +45,8 @@ export default function AddMissingBallForm({
       setVariation(editItem.variation || editItem.notes || "");
       setYear(editItem.year || "");
       setCustomImage(editItem.customImage);
+      setCustomImageSleeve(editItem.customImageSleeve);
+      setCustomImageBox(editItem.customImageBox);
     } else {
       setModel("");
       setName("");
@@ -48,11 +54,13 @@ export default function AddMissingBallForm({
       setVariation("");
       setYear("");
       setCustomImage(undefined);
+      setCustomImageSleeve(undefined);
+      setCustomImageBox(undefined);
     }
   }, [editItem]);
 
   // Helper to convert files to Base64 for localStorage storage
-  const processFile = (file: File) => {
+  const processFile = (file: File, type: "ball" | "sleeve" | "box") => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       alert("Please select a valid image file.");
@@ -60,43 +68,12 @@ export default function AddMissingBallForm({
     }
     const reader = new FileReader();
     reader.onloadend = () => {
-      setCustomImage(reader.result as string);
+      const result = reader.result as string;
+      if (type === "ball") setCustomImage(result);
+      else if (type === "sleeve") setCustomImageSleeve(result);
+      else if (type === "box") setCustomImageBox(result);
     };
     reader.readAsDataURL(file);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      processFile(e.target.files[0]);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragActive(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragActive(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      processFile(e.dataTransfer.files[0]);
-    }
-  };
-
-  const handleTriggerFileInput = () => {
-    if (fileInputRef.current) fileInputRef.current.click();
-  };
-
-  const handleRemoveImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setCustomImage(undefined);
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -114,6 +91,8 @@ export default function AddMissingBallForm({
       year: year.trim() || undefined,
       notes: variation.trim() || undefined,
       customImage,
+      customImageSleeve,
+      customImageBox,
     };
 
     if (editItem) {
@@ -138,6 +117,8 @@ export default function AddMissingBallForm({
         setVariation("");
         setYear("");
         setCustomImage(undefined);
+        setCustomImageSleeve(undefined);
+        setCustomImageBox(undefined);
       }, 1500);
     }
   };
@@ -272,68 +253,137 @@ export default function AddMissingBallForm({
              </div>
           </div>
 
-          {/* Upload Custom Image Area */}
+          {/* Upload Custom Images Grid */}
           <div className="space-y-1.5">
             <span className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 font-bold">
-              Custom Image texture / logo
+              Custom Uploads (Optional)
             </span>
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onClick={handleTriggerFileInput}
-              className={`border border-dashed rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${
-                isDragActive
-                  ? "border-[#2563eb] bg-[#2563eb]/10"
-                  : customImage
-                  ? "border-neutral-700 bg-neutral-950/60"
-                  : "border-neutral-800 bg-neutral-950 hover:bg-neutral-900 hover:border-neutral-700"
-              }`}
-              id="missing-image-uploader-dropzone"
-            >
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                accept="image/*"
-                className="hidden"
-              />
+            <div className="grid grid-cols-3 gap-3">
+              {/* Ball Image */}
+              <div 
+                onClick={() => ballInputRef.current?.click()}
+                className={`relative border border-dashed rounded-xl p-2.5 flex flex-col items-center justify-center gap-1 cursor-pointer h-16 text-center transition-all ${
+                  customImage ? "border-neutral-700 bg-neutral-950/60" : "border-neutral-800 bg-neutral-950 hover:bg-neutral-900/60 hover:border-neutral-700"
+                }`}
+              >
+                <input 
+                  type="file" 
+                  ref={ballInputRef} 
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) processFile(e.target.files[0], "ball");
+                  }} 
+                  accept="image/*" 
+                  className="hidden" 
+                />
+                {customImage ? (
+                  <>
+                    <img src={customImage} className="absolute inset-0 w-full h-full object-cover rounded-xl opacity-40" />
+                    <span className="relative z-10 text-[9px] font-black uppercase text-white bg-black/75 px-1 py-0.5 rounded-md leading-none">
+                      Ball
+                    </span>
+                    <button 
+                      type="button" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCustomImage(undefined);
+                        if (ballInputRef.current) ballInputRef.current.value = "";
+                      }}
+                      className="absolute top-1 right-1 z-20 p-0.5 rounded-full bg-rose-950 text-rose-450 hover:bg-rose-900 transition-colors"
+                    >
+                      <Trash className="w-2.5 h-2.5" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-3.5 h-3.5 text-neutral-500" />
+                    <span className="text-[9px] font-bold text-neutral-400">Ball Image</span>
+                  </>
+                )}
+              </div>
 
-              {customImage ? (
-                <div className="flex items-center gap-4 w-full justify-between">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={customImage}
-                      alt="Thumbnail preview"
-                      className="w-12 h-12 rounded-lg object-cover border border-neutral-700"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div>
-                      <span className="block text-xs font-bold text-white">Image Uploaded Successfully</span>
-                      <span className="text-[10px] text-neutral-500 font-mono">Compressed Base64 asset</span>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleRemoveImage}
-                    className="p-1 px-2.5 rounded bg-rose-950 text-rose-400 hover:bg-rose-900 text-xs font-bold flex items-center gap-1 transition-colors"
-                  >
-                    <Trash className="w-3.5 h-3.5" /> Remove
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <Upload className={`w-6 h-6 ${isDragActive ? "text-[#2563eb] animate-bounce" : "text-neutral-500"}`} />
-                  <div className="text-center">
-                    <p className="text-xs text-neutral-300 font-medium">
-                      Drag & Drop photo here, or <span className="text-[#2563eb] underline">Browse files</span>
-                    </p>
-                    <p className="text-[10px] text-neutral-500 font-mono mt-1">
-                      PNG, JPG, or WEBP up to 2MB (Auto 3D-molding)
-                    </p>
-                  </div>
-                </>
-              )}
+              {/* Sleeve Image */}
+              <div 
+                onClick={() => sleeveInputRef.current?.click()}
+                className={`relative border border-dashed rounded-xl p-2.5 flex flex-col items-center justify-center gap-1 cursor-pointer h-16 text-center transition-all ${
+                  customImageSleeve ? "border-neutral-700 bg-neutral-950/60" : "border-neutral-800 bg-neutral-950 hover:bg-neutral-900/60 hover:border-neutral-700"
+                }`}
+              >
+                <input 
+                  type="file" 
+                  ref={sleeveInputRef} 
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) processFile(e.target.files[0], "sleeve");
+                  }} 
+                  accept="image/*" 
+                  className="hidden" 
+                />
+                {customImageSleeve ? (
+                  <>
+                    <img src={customImageSleeve} className="absolute inset-0 w-full h-full object-cover rounded-xl opacity-40" />
+                    <span className="relative z-10 text-[9px] font-black uppercase text-white bg-black/75 px-1 py-0.5 rounded-md leading-none">
+                      Sleeve
+                    </span>
+                    <button 
+                      type="button" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCustomImageSleeve(undefined);
+                        if (sleeveInputRef.current) sleeveInputRef.current.value = "";
+                      }}
+                      className="absolute top-1 right-1 z-20 p-0.5 rounded-full bg-rose-950 text-rose-450 hover:bg-rose-900 transition-colors"
+                    >
+                      <Trash className="w-2.5 h-2.5" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-3.5 h-3.5 text-neutral-500" />
+                    <span className="text-[9px] font-bold text-neutral-400">Sleeve Image</span>
+                  </>
+                )}
+              </div>
+
+              {/* Box Image */}
+              <div 
+                onClick={() => boxInputRef.current?.click()}
+                className={`relative border border-dashed rounded-xl p-2.5 flex flex-col items-center justify-center gap-1 cursor-pointer h-16 text-center transition-all ${
+                  customImageBox ? "border-neutral-700 bg-neutral-950/60" : "border-neutral-800 bg-neutral-950 hover:bg-neutral-900/60 hover:border-neutral-700"
+                }`}
+              >
+                <input 
+                  type="file" 
+                  ref={boxInputRef} 
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) processFile(e.target.files[0], "box");
+                  }} 
+                  accept="image/*" 
+                  className="hidden" 
+                />
+                {customImageBox ? (
+                  <>
+                    <img src={customImageBox} className="absolute inset-0 w-full h-full object-cover rounded-xl opacity-40" />
+                    <span className="relative z-10 text-[9px] font-black uppercase text-white bg-black/75 px-1 py-0.5 rounded-md leading-none">
+                      Box
+                    </span>
+                    <button 
+                      type="button" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCustomImageBox(undefined);
+                        if (boxInputRef.current) boxInputRef.current.value = "";
+                      }}
+                      className="absolute top-1 right-1 z-20 p-0.5 rounded-full bg-rose-950 text-rose-450 hover:bg-rose-900 transition-colors"
+                    >
+                      <Trash className="w-2.5 h-2.5" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-3.5 h-3.5 text-neutral-500" />
+                    <span className="text-[9px] font-bold text-neutral-400">Box Image</span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 

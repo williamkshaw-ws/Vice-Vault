@@ -378,6 +378,8 @@ export default function OwnedBallCard({
             number={ball.packageType === 'box' ? undefined : ball.customNumber} 
             size="md" 
             customImage={ball.customImage}
+            customImageSleeve={ball.customImageSleeve}
+            customImageBox={ball.customImageBox}
             packageType={ball.packageType}
           />
           {ball.packageType !== 'box' && (

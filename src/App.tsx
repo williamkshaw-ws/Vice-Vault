@@ -476,7 +476,9 @@ export default function App() {
             color: updatedColor,
             variation: updatedVariation,
             year: updatedYear,
-            customImage: updatedFields.customImage
+            customImage: updatedFields.customImage,
+            customImageSleeve: updatedFields.customImageSleeve,
+            customImageBox: updatedFields.customImageBox
           })
         });
         if (!res.ok) {
@@ -494,7 +496,9 @@ export default function App() {
           variation: updatedVariation || undefined,
           year: updatedYear || undefined,
           notes: updatedFields.notes !== undefined ? updatedFields.notes.trim() : originalItem.notes,
-          customImage: updatedFields.customImage !== undefined ? updatedFields.customImage : originalItem.customImage
+          customImage: updatedFields.customImage !== undefined ? updatedFields.customImage : originalItem.customImage,
+          customImageSleeve: updatedFields.customImageSleeve !== undefined ? updatedFields.customImageSleeve : originalItem.customImageSleeve,
+          customImageBox: updatedFields.customImageBox !== undefined ? updatedFields.customImageBox : originalItem.customImageBox
         };
         return prev.map((item) => (item.id === id ? newItem : item));
       });
@@ -510,6 +514,8 @@ export default function App() {
                 color: updatedColor,
                 year: updatedYear || undefined,
                 customImage: updatedFields.customImage !== undefined ? updatedFields.customImage : ball.customImage,
+                customImageSleeve: updatedFields.customImageSleeve !== undefined ? updatedFields.customImageSleeve : ball.customImageSleeve,
+                customImageBox: updatedFields.customImageBox !== undefined ? updatedFields.customImageBox : ball.customImageBox
               };
             }
             return ball;
@@ -1011,7 +1017,9 @@ export default function App() {
     condition: BallCondition,
     customImage?: string,
     packageType?: 'ea' | 'sleeve' | 'box',
-    year?: string
+    year?: string,
+    customImageSleeve?: string,
+    customImageBox?: string
   ) => {
     const today = new Date().toLocaleDateString();
     
@@ -1054,7 +1062,9 @@ export default function App() {
           notes: notes || "",
           year: year || undefined,
           dateAdded: today,
-          customImage
+          customImage,
+          customImageSleeve,
+          customImageBox
         };
         return [newBall, ...prev];
       }
@@ -1085,7 +1095,9 @@ export default function App() {
             color: newItem.color,
             variation: newItem.variation,
             year: newItem.year,
-            customImage: newItem.customImage
+            customImage: newItem.customImage,
+            customImageSleeve: newItem.customImageSleeve,
+            customImageBox: newItem.customImageBox
           })
         });
         if (!res.ok) {
@@ -1103,7 +1115,9 @@ export default function App() {
           variation: newItem.variation ? newItem.variation.trim() : undefined,
           year: newItem.year ? newItem.year.trim() : undefined,
           notes: newItem.notes ? newItem.notes.trim() : "",
-          customImage: newItem.customImage
+          customImage: newItem.customImage,
+          customImageSleeve: newItem.customImageSleeve,
+          customImageBox: newItem.customImageBox
         };
       }
       setCatalog((prev) => [itemWithId, ...prev]);
@@ -1402,6 +1416,8 @@ export default function App() {
                             number={ball.packageType === 'box' ? undefined : ball.customNumber} 
                             size="md" 
                             customImage={ball.customImage}
+                            customImageSleeve={ball.customImageSleeve}
+                            customImageBox={ball.customImageBox}
                             packageType={ball.packageType}
                           />
                           {ball.packageType !== 'box' && (
@@ -2258,7 +2274,15 @@ export default function App() {
                         return (
                           <div key={ball.id} className="bg-neutral-950 border border-neutral-850 p-3 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
                             <div className="flex items-center gap-3">
-                              <BallVisual color={ball.color} model={ball.model} size="sm" customImage={ball.customImage} packageType={ball.packageType} />
+                              <BallVisual 
+                                color={ball.color} 
+                                model={ball.model} 
+                                size="sm" 
+                                customImage={ball.customImage} 
+                                customImageSleeve={ball.customImageSleeve}
+                                customImageBox={ball.customImageBox}
+                                packageType={ball.packageType} 
+                              />
                               <div>
                                 <span className="text-white font-bold block">{ball.model}</span>
                                 <span className="text-neutral-450 block text-[10px]">{ball.color} • {currentPkg === "box" ? "box" : currentPkg === "sleeve" ? "sleeve" : "ea"}</span>
@@ -2545,6 +2569,8 @@ export default function App() {
                               size="sm" 
                               className="!w-8 !h-8 shadow-none border-none" 
                               customImage={item.customImage} 
+                              customImageSleeve={item.customImageSleeve}
+                              customImageBox={item.customImageBox}
                             />
                           </span>
                           <div className="truncate">

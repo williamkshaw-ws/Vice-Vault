@@ -68,6 +68,8 @@ interface CatalogItem {
   variation?: string;
   year?: string;
   customImage?: string;
+  customImageSleeve?: string;
+  customImageBox?: string;
   notes?: string;
 }
 
@@ -767,7 +769,9 @@ if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
           color: item.color.trim(),
           variation: item.variation || item.notes || "",
           year: item.year,
-          customImage: item.customImage
+          customImage: item.customImage,
+          customImageSleeve: item.customImageSleeve,
+          customImageBox: item.customImageBox
         });
       }
     }
@@ -1776,7 +1780,7 @@ app.post("/api/catalog", async (req, res) => {
     return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
   }
 
-  const { model, name, color, variation, year, customImage } = req.body;
+  const { model, name, color, variation, year, customImage, customImageSleeve, customImageBox } = req.body;
   if (!model || !name || !color) {
     return res.status(400).json({ error: "Model, Name, and Color specifications are required." });
   }
@@ -1789,7 +1793,9 @@ app.post("/api/catalog", async (req, res) => {
     color: color.trim(),
     variation: variation !== undefined ? variation.trim() : undefined,
     year: year !== undefined ? year.trim() : undefined,
-    customImage
+    customImage,
+    customImageSleeve,
+    customImageBox
   };
 
   await saveGlobalCatalogItem(newItem);
@@ -1804,7 +1810,7 @@ app.put("/api/catalog/:id", async (req, res) => {
   }
 
   const { id } = req.params;
-  const { model, name, color, variation, year, customImage } = req.body;
+  const { model, name, color, variation, year, customImage, customImageSleeve, customImageBox } = req.body;
 
   const catalog = await getGlobalCatalog();
   const currentItem = catalog.find(item => item.id === id);
@@ -1827,7 +1833,9 @@ app.put("/api/catalog/:id", async (req, res) => {
     color: updatedColor,
     variation: updatedVariation,
     year: updatedYear,
-    customImage: customImage !== undefined ? customImage : currentItem.customImage
+    customImage: customImage !== undefined ? customImage : currentItem.customImage,
+    customImageSleeve: customImageSleeve !== undefined ? customImageSleeve : currentItem.customImageSleeve,
+    customImageBox: customImageBox !== undefined ? customImageBox : currentItem.customImageBox
   };
 
   if (newId !== id) {
