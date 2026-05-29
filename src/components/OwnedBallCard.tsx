@@ -472,23 +472,14 @@ export default function OwnedBallCard({
               </div>
             )}
 
-            {/* Variations Display */}
-            {((ball.variations && ball.variations.length > 0) || currentVersion !== "Standard Edition") && (
+            {/* Variation Display */}
+            {(ball.variation || currentVersion !== "Standard Edition") && (
               <div className="mt-1.5 flex flex-col gap-1 items-start">
-                <span className="text-[10px] font-mono text-neutral-500 uppercase">Variations:</span>
+                <span className="text-[10px] font-mono text-neutral-500 uppercase">Variation:</span>
                 <div className="flex flex-wrap gap-1">
-                  {ball.variations && ball.variations.length > 0 ? (
-                    ball.variations.map((v, i) => (
-                      <span key={i} className="text-[9px] font-mono font-bold bg-neutral-950 border border-neutral-800 text-neutral-450 px-1.5 py-0.5 rounded select-none leading-none">
-                        {v}
-                      </span>
-                    ))
-                  ) : (
-                    // Fallback to legacy version/variation
-                    <span className="text-[9px] font-mono font-bold bg-neutral-950 border border-neutral-800 text-neutral-450 px-1.5 py-0.5 rounded select-none leading-none">
-                      {currentVersion}
-                    </span>
-                  )}
+                  <span className="text-[9px] font-mono font-bold bg-neutral-950 border border-neutral-800 text-neutral-450 px-1.5 py-0.5 rounded select-none leading-none">
+                    {ball.variation || currentVersion}
+                  </span>
                 </div>
               </div>
             )}

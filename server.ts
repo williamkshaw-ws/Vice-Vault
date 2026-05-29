@@ -66,7 +66,6 @@ interface CatalogItem {
   name?: string;
   color: string;
   variation?: string;
-  variations?: string[];
   year?: string;
   customImage?: string;
   customImageSleeve?: string;
@@ -164,10 +163,12 @@ function sanitizeId(model: string, color: string, name?: string, variation?: str
   const modelPart = clean(model);
   const colorPart = clean(color);
   const namePart = name ? clean(name) : "";
+  const varPart = variation ? clean(variation) : "";
   
   let base = modelPart;
   if (namePart) base += `-${namePart}`;
   base += `-${colorPart}`;
+  if (varPart) base += `-${varPart}`;
   return base;
 }
 
@@ -761,34 +762,23 @@ if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
         const docsToDelete = new Set<string>();
 
         for (const item of rawItems) {
-          const newId = sanitizeId(item.model, item.color, item.name, undefined, item.year);
-          const cleanVar = item.variation ? item.variation.trim() : (item.notes ? item.notes.trim() : "");
-          const cleanVars = item.variations ? item.variations.map(v => v.trim()) : [];
-          if (cleanVar && !cleanVars.includes(cleanVar)) {
-            cleanVars.push(cleanVar);
-          }
-
+          const newId = sanitizeId(item.model, item.color, item.name, item.variation || item.notes);
+          
           if (!groupedRaw[newId]) {
             groupedRaw[newId] = {
               ...item,
               id: newId,
-              variations: cleanVars.filter(Boolean),
-              variation: cleanVars.length > 0 ? cleanVars[0] : undefined
+              variation: item.variation || item.notes || undefined
             };
-            delete groupedRaw[newId].year;
+            delete (groupedRaw[newId] as any).year;
+            delete (groupedRaw[newId] as any).variations;
           } else {
             const existing = groupedRaw[newId];
-            const mergedVars = Array.from(new Set([
-              ...(existing.variations || []),
-              ...cleanVars
-            ])).filter(Boolean);
-
-            existing.variations = mergedVars;
-            existing.variation = mergedVars.length > 0 ? mergedVars[0] : undefined;
             if (!existing.customImage && item.customImage) existing.customImage = item.customImage;
             if (!existing.customImageSleeve && item.customImageSleeve) existing.customImageSleeve = item.customImageSleeve;
             if (!existing.customImageBox && item.customImageBox) existing.customImageBox = item.customImageBox;
-            delete existing.year;
+            delete (existing as any).year;
+            delete (existing as any).variations;
           }
 
           if (item.id !== newId) {
@@ -838,33 +828,22 @@ if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
     const localCatalog = loadCatalog();
     const migratedCatalog: CatalogItem[] = [];
     for (const item of localCatalog) {
-      const newId = sanitizeId(item.model, item.color, item.name, undefined, item.year);
-      const cleanVar = item.variation ? item.variation.trim() : (item.notes ? item.notes.trim() : "");
-      const cleanVars = item.variations ? item.variations.map(v => v.trim()) : [];
-      if (cleanVar && !cleanVars.includes(cleanVar)) {
-        cleanVars.push(cleanVar);
-      }
-
+      const newId = sanitizeId(item.model, item.color, item.name, item.variation || item.notes);
+      
       const existing = migratedCatalog.find(c => c.id === newId);
       if (existing) {
-        const mergedVars = Array.from(new Set([
-          ...(existing.variations || []),
-          ...cleanVars
-        ])).filter(Boolean);
-        existing.variations = mergedVars;
-        existing.variation = mergedVars.length > 0 ? mergedVars[0] : undefined;
         if (!existing.customImage && item.customImage) existing.customImage = item.customImage;
         if (!existing.customImageSleeve && item.customImageSleeve) existing.customImageSleeve = item.customImageSleeve;
         if (!existing.customImageBox && item.customImageBox) existing.customImageBox = item.customImageBox;
-        delete existing.year;
+        delete (existing as any).year;
+        delete (existing as any).variations;
       } else {
         migratedCatalog.push({
           id: newId,
           model: item.model.trim(),
           name: item.name ? item.name.trim() : undefined,
           color: item.color.trim(),
-          variations: cleanVars.filter(Boolean),
-          variation: cleanVars.length > 0 ? cleanVars[0] : undefined,
+          variation: item.variation || item.notes || undefined,
           customImage: item.customImage,
           customImageSleeve: item.customImageSleeve,
           customImageBox: item.customImageBox
@@ -1887,7 +1866,7 @@ app.post("/api/catalog", async (req, res) => {
     return res.status(400).json({ error: "Model, Name, and Color specifications are required." });
   }
 
-  const newId = sanitizeId(model, color, name, undefined, year);
+  const newId = sanitizeId(model, color, name, variation);
 
   let resolvedImage = customImage;
   let resolvedImageSleeve = customImageSleeve;
@@ -1902,37 +1881,16 @@ app.post("/api/catalog", async (req, res) => {
     }
   }
 
-  // Load existing catalog items to merge variations
+  // Load existing catalog item if any
   const catalog = await getGlobalCatalog();
   const existingItem = catalog.find(item => item.id === newId);
-
-  // Incoming variations
-  let incomingVars: string[] = [];
-  if (Array.isArray(variations)) {
-    incomingVars = variations.map(v => v.trim()).filter(Boolean);
-  } else if (variation) {
-    incomingVars = variation.trim() ? [variation.trim()] : [];
-  }
-
-  let mergedVariations = existingItem && existingItem.variations ? [...existingItem.variations] : [];
-  if (existingItem && existingItem.variation && mergedVariations.length === 0) {
-    mergedVariations.push(existingItem.variation.trim());
-  }
-
-  for (const v of incomingVars) {
-    if (!mergedVariations.includes(v)) {
-      mergedVariations.push(v);
-    }
-  }
-  mergedVariations = mergedVariations.filter(Boolean);
 
   const newItem: CatalogItem = {
     id: newId,
     model: model.trim(),
     name: name.trim(),
     color: color.trim(),
-    variation: mergedVariations.length > 0 ? mergedVariations[0] : undefined,
-    variations: mergedVariations.length > 0 ? mergedVariations : undefined,
+    variation: variation ? variation.trim() : undefined,
     customImage: resolvedImage || (existingItem ? existingItem.customImage : undefined),
     customImageSleeve: resolvedImageSleeve || (existingItem ? existingItem.customImageSleeve : undefined),
     customImageBox: resolvedImageBox || (existingItem ? existingItem.customImageBox : undefined)
@@ -1960,58 +1918,23 @@ app.post("/api/catalog/bulk", async (req, res) => {
   const groupedItems: Record<string, CatalogItem> = {};
 
   for (const item of items) {
-    const { model, name, color, variation, variations, year, customImage, customImageSleeve, customImageBox } = item;
+    const { model, name, color, variation, customImage, customImageSleeve, customImageBox } = item;
     if (!model || !name || !color) continue;
 
-    const newId = sanitizeId(model, color, name, undefined, year);
-    
-    // Normalize variations to array of strings
-    let incomingVars: string[] = [];
-    if (Array.isArray(variations)) {
-      incomingVars = variations.map(v => v.trim()).filter(Boolean);
-    } else if (variation) {
-      incomingVars = variation.trim() ? [variation.trim()] : [];
-    }
+    const newId = sanitizeId(model, color, name, variation);
 
     if (!groupedItems[newId]) {
-      // Find existing item from database to merge variations
       const existing = currentMap.get(newId);
-      let mergedVars = existing && existing.variations ? [...existing.variations] : [];
-      if (existing && existing.variation && mergedVars.length === 0) {
-        mergedVars.push(existing.variation.trim());
-      }
-      for (const v of incomingVars) {
-        if (!mergedVars.includes(v)) {
-          mergedVars.push(v);
-        }
-      }
-      mergedVars = mergedVars.filter(Boolean);
-
       groupedItems[newId] = {
         id: newId,
         model: model.trim(),
         name: name.trim(),
         color: color.trim(),
-        variation: mergedVars.length > 0 ? mergedVars[0] : undefined,
-        variations: mergedVars.length > 0 ? mergedVars : undefined,
+        variation: variation ? variation.trim() : undefined,
         customImage: customImage || (existing ? existing.customImage : undefined),
         customImageSleeve: customImageSleeve || (existing ? existing.customImageSleeve : undefined),
         customImageBox: customImageBox || (existing ? existing.customImageBox : undefined)
       };
-    } else {
-      const existing = groupedItems[newId];
-      const mergedVars = existing.variations ? [...existing.variations] : [];
-      for (const v of incomingVars) {
-        if (!mergedVars.includes(v)) {
-          mergedVars.push(v);
-        }
-      }
-      existing.variations = mergedVars.filter(Boolean);
-      existing.variation = existing.variations.length > 0 ? existing.variations[0] : undefined;
-      
-      if (!existing.customImage && customImage) existing.customImage = customImage;
-      if (!existing.customImageSleeve && customImageSleeve) existing.customImageSleeve = customImageSleeve;
-      if (!existing.customImageBox && customImageBox) existing.customImageBox = customImageBox;
     }
   }
 
@@ -2187,7 +2110,7 @@ app.put("/api/catalog/:id", async (req, res) => {
   }
 
   const { id } = req.params;
-  const { model, name, color, variation, variations, year, customImage, customImageSleeve, customImageBox } = req.body;
+  const { model, name, color, variation, customImage, customImageSleeve, customImageBox } = req.body;
 
   const catalog = await getGlobalCatalog();
   const currentItem = catalog.find(item => item.id === id);
@@ -2198,19 +2121,9 @@ app.put("/api/catalog/:id", async (req, res) => {
   const updatedModel = model ? model.trim() : currentItem.model;
   const updatedName = name ? name.trim() : (currentItem.name || "");
   const updatedColor = color ? color.trim() : currentItem.color;
-  // Handle variations array update
-  let updatedVariations: string[] = [];
-  if (Array.isArray(variations)) {
-    updatedVariations = variations.map(v => v.trim()).filter(Boolean);
-  } else if (variation !== undefined) {
-    updatedVariations = variation.trim() ? [variation.trim()] : [];
-  } else {
-    updatedVariations = currentItem.variations || (currentItem.variation ? [currentItem.variation] : []);
-  }
+  const updatedVariation = variation !== undefined ? (variation ? variation.trim() : undefined) : currentItem.variation;
 
-  const updatedVariation = updatedVariations.length > 0 ? updatedVariations[0] : undefined;
-
-  const newId = sanitizeId(updatedModel, updatedColor, updatedName);
+  const newId = sanitizeId(updatedModel, updatedColor, updatedName, updatedVariation);
 
   let resolvedImage = customImage !== undefined ? customImage : currentItem.customImage;
   let resolvedImageSleeve = customImageSleeve !== undefined ? customImageSleeve : currentItem.customImageSleeve;
@@ -2231,7 +2144,6 @@ app.put("/api/catalog/:id", async (req, res) => {
     name: updatedName,
     color: updatedColor,
     variation: updatedVariation,
-    variations: updatedVariations.length > 0 ? updatedVariations : undefined,
     customImage: resolvedImage,
     customImageSleeve: resolvedImageSleeve,
     customImageBox: resolvedImageBox

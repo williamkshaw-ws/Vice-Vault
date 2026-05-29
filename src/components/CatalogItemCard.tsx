@@ -25,7 +25,7 @@ interface CatalogItemCardProps {
     customImageSleeve?: string,
     customImageBox?: string,
     name?: string,
-    variations?: string[]
+    variation?: string
   ) => void;
 }
 
@@ -59,7 +59,7 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
       item.customImageSleeve,
       item.customImageBox,
       item.name,
-      item.variations || (item.variation ? [item.variation] : undefined)
+      item.variation
     );
 
     setJustAdded(true);
@@ -127,15 +127,11 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
                 <p className="text-xs text-[#2563eb] font-mono font-medium truncate mt-0.5">
                   {item.color}
                 </p>
-                {((item.variations && item.variations.length > 0) || item.variation || item.notes) && (
+                {(item.variation || item.notes) && (
                   <p className="text-[10px] text-neutral-400 font-mono mt-1 break-words line-clamp-2 italic leading-tight" title={
-                    item.variations && item.variations.length > 0 
-                      ? item.variations.join(", ") 
-                      : (item.variation || item.notes)
+                    item.variation || item.notes
                   }>
-                    "{item.variations && item.variations.length > 0 
-                      ? item.variations.join(", ") 
-                      : (item.variation || item.notes)}"
+                    "{item.variation || item.notes}"
                   </p>
                 )}
               </div>

@@ -40,10 +40,7 @@ export default function AddMissingBallForm({
       setModel(editItem.model);
       setName(editItem.name || "");
       setColor(editItem.color);
-      const varVal = editItem.variations && editItem.variations.length > 0
-        ? editItem.variations.join(", ")
-        : (editItem.variation || editItem.notes || "");
-      setVariation(varVal);
+      setVariation(editItem.variation || editItem.notes || "");
       setCustomImage(editItem.customImage);
       setCustomImageSleeve(editItem.customImageSleeve);
       setCustomImageBox(editItem.customImageBox);
@@ -82,16 +79,11 @@ export default function AddMissingBallForm({
       return;
     }
 
-    const cleanVars = variation.trim()
-      ? variation.split(",").map(v => v.trim()).filter(Boolean)
-      : [];
-
     const payload = {
       model: model.trim().toUpperCase(),
       name: name.trim(),
       color: color.trim(),
-      variation: cleanVars.length > 0 ? cleanVars[0] : undefined,
-      variations: cleanVars.length > 0 ? cleanVars : undefined,
+      variation: variation.trim() || undefined,
       notes: variation.trim() || undefined,
       customImage,
       customImageSleeve,
