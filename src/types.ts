@@ -47,6 +47,8 @@ export interface GolfBall {
   customImage?: string; // Custom uploaded base64 image representation
   customImageSleeve?: string; // Custom uploaded sleeve image
   customImageBox?: string; // Custom uploaded box image
+  name?: string;
+  variations?: string[];
 }
 
 export interface CourseLog {
@@ -67,6 +69,7 @@ export interface CatalogItem {
   name?: string;
   color: string;
   variation?: string;
+  variations?: string[];
   year?: string;
   customImage?: string;
   customImageSleeve?: string;

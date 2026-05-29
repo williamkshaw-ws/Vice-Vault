@@ -344,7 +344,7 @@ export default function OwnedBallCard({
             Remove from Bag?
           </h4>
           <p className="text-[10px] text-neutral-400 mt-0.5 max-w-[220px] leading-snug">
-            Delete <strong>{ball.model} ({ball.color})</strong> from your list?
+            Delete <strong>{ball.model}{ball.name ? ` - ${ball.name}` : ''} ({ball.color})</strong> from your list?
           </p>
           <div className="flex gap-2 mt-2 w-full max-w-[180px]">
             <button
@@ -396,7 +396,7 @@ export default function OwnedBallCard({
               <div className="truncate">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-[9px] font-mono tracking-widest text-[#2563eb] uppercase font-black">
-                    {ball.model}
+                    {ball.model}{ball.name ? ` - ${ball.name}` : ''}
                   </span>
                   <span className={`text-[8px] px-1 py-0.2 rounded font-mono font-bold uppercase border tracking-wider scale-95 ${
                     ball.packageType === 'box'
@@ -449,6 +449,27 @@ export default function OwnedBallCard({
                 <span className="text-[10px] py-0.5 px-2 rounded font-bold border border-neutral-800 bg-neutral-950 text-neutral-300 select-none">
                   {ball.year}
                 </span>
+              </div>
+            )}
+
+            {/* Variations Display */}
+            {((ball.variations && ball.variations.length > 0) || currentVersion !== "Standard Edition") && (
+              <div className="mt-1.5 flex flex-col gap-1 items-start">
+                <span className="text-[10px] font-mono text-neutral-500 uppercase">Variations:</span>
+                <div className="flex flex-wrap gap-1">
+                  {ball.variations && ball.variations.length > 0 ? (
+                    ball.variations.map((v, i) => (
+                      <span key={i} className="text-[9px] font-mono font-bold bg-neutral-950 border border-neutral-800 text-neutral-450 px-1.5 py-0.5 rounded select-none leading-none">
+                        {v}
+                      </span>
+                    ))
+                  ) : (
+                    // Fallback to legacy version/variation
+                    <span className="text-[9px] font-mono font-bold bg-neutral-950 border border-neutral-800 text-neutral-450 px-1.5 py-0.5 rounded select-none leading-none">
+                      {currentVersion}
+                    </span>
+                  )}
+                </div>
               </div>
             )}
           </div>

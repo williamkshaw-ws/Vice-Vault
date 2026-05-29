@@ -163,13 +163,11 @@ function sanitizeId(model: string, color: string, name?: string, variation?: str
   const modelPart = clean(model);
   const colorPart = clean(color);
   const namePart = name ? clean(name) : "";
-  const varPart = variation ? clean(variation) : "";
   const yearPart = year ? clean(year) : "";
   
   let base = modelPart;
   if (namePart) base += `-${namePart}`;
   base += `-${colorPart}`;
-  if (varPart) base += `-${varPart}`;
   if (yearPart) base += `-${yearPart}`;
   return base;
 }
@@ -755,29 +753,70 @@ if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
 
         // Migrate and read catalog from Firestore
         const updatedSnap = await catalogRef.get();
-        const firestoreItems: CatalogItem[] = [];
+        const rawItems: CatalogItem[] = [];
+        updatedSnap.forEach(doc => {
+          rawItems.push({ id: doc.id, ...doc.data() } as CatalogItem);
+        });
+
+        const groupedRaw: Record<string, CatalogItem> = {};
+        const docsToDelete = new Set<string>();
+
+        for (const item of rawItems) {
+          const newId = sanitizeId(item.model, item.color, item.name, undefined, item.year);
+          const cleanVar = item.variation ? item.variation.trim() : (item.notes ? item.notes.trim() : "");
+          const cleanVars = item.variations ? item.variations.map(v => v.trim()) : [];
+          if (cleanVar && !cleanVars.includes(cleanVar)) {
+            cleanVars.push(cleanVar);
+          }
+
+          if (!groupedRaw[newId]) {
+            groupedRaw[newId] = {
+              ...item,
+              id: newId,
+              variations: cleanVars.filter(Boolean),
+              variation: cleanVars.length > 0 ? cleanVars[0] : undefined
+            };
+          } else {
+            const existing = groupedRaw[newId];
+            const mergedVars = Array.from(new Set([
+              ...(existing.variations || []),
+              ...cleanVars
+            ])).filter(Boolean);
+
+            existing.variations = mergedVars;
+            existing.variation = mergedVars.length > 0 ? mergedVars[0] : undefined;
+            if (!existing.customImage && item.customImage) existing.customImage = item.customImage;
+            if (!existing.customImageSleeve && item.customImageSleeve) existing.customImageSleeve = item.customImageSleeve;
+            if (!existing.customImageBox && item.customImageBox) existing.customImageBox = item.customImageBox;
+          }
+
+          if (item.id !== newId) {
+            docsToDelete.add(item.id);
+          }
+        }
+
+        const firestoreItems: CatalogItem[] = Object.values(groupedRaw);
         const batch = dbAdmin!.batch();
         let needsCommit = false;
-        
-        updatedSnap.forEach(doc => {
-          const data = doc.data();
-          const newId = sanitizeId(data.model || "", data.color || "", data.name, data.variation, data.year);
-          if (doc.id !== newId) {
-            console.log(`Migrating legacy catalog doc ID in Firestore: ${doc.id} -> ${newId}`);
-            batch.set(catalogRef.doc(newId), data);
-            batch.delete(doc.ref);
+
+        for (const item of firestoreItems) {
+          const { id, ...data } = item;
+          batch.set(catalogRef.doc(id), data, { merge: true });
+          needsCommit = true;
+        }
+
+        for (const deleteId of docsToDelete) {
+          if (!groupedRaw[deleteId]) {
+            batch.delete(catalogRef.doc(deleteId));
             needsCommit = true;
-            firestoreItems.push({ id: newId, ...data } as CatalogItem);
-          } else {
-            firestoreItems.push({ id: doc.id, ...data } as CatalogItem);
           }
-        });
-        
+        }
+
         if (needsCommit) {
           await batch.commit();
-          console.log("Committed catalog ID migration batch in Firestore.");
+          console.log("Committed catalog ID migration/merging batch in Firestore.");
         }
-        
+
         saveCatalog(firestoreItems);
         console.log(`Catalog sync complete. Firestore and local catalog.json are in sync with ${firestoreItems.length} items.`);
         if (process.env.CLEAN_DB === "true") {
@@ -798,14 +837,32 @@ if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
     const localCatalog = loadCatalog();
     const migratedCatalog: CatalogItem[] = [];
     for (const item of localCatalog) {
-      const newId = sanitizeId(item.model, item.color, item.name, item.variation, item.year);
-      if (!migratedCatalog.some(c => c.id === newId)) {
+      const newId = sanitizeId(item.model, item.color, item.name, undefined, item.year);
+      const cleanVar = item.variation ? item.variation.trim() : (item.notes ? item.notes.trim() : "");
+      const cleanVars = item.variations ? item.variations.map(v => v.trim()) : [];
+      if (cleanVar && !cleanVars.includes(cleanVar)) {
+        cleanVars.push(cleanVar);
+      }
+
+      const existing = migratedCatalog.find(c => c.id === newId);
+      if (existing) {
+        const mergedVars = Array.from(new Set([
+          ...(existing.variations || []),
+          ...cleanVars
+        ])).filter(Boolean);
+        existing.variations = mergedVars;
+        existing.variation = mergedVars.length > 0 ? mergedVars[0] : undefined;
+        if (!existing.customImage && item.customImage) existing.customImage = item.customImage;
+        if (!existing.customImageSleeve && item.customImageSleeve) existing.customImageSleeve = item.customImageSleeve;
+        if (!existing.customImageBox && item.customImageBox) existing.customImageBox = item.customImageBox;
+      } else {
         migratedCatalog.push({
           id: newId,
           model: item.model.trim(),
           name: item.name ? item.name.trim() : undefined,
           color: item.color.trim(),
-          variation: item.variation || item.notes || "",
+          variations: cleanVars.filter(Boolean),
+          variation: cleanVars.length > 0 ? cleanVars[0] : undefined,
           year: item.year,
           customImage: item.customImage,
           customImageSleeve: item.customImageSleeve,
@@ -1824,12 +1881,12 @@ app.post("/api/catalog", async (req, res) => {
     return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
   }
 
-  const { model, name, color, variation, year, customImage, customImageSleeve, customImageBox } = req.body;
+  const { model, name, color, variation, variations, year, customImage, customImageSleeve, customImageBox } = req.body;
   if (!model || !name || !color) {
     return res.status(400).json({ error: "Model, Name, and Color specifications are required." });
   }
 
-  const newId = sanitizeId(model, color, name, variation, year);
+  const newId = sanitizeId(model, color, name, undefined, year);
 
   let resolvedImage = customImage;
   let resolvedImageSleeve = customImageSleeve;
@@ -1844,16 +1901,41 @@ app.post("/api/catalog", async (req, res) => {
     }
   }
 
+  // Load existing catalog items to merge variations
+  const catalog = await getGlobalCatalog();
+  const existingItem = catalog.find(item => item.id === newId);
+
+  // Incoming variations
+  let incomingVars: string[] = [];
+  if (Array.isArray(variations)) {
+    incomingVars = variations.map(v => v.trim()).filter(Boolean);
+  } else if (variation) {
+    incomingVars = variation.trim() ? [variation.trim()] : [];
+  }
+
+  let mergedVariations = existingItem && existingItem.variations ? [...existingItem.variations] : [];
+  if (existingItem && existingItem.variation && mergedVariations.length === 0) {
+    mergedVariations.push(existingItem.variation.trim());
+  }
+
+  for (const v of incomingVars) {
+    if (!mergedVariations.includes(v)) {
+      mergedVariations.push(v);
+    }
+  }
+  mergedVariations = mergedVariations.filter(Boolean);
+
   const newItem: CatalogItem = {
     id: newId,
     model: model.trim(),
     name: name.trim(),
     color: color.trim(),
-    variation: variation !== undefined ? variation.trim() : undefined,
+    variation: mergedVariations.length > 0 ? mergedVariations[0] : undefined,
+    variations: mergedVariations.length > 0 ? mergedVariations : undefined,
     year: year !== undefined ? year.trim() : undefined,
-    customImage: resolvedImage,
-    customImageSleeve: resolvedImageSleeve,
-    customImageBox: resolvedImageBox
+    customImage: resolvedImage || (existingItem ? existingItem.customImage : undefined),
+    customImageSleeve: resolvedImageSleeve || (existingItem ? existingItem.customImageSleeve : undefined),
+    customImageBox: resolvedImageBox || (existingItem ? existingItem.customImageBox : undefined)
   };
 
   await saveGlobalCatalogItem(newItem);
@@ -1872,7 +1954,69 @@ app.post("/api/catalog/bulk", async (req, res) => {
     return res.status(400).json({ error: "An array of items is required under the 'items' key." });
   }
 
-  const createdItems: CatalogItem[] = [];
+  const currentCatalog = await getGlobalCatalog();
+  const currentMap = new Map(currentCatalog.map(item => [item.id, item]));
+
+  const groupedItems: Record<string, CatalogItem> = {};
+
+  for (const item of items) {
+    const { model, name, color, variation, variations, year, customImage, customImageSleeve, customImageBox } = item;
+    if (!model || !name || !color) continue;
+
+    const newId = sanitizeId(model, color, name, undefined, year);
+    
+    // Normalize variations to array of strings
+    let incomingVars: string[] = [];
+    if (Array.isArray(variations)) {
+      incomingVars = variations.map(v => v.trim()).filter(Boolean);
+    } else if (variation) {
+      incomingVars = variation.trim() ? [variation.trim()] : [];
+    }
+
+    if (!groupedItems[newId]) {
+      // Find existing item from database to merge variations
+      const existing = currentMap.get(newId);
+      let mergedVars = existing && existing.variations ? [...existing.variations] : [];
+      if (existing && existing.variation && mergedVars.length === 0) {
+        mergedVars.push(existing.variation.trim());
+      }
+      for (const v of incomingVars) {
+        if (!mergedVars.includes(v)) {
+          mergedVars.push(v);
+        }
+      }
+      mergedVars = mergedVars.filter(Boolean);
+
+      groupedItems[newId] = {
+        id: newId,
+        model: model.trim(),
+        name: name.trim(),
+        color: color.trim(),
+        variation: mergedVars.length > 0 ? mergedVars[0] : undefined,
+        variations: mergedVars.length > 0 ? mergedVars : undefined,
+        year: year !== undefined ? year.trim() : undefined,
+        customImage: customImage || (existing ? existing.customImage : undefined),
+        customImageSleeve: customImageSleeve || (existing ? existing.customImageSleeve : undefined),
+        customImageBox: customImageBox || (existing ? existing.customImageBox : undefined)
+      };
+    } else {
+      const existing = groupedItems[newId];
+      const mergedVars = existing.variations ? [...existing.variations] : [];
+      for (const v of incomingVars) {
+        if (!mergedVars.includes(v)) {
+          mergedVars.push(v);
+        }
+      }
+      existing.variations = mergedVars.filter(Boolean);
+      existing.variation = existing.variations.length > 0 ? existing.variations[0] : undefined;
+      
+      if (!existing.customImage && customImage) existing.customImage = customImage;
+      if (!existing.customImageSleeve && customImageSleeve) existing.customImageSleeve = customImageSleeve;
+      if (!existing.customImageBox && customImageBox) existing.customImageBox = customImageBox;
+    }
+  }
+
+  const createdItems = Object.values(groupedItems);
   const localCatalog = loadCatalog();
   const localPreserved = loadPreservedImagesLocal();
 
@@ -1882,15 +2026,11 @@ app.post("/api/catalog/bulk", async (req, res) => {
       let opCount = 0;
       const batches = [batch];
 
-      for (const item of items) {
-        const { model, name, color, variation, year, customImage, customImageSleeve, customImageBox } = item;
-        if (!model || !name || !color) continue;
-
-        const newId = sanitizeId(model, color, name, variation, year);
-
-        let resolvedImage = customImage;
-        let resolvedImageSleeve = customImageSleeve;
-        let resolvedImageBox = customImageBox;
+      for (const newItem of createdItems) {
+        const newId = newItem.id;
+        let resolvedImage = newItem.customImage;
+        let resolvedImageSleeve = newItem.customImageSleeve;
+        let resolvedImageBox = newItem.customImageBox;
 
         if (!resolvedImage || !resolvedImageSleeve || !resolvedImageBox) {
           const preserved = localPreserved[newId];
@@ -1901,17 +2041,9 @@ app.post("/api/catalog/bulk", async (req, res) => {
           }
         }
 
-        const newItem: CatalogItem = {
-          id: newId,
-          model: model.trim(),
-          name: name.trim(),
-          color: color.trim(),
-          variation: variation !== undefined ? variation.trim() : undefined,
-          year: year !== undefined ? year.trim() : undefined,
-          customImage: resolvedImage,
-          customImageSleeve: resolvedImageSleeve,
-          customImageBox: resolvedImageBox
-        };
+        newItem.customImage = resolvedImage;
+        newItem.customImageSleeve = resolvedImageSleeve;
+        newItem.customImageBox = resolvedImageBox;
 
         // Add to Firestore catalog collection in batch
         const catDocRef = dbAdmin.collection("catalog").doc(newId);
@@ -1948,9 +2080,7 @@ app.post("/api/catalog/bulk", async (req, res) => {
           };
         }
 
-        createdItems.push(newItem);
-
-        // Limit each batch to 10 operations (5 items max) to avoid exceeding the Firestore 10MB payload size limit for a single batch.
+        // Limit each batch to 10 operations (5 items max)
         if (opCount >= 10) {
           batch = dbAdmin.batch();
           batches.push(batch);
@@ -1967,15 +2097,11 @@ app.post("/api/catalog/bulk", async (req, res) => {
     }
   } else {
     // Non-Firestore local file fallback path
-    for (const item of items) {
-      const { model, name, color, variation, year, customImage, customImageSleeve, customImageBox } = item;
-      if (!model || !name || !color) continue;
-
-      const newId = sanitizeId(model, color, name, variation, year);
-
-      let resolvedImage = customImage;
-      let resolvedImageSleeve = customImageSleeve;
-      let resolvedImageBox = customImageBox;
+    for (const newItem of createdItems) {
+      const newId = newItem.id;
+      let resolvedImage = newItem.customImage;
+      let resolvedImageSleeve = newItem.customImageSleeve;
+      let resolvedImageBox = newItem.customImageBox;
 
       if (!resolvedImage || !resolvedImageSleeve || !resolvedImageBox) {
         const preserved = localPreserved[newId];
@@ -1986,17 +2112,9 @@ app.post("/api/catalog/bulk", async (req, res) => {
         }
       }
 
-      const newItem: CatalogItem = {
-        id: newId,
-        model: model.trim(),
-        name: name.trim(),
-        color: color.trim(),
-        variation: variation !== undefined ? variation.trim() : undefined,
-        year: year !== undefined ? year.trim() : undefined,
-        customImage: resolvedImage,
-        customImageSleeve: resolvedImageSleeve,
-        customImageBox: resolvedImageBox
-      };
+      newItem.customImage = resolvedImage;
+      newItem.customImageSleeve = resolvedImageSleeve;
+      newItem.customImageBox = resolvedImageBox;
 
       const idx = localCatalog.findIndex(c => c.id === newId);
       if (idx > -1) {
@@ -2013,8 +2131,6 @@ app.post("/api/catalog/bulk", async (req, res) => {
           ...(resolvedImageBox ? { customImageBox: resolvedImageBox } : {})
         };
       }
-
-      createdItems.push(newItem);
     }
   }
 
@@ -2072,7 +2188,7 @@ app.put("/api/catalog/:id", async (req, res) => {
   }
 
   const { id } = req.params;
-  const { model, name, color, variation, year, customImage, customImageSleeve, customImageBox } = req.body;
+  const { model, name, color, variation, variations, year, customImage, customImageSleeve, customImageBox } = req.body;
 
   const catalog = await getGlobalCatalog();
   const currentItem = catalog.find(item => item.id === id);
@@ -2083,10 +2199,21 @@ app.put("/api/catalog/:id", async (req, res) => {
   const updatedModel = model ? model.trim() : currentItem.model;
   const updatedName = name ? name.trim() : (currentItem.name || "");
   const updatedColor = color ? color.trim() : currentItem.color;
-  const updatedVariation = variation !== undefined ? variation.trim() : currentItem.variation;
   const updatedYear = year !== undefined ? year.trim() : currentItem.year;
 
-  const newId = sanitizeId(updatedModel, updatedColor, updatedName, updatedVariation, updatedYear);
+  // Handle variations array update
+  let updatedVariations: string[] = [];
+  if (Array.isArray(variations)) {
+    updatedVariations = variations.map(v => v.trim()).filter(Boolean);
+  } else if (variation !== undefined) {
+    updatedVariations = variation.trim() ? [variation.trim()] : [];
+  } else {
+    updatedVariations = currentItem.variations || (currentItem.variation ? [currentItem.variation] : []);
+  }
+
+  const updatedVariation = updatedVariations.length > 0 ? updatedVariations[0] : undefined;
+
+  const newId = sanitizeId(updatedModel, updatedColor, updatedName, undefined, updatedYear);
 
   let resolvedImage = customImage !== undefined ? customImage : currentItem.customImage;
   let resolvedImageSleeve = customImageSleeve !== undefined ? customImageSleeve : currentItem.customImageSleeve;
@@ -2107,6 +2234,7 @@ app.put("/api/catalog/:id", async (req, res) => {
     name: updatedName,
     color: updatedColor,
     variation: updatedVariation,
+    variations: updatedVariations.length > 0 ? updatedVariations : undefined,
     year: updatedYear,
     customImage: resolvedImage,
     customImageSleeve: resolvedImageSleeve,

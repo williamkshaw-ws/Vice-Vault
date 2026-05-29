@@ -148,13 +148,11 @@ function sanitizeId(model: string, color: string, name?: string, variation?: str
   const modelPart = clean(model);
   const colorPart = clean(color);
   const namePart = name ? clean(name) : "";
-  const varPart = variation ? clean(variation) : "";
   const yearPart = year ? clean(year) : "";
   
   let base = modelPart;
   if (namePart) base += `-${namePart}`;
   base += `-${colorPart}`;
-  if (varPart) base += `-${varPart}`;
   if (yearPart) base += `-${yearPart}`;
   return base;
 }
@@ -351,25 +349,7 @@ export default function App() {
     setIsVaultProcessing(true);
     try {
       const itemsWithIds: CatalogItem[] = [];
-      const seenIds = new Set<string>();
       
-      // Filter out newItems that would result in duplicate IDs within the import itself, or that already exist in our catalog state
-      const catalogIds = new Set(catalog.map(c => c.id));
-      
-      const filteredNewItems: Omit<CatalogItem, "id">[] = [];
-      for (const item of newItems) {
-        const id = sanitizeId(item.model, item.color, item.name, item.variation || item.notes, item.year);
-        if (!seenIds.has(id) && !catalogIds.has(id)) {
-          seenIds.add(id);
-          filteredNewItems.push(item);
-        }
-      }
-
-      if (filteredNewItems.length === 0) {
-        alert("All imported items are already present in the catalog.");
-        return;
-      }
-
       if (currentUser) {
         const res = await fetch("/api/catalog/bulk", {
           method: "POST",
@@ -378,7 +358,7 @@ export default function App() {
             "x-user-id": currentUser.uid
           },
           body: JSON.stringify({
-            items: filteredNewItems.map(item => ({
+            items: newItems.map(item => ({
               model: item.model,
               name: item.name || "",
               color: item.color,
@@ -401,24 +381,64 @@ export default function App() {
           throw new Error(errData.error || "Failed to bulk import catalog items.");
         }
       } else {
-        filteredNewItems.forEach((item) => {
-          const id = sanitizeId(item.model, item.color, item.name, item.variation || item.notes, item.year);
-          itemsWithIds.push({
-            id,
-            model: item.model.trim(),
-            name: item.name ? item.name.trim() : "",
-            color: item.color.trim(),
-            variation: item.variation ? item.variation.trim() : undefined,
-            year: item.year ? item.year.trim() : undefined,
-            notes: item.notes ? item.notes.trim() : "",
-            customImage: item.customImage,
-            customImageSleeve: item.customImageSleeve,
-            customImageBox: item.customImageBox
-          });
-        });
+        // Guest / fallback mode: merge variations locally
+        const groupedLocal: Record<string, CatalogItem> = {};
+        for (const item of newItems) {
+          const id = sanitizeId(item.model, item.color, item.name, undefined, item.year);
+          const cleanVar = item.variation ? item.variation.trim() : (item.notes ? item.notes.trim() : "");
+          const cleanVars = item.variations ? item.variations.map(v => v.trim()) : [];
+          if (cleanVar && !cleanVars.includes(cleanVar)) {
+            cleanVars.push(cleanVar);
+          }
+          
+          if (!groupedLocal[id]) {
+            // Find existing in catalog to merge
+            const existingInCatalog = catalog.find(c => c.id === id);
+            let mergedVars = cleanVars;
+            if (existingInCatalog) {
+              const existingVars = existingInCatalog.variations || (existingInCatalog.variation ? [existingInCatalog.variation] : []);
+              mergedVars = Array.from(new Set([...existingVars, ...cleanVars])).filter(Boolean);
+            }
+            groupedLocal[id] = {
+              id,
+              model: item.model.trim(),
+              name: item.name ? item.name.trim() : "",
+              color: item.color.trim(),
+              variation: mergedVars.length > 0 ? mergedVars[0] : undefined,
+              variations: mergedVars.length > 0 ? mergedVars : undefined,
+              year: item.year ? item.year.trim() : undefined,
+              customImage: item.customImage || (existingInCatalog ? existingInCatalog.customImage : undefined),
+              customImageSleeve: item.customImageSleeve || (existingInCatalog ? existingInCatalog.customImageSleeve : undefined),
+              customImageBox: item.customImageBox || (existingInCatalog ? existingInCatalog.customImageBox : undefined)
+            };
+          } else {
+            const existing = groupedLocal[id];
+            const mergedVars = Array.from(new Set([
+              ...(existing.variations || []),
+              ...cleanVars
+            ])).filter(Boolean);
+            existing.variations = mergedVars;
+            existing.variation = mergedVars.length > 0 ? mergedVars[0] : undefined;
+            if (!existing.customImage && item.customImage) existing.customImage = item.customImage;
+            if (!existing.customImageSleeve && item.customImageSleeve) existing.customImageSleeve = item.customImageSleeve;
+            if (!existing.customImageBox && item.customImageBox) existing.customImageBox = item.customImageBox;
+          }
+        }
+        itemsWithIds.push(...Object.values(groupedLocal));
       }
       
-      setCatalog((prev) => [...itemsWithIds, ...prev]);
+      setCatalog((prev) => {
+        const updated = [...prev];
+        for (const item of itemsWithIds) {
+          const idx = updated.findIndex(c => c.id === item.id);
+          if (idx > -1) {
+            updated[idx] = item;
+          } else {
+            updated.unshift(item);
+          }
+        }
+        return updated;
+      });
     } catch (err: any) {
       console.error("Error bulk importing catalog items:", err);
       alert(err.message || "Failed to bulk import catalog items.");
@@ -496,9 +516,16 @@ export default function App() {
       const updatedModel = (updatedFields.model !== undefined ? updatedFields.model.trim() : originalItem.model);
       const updatedName = (updatedFields.name !== undefined ? updatedFields.name.trim() : (originalItem.name || ""));
       const updatedColor = (updatedFields.color !== undefined ? updatedFields.color.trim() : originalItem.color);
-      const updatedVariation = (updatedFields.variation !== undefined ? updatedFields.variation.trim() : (originalItem.variation || ""));
       const updatedYear = (updatedFields.year !== undefined ? updatedFields.year.trim() : (originalItem.year || ""));
-      const newId = sanitizeId(updatedModel, updatedColor, updatedName, updatedVariation, updatedYear);
+      
+      const updatedVariations = updatedFields.variations !== undefined
+        ? updatedFields.variations
+        : (updatedFields.variation !== undefined
+            ? (updatedFields.variation.trim() ? updatedFields.variation.split(",").map(v => v.trim()).filter(Boolean) : [])
+            : (originalItem.variations || (originalItem.variation ? [originalItem.variation] : [])));
+      const updatedVariation = updatedVariations.length > 0 ? updatedVariations[0] : "";
+      
+      const newId = sanitizeId(updatedModel, updatedColor, updatedName, undefined, updatedYear);
 
       if (currentUser) {
         const res = await fetch(`/api/catalog/${id}`, {
@@ -512,6 +539,7 @@ export default function App() {
             name: updatedName,
             color: updatedColor,
             variation: updatedVariation,
+            variations: updatedVariations,
             year: updatedYear,
             customImage: updatedFields.customImage,
             customImageSleeve: updatedFields.customImageSleeve,
@@ -531,6 +559,7 @@ export default function App() {
           name: updatedName,
           color: updatedColor,
           variation: updatedVariation || undefined,
+          variations: updatedVariations.length > 0 ? updatedVariations : undefined,
           year: updatedYear || undefined,
           notes: updatedFields.notes !== undefined ? updatedFields.notes.trim() : originalItem.notes,
           customImage: updatedFields.customImage !== undefined ? updatedFields.customImage : originalItem.customImage,
@@ -550,6 +579,8 @@ export default function App() {
                 model: updatedModel.toUpperCase(),
                 color: updatedColor,
                 year: updatedYear || undefined,
+                name: updatedName || undefined,
+                variations: updatedVariations,
                 customImage: updatedFields.customImage !== undefined ? updatedFields.customImage : ball.customImage,
                 customImageSleeve: updatedFields.customImageSleeve !== undefined ? updatedFields.customImageSleeve : ball.customImageSleeve,
                 customImageBox: updatedFields.customImageBox !== undefined ? updatedFields.customImageBox : ball.customImageBox
@@ -1030,6 +1061,52 @@ export default function App() {
   }, [balls, currentUser, isCloudDataLoaded]);
 
 
+  // Self-heal / hydrate legacy owned balls with name and variations from the catalog
+  useEffect(() => {
+    if (catalog.length === 0 || balls.length === 0) return;
+
+    let changed = false;
+    const updatedBalls = balls.map(b => {
+      // Find matching catalog item (matching model, color, year)
+      const match = catalog.find(c => 
+        c.model.trim().toLowerCase() === b.model.trim().toLowerCase() &&
+        c.color.trim().toLowerCase() === b.color.trim().toLowerCase() &&
+        (c.year || "").trim().toLowerCase() === (b.year || "").trim().toLowerCase()
+      );
+
+      if (match) {
+        let updatedB = { ...b };
+        let localChanged = false;
+        
+        if (!b.name && match.name) {
+          updatedB.name = match.name;
+          localChanged = true;
+        }
+        
+        const catalogVars = match.variations || (match.variation ? [match.variation] : []);
+        if (catalogVars.length > 0) {
+          const bVars = b.variations || [];
+          // Compare arrays
+          const hasAll = catalogVars.every(v => bVars.includes(v)) && bVars.every(v => catalogVars.includes(v));
+          if (!hasAll) {
+            updatedB.variations = catalogVars;
+            localChanged = true;
+          }
+        }
+        
+        if (localChanged) {
+          changed = true;
+          return updatedB;
+        }
+      }
+      return b;
+    });
+
+    if (changed) {
+      setBalls(updatedBalls);
+    }
+  }, [catalog, balls]);
+
 
   // Handle theme switching and OS preference changes
   useEffect(() => {
@@ -1079,19 +1156,22 @@ export default function App() {
     packageType?: 'ea' | 'sleeve' | 'box',
     year?: string,
     customImageSleeve?: string,
-    customImageBox?: string
+    customImageBox?: string,
+    name?: string,
+    variations?: string[]
   ) => {
     const today = new Date().toLocaleDateString();
     
     setBalls((prev) => {
       const resolvedPkgType = packageType || (qty >= 12 ? 'box' : qty >= 3 ? 'sleeve' : 'ea');
-      // Check if matching ball stack exists to merge (model, color, packageType, year, condition, and design notes matching)
+      // Check if matching ball stack exists to merge (model, color, packageType, year, condition, name, and design notes matching)
       const existingIdx = prev.findIndex(b => 
         b.model.trim().toLowerCase() === model.trim().toLowerCase() &&
         b.color.trim().toLowerCase() === color.trim().toLowerCase() &&
         b.notes.trim().toLowerCase() === notes.trim().toLowerCase() &&
         b.condition === condition &&
         (b.year || "").trim().toLowerCase() === (year || "").trim().toLowerCase() &&
+        (b.name || "").trim().toLowerCase() === (name || "").trim().toLowerCase() &&
         (b.packageType || (b.quantity >= 12 ? 'box' : b.quantity >= 3 ? 'sleeve' : 'ea')) === resolvedPkgType
       );
 
@@ -1124,7 +1204,9 @@ export default function App() {
           dateAdded: today,
           customImage,
           customImageSleeve,
-          customImageBox
+          customImageBox,
+          name,
+          variations
         };
         return [newBall, ...prev];
       }
@@ -1134,13 +1216,8 @@ export default function App() {
   // Add missing ball to Catalog Database
   const handleAddCatalogItem = async (newItem: Omit<CatalogItem, "id">) => {
     try {
-      const id = sanitizeId(newItem.model, newItem.color, newItem.name, newItem.variation, newItem.year);
-      const exists = catalog.some(c => c.id === id);
-      if (exists) {
-        alert("A design spec with this Model, Name, and Color already exists in the Catalog.");
-        return;
-      }
-
+      const id = sanitizeId(newItem.model, newItem.color, newItem.name, undefined, newItem.year);
+      
       let itemWithId: CatalogItem;
       if (currentUser) {
         const res = await fetch("/api/catalog", {
@@ -1154,6 +1231,7 @@ export default function App() {
             name: newItem.name,
             color: newItem.color,
             variation: newItem.variation,
+            variations: newItem.variations,
             year: newItem.year,
             customImage: newItem.customImage,
             customImageSleeve: newItem.customImageSleeve,
@@ -1167,20 +1245,35 @@ export default function App() {
         itemWithId = await res.json();
       } else {
         // Guest / fallback mode
+        const existing = catalog.find(c => c.id === id);
+        let mergedVars = newItem.variations ? [...newItem.variations] : (newItem.variation ? [newItem.variation.trim()] : []);
+        if (existing) {
+          const existingVars = existing.variations || (existing.variation ? [existing.variation] : []);
+          mergedVars = Array.from(new Set([...existingVars, ...mergedVars])).filter(Boolean);
+        }
         itemWithId = {
           id,
           model: newItem.model.trim(),
           name: newItem.name ? newItem.name.trim() : "",
           color: newItem.color.trim(),
-          variation: newItem.variation ? newItem.variation.trim() : undefined,
+          variation: mergedVars.length > 0 ? mergedVars[0] : undefined,
+          variations: mergedVars.length > 0 ? mergedVars : undefined,
           year: newItem.year ? newItem.year.trim() : undefined,
           notes: newItem.notes ? newItem.notes.trim() : "",
-          customImage: newItem.customImage,
-          customImageSleeve: newItem.customImageSleeve,
-          customImageBox: newItem.customImageBox
+          customImage: newItem.customImage || (existing ? existing.customImage : undefined),
+          customImageSleeve: newItem.customImageSleeve || (existing ? existing.customImageSleeve : undefined),
+          customImageBox: newItem.customImageBox || (existing ? existing.customImageBox : undefined)
         };
       }
-      setCatalog((prev) => [itemWithId, ...prev]);
+      setCatalog((prev) => {
+        const idx = prev.findIndex(c => c.id === itemWithId.id);
+        if (idx > -1) {
+          const updated = [...prev];
+          updated[idx] = itemWithId;
+          return updated;
+        }
+        return [itemWithId, ...prev];
+      });
     } catch (err: any) {
       console.error("Error adding catalog item:", err);
       alert(err.message || "Failed to add catalog item.");
@@ -1278,6 +1371,7 @@ export default function App() {
         (item.name && item.name.toLowerCase().includes(query)) ||
         item.color.toLowerCase().includes(query) ||
         (item.variation && item.variation.toLowerCase().includes(query)) ||
+        (item.variations && item.variations.some(v => v.toLowerCase().includes(query))) ||
         (item.notes && item.notes.toLowerCase().includes(query)) ||
         (item.year && item.year.toLowerCase().includes(query));
 
@@ -1314,8 +1408,8 @@ export default function App() {
       if (colorA < colorB) return -1;
       if (colorA > colorB) return 1;
 
-      const varA = (a.variation || a.notes || "").trim().toLowerCase();
-      const varB = (b.variation || b.notes || "").trim().toLowerCase();
+      const varA = (a.variations && a.variations.length > 0 ? a.variations.join(",") : (a.variation || a.notes || "")).trim().toLowerCase();
+      const varB = (b.variations && b.variations.length > 0 ? b.variations.join(",") : (b.variation || b.notes || "")).trim().toLowerCase();
       if (varA < varB) return -1;
       if (varA > varB) return 1;
 
@@ -2682,6 +2776,7 @@ export default function App() {
                         item.color.toLowerCase().includes(q) ||
                         (item.name && item.name.toLowerCase().includes(q)) ||
                         (item.variation && item.variation.toLowerCase().includes(q)) ||
+                        (item.variations && item.variations.some(v => v.toLowerCase().includes(q))) ||
                         (item.notes && item.notes.toLowerCase().includes(q)) ||
                         (item.year && item.year.toLowerCase().includes(q));
 
@@ -2725,11 +2820,17 @@ export default function App() {
                             </div>
                             <p className="text-[10px] text-neutral-400 truncate mt-0.5 flex flex-wrap gap-x-2 items-center">
                               <span className="font-medium text-neutral-300">{item.color}</span>
-                              {(item.variation || item.notes) && (
+                              {((item.variations && item.variations.length > 0) || item.variation || item.notes) && (
                                 <>
                                   <span className="text-neutral-600 font-mono select-none">•</span>
-                                  <span className="text-neutral-400 italic text-[10px] truncate max-w-[150px] md:max-w-[280px]" title={item.variation || item.notes}>
-                                    {item.variation || item.notes}
+                                  <span className="text-neutral-400 italic text-[10px] truncate max-w-[150px] md:max-w-[280px]" title={
+                                    item.variations && item.variations.length > 0
+                                      ? item.variations.join(", ")
+                                      : (item.variation || item.notes)
+                                  }>
+                                    {item.variations && item.variations.length > 0
+                                      ? item.variations.join(", ")
+                                      : (item.variation || item.notes)}
                                   </span>
                                 </>
                               )}
@@ -2803,6 +2904,7 @@ export default function App() {
                         item.color.toLowerCase().includes(q) ||
                         (item.name && item.name.toLowerCase().includes(q)) ||
                         (item.variation && item.variation.toLowerCase().includes(q)) ||
+                        (item.variations && item.variations.some(v => v.toLowerCase().includes(q))) ||
                         (item.notes && item.notes.toLowerCase().includes(q)) ||
                         (item.year && item.year.toLowerCase().includes(q));
 
