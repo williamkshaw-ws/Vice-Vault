@@ -148,12 +148,10 @@ function sanitizeId(model: string, color: string, name?: string, variation?: str
   const modelPart = clean(model);
   const colorPart = clean(color);
   const namePart = name ? clean(name) : "";
-  const yearPart = year ? clean(year) : "";
   
   let base = modelPart;
   if (namePart) base += `-${namePart}`;
   base += `-${colorPart}`;
-  if (yearPart) base += `-${yearPart}`;
   return base;
 }
 
@@ -258,6 +256,7 @@ export default function App() {
   const [modalNotes, setModalNotes] = useState("");
   const [modalPlayNumber, setModalPlayNumber] = useState<number>(1);
   const [modalCustomNumberInput, setModalCustomNumberInput] = useState<string>("");
+  const [modalYear, setModalYear] = useState<string>("2012");
 
   // User Editing States
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
@@ -516,7 +515,6 @@ export default function App() {
       const updatedModel = (updatedFields.model !== undefined ? updatedFields.model.trim() : originalItem.model);
       const updatedName = (updatedFields.name !== undefined ? updatedFields.name.trim() : (originalItem.name || ""));
       const updatedColor = (updatedFields.color !== undefined ? updatedFields.color.trim() : originalItem.color);
-      const updatedYear = (updatedFields.year !== undefined ? updatedFields.year.trim() : (originalItem.year || ""));
       
       const updatedVariations = updatedFields.variations !== undefined
         ? updatedFields.variations
@@ -525,7 +523,7 @@ export default function App() {
             : (originalItem.variations || (originalItem.variation ? [originalItem.variation] : [])));
       const updatedVariation = updatedVariations.length > 0 ? updatedVariations[0] : "";
       
-      const newId = sanitizeId(updatedModel, updatedColor, updatedName, undefined, updatedYear);
+      const newId = sanitizeId(updatedModel, updatedColor, updatedName);
 
       if (currentUser) {
         const res = await fetch(`/api/catalog/${id}`, {
@@ -540,7 +538,6 @@ export default function App() {
             color: updatedColor,
             variation: updatedVariation,
             variations: updatedVariations,
-            year: updatedYear,
             customImage: updatedFields.customImage,
             customImageSleeve: updatedFields.customImageSleeve,
             customImageBox: updatedFields.customImageBox
@@ -560,7 +557,6 @@ export default function App() {
           color: updatedColor,
           variation: updatedVariation || undefined,
           variations: updatedVariations.length > 0 ? updatedVariations : undefined,
-          year: updatedYear || undefined,
           notes: updatedFields.notes !== undefined ? updatedFields.notes.trim() : originalItem.notes,
           customImage: updatedFields.customImage !== undefined ? updatedFields.customImage : originalItem.customImage,
           customImageSleeve: updatedFields.customImageSleeve !== undefined ? updatedFields.customImageSleeve : originalItem.customImageSleeve,
@@ -578,7 +574,6 @@ export default function App() {
                 ...ball,
                 model: updatedModel.toUpperCase(),
                 color: updatedColor,
-                year: updatedYear || undefined,
                 name: updatedName || undefined,
                 variations: updatedVariations,
                 customImage: updatedFields.customImage !== undefined ? updatedFields.customImage : ball.customImage,
@@ -1067,11 +1062,10 @@ export default function App() {
 
     let changed = false;
     const updatedBalls = balls.map(b => {
-      // Find matching catalog item (matching model, color, year)
+      // Find matching catalog item (matching model, color)
       const match = catalog.find(c => 
         c.model.trim().toLowerCase() === b.model.trim().toLowerCase() &&
-        c.color.trim().toLowerCase() === b.color.trim().toLowerCase() &&
-        (c.year || "").trim().toLowerCase() === (b.year || "").trim().toLowerCase()
+        c.color.trim().toLowerCase() === b.color.trim().toLowerCase()
       );
 
       if (match) {
@@ -1216,7 +1210,7 @@ export default function App() {
   // Add missing ball to Catalog Database
   const handleAddCatalogItem = async (newItem: Omit<CatalogItem, "id">) => {
     try {
-      const id = sanitizeId(newItem.model, newItem.color, newItem.name, undefined, newItem.year);
+      const id = sanitizeId(newItem.model, newItem.color, newItem.name);
       
       let itemWithId: CatalogItem;
       if (currentUser) {
@@ -1232,7 +1226,6 @@ export default function App() {
             color: newItem.color,
             variation: newItem.variation,
             variations: newItem.variations,
-            year: newItem.year,
             customImage: newItem.customImage,
             customImageSleeve: newItem.customImageSleeve,
             customImageBox: newItem.customImageBox
@@ -1258,7 +1251,6 @@ export default function App() {
           color: newItem.color.trim(),
           variation: mergedVars.length > 0 ? mergedVars[0] : undefined,
           variations: mergedVars.length > 0 ? mergedVars : undefined,
-          year: newItem.year ? newItem.year.trim() : undefined,
           notes: newItem.notes ? newItem.notes.trim() : "",
           customImage: newItem.customImage || (existing ? existing.customImage : undefined),
           customImageSleeve: newItem.customImageSleeve || (existing ? existing.customImageSleeve : undefined),
@@ -2372,6 +2364,20 @@ export default function App() {
                       <option value={BallCondition.SHAG}>{BallCondition.SHAG}</option>
                     </select>
                   </div>
+                  <div>
+                    <label className="block text-[9px] uppercase text-neutral-400 mb-1">Release Year</label>
+                    <select
+                      value={modalYear}
+                      onChange={(e) => setModalYear(e.target.value)}
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none cursor-pointer font-sans"
+                    >
+                      {Array.from({ length: new Date().getFullYear() - 2012 + 1 }, (_, i) => String(2012 + i)).map((y) => (
+                        <option key={y} value={y}>
+                          {y}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
                 </div>
 
@@ -2403,7 +2409,7 @@ export default function App() {
                       packageType: modalPkgType,
                       customNumber: modalPkgType === 'box' ? 1 : modalPlayNumber,
                       notes: modalNotes.trim() || "Added by Admin",
-                      year: matchedCatalogItem?.year || undefined,
+                      year: modalYear,
                       dateAdded: today,
                       customImage
                     };
@@ -2411,6 +2417,7 @@ export default function App() {
                     setModalNotes("");
                     setModalPlayNumber(1);
                     setModalCustomNumberInput("");
+                    setModalYear("2012");
                   }}
                   className="w-full py-2 bg-[#2563eb] hover:bg-[#b5e000] text-black font-extrabold rounded-lg text-xs uppercase tracking-wider transition-all cursor-pointer"
                 >

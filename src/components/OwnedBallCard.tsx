@@ -48,6 +48,7 @@ export default function OwnedBallCard({
   );
   const [editCondition, setEditCondition] = useState<BallCondition>(ball.condition);
   const [editNotes, setEditNotes] = useState<string>(currentNotes);
+  const [editYear, setEditYear] = useState<string>(ball.year || "2012");
 
   const startEditing = () => {
     const { notes } = getVersionAndNotes(ball);
@@ -57,6 +58,7 @@ export default function OwnedBallCard({
     setEditCustomNumberInput([1, 2, 3, 4].includes(ball.customNumber) ? "" : String(ball.customNumber || ""));
     setEditCondition(ball.condition);
     setEditNotes(notes);
+    setEditYear(ball.year || "2012");
     setIsEditing(true);
   };
 
@@ -67,6 +69,7 @@ export default function OwnedBallCard({
       customNumber: editPkgType === 'box' ? 1 : editPlayNumber,
       condition: editCondition,
       notes: editNotes.trim(),
+      year: editYear,
     });
     setIsEditing(false);
   };
@@ -134,7 +137,7 @@ export default function OwnedBallCard({
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Play Number */}
           <div>
             <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
@@ -207,6 +210,23 @@ export default function OwnedBallCard({
             </select>
           </div>
 
+          {/* Release Year Dropdown */}
+          <div>
+            <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
+              Release Year
+            </label>
+            <select
+              value={editYear}
+              onChange={(e) => setEditYear(e.target.value)}
+              className="w-full bg-neutral-950 text-xs py-1.5 px-2 rounded text-neutral-300 font-bold border border-neutral-850 focus:border-neutral-750 outline-none cursor-pointer"
+            >
+              {Array.from({ length: new Date().getFullYear() - 2012 + 1 }, (_, i) => String(2012 + i)).map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+          </div>
 
         </div>
 

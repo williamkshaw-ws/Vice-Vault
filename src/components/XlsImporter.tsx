@@ -17,7 +17,6 @@ interface TempImportRow {
   name: string;
   color: string;
   variation: string;
-  year: string;
   customImage?: string;
   customImageSleeve?: string;
   customImageBox?: string;
@@ -32,13 +31,11 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
     name: string;
     color: string;
     variation: string;
-    year: string;
   }>({
     model: "",
     name: "",
     color: "",
     variation: "",
-    year: "",
   });
   const [isDragActive, setIsDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +46,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
     setFile(null);
     setParsedRows([]);
     setHeaders([]);
-    setColumnMapping({ model: "", name: "", color: "", variation: "", year: "" });
+    setColumnMapping({ model: "", name: "", color: "", variation: "" });
     setError(null);
     setSuccessCount(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -100,7 +97,6 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
         let detectedNameCol = "";
         let detectedColorCol = "";
         let detectedVariationCol = "";
-        let detectedYearCol = "";
 
         detectedHeaders.forEach((h) => {
           const lh = h.toLowerCase();
@@ -115,9 +111,6 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
           }
           if (lh.includes("variation") || lh.includes("type") || lh.includes("subcolor")) {
             if (!detectedVariationCol) detectedVariationCol = h;
-          }
-          if (lh === "year" || lh.includes("season") || lh.includes("date")) {
-            if (!detectedYearCol) detectedYearCol = h;
           }
         });
 
@@ -135,17 +128,12 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
           const found = detectedHeaders.find(h => h.toLowerCase() === "variation");
           detectedVariationCol = found || "";
         }
-        if (!detectedYearCol) {
-          const found = detectedHeaders.find(h => h.toLowerCase() === "year");
-          detectedYearCol = found || "";
-        }
 
         setColumnMapping({
           model: detectedModelCol,
           name: detectedNameCol,
           color: detectedColorCol,
           variation: detectedVariationCol,
-          year: detectedYearCol,
         });
 
         // Store rows for previewing
@@ -154,8 +142,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
           detectedModelCol,
           detectedNameCol,
           detectedColorCol,
-          detectedVariationCol,
-          detectedYearCol
+          detectedVariationCol
         );
 
       } catch (err: any) {
@@ -171,8 +158,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
     modelCol: string,
     nameCol: string,
     colorCol: string,
-    variationCol: string,
-    yearCol: string
+    variationCol: string
   ) => {
     const formatted: TempImportRow[] = rawJson
       .map((row) => {
@@ -180,7 +166,6 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
         const nameVal = nameCol && row[nameCol] !== undefined && row[nameCol] !== null ? String(row[nameCol]).trim() : "";
         const cVal = row[colorCol] !== undefined && row[colorCol] !== null ? String(row[colorCol]).trim() : "";
         const varVal = variationCol && row[variationCol] !== undefined && row[variationCol] !== null ? String(row[variationCol]).trim() : "";
-        const yVal = yearCol && row[yearCol] !== undefined && row[yearCol] !== null ? String(row[yearCol]).trim() : "";
 
         // Reconstruct ball image chunks
         let customImage = "";
@@ -226,7 +211,6 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
           name: nameVal,
           color: cVal,
           variation: varVal,
-          year: yVal,
           customImage: customImage || undefined,
           customImageSleeve: customImageSleeve || undefined,
           customImageBox: customImageBox || undefined
@@ -238,7 +222,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
   };
 
   const handleMappingChange = (
-    key: "model" | "name" | "color" | "variation" | "year",
+    key: "model" | "name" | "color" | "variation",
     selectedHeader: string
   ) => {
     const nextMapping = { ...columnMapping, [key]: selectedHeader };
@@ -258,8 +242,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
             nextMapping.model,
             nextMapping.name,
             nextMapping.color,
-            nextMapping.variation,
-            nextMapping.year
+            nextMapping.variation
           );
         } catch (err) {}
       };
@@ -269,7 +252,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
 
   const handleRowChange = (
     index: number,
-    key: "model" | "name" | "color" | "variation" | "year",
+    key: "model" | "name" | "color" | "variation",
     value: string
   ) => {
     setParsedRows((prev) =>
@@ -321,7 +304,6 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
         name: row.name.trim() || undefined,
         color: row.color.trim(),
         variation: row.variation.trim() || undefined,
-        year: row.year.trim() || undefined,
         customImage: row.customImage,
         customImageSleeve: row.customImageSleeve,
         customImageBox: row.customImageBox
@@ -442,7 +424,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
               Identify Spreadsheet Columns
             </span>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <div>
                 <label className="block text-[10px] font-mono text-neutral-400 uppercase mb-1">
                   Model Name Column:
@@ -515,24 +497,6 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-[10px] font-mono text-neutral-400 uppercase mb-1">
-                  Year Column:
-                </label>
-                <select
-                  value={columnMapping.year}
-                  onChange={(e) => handleMappingChange("year", e.target.value)}
-                  className="w-full bg-neutral-900 border border-neutral-800 py-1.5 px-2 rounded-md text-xs text-white outline-none cursor-pointer focus:border-emerald-500"
-                >
-                  <option value="">-- Ignore / Skip --</option>
-                  {headers.map((h) => (
-                    <option key={h} value={h}>
-                      {h}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
             </div>
           </div>
 
@@ -546,7 +510,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
             <div className="max-h-[250px] overflow-y-auto border border-neutral-850 rounded-xl bg-neutral-950/60 divide-y divide-neutral-850 pr-1">
               {parsedRows.map((row, idx) => (
                 <div key={idx} className="flex items-center justify-between p-2 gap-2 text-xs">
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 flex-1">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 flex-1">
                     <input
                       type="text"
                       value={row.model}
@@ -574,13 +538,6 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
                       onChange={(e) => handleRowChange(idx, "variation", e.target.value)}
                       placeholder="Variation"
                       className="bg-transparent border-0 text-neutral-400 focus:bg-neutral-900 focus:ring-1 focus:ring-emerald-500 rounded py-0.5 px-1 truncate placeholder-neutral-600 outline-none w-full text-xs"
-                    />
-                    <input
-                      type="text"
-                      value={row.year}
-                      onChange={(e) => handleRowChange(idx, "year", e.target.value)}
-                      placeholder="Year"
-                      className="bg-transparent border-0 text-neutral-450 focus:bg-neutral-900 focus:ring-1 focus:ring-emerald-500 rounded py-0.5 px-1 truncate placeholder-neutral-600 outline-none w-full text-xs font-mono"
                     />
                   </div>
 

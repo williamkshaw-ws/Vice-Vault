@@ -24,7 +24,6 @@ export default function AddMissingBallForm({
   const [name, setName] = useState("");
   const [color, setColor] = useState("");
   const [variation, setVariation] = useState("");
-  const [year, setYear] = useState("");
   const [customImage, setCustomImage] = useState<string | undefined>(undefined);
   const [customImageSleeve, setCustomImageSleeve] = useState<string | undefined>(undefined);
   const [customImageBox, setCustomImageBox] = useState<string | undefined>(undefined);
@@ -36,7 +35,6 @@ export default function AddMissingBallForm({
   const sleeveInputRef = useRef<HTMLInputElement>(null);
   const boxInputRef = useRef<HTMLInputElement>(null);
 
-  // Prefill fields when editing an item
   React.useEffect(() => {
     if (editItem) {
       setModel(editItem.model);
@@ -46,7 +44,6 @@ export default function AddMissingBallForm({
         ? editItem.variations.join(", ")
         : (editItem.variation || editItem.notes || "");
       setVariation(varVal);
-      setYear(editItem.year || "");
       setCustomImage(editItem.customImage);
       setCustomImageSleeve(editItem.customImageSleeve);
       setCustomImageBox(editItem.customImageBox);
@@ -55,7 +52,6 @@ export default function AddMissingBallForm({
       setName("");
       setColor("");
       setVariation("");
-      setYear("");
       setCustomImage(undefined);
       setCustomImageSleeve(undefined);
       setCustomImageBox(undefined);
@@ -96,7 +92,6 @@ export default function AddMissingBallForm({
       color: color.trim(),
       variation: cleanVars.length > 0 ? cleanVars[0] : undefined,
       variations: cleanVars.length > 0 ? cleanVars : undefined,
-      year: year.trim() || undefined,
       notes: variation.trim() || undefined,
       customImage,
       customImageSleeve,
@@ -123,7 +118,6 @@ export default function AddMissingBallForm({
         setName("");
         setColor("");
         setVariation("");
-        setYear("");
         setCustomImage(undefined);
         setCustomImageSleeve(undefined);
         setCustomImageBox(undefined);
@@ -226,8 +220,8 @@ export default function AddMissingBallForm({
              </div>
           </div>
 
-          {/* Second Row: Variation, Year (Both Optional) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Second Row: Variation (Optional) */}
+          <div className="grid grid-cols-1 gap-4">
              {/* Variation */}
              <div>
                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold whitespace-nowrap">
@@ -241,22 +235,6 @@ export default function AddMissingBallForm({
                  onChange={(e) => setVariation(e.target.value)}
                  className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
                  id="missing-variation-input"
-               />
-             </div>
-
-             {/* Year */}
-             <div>
-               <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold whitespace-nowrap">
-                 Year (release year)
-               </label>
-               <input
-                 type="text"
-                 maxLength={10}
-                 placeholder="e.g. 2026, 2024"
-                 value={year}
-                 onChange={(e) => setYear(e.target.value)}
-                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
-                 id="missing-year-input"
                />
              </div>
           </div>
@@ -408,7 +386,6 @@ export default function AddMissingBallForm({
                   setName("");
                   setColor("");
                   setVariation("");
-                  setYear("");
                   setCustomImage(undefined);
                 }
               }}

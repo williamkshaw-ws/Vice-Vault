@@ -66,6 +66,7 @@ interface CatalogItem {
   name?: string;
   color: string;
   variation?: string;
+  variations?: string[];
   year?: string;
   customImage?: string;
   customImageSleeve?: string;
@@ -163,12 +164,10 @@ function sanitizeId(model: string, color: string, name?: string, variation?: str
   const modelPart = clean(model);
   const colorPart = clean(color);
   const namePart = name ? clean(name) : "";
-  const yearPart = year ? clean(year) : "";
   
   let base = modelPart;
   if (namePart) base += `-${namePart}`;
   base += `-${colorPart}`;
-  if (yearPart) base += `-${yearPart}`;
   return base;
 }
 
@@ -776,6 +775,7 @@ if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
               variations: cleanVars.filter(Boolean),
               variation: cleanVars.length > 0 ? cleanVars[0] : undefined
             };
+            delete groupedRaw[newId].year;
           } else {
             const existing = groupedRaw[newId];
             const mergedVars = Array.from(new Set([
@@ -788,6 +788,7 @@ if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
             if (!existing.customImage && item.customImage) existing.customImage = item.customImage;
             if (!existing.customImageSleeve && item.customImageSleeve) existing.customImageSleeve = item.customImageSleeve;
             if (!existing.customImageBox && item.customImageBox) existing.customImageBox = item.customImageBox;
+            delete existing.year;
           }
 
           if (item.id !== newId) {
@@ -855,6 +856,7 @@ if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
         if (!existing.customImage && item.customImage) existing.customImage = item.customImage;
         if (!existing.customImageSleeve && item.customImageSleeve) existing.customImageSleeve = item.customImageSleeve;
         if (!existing.customImageBox && item.customImageBox) existing.customImageBox = item.customImageBox;
+        delete existing.year;
       } else {
         migratedCatalog.push({
           id: newId,
@@ -863,7 +865,6 @@ if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
           color: item.color.trim(),
           variations: cleanVars.filter(Boolean),
           variation: cleanVars.length > 0 ? cleanVars[0] : undefined,
-          year: item.year,
           customImage: item.customImage,
           customImageSleeve: item.customImageSleeve,
           customImageBox: item.customImageBox
@@ -1932,7 +1933,6 @@ app.post("/api/catalog", async (req, res) => {
     color: color.trim(),
     variation: mergedVariations.length > 0 ? mergedVariations[0] : undefined,
     variations: mergedVariations.length > 0 ? mergedVariations : undefined,
-    year: year !== undefined ? year.trim() : undefined,
     customImage: resolvedImage || (existingItem ? existingItem.customImage : undefined),
     customImageSleeve: resolvedImageSleeve || (existingItem ? existingItem.customImageSleeve : undefined),
     customImageBox: resolvedImageBox || (existingItem ? existingItem.customImageBox : undefined)
@@ -1994,7 +1994,6 @@ app.post("/api/catalog/bulk", async (req, res) => {
         color: color.trim(),
         variation: mergedVars.length > 0 ? mergedVars[0] : undefined,
         variations: mergedVars.length > 0 ? mergedVars : undefined,
-        year: year !== undefined ? year.trim() : undefined,
         customImage: customImage || (existing ? existing.customImage : undefined),
         customImageSleeve: customImageSleeve || (existing ? existing.customImageSleeve : undefined),
         customImageBox: customImageBox || (existing ? existing.customImageBox : undefined)
@@ -2199,8 +2198,6 @@ app.put("/api/catalog/:id", async (req, res) => {
   const updatedModel = model ? model.trim() : currentItem.model;
   const updatedName = name ? name.trim() : (currentItem.name || "");
   const updatedColor = color ? color.trim() : currentItem.color;
-  const updatedYear = year !== undefined ? year.trim() : currentItem.year;
-
   // Handle variations array update
   let updatedVariations: string[] = [];
   if (Array.isArray(variations)) {
@@ -2213,7 +2210,7 @@ app.put("/api/catalog/:id", async (req, res) => {
 
   const updatedVariation = updatedVariations.length > 0 ? updatedVariations[0] : undefined;
 
-  const newId = sanitizeId(updatedModel, updatedColor, updatedName, undefined, updatedYear);
+  const newId = sanitizeId(updatedModel, updatedColor, updatedName);
 
   let resolvedImage = customImage !== undefined ? customImage : currentItem.customImage;
   let resolvedImageSleeve = customImageSleeve !== undefined ? customImageSleeve : currentItem.customImageSleeve;
@@ -2235,7 +2232,6 @@ app.put("/api/catalog/:id", async (req, res) => {
     color: updatedColor,
     variation: updatedVariation,
     variations: updatedVariations.length > 0 ? updatedVariations : undefined,
-    year: updatedYear,
     customImage: resolvedImage,
     customImageSleeve: resolvedImageSleeve,
     customImageBox: resolvedImageBox

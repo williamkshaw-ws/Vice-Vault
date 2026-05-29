@@ -39,6 +39,10 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
   const [notes, setNotes] = useState("");
   const [justAdded, setJustAdded] = useState(false);
 
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: currentYear - 2012 + 1 }, (_, i) => String(2012 + i));
+  const [selectedYear, setSelectedYear] = useState<string>("2012");
+
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -51,7 +55,7 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
       condition,
       item.customImage,
       pkgType,
-      item.year,
+      selectedYear,
       item.customImageSleeve,
       item.customImageBox,
       item.name,
@@ -134,11 +138,6 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
                       : (item.variation || item.notes)}"
                   </p>
                 )}
-                {item.year && (
-                  <span className="inline-block text-[9px] font-mono font-bold bg-neutral-950 border border-neutral-850 text-neutral-450 px-1.5 py-0.5 rounded select-none mt-1 leading-none">
-                    {item.year}
-                  </span>
-                )}
               </div>
 
               {!isReadOnly && (
@@ -176,7 +175,7 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
             <span>Add to My Bag</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* Play Number */}
             <div>
               <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
@@ -245,6 +244,24 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
                 {Object.values(BallCondition).map((cond) => (
                   <option key={cond} value={cond}>
                     {cond}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Release Year Dropdown */}
+            <div>
+              <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
+                Release Year
+              </label>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="w-full bg-neutral-950 text-xs py-1.5 px-2 rounded text-neutral-300 font-bold border border-neutral-850 focus:border-neutral-700 outline-none cursor-pointer"
+              >
+                {years.map((y) => (
+                  <option key={y} value={y}>
+                    {y}
                   </option>
                 ))}
               </select>
