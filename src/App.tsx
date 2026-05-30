@@ -1433,11 +1433,28 @@ export default function App() {
 
       const shouldGroup = item.groupColor || item.groupVariation;
       if (shouldGroup && item.name) {
-        const matching = sortedCatalog.filter(i => 
-          i.model.trim().toLowerCase() === item.model.trim().toLowerCase() &&
-          (i.name || "").trim().toLowerCase() === (item.name || "").trim().toLowerCase() &&
-          (i.groupColor || i.groupVariation)
-        );
+        const matching = sortedCatalog.filter(i => {
+          const sameModelName = i.model.trim().toLowerCase() === item.model.trim().toLowerCase() &&
+                                (i.name || "").trim().toLowerCase() === (item.name || "").trim().toLowerCase();
+          
+          if (!sameModelName) return false;
+          if (item.groupVariation && !i.groupVariation) return false;
+          if (item.groupColor && !i.groupColor) return false;
+
+          if (item.groupVariation) {
+            // If grouping by variation, they must share the SAME color
+            return i.color.trim().toLowerCase() === item.color.trim().toLowerCase();
+          }
+          
+          if (item.groupColor) {
+            // If grouping by color, they must share the SAME variation
+            const itemVar = (item.variation || item.notes || "").trim().toLowerCase();
+            const iVar = (i.variation || i.notes || "").trim().toLowerCase();
+            return itemVar === iVar;
+          }
+
+          return false;
+        });
 
         matching.forEach(i => visited.add(i.id));
 
