@@ -145,7 +145,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
                 <p className="text-xs text-[#2563eb] font-mono font-medium truncate mt-0.5">
                   {activeItem.color}
                 </p>
-                {(activeItem.variation || activeItem.notes) && (
+                {!(item.groupVariation && subItems.length > 1) && (activeItem.variation || activeItem.notes) && (
                   <p className="text-[10px] text-neutral-400 font-mono mt-1 break-words line-clamp-2 italic leading-tight" title={
                     activeItem.variation || activeItem.notes
                   }>
