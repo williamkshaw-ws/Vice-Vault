@@ -42,7 +42,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: currentYear - 2012 + 1 }, (_, i) => String(2012 + i));
-  const [selectedYear, setSelectedYear] = useState<string>("2012");
+  const [selectedYear, setSelectedYear] = useState<string>("");
 
   const [selectedItemId, setSelectedItemId] = useState(item.id);
   React.useEffect(() => {
@@ -55,21 +55,29 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
     e.preventDefault();
 
     const itemToAdd = pkgType === 'box' ? item : activeItem;
+    
+    let colorToAdd = itemToAdd.color;
+    let varToAdd = itemToAdd.variation;
+
+    if (pkgType === 'box' && (item.groupColor || item.groupVariation)) {
+      colorToAdd = "";
+      varToAdd = "";
+    }
 
     onAddToLocker(
       itemToAdd.model,
-      itemToAdd.color,
+      colorToAdd,
       quantity,
       playNumber,
       notes.trim(),
       condition,
       itemToAdd.customImage,
       pkgType,
-      selectedYear,
+      selectedYear === "" ? undefined : selectedYear,
       itemToAdd.customImageSleeve,
       itemToAdd.customImageBox,
       itemToAdd.name,
-      itemToAdd.variation
+      varToAdd
     );
 
     setJustAdded(true);
@@ -265,6 +273,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
                 onChange={(e) => setSelectedYear(e.target.value)}
                 className="w-full bg-neutral-950 text-xs py-1.5 px-2 rounded text-neutral-300 font-bold border border-neutral-850 focus:border-neutral-700 outline-none cursor-pointer"
               >
+                <option value="">Unknown</option>
                 {years.map((y) => (
                   <option key={y} value={y}>
                     {y}

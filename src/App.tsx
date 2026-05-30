@@ -258,7 +258,7 @@ export default function App() {
   const [modalNotes, setModalNotes] = useState("");
   const [modalPlayNumber, setModalPlayNumber] = useState<number>(1);
   const [modalCustomNumberInput, setModalCustomNumberInput] = useState<string>("");
-  const [modalYear, setModalYear] = useState<string>("2012");
+  const [modalYear, setModalYear] = useState<string>("");
 
   // User Editing States
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
@@ -2421,6 +2421,7 @@ export default function App() {
                       onChange={(e) => setModalYear(e.target.value)}
                       className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none cursor-pointer font-sans"
                     >
+                      <option value="">Unknown</option>
                       {Array.from({ length: new Date().getFullYear() - 2012 + 1 }, (_, i) => String(2012 + i)).map((y) => (
                         <option key={y} value={y}>
                           {y}
@@ -2459,7 +2460,7 @@ export default function App() {
                       packageType: modalPkgType,
                       customNumber: modalPkgType === 'box' ? 1 : modalPlayNumber,
                       notes: modalNotes.trim() || "Added by Admin",
-                      year: modalYear,
+                      year: modalYear === "" ? undefined : modalYear,
                       dateAdded: today,
                       customImage
                     };
@@ -2467,7 +2468,7 @@ export default function App() {
                     setModalNotes("");
                     setModalPlayNumber(1);
                     setModalCustomNumberInput("");
-                    setModalYear("2012");
+                    setModalYear("");
                   }}
                   className="w-full py-2 bg-[#2563eb] hover:bg-[#b5e000] text-black font-extrabold rounded-lg text-xs uppercase tracking-wider transition-all cursor-pointer"
                 >

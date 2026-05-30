@@ -168,8 +168,8 @@ export default function AddMissingBallForm({
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* First Row: Model, Name, Color (All Required) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* First Row: Model, Name (All Required) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              {/* Model Name */}
              <div>
                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold whitespace-nowrap">
@@ -203,47 +203,29 @@ export default function AddMissingBallForm({
                  id="missing-name-input"
                />
              </div>
- 
+          </div>
+
+          {/* Second Row: Color, Variation & Grouping */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
              {/* Color */}
              <div>
                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold whitespace-nowrap">
-                 Color (Red, Drip, Shade) <span className="text-[#2563eb]">*</span>
+                 Color <span className="text-[#2563eb]">*</span>
                </label>
                <input
                  type="text"
                  required
                  maxLength={40}
-                 placeholder="e.g. Red, Drip, Shade"
+                 placeholder="e.g. Red, Drip"
                  value={color}
                  onChange={(e) => setColor(e.target.value)}
                  className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
                  id="missing-color-input"
                />
              </div>
-          </div>
 
-          {/* Second Row: Variation (Optional) */}
-          <div className="grid grid-cols-1 gap-4">
-             {/* Variation */}
-             <div>
-               <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold whitespace-nowrap">
-                 Variation (Different Ball Designs)
-               </label>
-               <input
-                 type="text"
-                 maxLength={80}
-                 placeholder="e.g. matte finish, customized side stamp"
-                 value={variation}
-                 onChange={(e) => setVariation(e.target.value)}
-                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
-                 id="missing-variation-input"
-               />
-             </div>
-          </div>
-
-          {/* Grouping Checkboxes (Mutually Exclusive) */}
-          <div className="grid grid-cols-2 gap-4 bg-neutral-950 p-3 rounded-lg border border-neutral-800/60">
-             <div className="flex items-center gap-2 select-none cursor-pointer" onClick={() => {
+             {/* Group By Color Checkbox */}
+             <div className="flex items-center gap-2 select-none cursor-pointer pb-2.5 px-1" onClick={() => {
                setGroupColor(!groupColor);
                setGroupVariation(false);
              }}>
@@ -253,11 +235,29 @@ export default function AddMissingBallForm({
                  onChange={() => {}} // handled by parent div onClick
                  className="w-3.5 h-3.5 rounded text-[#2563eb] bg-neutral-900 border-neutral-850 focus:ring-0 focus:ring-offset-0 cursor-pointer"
                />
-               <span className="text-[10px] uppercase font-mono tracking-wider text-neutral-300 font-bold">
+               <span className="text-[9px] uppercase font-mono tracking-wider text-neutral-300 font-bold whitespace-nowrap">
                  Group By Color
                </span>
              </div>
-             <div className="flex items-center gap-2 select-none cursor-pointer" onClick={() => {
+
+             {/* Variation */}
+             <div>
+               <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold whitespace-nowrap">
+                 Variation
+               </label>
+               <input
+                 type="text"
+                 maxLength={80}
+                 placeholder="e.g. matte finish"
+                 value={variation}
+                 onChange={(e) => setVariation(e.target.value)}
+                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
+                 id="missing-variation-input"
+               />
+             </div>
+
+             {/* Group By Variation Checkbox */}
+             <div className="flex items-center gap-2 select-none cursor-pointer pb-2.5 px-1" onClick={() => {
                setGroupVariation(!groupVariation);
                setGroupColor(false);
              }}>
@@ -267,8 +267,8 @@ export default function AddMissingBallForm({
                  onChange={() => {}} // handled by parent div onClick
                  className="w-3.5 h-3.5 rounded text-[#2563eb] bg-neutral-900 border-neutral-850 focus:ring-0 focus:ring-offset-0 cursor-pointer"
                />
-               <span className="text-[10px] uppercase font-mono tracking-wider text-neutral-300 font-bold">
-                 Group By Variation
+               <span className="text-[9px] uppercase font-mono tracking-wider text-neutral-300 font-bold whitespace-nowrap">
+                 Group By Var.
                </span>
              </div>
           </div>
