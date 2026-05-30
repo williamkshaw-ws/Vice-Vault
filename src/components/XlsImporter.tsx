@@ -17,6 +17,8 @@ interface TempImportRow {
   name: string;
   color: string;
   variation: string;
+  groupColor?: boolean;
+  groupVariation?: boolean;
   customImage?: string;
   customImageSleeve?: string;
   customImageBox?: string;
@@ -206,11 +208,37 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
           if (row[k]) customImageBox += String(row[k]);
         });
 
+        const parseBool = (val: any) => {
+          if (val === undefined || val === null) return false;
+          const s = String(val).trim().toUpperCase();
+          return s === "TRUE" || s === "T" || s === "1" || s === "YES" || s === "Y";
+        };
+
+        let groupColor = false;
+        const colorGroupKey = Object.keys(row).find(k => {
+          const lk = k.toLowerCase();
+          return lk.includes("group") && lk.includes("color");
+        });
+        if (colorGroupKey) {
+          groupColor = parseBool(row[colorGroupKey]);
+        }
+
+        let groupVariation = false;
+        const varGroupKey = Object.keys(row).find(k => {
+          const lk = k.toLowerCase();
+          return lk.includes("group") && (lk.includes("var") || lk.includes("version") || lk.includes("v_"));
+        });
+        if (varGroupKey) {
+          groupVariation = parseBool(row[varGroupKey]);
+        }
+
         return {
           model: mVal,
           name: nameVal,
           color: cVal,
           variation: varVal,
+          groupColor,
+          groupVariation,
           customImage: customImage || undefined,
           customImageSleeve: customImageSleeve || undefined,
           customImageBox: customImageBox || undefined
@@ -304,6 +332,8 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
         name: row.name.trim() || undefined,
         color: row.color.trim(),
         variation: row.variation.trim() || undefined,
+        groupColor: row.groupColor,
+        groupVariation: row.groupVariation,
         customImage: row.customImage,
         customImageSleeve: row.customImageSleeve,
         customImageBox: row.customImageBox

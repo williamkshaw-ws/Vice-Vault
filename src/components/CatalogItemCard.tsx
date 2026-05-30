@@ -11,6 +11,7 @@ import { Plus, Check, ChevronDown, ChevronUp, Layers, HelpCircle, Package, Messa
 interface CatalogItemCardProps {
   key?: string | number;
   item: CatalogItem;
+  subItems?: CatalogItem[];
   isReadOnly?: boolean;
   onAddToLocker: (
     model: string,
@@ -29,7 +30,7 @@ interface CatalogItemCardProps {
   ) => void;
 }
 
-export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = false }: CatalogItemCardProps) {
+export default function CatalogItemCard({ item, subItems = [], onAddToLocker, isReadOnly = false }: CatalogItemCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [quantity, setQuantity] = useState(12); // Defaults to a standard Box
   const [pkgType, setPkgType] = useState<'sleeve' | 'box' | 'ea'>('box');
@@ -43,23 +44,32 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
   const years = Array.from({ length: currentYear - 2012 + 1 }, (_, i) => String(2012 + i));
   const [selectedYear, setSelectedYear] = useState<string>("2012");
 
+  const [selectedItemId, setSelectedItemId] = useState(item.id);
+  React.useEffect(() => {
+    setSelectedItemId(item.id);
+  }, [item.id]);
+
+  const activeItem = subItems.find(si => si.id === selectedItemId) || item;
+
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    const itemToAdd = pkgType === 'box' ? item : activeItem;
+
     onAddToLocker(
-      item.model,
-      item.color,
+      itemToAdd.model,
+      itemToAdd.color,
       quantity,
       playNumber,
       notes.trim(),
       condition,
-      item.customImage,
+      itemToAdd.customImage,
       pkgType,
       selectedYear,
-      item.customImageSleeve,
-      item.customImageBox,
-      item.name,
-      item.variation
+      itemToAdd.customImageSleeve,
+      itemToAdd.customImageBox,
+      itemToAdd.name,
+      itemToAdd.variation
     );
 
     setJustAdded(true);
@@ -106,12 +116,12 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
         {/* Ball Visual Display */}
         <div className="flex-shrink-0 flex items-center justify-center p-1 bg-neutral-950/40 rounded-xl border border-neutral-850/55 h-20 w-20">
           <BallVisual 
-            color={item.color} 
-            model={item.model} 
+            color={activeItem.color} 
+            model={activeItem.model} 
             size="md" 
-            customImage={item.customImage}
-            customImageSleeve={item.customImageSleeve}
-            customImageBox={item.customImageBox}
+            customImage={activeItem.customImage}
+            customImageSleeve={activeItem.customImageSleeve}
+            customImageBox={activeItem.customImageBox}
             packageType={pkgType}
           />
         </div>
@@ -121,17 +131,17 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
           <div>
             <div className="flex items-start justify-between gap-2">
               <div className="truncate font-sans">
-                <h4 className="font-sans font-black text-white text-base leading-tight truncate" title={item.model}>
-                  {item.model}{item.name ? ` - ${item.name}` : ''}
+                <h4 className="font-sans font-black text-white text-base leading-tight truncate" title={activeItem.model}>
+                  {activeItem.model}{activeItem.name ? ` - ${activeItem.name}` : ''}
                 </h4>
                 <p className="text-xs text-[#2563eb] font-mono font-medium truncate mt-0.5">
-                  {item.color}
+                  {activeItem.color}
                 </p>
-                {(item.variation || item.notes) && (
+                {(activeItem.variation || activeItem.notes) && (
                   <p className="text-[10px] text-neutral-400 font-mono mt-1 break-words line-clamp-2 italic leading-tight" title={
-                    item.variation || item.notes
+                    activeItem.variation || activeItem.notes
                   }>
-                    "{item.variation || item.notes}"
+                    "{activeItem.variation || activeItem.notes}"
                   </p>
                 )}
               </div>
@@ -265,7 +275,26 @@ export default function CatalogItemCard({ item, onAddToLocker, isReadOnly = fals
 
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+          {subItems.length > 1 && pkgType !== 'box' && (
+            <div className="mt-3">
+              <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
+                {item.groupColor ? 'Select Color' : item.groupVariation ? 'Select Variation' : 'Select Variant'}
+              </label>
+              <select
+                value={selectedItemId}
+                onChange={(e) => setSelectedItemId(e.target.value)}
+                className="w-full bg-neutral-950 text-xs py-1.5 px-2 rounded text-neutral-300 font-bold border border-neutral-850 focus:border-neutral-700 outline-none cursor-pointer"
+              >
+                {subItems.map((subItem) => (
+                  <option key={subItem.id} value={subItem.id}>
+                    {item.groupColor ? subItem.color : subItem.variation || subItem.color}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end mt-3">
             {/* Quantity adjustment */}
             <div>
               <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">

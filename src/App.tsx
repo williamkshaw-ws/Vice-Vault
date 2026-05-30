@@ -462,7 +462,9 @@ export default function App() {
           "Name": item.name || "",
           "Color": item.color,
           "Variation": item.variation || "",
-          "Year": item.year || ""
+          "Year": item.year || "",
+          "Group By Color": item.groupColor ? "TRUE" : "FALSE",
+          "Group By Variation": item.groupVariation ? "TRUE" : "FALSE"
         };
 
         for (let i = 0; i < maxBallChunks; i++) {
@@ -498,6 +500,8 @@ export default function App() {
       const updatedName = (updatedFields.name !== undefined ? updatedFields.name.trim() : (originalItem.name || ""));
       const updatedColor = (updatedFields.color !== undefined ? updatedFields.color.trim() : originalItem.color);
       const updatedVariation = (updatedFields.variation !== undefined ? (updatedFields.variation ? updatedFields.variation.trim() : undefined) : originalItem.variation);
+      const updatedGroupColor = (updatedFields.groupColor !== undefined ? updatedFields.groupColor : originalItem.groupColor);
+      const updatedGroupVariation = (updatedFields.groupVariation !== undefined ? updatedFields.groupVariation : originalItem.groupVariation);
       
       const newId = sanitizeId(updatedModel, updatedColor, updatedName, updatedVariation);
 
@@ -513,6 +517,8 @@ export default function App() {
             name: updatedName,
             color: updatedColor,
             variation: updatedVariation,
+            groupColor: updatedGroupColor,
+            groupVariation: updatedGroupVariation,
             customImage: updatedFields.customImage,
             customImageSleeve: updatedFields.customImageSleeve,
             customImageBox: updatedFields.customImageBox
@@ -531,6 +537,8 @@ export default function App() {
           name: updatedName,
           color: updatedColor,
           variation: updatedVariation || undefined,
+          groupColor: updatedGroupColor,
+          groupVariation: updatedGroupVariation,
           notes: updatedFields.notes !== undefined ? updatedFields.notes.trim() : originalItem.notes,
           customImage: updatedFields.customImage !== undefined ? updatedFields.customImage : originalItem.customImage,
           customImageSleeve: updatedFields.customImageSleeve !== undefined ? updatedFields.customImageSleeve : originalItem.customImageSleeve,
@@ -1230,6 +1238,8 @@ export default function App() {
             name: newItem.name,
             color: newItem.color,
             variation: newItem.variation,
+            groupColor: newItem.groupColor,
+            groupVariation: newItem.groupVariation,
             customImage: newItem.customImage,
             customImageSleeve: newItem.customImageSleeve,
             customImageBox: newItem.customImageBox
@@ -1249,6 +1259,8 @@ export default function App() {
           name: newItem.name ? newItem.name.trim() : "",
           color: newItem.color.trim(),
           variation: newItem.variation ? newItem.variation.trim() : undefined,
+          groupColor: newItem.groupColor,
+          groupVariation: newItem.groupVariation,
           notes: newItem.notes ? newItem.notes.trim() : "",
           customImage: newItem.customImage || (existing ? existing.customImage : undefined),
           customImageSleeve: newItem.customImageSleeve || (existing ? existing.customImageSleeve : undefined),
@@ -1410,6 +1422,46 @@ export default function App() {
       return 0;
     });
   }, [filteredCatalog]);
+
+  // Group catalog items dynamically based on groupColor and groupVariation flags
+  const groupedCatalog = useMemo(() => {
+    const groups: { primary: CatalogItem; subItems: CatalogItem[] }[] = [];
+    const visited = new Set<string>();
+
+    for (const item of sortedCatalog) {
+      if (visited.has(item.id)) continue;
+
+      const shouldGroup = item.groupColor || item.groupVariation;
+      if (shouldGroup && item.name) {
+        const matching = sortedCatalog.filter(i => 
+          i.model.trim().toLowerCase() === item.model.trim().toLowerCase() &&
+          (i.name || "").trim().toLowerCase() === (item.name || "").trim().toLowerCase() &&
+          (i.groupColor || i.groupVariation)
+        );
+
+        matching.forEach(i => visited.add(i.id));
+
+        const primary = { ...matching[0] };
+        matching.forEach(m => {
+          if (!primary.customImageSleeve && m.customImageSleeve) primary.customImageSleeve = m.customImageSleeve;
+          if (!primary.customImageBox && m.customImageBox) primary.customImageBox = m.customImageBox;
+        });
+
+        groups.push({
+          primary,
+          subItems: matching
+        });
+      } else {
+        visited.add(item.id);
+        groups.push({
+          primary: item,
+          subItems: [item]
+        });
+      }
+    }
+
+    return groups;
+  }, [sortedCatalog]);
 
   // Calculate high level statistics for Locker
   const totalOwnedCount = useMemo(() => {
@@ -2026,10 +2078,11 @@ export default function App() {
                       </div>
                     ) : (
                       <div className="space-y-3 max-h-[560px] overflow-y-auto pr-1">
-                        {sortedCatalog.map((item) => (
+                        {groupedCatalog.map((group) => (
                           <CatalogItemCard 
-                            key={item.id} 
-                            item={item} 
+                            key={group.primary.id} 
+                            item={group.primary} 
+                            subItems={group.subItems}
                             isReadOnly={!currentUser}
                             onAddToLocker={handleAddBallFromCatalog}
                           />

@@ -71,6 +71,8 @@ interface CatalogItem {
   customImageSleeve?: string;
   customImageBox?: string;
   notes?: string;
+  groupColor?: boolean;
+  groupVariation?: boolean;
 }
 
 function isStrongPassword(password: string): boolean {
@@ -1861,7 +1863,7 @@ app.post("/api/catalog", async (req, res) => {
     return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
   }
 
-  const { model, name, color, variation, variations, year, customImage, customImageSleeve, customImageBox } = req.body;
+  const { model, name, color, variation, groupColor, groupVariation, customImage, customImageSleeve, customImageBox } = req.body;
   if (!model || !name || !color) {
     return res.status(400).json({ error: "Model, Name, and Color specifications are required." });
   }
@@ -1891,6 +1893,8 @@ app.post("/api/catalog", async (req, res) => {
     name: name.trim(),
     color: color.trim(),
     variation: variation ? variation.trim() : undefined,
+    groupColor: groupColor !== undefined ? !!groupColor : undefined,
+    groupVariation: groupVariation !== undefined ? !!groupVariation : undefined,
     customImage: resolvedImage || (existingItem ? existingItem.customImage : undefined),
     customImageSleeve: resolvedImageSleeve || (existingItem ? existingItem.customImageSleeve : undefined),
     customImageBox: resolvedImageBox || (existingItem ? existingItem.customImageBox : undefined)
@@ -1918,7 +1922,7 @@ app.post("/api/catalog/bulk", async (req, res) => {
   const groupedItems: Record<string, CatalogItem> = {};
 
   for (const item of items) {
-    const { model, name, color, variation, customImage, customImageSleeve, customImageBox } = item;
+    const { model, name, color, variation, groupColor, groupVariation, customImage, customImageSleeve, customImageBox } = item;
     if (!model || !name || !color) continue;
 
     const newId = sanitizeId(model, color, name, variation);
@@ -1931,6 +1935,8 @@ app.post("/api/catalog/bulk", async (req, res) => {
         name: name.trim(),
         color: color.trim(),
         variation: variation ? variation.trim() : undefined,
+        groupColor: groupColor !== undefined ? !!groupColor : undefined,
+        groupVariation: groupVariation !== undefined ? !!groupVariation : undefined,
         customImage: customImage || (existing ? existing.customImage : undefined),
         customImageSleeve: customImageSleeve || (existing ? existing.customImageSleeve : undefined),
         customImageBox: customImageBox || (existing ? existing.customImageBox : undefined)
@@ -2110,7 +2116,7 @@ app.put("/api/catalog/:id", async (req, res) => {
   }
 
   const { id } = req.params;
-  const { model, name, color, variation, customImage, customImageSleeve, customImageBox } = req.body;
+  const { model, name, color, variation, groupColor, groupVariation, customImage, customImageSleeve, customImageBox } = req.body;
 
   const catalog = await getGlobalCatalog();
   const currentItem = catalog.find(item => item.id === id);
@@ -2144,6 +2150,8 @@ app.put("/api/catalog/:id", async (req, res) => {
     name: updatedName,
     color: updatedColor,
     variation: updatedVariation,
+    groupColor: groupColor !== undefined ? !!groupColor : currentItem.groupColor,
+    groupVariation: groupVariation !== undefined ? !!groupVariation : currentItem.groupVariation,
     customImage: resolvedImage,
     customImageSleeve: resolvedImageSleeve,
     customImageBox: resolvedImageBox

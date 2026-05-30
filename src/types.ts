@@ -74,6 +74,8 @@ export interface CatalogItem {
   customImageSleeve?: string;
   customImageBox?: string;
   notes?: string;
+  groupColor?: boolean;
+  groupVariation?: boolean;
 }
 
 export interface FittingRecommendation {

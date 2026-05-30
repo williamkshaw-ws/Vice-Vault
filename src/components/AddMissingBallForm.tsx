@@ -27,6 +27,8 @@ export default function AddMissingBallForm({
   const [customImage, setCustomImage] = useState<string | undefined>(undefined);
   const [customImageSleeve, setCustomImageSleeve] = useState<string | undefined>(undefined);
   const [customImageBox, setCustomImageBox] = useState<string | undefined>(undefined);
+  const [groupColor, setGroupColor] = useState(false);
+  const [groupVariation, setGroupVariation] = useState(false);
   
   // Visual feedback states
   const [isDragActive, setIsDragActive] = useState(false);
@@ -41,6 +43,8 @@ export default function AddMissingBallForm({
       setName(editItem.name || "");
       setColor(editItem.color);
       setVariation(editItem.variation || editItem.notes || "");
+      setGroupColor(!!editItem.groupColor);
+      setGroupVariation(!!editItem.groupVariation);
       setCustomImage(editItem.customImage);
       setCustomImageSleeve(editItem.customImageSleeve);
       setCustomImageBox(editItem.customImageBox);
@@ -49,6 +53,8 @@ export default function AddMissingBallForm({
       setName("");
       setColor("");
       setVariation("");
+      setGroupColor(false);
+      setGroupVariation(false);
       setCustomImage(undefined);
       setCustomImageSleeve(undefined);
       setCustomImageBox(undefined);
@@ -84,6 +90,8 @@ export default function AddMissingBallForm({
       name: name.trim(),
       color: color.trim(),
       variation: variation.trim() || undefined,
+      groupColor: groupColor || undefined,
+      groupVariation: groupVariation || undefined,
       notes: variation.trim() || undefined,
       customImage,
       customImageSleeve,
@@ -110,10 +118,12 @@ export default function AddMissingBallForm({
         setName("");
         setColor("");
         setVariation("");
+        setGroupColor(false);
+        setGroupVariation(false);
         setCustomImage(undefined);
         setCustomImageSleeve(undefined);
         setCustomImageBox(undefined);
-      }, 1500);
+      }, 1200);
     }
   };
 
@@ -228,6 +238,38 @@ export default function AddMissingBallForm({
                  className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
                  id="missing-variation-input"
                />
+             </div>
+          </div>
+
+          {/* Grouping Checkboxes (Mutually Exclusive) */}
+          <div className="grid grid-cols-2 gap-4 bg-neutral-950 p-3 rounded-lg border border-neutral-800/60">
+             <div className="flex items-center gap-2 select-none cursor-pointer" onClick={() => {
+               setGroupColor(!groupColor);
+               setGroupVariation(false);
+             }}>
+               <input
+                 type="checkbox"
+                 checked={groupColor}
+                 onChange={() => {}} // handled by parent div onClick
+                 className="w-3.5 h-3.5 rounded text-[#2563eb] bg-neutral-900 border-neutral-850 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+               />
+               <span className="text-[10px] uppercase font-mono tracking-wider text-neutral-300 font-bold">
+                 Group By Color
+               </span>
+             </div>
+             <div className="flex items-center gap-2 select-none cursor-pointer" onClick={() => {
+               setGroupVariation(!groupVariation);
+               setGroupColor(false);
+             }}>
+               <input
+                 type="checkbox"
+                 checked={groupVariation}
+                 onChange={() => {}} // handled by parent div onClick
+                 className="w-3.5 h-3.5 rounded text-[#2563eb] bg-neutral-900 border-neutral-850 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+               />
+               <span className="text-[10px] uppercase font-mono tracking-wider text-neutral-300 font-bold">
+                 Group By Variation
+               </span>
              </div>
           </div>
 
