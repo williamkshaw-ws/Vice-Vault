@@ -914,6 +914,9 @@ async function resolveUserDocId(uid: string): Promise<string> {
       console.error("resolveUserDocId failed in Firestore:", e);
     }
   }
+  const users = loadUsers();
+  const u = users.find(x => x.authUid === uid || x.uid === uid || x.email === uid);
+  if (u) return u.uid;
   return uid;
 }
 

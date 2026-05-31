@@ -154,6 +154,11 @@ export default function FriendsPortal({ currentUserUid, onClose, onViewBag }: Fr
                   value={searchUsername}
                   onChange={e => setSearchUsername(e.target.value)}
                   placeholder="Enter exact username..."
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="none"
+                  spellCheck="false"
+                  data-1p-ignore="true"
                   className="w-full bg-neutral-900 border border-neutral-800 rounded-lg py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-[#2563eb]"
                 />
               </div>
