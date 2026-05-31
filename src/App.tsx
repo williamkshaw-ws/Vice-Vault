@@ -3080,7 +3080,22 @@ export default function App() {
       {isFriendsPortalOpen && userProfile && (
         <FriendsPortal
           currentUserUid={userProfile.uid}
-          onClose={() => setIsFriendsPortalOpen(false)}
+          onClose={() => {
+            setIsFriendsPortalOpen(false);
+            if (userProfile?.uid) {
+              fetch(`/api/users/${userProfile.uid}/profile`)
+                .then(res => res.json())
+                .then(data => {
+                  if (data) {
+                    setUserProfile(prev => prev ? {
+                      ...prev,
+                      pendingFriendRequestsCount: data.pendingFriendRequestsCount || 0
+                    } : null);
+                  }
+                })
+                .catch(err => console.error("Failed to refresh friend requests count", err));
+            }
+          }}
           onViewBag={(username) => {
             setFriendBagUsername(username);
           }}
