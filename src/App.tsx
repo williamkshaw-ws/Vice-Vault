@@ -354,7 +354,9 @@ export default function App() {
     if (friendBagUsername && userProfile?.uid) {
       setIsSharedViewLoading(true);
       setSharedLockerError(null);
-      fetch(`/api/friends/${encodeURIComponent(userProfile.uid)}/bag/${encodeURIComponent(friendBagUsername)}`)
+      if (userProfile?.preferredColor) {
+        setAccentColor(userProfile.preferredColor);
+      }      fetch(`/api/friends/${encodeURIComponent(userProfile.uid)}/bag/${encodeURIComponent(friendBagUsername)}`)
         .then(async (res) => {
           const data = await res.json();
           if (res.ok) {
@@ -378,7 +380,9 @@ export default function App() {
       setSharedLockerOwner(null);
       setSharedLockerBalls([]);
       setSharedLockerError(null);
-    }
+      if (userProfile?.preferredColor) {
+        setAccentColor(userProfile.preferredColor);
+      }    }
   }, [friendBagUsername, userProfile?.uid]);
 
   // Add multiple catalog items from Excel/Spreadsheet import
@@ -666,7 +670,7 @@ export default function App() {
           preferredColor: parsed.preferredColor || "#2563eb",
           role: (parsed.role && parsed.role.toLowerCase() === "admin") ? "Admin" : "User",
           shareBag: !!parsed.shareBag,
-          shareToken: parsed.shareToken
+          shareToken: parsed.shareToken, pendingFriendRequestsCount: parsed.pendingFriendRequestsCount || 0
         });
         setAccentColor(parsed.preferredColor || "#2563eb");
         setIsCloudDataLoaded(false);
@@ -718,7 +722,7 @@ export default function App() {
                 displayName: userDocData.displayName || userDocData.name || user.displayName || "User",
                 username: userDocData.username || userDocId.replace(/^u-/, ""),
                 avatarUrl: userDocData.avatarUrl || "initials",
-                preferredColor: userDocData.preferredColor || "#2563eb",
+                preferredColor: userDocData.preferredColor || "#2563eb", pendingFriendRequestsCount: userDocData.friendRequestsIn ? userDocData.friendRequestsIn.length : 0,
                 role: (userDocData.role && userDocData.role.toLowerCase() === "admin") ? "Admin" : "User",
                 createdAt: userDocData.createdAt,
                 email: userDocData.email || user.email || "",
@@ -2337,7 +2341,7 @@ export default function App() {
             preferredColor: updatedUser.preferredColor,
             role: updatedUser.role,
             shareBag: !!updatedUser.shareBag,
-            shareToken: updatedUser.shareToken
+            shareToken: updatedUser.shareToken, pendingFriendRequestsCount: userProfile?.pendingFriendRequestsCount || 0
           });
           setAccentColor(updatedUser.preferredColor);
         }}
@@ -2351,7 +2355,7 @@ export default function App() {
             preferredColor: mockUser.preferredColor,
             role: mockUser.role,
             shareBag: !!mockUser.shareBag,
-            shareToken: mockUser.shareToken
+            shareToken: mockUser.shareToken, pendingFriendRequestsCount: mockUser.pendingFriendRequestsCount || 0
           });
           setAccentColor(mockUser.preferredColor);
         }}

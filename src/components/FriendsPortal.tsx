@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Users, UserPlus, UserCheck, UserX, Trash2, Search, ShoppingBag, ChevronRight, X } from "lucide-react";
+import { GolfBagIcon } from "./GolfBagIcon";
+import { Users, UserPlus, UserCheck, UserX, Trash2, Search, ChevronRight, X } from "lucide-react";
 
 interface ProfileItem {
   username: string;
@@ -260,7 +261,7 @@ export default function FriendsPortal({ currentUserUid, onClose, onViewBag }: Fr
                         }}
                         className="flex items-center justify-center gap-1.5 py-2 bg-[#2563eb]/10 hover:bg-[#2563eb]/20 text-[#2563eb] text-xs font-bold rounded-lg transition-colors cursor-pointer"
                       >
-                        <ShoppingBag size={14} />
+                        <GolfBagIcon size={14} />
                         View Bag
                       </button>
                       <button 
