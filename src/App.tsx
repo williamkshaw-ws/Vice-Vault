@@ -10,6 +10,7 @@ import CatalogItemCard from "./components/CatalogItemCard";
 import AddMissingBallForm from "./components/AddMissingBallForm";
 import * as XLSX from "xlsx";
 import XlsImporter from "./components/XlsImporter";
+import FriendsPortal from "./components/FriendsPortal";
 import OwnedBallCard from "./components/OwnedBallCard";
 import BallVisual from "./components/BallVisual";
 import { 
@@ -40,7 +41,8 @@ import {
   X,
   Eye,
   ShoppingBag,
-  FileText
+  FileText,
+  Users
 } from "lucide-react";
 
 import { auth, db, isFirebaseConfigured } from "./firebase";
@@ -242,6 +244,8 @@ export default function App() {
   const [usersError, setUsersError] = useState<string | null>(null);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [isUserManagerOpen, setIsUserManagerOpen] = useState(false);
+  const [isFriendsPortalOpen, setIsFriendsPortalOpen] = useState(false);
+  const [friendBagUsername, setFriendBagUsername] = useState<string | null>(null);
   const [isVaultManagerOpen, setIsVaultManagerOpen] = useState(false);
   const [isVaultProcessing, setIsVaultProcessing] = useState(false);
 
@@ -1506,7 +1510,7 @@ export default function App() {
   // Check if we are viewing a shared locker link
   const params = new URLSearchParams(window.location.search);
   const shareUsername = params.get("share");
-  const isSharedView = !!shareUsername;
+  const isSharedView = !!shareUsername || !!friendBagUsername;
 
   if (isSharedView) {
     if (isSharedViewLoading) {
@@ -1583,7 +1587,7 @@ export default function App() {
                 <h2 className="text-lg font-black text-white truncate leading-tight font-sans">{sharedLockerOwner.displayName}'s Bag</h2>
                 <p className="text-xs text-neutral-400 font-mono mt-0.5 font-bold">@{sharedLockerOwner.username}</p>
                 <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 rounded-full bg-[#2563eb]/10 border border-[#2563eb]/20 text-[9px] font-mono font-bold text-[#2563eb] uppercase tracking-wider">
-                  Public Share View
+                  {friendBagUsername ? "Friend's Bag" : "Public Share View"}
                 </div>
               </div>
             </div>
@@ -1885,6 +1889,20 @@ export default function App() {
                           <div className="border-b border-neutral-900 my-1"></div>
                         </>
                       )}
+
+                      
+                      {/* Friends Portal */}
+                      <button
+                        onClick={() => {
+                          setIsFriendsPortalOpen(true);
+                          setUserDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-2.5 py-2 hover:bg-neutral-900 rounded-lg text-neutral-400 hover:text-white transition-colors flex items-center gap-2 cursor-pointer border border-transparent font-bold"
+                      >
+                        <Users size={12} className="text-neutral-500" />
+                        <span>Friends</span>
+                      </button>
+                      <div className="border-b border-neutral-900 my-1"></div>
 
                       {/* Theme selection row */}
                       <div className="px-2.5 py-2 hover:bg-neutral-900 rounded-lg transition-colors flex items-center justify-between border border-transparent">
@@ -2996,6 +3014,17 @@ export default function App() {
       )}
 
       {/* User Manager Modal */}
+      
+      {isFriendsPortalOpen && userProfile && (
+        <FriendsPortal
+          currentUserUid={userProfile.uid}
+          onClose={() => setIsFriendsPortalOpen(false)}
+          onViewBag={(username) => {
+            setFriendBagUsername(username);
+          }}
+        />
+      )}
+
       {isUserManagerOpen && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
           <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
