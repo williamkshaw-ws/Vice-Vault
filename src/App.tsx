@@ -722,7 +722,7 @@ export default function App() {
                 displayName: userDocData.displayName || userDocData.name || user.displayName || "User",
                 username: userDocData.username || userDocId.replace(/^u-/, ""),
                 avatarUrl: userDocData.avatarUrl || "initials",
-                preferredColor: userDocData.preferredColor || "#2563eb", pendingFriendRequestsCount: userDocData.friendRequestsIn ? userDocData.friendRequestsIn.length : 0,
+                preferredColor: userDocData.preferredColor || "#2563eb", pendingFriendRequestsCount: userDocData.pendingFriendRequestsCount || 0,
                 role: (userDocData.role && userDocData.role.toLowerCase() === "admin") ? "Admin" : "User",
                 createdAt: userDocData.createdAt,
                 email: userDocData.email || user.email || "",
@@ -1865,10 +1865,15 @@ export default function App() {
               <div className="relative" id="user-profile-dropdown-container">
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="text-[11px] font-mono hover:text-[#2563eb] border transition-all cursor-pointer flex items-center gap-2 shadow-sm px-3 py-1.5 rounded-xl text-neutral-300 border border-neutral-850 hover:border-neutral-750 bg-neutral-950 hover:bg-neutral-900"
+                  className="text-[11px] font-mono hover:text-[#2563eb] border transition-all cursor-pointer flex items-center gap-2 shadow-sm px-3 py-1.5 rounded-xl text-neutral-300 border border-neutral-850 hover:border-neutral-750 bg-neutral-950 hover:bg-neutral-900 relative"
                   id="user-profile-menu-btn"
                 >
-                  <AvatarRenderer avatarUrl={userProfile?.avatarUrl} name={userProfile?.displayName || currentUser.displayName || "User"} size="sm" color={accentColor} />
+                  <div className="relative">
+                    <AvatarRenderer avatarUrl={userProfile?.avatarUrl} name={userProfile?.displayName || currentUser.displayName || "User"} size="sm" color={accentColor} />
+                    {userProfile?.pendingFriendRequestsCount ? (
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-neutral-950"></span>
+                    ) : null}
+                  </div>
                   <span>{userProfile?.displayName || currentUser.displayName || "User"}</span>
                   {userProfile?.role === "Admin" && (
                     <span className="px-1 py-0.2 rounded border border-[#2563eb]/30 text-[8px] uppercase tracking-wider font-extrabold text-[#2563eb] bg-[#2563eb]/10 leading-none">
