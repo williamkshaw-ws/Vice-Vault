@@ -150,7 +150,7 @@ export default function FriendsPortal({ currentUserUid, onClose, onViewBag }: Fr
                   <Search size={16} />
                 </div>
                 <input 
-                  type="text" 
+                  type="search" 
                   value={searchUsername}
                   onChange={e => setSearchUsername(e.target.value)}
                   placeholder="Enter exact username..."
