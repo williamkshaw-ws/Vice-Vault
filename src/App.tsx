@@ -194,7 +194,7 @@ export default function App() {
 
   // Firebase Auth & Cloud Sync states
   const [currentUser, setCurrentUser] = useState<any | null>(null);
-  const [userProfile, setUserProfile] = useState<{ displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; shareBag?: boolean; shareToken?: string } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ uid: string; displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; shareBag?: boolean; shareToken?: string } | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [isLoadingCloudData, setIsLoadingCloudData] = useState(false);
   const [isCloudDataLoaded, setIsCloudDataLoaded] = useState(false);
@@ -627,6 +627,7 @@ export default function App() {
         const parsed = JSON.parse(savedMockUser);
         setCurrentUser(parsed);
         setUserProfile({
+          uid: parsed.uid || parsed.id || "",
           displayName: parsed.displayName || "User",
           username: parsed.username || "",
           avatarUrl: parsed.photoURL || "initials",
@@ -681,6 +682,7 @@ export default function App() {
             if (userDocData && userDocId) {
               // Found user profile
               setUserProfile({
+                uid: userDocId,
                 displayName: userDocData.displayName || userDocData.name || user.displayName || "User",
                 username: userDocData.username || userDocId.replace(/^u-/, ""),
                 avatarUrl: userDocData.avatarUrl || "initials",
@@ -699,6 +701,7 @@ export default function App() {
               const fallbackDocId = `u-${cleanUsername}`;
               
               setUserProfile({
+                uid: fallbackDocId,
                 displayName: user.displayName || cleanUsername,
                 username: cleanUsername,
                 avatarUrl: user.photoURL || "preset-1",
@@ -809,6 +812,7 @@ export default function App() {
             const data = await res.json();
             if (data) {
               setUserProfile({
+                uid: data.uid || data.id,
                 displayName: data.displayName || "User",
                 username: data.username || "",
                 avatarUrl: data.photoURL || "initials",
@@ -904,6 +908,7 @@ export default function App() {
       setUsersList(prev => prev.map(u => (u.uid === userId || u.id === userId) ? { ...u, ...data, id: data.uid || data.id, name: data.displayName || data.name } : u));
       if (userId === currentUser?.uid) {
         setUserProfile({
+          uid: data.uid || currentUser.uid,
           displayName: data.displayName,
           username: data.username,
           avatarUrl: data.photoURL || data.avatarUrl,
@@ -2279,6 +2284,7 @@ export default function App() {
         onProfileUpdate={(updatedUser) => {
           setCurrentUser(updatedUser);
           setUserProfile({
+            uid: updatedUser.uid || updatedUser.id,
             displayName: updatedUser.displayName,
             username: updatedUser.username,
             avatarUrl: updatedUser.photoURL,
@@ -2292,6 +2298,7 @@ export default function App() {
         onMockLogin={(mockUser) => {
           setCurrentUser(mockUser);
           setUserProfile({
+            uid: mockUser.uid || mockUser.id,
             displayName: mockUser.displayName,
             username: mockUser.username,
             avatarUrl: mockUser.photoURL,
