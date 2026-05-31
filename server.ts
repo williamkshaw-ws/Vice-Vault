@@ -1282,23 +1282,31 @@ app.get("/api/friends/:id", async (req, res) => {
 // Send friend request
 app.post("/api/friends/:id/request", async (req, res) => {
   const { id } = req.params;
-  const { targetUsername } = req.body;
-  if (!targetUsername) return res.status(400).json({ error: "Target username required." });
+  let { targetUsername } = req.body;
+  if (!targetUsername) return res.status(400).json({ error: "Target required." });
+
+  // strip @ if they included it accidentally
+  if (targetUsername.startsWith("@")) targetUsername = targetUsername.substring(1);
 
   const resolvedId = await resolveUserDocId(id);
   const users = await getUsersList();
   const user = users.find(u => u.uid === resolvedId);
-  if (!user) return res.status(404).json({ error: "User not found." });
+  if (!user) return res.status(404).json({ error: "Sender profile could not be resolved." });
 
   if (user.username?.toLowerCase() === targetUsername.toLowerCase()) {
     return res.status(400).json({ error: "Cannot add yourself." });
   }
 
-  const targetUser = users.find(u => u.username?.toLowerCase() === targetUsername.toLowerCase());
-  if (!targetUser) return res.status(404).json({ error: "Target user not found." });
+  // Look up by username or exact display name match
+  const targetUser = users.find(u => 
+    u.username?.toLowerCase() === targetUsername.toLowerCase() || 
+    u.displayName?.toLowerCase() === targetUsername.toLowerCase()
+  );
+  
+  if (!targetUser) return res.status(404).json({ error: `Could not find any user matching '${targetUsername}'.` });
 
   const myUsername = user.username;
-  if (!myUsername) return res.status(400).json({ error: "You must have a username." });
+  if (!myUsername) return res.status(400).json({ error: "You must have a username to send requests." });
 
   user.friends = user.friends || [];
   user.friendRequestsOut = user.friendRequestsOut || [];

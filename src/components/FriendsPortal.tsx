@@ -144,7 +144,7 @@ export default function FriendsPortal({ currentUserUid, onClose, onViewBag }: Fr
               <UserPlus size={16} className="text-neutral-500" />
               Add a Friend
             </h3>
-            <form onSubmit={handleSendRequest} className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <div className="relative flex-1">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neutral-500">
                   <Search size={16} />
@@ -153,7 +153,10 @@ export default function FriendsPortal({ currentUserUid, onClose, onViewBag }: Fr
                   type="search" 
                   value={searchUsername}
                   onChange={e => setSearchUsername(e.target.value)}
-                  placeholder="Enter exact username..."
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') handleSendRequest(e as any);
+                  }}
+                  placeholder="Enter username..."
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="none"
@@ -163,13 +166,13 @@ export default function FriendsPortal({ currentUserUid, onClose, onViewBag }: Fr
                 />
               </div>
               <button 
-                type="submit"
+                onClick={handleSendRequest}
                 disabled={!searchUsername.trim()}
                 className="bg-[#2563eb] hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2.5 px-5 rounded-lg text-sm transition-colors cursor-pointer"
               >
                 Send Request
               </button>
-            </form>
+            </div>
             {message && (
               <p className={`mt-2 text-xs font-bold ${message.type === 'error' ? 'text-red-400' : 'text-emerald-400'}`}>
                 {message.text}
