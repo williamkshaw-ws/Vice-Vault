@@ -1646,6 +1646,19 @@ export default function App() {
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl flex items-center justify-between">
                 <div>
+                  <span className="text-[10px] font-mono text-neutral-500 uppercase block tracking-wider font-bold">Unique Balls</span>
+                  <span className="font-sans font-black text-2xl text-white tracking-tight">
+                    {new Set(sharedLockerBalls.map(b => `${b.model.trim().toLowerCase()}|${b.color.trim().toLowerCase()}|${(b.year || "").trim().toLowerCase()}`)).size}
+                    <span className="text-sm text-neutral-500 ml-1">/ {catalog.length}</span>
+                  </span>
+                </div>
+                <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
+                  <GolfBallOutlineIcon className="w-5 h-5" />
+                </div>
+              </div>
+
+              <div className="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl flex items-center justify-between">
+                <div>
                   <span className="text-[10px] font-mono text-neutral-500 uppercase block tracking-wider font-bold">Total Owned Balls</span>
                   <span className="font-sans font-black text-2xl text-white tracking-tight">
                     {sharedLockerBalls.reduce((sum, b) => sum + b.quantity, 0)}
@@ -1653,18 +1666,6 @@ export default function App() {
                 </div>
                 <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
                   <GolfBallStackIcon className="w-[22px] h-[22px]" />
-                </div>
-              </div>
-
-              <div className="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-mono text-neutral-500 uppercase block tracking-wider font-bold">Unique Balls</span>
-                  <span className="font-sans font-black text-2xl text-white tracking-tight">
-                    {new Set(sharedLockerBalls.map(b => `${b.model.trim().toLowerCase()}|${b.color.trim().toLowerCase()}|${(b.year || "").trim().toLowerCase()}`)).size}
-                  </span>
-                </div>
-                <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
-                  <GolfBallOutlineIcon className="w-5 h-5" />
                 </div>
               </div>
             </div>
@@ -2210,6 +2211,21 @@ export default function App() {
                 <div className="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl flex items-center justify-between">
                   <div>
                     <span className="text-[10px] font-mono text-neutral-500 uppercase block tracking-wider">
+                      Unique Balls
+                    </span>
+                    <span className="font-sans font-black text-2xl text-white tracking-tight">
+                      {totalUniqueModels}
+                      <span className="text-sm text-neutral-500 ml-1">/ {catalog.length}</span>
+                    </span>
+                  </div>
+                  <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
+                    <GolfBallOutlineIcon className="w-5 h-5" />
+                  </div>
+                </div>
+
+                <div className="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-mono text-neutral-500 uppercase block tracking-wider">
                       Total Owned Balls
                     </span>
                     <span className="font-sans font-black text-2xl text-white tracking-tight">
@@ -2218,20 +2234,6 @@ export default function App() {
                   </div>
                   <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
                     <GolfBallStackIcon className="w-[22px] h-[22px]" />
-                  </div>
-                </div>
-
-                <div className="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-mono text-neutral-500 uppercase block tracking-wider">
-                      Unique Balls
-                    </span>
-                    <span className="font-sans font-black text-2xl text-white tracking-tight">
-                      {totalUniqueModels}
-                    </span>
-                  </div>
-                  <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
-                    <GolfBallOutlineIcon className="w-5 h-5" />
                   </div>
                 </div>
               </div>
