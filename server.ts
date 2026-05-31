@@ -902,7 +902,10 @@ async function resolveUserDocId(uid: string): Promise<string> {
   if (uid.startsWith("u-")) return uid;
   if (dbAdmin) {
     try {
-      const q = await dbAdmin.collection("users").where("uid", "==", uid).get();
+      let q = await dbAdmin.collection("users").where("authUid", "==", uid).get();
+      if (q.empty) {
+        q = await dbAdmin.collection("users").where("uid", "==", uid).get();
+      }
       if (!q.empty) {
         return q.docs[0].id;
       }
