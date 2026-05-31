@@ -1752,6 +1752,16 @@ export default function App() {
                                 </span>
                               </div>
                             )}
+
+                            {/* Variation Display */}
+                            {ball.variation && (
+                              <div className="mt-1 flex items-center gap-2 text-[10px] font-mono">
+                                <span className="text-neutral-550 uppercase">Var:</span>
+                                <span className="text-neutral-300 font-bold border border-neutral-850 bg-neutral-950/40 px-2 py-0.5 rounded">
+                                  {ball.variation}
+                                </span>
+                              </div>
+                            )}
                           </div>
 
                           {/* Quantity display */}
