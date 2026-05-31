@@ -1266,9 +1266,9 @@ app.get("/api/friends/:id", async (req, res) => {
     return usernames.map(un => {
       const u = users.find(x => x.username?.toLowerCase() === un.toLowerCase());
       if (u) {
-        return { username: u.username, displayName: u.displayName, avatarUrl: u.avatarUrl, preferredColor: u.preferredColor };
+        return { uid: u.uid, username: u.username, displayName: u.displayName, avatarUrl: u.avatarUrl, preferredColor: u.preferredColor };
       }
-      return { username: un, displayName: un, avatarUrl: "preset-1", preferredColor: "#2563eb" };
+      return { uid: `u-${un.toLowerCase()}`, username: un, displayName: un, avatarUrl: "preset-1", preferredColor: "#2563eb" };
     });
   };
 
@@ -1559,6 +1559,7 @@ app.get("/api/users/:id/profile", async (req, res) => {
     role: user.role,
     shareBag: !!user.shareBag,
     shareToken: encryptUsername(user.username || ""),
+    pendingFriendRequestsCount: user.friendRequestsIn ? user.friendRequestsIn.length : 0,
     isMock: false
   };
   res.json(clientUser);

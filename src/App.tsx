@@ -194,7 +194,7 @@ export default function App() {
 
   // Firebase Auth & Cloud Sync states
   const [currentUser, setCurrentUser] = useState<any | null>(null);
-  const [userProfile, setUserProfile] = useState<{ uid: string; displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; shareBag?: boolean; shareToken?: string } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ uid: string; displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; shareBag?: boolean; shareToken?: string; pendingFriendRequestsCount?: number } | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [isLoadingCloudData, setIsLoadingCloudData] = useState(false);
   const [isCloudDataLoaded, setIsCloudDataLoaded] = useState(false);
@@ -348,6 +348,38 @@ export default function App() {
         });
     }
   }, []);
+
+  // Load friend's locker data if friendBagUsername is set
+  useEffect(() => {
+    if (friendBagUsername && userProfile?.uid) {
+      setIsSharedViewLoading(true);
+      setSharedLockerError(null);
+      fetch(`/api/friends/${encodeURIComponent(userProfile.uid)}/bag/${encodeURIComponent(friendBagUsername)}`)
+        .then(async (res) => {
+          const data = await res.json();
+          if (res.ok) {
+            setSharedLockerOwner(data.profile);
+            setSharedLockerBalls(data.balls);
+            if (data.profile?.preferredColor) {
+              setAccentColor(data.profile.preferredColor);
+            }
+          } else {
+            setSharedLockerError(data.error || "Failed to load friend's bag.");
+          }
+        })
+        .catch((err) => {
+          setSharedLockerError("Failed to connect to server.");
+        })
+        .finally(() => {
+          setIsSharedViewLoading(false);
+        });
+    } else if (!friendBagUsername && !new URLSearchParams(window.location.search).get("share")) {
+      // Clear when closed
+      setSharedLockerOwner(null);
+      setSharedLockerBalls([]);
+      setSharedLockerError(null);
+    }
+  }, [friendBagUsername, userProfile?.uid]);
 
   // Add multiple catalog items from Excel/Spreadsheet import
   const handleXlsImportCatalogItems = async (newItems: Omit<CatalogItem, "id">[]) => {
@@ -669,7 +701,7 @@ export default function App() {
                   email: profileData.email,
                   uid: profileData.uid,
                   shareBag: profileData.shareBag,
-                  shareToken: profileData.shareToken
+                  shareToken: profileData.shareToken, pendingFriendRequestsCount: profileData.pendingFriendRequestsCount || 0
                 };
                 userDocId = profileData.uid.startsWith("u-") ? profileData.uid : `u-${profileData.username}`;
               }
@@ -819,7 +851,7 @@ export default function App() {
                 preferredColor: data.preferredColor || "#2563eb",
                 role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User",
                 shareBag: !!data.shareBag,
-                shareToken: data.shareToken
+                shareToken: data.shareToken, pendingFriendRequestsCount: data.pendingFriendRequestsCount || 0
               });
               setAccentColor(data.preferredColor || "#2563eb");
               // Keep local storage up to date with latest server-side profile
@@ -915,7 +947,7 @@ export default function App() {
           preferredColor: data.preferredColor,
           role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User",
           shareBag: !!data.shareBag,
-          shareToken: data.shareToken
+          shareToken: data.shareToken, pendingFriendRequestsCount: data.pendingFriendRequestsCount || 0
         });
         setAccentColor(data.preferredColor);
       }
@@ -1574,12 +1606,21 @@ export default function App() {
                 <span className="w-2.5 h-2.5 rounded-full bg-[#2563eb]"></span>
                 <span className="font-sans font-black text-sm text-white uppercase tracking-widest">Golf Ball Vault</span>
               </div>
-              <a
-                href="/"
-                className="text-[10px] font-mono font-black uppercase text-neutral-400 hover:text-white px-3 py-1.5 border border-neutral-800 hover:border-neutral-750 bg-neutral-900 rounded-lg transition-colors"
-              >
-                Build Your Own Vault
-              </a>
+              {friendBagUsername ? (
+                <button
+                  onClick={() => setFriendBagUsername(null)}
+                  className="text-[10px] font-mono font-black uppercase text-neutral-400 hover:text-white px-3 py-1.5 border border-neutral-800 hover:border-neutral-750 bg-neutral-900 rounded-lg transition-colors cursor-pointer"
+                >
+                  Return to My Vault
+                </button>
+              ) : (
+                <a
+                  href="/"
+                  className="text-[10px] font-mono font-black uppercase text-neutral-400 hover:text-white px-3 py-1.5 border border-neutral-800 hover:border-neutral-750 bg-neutral-900 rounded-lg transition-colors"
+                >
+                  Return to My Vault
+                </a>
+              )}
             </div>
           </header>
 
@@ -1905,7 +1946,12 @@ export default function App() {
                         className="w-full text-left px-2.5 py-2 hover:bg-neutral-900 rounded-lg text-neutral-400 hover:text-white transition-colors flex items-center gap-2 cursor-pointer border border-transparent font-bold"
                       >
                         <Users size={12} className="text-neutral-500" />
-                        <span>Friends</span>
+                        <span className="flex-1">Friends</span>
+                        {userProfile?.pendingFriendRequestsCount ? (
+                          <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">
+                            {userProfile.pendingFriendRequestsCount}
+                          </span>
+                        ) : null}
                       </button>
                       <div className="border-b border-neutral-900 my-1"></div>
 
