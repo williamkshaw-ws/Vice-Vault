@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor, Copy, Eye, EyeOff } from "lucide-react";
+import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor, Copy, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import {
   auth,
   db,
