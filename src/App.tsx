@@ -179,7 +179,7 @@ const getOwnedUniqueCount = (balls: GolfBall[], catalog: CatalogItem[]) => {
   const ownedUniqueHashes = new Set<string>();
   
   balls.forEach(b => {
-    const isGroupBox = b.packageType === "box" && b.color === "" && catalog.some(c => 
+    const isGroupBox = b.packageType === "box" && (b.color === "Mixed" || b.color === "" || b.variation === "Mixed" || b.variation === "") && catalog.some(c => 
       c.model.trim().toLowerCase() === b.model.trim().toLowerCase() &&
       (c.name || "").trim().toLowerCase() === (b.name || "").trim().toLowerCase() &&
       (c.groupColor || c.groupVariation)
