@@ -217,36 +217,41 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
       id={`catalog-item-card-${item.id}`}
     >
       {showUnsavedPrompt && (
-        <div className="absolute inset-0 bg-neutral-950/95 flex flex-col items-center justify-center p-3 text-center z-20 animate-fade-in backdrop-blur-sm rounded-xl">
-          <AlertTriangle className="w-5 h-5 text-amber-500 mb-1 animate-pulse" />
-          <h4 className="text-white font-sans font-black text-xs uppercase tracking-wider">
-            Unsaved Changes
-          </h4>
-          <p className="text-[10px] text-neutral-400 mt-0.5 max-w-[220px] leading-snug">
-            Add this to your bag before switching?
-          </p>
-          <div className="flex gap-2 mt-2 w-full max-w-[220px]">
-            <button
-              type="button"
-              onClick={handlePromptCancel}
-              className="flex-1 py-1 px-2 bg-neutral-950 border border-neutral-800 hover:bg-neutral-900 text-neutral-400 font-mono text-[9px] uppercase font-bold tracking-wider rounded-md transition-all cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handlePromptDiscard}
-              className="flex-1 py-1 px-2 bg-rose-600 hover:bg-rose-500 text-white font-mono text-[9px] uppercase font-bold tracking-wider rounded-md transition-all cursor-pointer shadow-md shadow-rose-950/40"
-            >
-              Discard
-            </button>
-            <button
-              type="button"
-              onClick={handlePromptSave}
-              className="flex-1 py-1 px-2 bg-[#2563eb] hover:bg-[#3b82f6] text-black font-mono text-[9px] uppercase font-bold tracking-wider rounded-md transition-all cursor-pointer shadow-md shadow-blue-900/20"
-            >
-              Add
-            </button>
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in" style={{ position: 'fixed' }}>
+          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-4 shadow-2xl animate-scale-in">
+            <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto animate-pulse" />
+            <h4 className="text-white font-sans font-black text-base uppercase tracking-wider">
+              Unsaved Changes
+            </h4>
+            <p className="text-xs text-neutral-400 leading-relaxed font-mono">
+              Add this to your bag before switching?
+            </p>
+            <div className="flex gap-3 mt-6 pt-2 w-full">
+              <button
+                type="button"
+                onClick={() => {
+                  handlePromptCancel();
+                  document.getElementById(`catalog-item-card-${item.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }}
+                className="flex-1 py-2.5 px-3 bg-neutral-950 border border-neutral-800 hover:bg-neutral-900 text-neutral-400 font-mono text-[10px] uppercase font-bold tracking-wider rounded-xl transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handlePromptDiscard}
+                className="flex-1 py-2.5 px-3 bg-rose-600 hover:bg-rose-500 text-white font-mono text-[10px] uppercase font-bold tracking-wider rounded-xl transition-all cursor-pointer shadow-md shadow-rose-950/40"
+              >
+                Discard
+              </button>
+              <button
+                type="button"
+                onClick={handlePromptSave}
+                className="flex-1 py-2.5 px-3 bg-[#2563eb] hover:bg-[#3b82f6] text-black font-mono text-[10px] uppercase font-bold tracking-wider rounded-xl transition-all cursor-pointer shadow-md shadow-blue-900/20"
+              >
+                Add
+              </button>
+            </div>
           </div>
         </div>
       )}
