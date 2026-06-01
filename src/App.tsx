@@ -699,7 +699,9 @@ export default function App() {
         if (Array.isArray(parsed)) {
           const filtered = filterLegacyBalls(parsed);
           if (filtered.length !== parsed.length) {
-            localStorage.setItem("vice_vault_guest_v2", JSON.stringify(filtered));
+            try {
+              localStorage.setItem("vice_vault_guest_v2", JSON.stringify(filtered));
+            } catch(e) { console.warn("localStorage quota exceeded"); }
           }
         }
       } catch (e) {}
@@ -817,7 +819,9 @@ export default function App() {
               const lockerData = await lockerRes.json();
               if (lockerData && lockerData.balls !== null) {
                 finalBalls = filterLegacyBalls(lockerData.balls);
+              try {
                 localStorage.setItem("vice_vault_bag_" + user.uid, JSON.stringify(finalBalls));
+              } catch(e) { console.warn("localStorage quota exceeded"); }
               } else {
                 // If locker doesn't exist on server, upload current client balls (migration of guest data)
                 await fetch(`/api/users/${user.uid}/locker`, {
@@ -931,7 +935,9 @@ export default function App() {
               });
               setAccentColor(data.preferredColor || "#2563eb");
               // Keep local storage up to date with latest server-side profile
+            try {
               localStorage.setItem("vice_vault_mock_user", JSON.stringify(data));
+            } catch(e) {}
             }
           }
         }),
@@ -941,7 +947,9 @@ export default function App() {
             if (data && data.balls !== null) {
               const parsedBalls = filterLegacyBalls(data.balls);
               setBalls(parsedBalls);
+            try {
               localStorage.setItem("vice_vault_bag_" + currentUser.uid, JSON.stringify(parsedBalls));
+            } catch(e) {}
             }
           }
         })
@@ -1151,11 +1159,23 @@ export default function App() {
         },
         body: JSON.stringify({ balls })
       }).catch(err => console.error("Error writing locker to server:", err));
-      localStorage.setItem("vice_vault_bag_" + currentUser.uid, JSON.stringify(balls));
-    } else if (!currentUser) {
-      localStorage.setItem("vice_vault_guest_v2", JSON.stringify(balls));
     }
   }, [balls, currentUser, isCloudDataLoaded]);
+
+  // Synchronize balls changes to localStorage for instant UI caching on refresh
+  useEffect(() => {
+    if (balls.length > 0) {
+      try {
+        if (currentUser && currentUser.uid) {
+          localStorage.setItem("vice_vault_bag_" + currentUser.uid, JSON.stringify(balls));
+        } else {
+          localStorage.setItem("vice_vault_guest_v2", JSON.stringify(balls));
+        }
+      } catch (e) {
+        console.warn("Failed to write bag to localStorage:", e);
+      }
+    }
+  }, [balls, currentUser]);
 
 
   // Self-heal / hydrate legacy owned balls with name and variation from the catalog
