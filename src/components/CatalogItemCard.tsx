@@ -273,7 +273,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
                   {activeItem.model}{activeItem.name ? ` - ${activeItem.name}` : ''}
                 </h4>
                 <p className="text-xs text-[#2563eb] font-mono font-medium truncate mt-0.5">
-                  {activeItem.color}
+                  {item.groupColor && (!isOpen || pkgType === 'box') ? "Mixed" : activeItem.color}
                 </p>
                 {!(item.groupVariation && subItems.length > 1) && (activeItem.variation || activeItem.notes) && (
                   <p className="text-[10px] text-neutral-400 font-mono mt-1 break-words line-clamp-2 italic leading-tight" title={
