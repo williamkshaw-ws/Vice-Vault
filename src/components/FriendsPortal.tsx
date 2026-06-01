@@ -261,7 +261,7 @@ export default function FriendsPortal({ currentUserUid, onClose, onViewBag }: Fr
                         }}
                         className="flex items-center justify-center gap-1.5 py-2 bg-[#2563eb]/10 hover:bg-[#2563eb]/20 text-[#2563eb] text-xs font-bold rounded-lg transition-colors cursor-pointer"
                       >
-                        <GolfBagIcon size={14} />
+                        <GolfBagIcon className="w-3.5 h-3.5" />
                         View Bag
                       </button>
                       <button 
