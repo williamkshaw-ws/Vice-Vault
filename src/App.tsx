@@ -2045,7 +2045,7 @@ export default function App() {
                         className="w-full text-left px-2.5 py-2 hover:bg-neutral-900 rounded-lg text-neutral-400 hover:text-white transition-colors flex items-center gap-2 cursor-pointer border border-transparent"
                       >
                         <Settings size={12} className="text-neutral-500" />
-                        <span>Setting</span>
+                        <span>Settings</span>
                       </button>
 
                       <button
