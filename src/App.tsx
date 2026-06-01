@@ -577,9 +577,9 @@ export default function App() {
       if (!originalItem) throw new Error("Original item not found");
 
       const updatedModel = (updatedFields.model !== undefined ? updatedFields.model.trim() : originalItem.model);
-      const updatedName = (updatedFields.name !== undefined ? updatedFields.name.trim() : (originalItem.name || ""));
+      const updatedName = (updatedFields.name !== undefined ? (updatedFields.name ? updatedFields.name.trim() : null) : (originalItem.name || ""));
       const updatedColor = (updatedFields.color !== undefined ? updatedFields.color.trim() : originalItem.color);
-      const updatedVariation = (updatedFields.variation !== undefined ? (updatedFields.variation ? updatedFields.variation.trim() : undefined) : originalItem.variation);
+      const updatedVariation = (updatedFields.variation !== undefined ? (updatedFields.variation ? updatedFields.variation.trim() : null) : originalItem.variation);
       const updatedGroupColor = (updatedFields.groupColor !== undefined ? updatedFields.groupColor : originalItem.groupColor);
       const updatedGroupVariation = (updatedFields.groupVariation !== undefined ? updatedFields.groupVariation : originalItem.groupVariation);
       
@@ -614,9 +614,9 @@ export default function App() {
         const newItem: CatalogItem = {
           id: newId,
           model: updatedModel,
-          name: updatedName,
+          name: updatedName === null ? undefined : updatedName,
           color: updatedColor,
-          variation: updatedVariation || undefined,
+          variation: updatedVariation === null ? undefined : updatedVariation,
           groupColor: updatedGroupColor,
           groupVariation: updatedGroupVariation,
           notes: updatedFields.notes !== undefined ? updatedFields.notes.trim() : originalItem.notes,

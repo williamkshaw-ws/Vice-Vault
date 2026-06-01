@@ -2325,9 +2325,9 @@ app.put("/api/catalog/:id", async (req, res) => {
   }
 
   const updatedModel = model ? model.trim() : currentItem.model;
-  const updatedName = name ? name.trim() : (currentItem.name || "");
+  const updatedName = name !== undefined ? (name === null ? undefined : name.trim()) : (currentItem.name || "");
   const updatedColor = color ? color.trim() : currentItem.color;
-  const updatedVariation = variation !== undefined ? (variation ? variation.trim() : undefined) : currentItem.variation;
+  const updatedVariation = variation !== undefined ? (variation === null ? undefined : variation.trim()) : currentItem.variation;
 
   const newId = sanitizeId(updatedModel, updatedColor, updatedName, updatedVariation);
 
