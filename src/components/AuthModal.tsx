@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor, Copy } from "lucide-react";
+import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor, Copy, Eye, EyeOff } from "lucide-react";
 import {
   auth,
   db,
@@ -228,6 +228,8 @@ export default function AuthModal({
 
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [newPasswordFocused, setNewPasswordFocused] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Initialize/Load state on mount/open
   useEffect(() => {
@@ -639,13 +641,20 @@ export default function AuthModal({
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" size={14} />
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] transition-all font-mono"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2.5 pl-10 pr-10 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] transition-all font-mono"
                     placeholder="••••••••"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white cursor-pointer p-1"
+                  >
+                    {showPassword ? <Eye size={14} /> : <EyeOff size={14} />}
+                  </button>
                 </div>
               </div>
 
@@ -737,15 +746,22 @@ export default function AuthModal({
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-555" size={12} />
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onFocus={() => setPasswordFocused(true)}
                     onBlur={() => setTimeout(() => setPasswordFocused(false), 200)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#2563eb] transition-all font-mono"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-9 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#2563eb] transition-all font-mono"
                     placeholder="Enter password"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white cursor-pointer p-1"
+                  >
+                    {showPassword ? <Eye size={12} /> : <EyeOff size={12} />}
+                  </button>
                   {passwordFocused && (
                     <div className="absolute z-20 left-0 right-0 mt-1 bg-neutral-950 border border-neutral-800 rounded-xl p-3 shadow-2xl space-y-1.5 font-mono text-[10px] text-left">
                       <div className="text-[9px] uppercase text-neutral-500 font-bold mb-1">Password Strength Checklist:</div>
@@ -789,13 +805,20 @@ export default function AuthModal({
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-555" size={12} />
                   <input
-                    type="password"
+                    type={showConfirmPassword ? "text" : "password"}
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#2563eb] transition-all font-mono"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-9 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#2563eb] transition-all font-mono"
                     placeholder="Verify password"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white cursor-pointer p-1"
+                  >
+                    {showConfirmPassword ? <Eye size={12} /> : <EyeOff size={12} />}
+                  </button>
                 </div>
               </div>
                     {/* Profile Picture / Avatar Selector */}
@@ -965,14 +988,21 @@ export default function AuthModal({
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-555" size={12} />
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     onFocus={() => setNewPasswordFocused(true)}
                     onBlur={() => setTimeout(() => setNewPasswordFocused(false), 200)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#2563eb] transition-all font-mono"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-9 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#2563eb] transition-all font-mono"
                     placeholder="Enter new password"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white cursor-pointer p-1"
+                  >
+                    {showPassword ? <Eye size={12} /> : <EyeOff size={12} />}
+                  </button>
                   {newPasswordFocused && (
                     <div className="absolute z-20 left-0 right-0 mt-1 bg-neutral-950 border border-neutral-800 rounded-xl p-3 shadow-2xl space-y-1.5 font-mono text-[10px] text-left">
                       <div className="text-[9px] uppercase text-neutral-500 font-bold mb-1">Password Strength Checklist:</div>
@@ -1017,10 +1047,10 @@ export default function AuthModal({
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-555" size={12} />
                   <input
-                    type="password"
+                    type={showConfirmPassword ? "text" : "password"}
                     value={newPasswordConfirm}
                     onChange={(e) => setNewPasswordConfirm(e.target.value)}
-                    className={`w-full bg-neutral-950 border rounded-xl py-2 pl-9 pr-9 text-xs focus:outline-none focus:border-[#2563eb] transition-all font-mono ${
+                    className={`w-full bg-neutral-950 border rounded-xl py-2 pl-9 pr-[60px] text-xs focus:outline-none focus:border-[#2563eb] transition-all font-mono ${
                       newPasswordConfirm && newPassword && newPassword !== newPasswordConfirm
                         ? "border-red-600 text-red-400"
                         : newPasswordConfirm && newPassword && newPassword === newPasswordConfirm
@@ -1029,6 +1059,13 @@ export default function AuthModal({
                     }`}
                     placeholder="Re-enter new password to confirm"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-6 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white cursor-pointer p-1"
+                  >
+                    {showConfirmPassword ? <Eye size={12} /> : <EyeOff size={12} />}
+                  </button>
                   {newPasswordConfirm && newPassword && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-bold">
                       {newPassword === newPasswordConfirm

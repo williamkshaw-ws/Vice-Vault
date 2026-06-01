@@ -40,6 +40,7 @@ import {
   Mail,
   X,
   Eye,
+  EyeOff,
   ShoppingBag,
   FileText,
   Users
@@ -304,6 +305,8 @@ export default function App() {
   const [editPassword, setEditPassword] = useState("");
   const [editPasswordConfirm, setEditPasswordConfirm] = useState("");
   const [editPasswordFocused, setEditPasswordFocused] = useState(false);
+  const [showEditPassword, setShowEditPassword] = useState(false);
+  const [showEditConfirmPassword, setShowEditConfirmPassword] = useState(false);
 
   // Mobile layout active workspace tab: "bag" or "catalog"
   const [mobileTab, setMobileTab] = useState<"bag" | "catalog">("bag");
@@ -3284,14 +3287,21 @@ export default function App() {
                                 <label className="block text-[9px] uppercase text-neutral-400 mb-1">New Password</label>
                                 <div className="relative">
                                   <input
-                                    type="password"
+                                    type={showEditPassword ? "text" : "password"}
                                     value={editPassword}
                                     onChange={(e) => setEditPassword(e.target.value)}
                                     onFocus={() => setEditPasswordFocused(true)}
                                     onBlur={() => setTimeout(() => setEditPasswordFocused(false), 200)}
-                                    className={`w-full bg-neutral-950 border rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none ${editPassword && editPasswordConfirm && editPassword !== editPasswordConfirm ? "border-red-600" : "border-neutral-800"}`}
+                                    className={`w-full bg-neutral-950 border rounded-lg p-2 pl-2 pr-9 text-xs text-white focus:border-[#2563eb] outline-none ${editPassword && editPasswordConfirm && editPassword !== editPasswordConfirm ? "border-red-600" : "border-neutral-800"}`}
                                     placeholder="Leave blank to keep"
                                   />
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowEditPassword(!showEditPassword)}
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white cursor-pointer p-1"
+                                  >
+                                    {showEditPassword ? <Eye size={12} /> : <EyeOff size={12} />}
+                                  </button>
                                   {editPasswordFocused && (
                                     <div className="absolute z-20 left-0 right-0 mt-1 bg-neutral-950 border border-neutral-800 rounded-xl p-3 shadow-2xl space-y-1.5 font-mono text-[9px] text-left">
                                       <div className="text-[8px] uppercase text-neutral-500 font-bold mb-1">Password Requirements:</div>
@@ -3333,10 +3343,10 @@ export default function App() {
                                 <label className="block text-[9px] uppercase text-neutral-400 mb-1">Confirm Password</label>
                                 <div className="relative">
                                   <input
-                                    type="password"
+                                    type={showEditConfirmPassword ? "text" : "password"}
                                     value={editPasswordConfirm}
                                     onChange={(e) => setEditPasswordConfirm(e.target.value)}
-                                    className={`w-full bg-neutral-950 border rounded-lg p-2 text-xs focus:border-[#2563eb] outline-none pr-7 ${
+                                    className={`w-full bg-neutral-950 border rounded-lg p-2 pl-2 pr-[60px] text-xs focus:border-[#2563eb] outline-none ${
                                       editPasswordConfirm && editPassword !== editPasswordConfirm
                                         ? "border-red-600 text-red-400"
                                         : editPasswordConfirm && editPassword === editPasswordConfirm && editPassword
@@ -3345,8 +3355,15 @@ export default function App() {
                                     }`}
                                     placeholder="Re-enter password"
                                   />
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowEditConfirmPassword(!showEditConfirmPassword)}
+                                    className="absolute right-6 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white cursor-pointer p-1"
+                                  >
+                                    {showEditConfirmPassword ? <Eye size={12} /> : <EyeOff size={12} />}
+                                  </button>
                                   {editPasswordConfirm && (
-                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] font-bold">
+                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] font-bold pointer-events-none">
                                       {editPassword === editPasswordConfirm
                                         ? <span className="text-emerald-400">✓</span>
                                         : <span className="text-red-500">✗</span>
