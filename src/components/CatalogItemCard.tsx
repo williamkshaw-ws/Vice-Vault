@@ -129,9 +129,9 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
     let colorToAdd = itemToAdd.color;
     let varToAdd = itemToAdd.variation;
 
-    if (pkgType === 'box' && (item.groupColor || item.groupVariation)) {
-      colorToAdd = "";
-      varToAdd = "";
+    if (pkgType === 'box') {
+      if (item.groupColor) colorToAdd = "Mixed";
+      if (item.groupVariation) varToAdd = "Mixed";
     }
 
     onAddToLocker(
