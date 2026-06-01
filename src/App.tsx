@@ -438,6 +438,8 @@ export default function App() {
               color: item.color,
               variation: item.variation || item.notes,
               year: item.year,
+              groupColor: item.groupColor,
+              groupVariation: item.groupVariation,
               customImage: item.customImage,
               customImageSleeve: item.customImageSleeve,
               customImageBox: item.customImageBox
@@ -467,6 +469,8 @@ export default function App() {
               name: item.name ? item.name.trim() : "",
               color: item.color.trim(),
               variation: item.variation ? item.variation.trim() : undefined,
+              groupColor: !!item.groupColor,
+              groupVariation: !!item.groupVariation,
               customImage: item.customImage || (existingInCatalog ? existingInCatalog.customImage : undefined),
               customImageSleeve: item.customImageSleeve || (existingInCatalog ? existingInCatalog.customImageSleeve : undefined),
               customImageBox: item.customImageBox || (existingInCatalog ? existingInCatalog.customImageBox : undefined)
