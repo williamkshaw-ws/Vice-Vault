@@ -6,7 +6,7 @@
 import React, { useState } from "react";
 import { GolfBall, BallCondition } from "../types";
 import BallVisual from "./BallVisual";
-import { Trash2, Calendar, FileText, ChevronDown, Check, Save, Edit2, X, Package, MessageSquare } from "lucide-react";
+import { Trash2, Calendar, FileText, ChevronDown, Check, Save, Edit2, X, Package, MessageSquare, AlertTriangle } from "lucide-react";
 
 interface OwnedBallCardProps {
   key?: string | number;
@@ -15,6 +15,13 @@ interface OwnedBallCardProps {
   onDelete: (id: string) => void;
 }
 
+let currentlyEditingCard: {
+  id: string;
+  isDirty: () => boolean;
+  promptAndSwitch: (onProceed: () => void) => void;
+  discardAndClose: () => void;
+} | null = null;
+
 export default function OwnedBallCard({
   ball,
   onUpdateBall,
@@ -22,6 +29,8 @@ export default function OwnedBallCard({
 }: OwnedBallCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showUnsavedPrompt, setShowUnsavedPrompt] = useState(false);
+  const [pendingProceed, setPendingProceed] = useState<(() => void) | null>(null);
 
   // Parse version and notes from ball (handling legacy bracketed format if necessary)
   const getVersionAndNotes = (b: GolfBall) => {
@@ -50,7 +59,47 @@ export default function OwnedBallCard({
   const [editNotes, setEditNotes] = useState<string>(currentNotes);
   const [editYear, setEditYear] = useState<string>(ball.year || "2012");
 
+  React.useEffect(() => {
+    if (isEditing) {
+      currentlyEditingCard = {
+        id: ball.id,
+        isDirty: () => {
+          return editQty !== ball.quantity ||
+            editPkgType !== (ball.packageType || 'ea') ||
+            (editPkgType !== 'box' && editPlayNumber !== (ball.customNumber || 1)) ||
+            editCondition !== ball.condition ||
+            editNotes.trim() !== currentNotes ||
+            editYear !== (ball.year || "2012");
+        },
+        promptAndSwitch: (onProceed: () => void) => {
+          setShowUnsavedPrompt(true);
+          setPendingProceed(() => onProceed);
+        },
+        discardAndClose: () => {
+          setIsEditing(false);
+          currentlyEditingCard = null;
+        }
+      };
+    } else if (currentlyEditingCard?.id === ball.id) {
+      currentlyEditingCard = null;
+    }
+  }, [isEditing, editQty, editPkgType, editPlayNumber, editCondition, editNotes, editYear, ball]);
+
   const startEditing = () => {
+    if (currentlyEditingCard && currentlyEditingCard.id !== ball.id) {
+      if (currentlyEditingCard.isDirty()) {
+        currentlyEditingCard.promptAndSwitch(() => {
+          openThisCard();
+        });
+        return;
+      } else {
+        currentlyEditingCard.discardAndClose();
+      }
+    }
+    openThisCard();
+  };
+
+  const openThisCard = () => {
     const { notes } = getVersionAndNotes(ball);
     setEditQty(ball.quantity);
     setEditPkgType(ball.packageType || 'ea');
@@ -60,6 +109,36 @@ export default function OwnedBallCard({
     setEditNotes(notes);
     setEditYear(ball.year || "2012");
     setIsEditing(true);
+  };
+
+  const handlePromptSave = () => {
+    handleSave();
+    setShowUnsavedPrompt(false);
+    if (pendingProceed) pendingProceed();
+    setPendingProceed(null);
+  };
+
+  const handlePromptDiscard = () => {
+    setIsEditing(false);
+    if (currentlyEditingCard?.id === ball.id) currentlyEditingCard = null;
+    setShowUnsavedPrompt(false);
+    if (pendingProceed) pendingProceed();
+    setPendingProceed(null);
+  };
+
+  const handlePromptCancel = () => {
+    setShowUnsavedPrompt(false);
+    setPendingProceed(null);
+  };
+
+  const handleCloseEdit = () => {
+    if (currentlyEditingCard?.id === ball.id && currentlyEditingCard.isDirty()) {
+      setShowUnsavedPrompt(true);
+      setPendingProceed(() => () => {}); // No extra action needed on proceed
+    } else {
+      setIsEditing(false);
+      if (currentlyEditingCard?.id === ball.id) currentlyEditingCard = null;
+    }
   };
 
   const handleSave = () => {
@@ -72,6 +151,9 @@ export default function OwnedBallCard({
       year: editYear,
     });
     setIsEditing(false);
+    if (currentlyEditingCard?.id === ball.id) {
+      currentlyEditingCard = null;
+    }
   };
 
   const incrementEditQty = () => {
@@ -126,11 +208,46 @@ export default function OwnedBallCard({
         className="bg-neutral-900 border border-[#2563eb]/50 rounded-2xl p-4 transition-all duration-300 shadow-md shadow-[#2563eb]/5 relative overflow-hidden"
         id={`owned-card-edit-${ball.id}`}
       >
+        {showUnsavedPrompt && (
+          <div className="absolute inset-0 bg-neutral-950/95 flex flex-col items-center justify-center p-3 text-center z-20 animate-fade-in backdrop-blur-sm">
+            <AlertTriangle className="w-5 h-5 text-amber-500 mb-1 animate-pulse" />
+            <h4 className="text-white font-sans font-black text-xs uppercase tracking-wider">
+              Unsaved Changes
+            </h4>
+            <p className="text-[10px] text-neutral-400 mt-0.5 max-w-[220px] leading-snug">
+              Save changes to this record?
+            </p>
+            <div className="flex gap-2 mt-2 w-full max-w-[220px]">
+              <button
+                type="button"
+                onClick={handlePromptCancel}
+                className="flex-1 py-1 px-2 bg-neutral-950 border border-neutral-800 hover:bg-neutral-900 text-neutral-400 font-mono text-[9px] uppercase font-bold tracking-wider rounded-md transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handlePromptDiscard}
+                className="flex-1 py-1 px-2 bg-rose-600 hover:bg-rose-500 text-white font-mono text-[9px] uppercase font-bold tracking-wider rounded-md transition-all cursor-pointer shadow-md shadow-rose-950/40"
+              >
+                Discard
+              </button>
+              <button
+                type="button"
+                onClick={handlePromptSave}
+                className="flex-1 py-1 px-2 bg-[#2563eb] hover:bg-[#3b82f6] text-black font-mono text-[9px] uppercase font-bold tracking-wider rounded-md transition-all cursor-pointer shadow-md shadow-blue-900/20"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="text-xs font-bold text-[#2563eb] uppercase tracking-widest mb-3 flex items-center justify-between">
-          <span>Edit Ball Stack</span>
+          <span>Edit {ball.model}{ball.name ? ` - ${ball.name}` : ''}{ball.color ? ` (${ball.color})` : ''}</span>
           <button 
             type="button" 
-            onClick={() => setIsEditing(false)} 
+            onClick={handleCloseEdit} 
             className="text-neutral-500 hover:text-white cursor-pointer"
           >
             <X className="w-4 h-4" />
@@ -335,7 +452,7 @@ export default function OwnedBallCard({
         <div className="flex gap-2 justify-end mt-4 pt-3 border-t border-neutral-800/70">
           <button
             type="button"
-            onClick={() => setIsEditing(false)}
+            onClick={handleCloseEdit}
             className="px-3 py-1.5 bg-neutral-950 hover:bg-neutral-850 border border-neutral-800 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer text-[10px] uppercase tracking-wider font-bold"
           >
             Cancel
