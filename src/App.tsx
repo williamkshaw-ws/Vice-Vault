@@ -2217,7 +2217,7 @@ export default function App() {
                         )}
                       </div>
                     ) : (
-                      <div className="space-y-3 max-h-[560px] overflow-y-auto pr-1">
+                      <div className="space-y-3">
                         {groupedCatalog.map((group) => (
                           <CatalogItemCard 
                             key={group.primary.id} 
