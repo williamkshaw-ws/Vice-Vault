@@ -170,41 +170,33 @@ const hexToRgb = (hex: string) => {
   return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : "124, 179, 0";
 };
 
-const getUniqueIdForBall = (b: GolfBall, catalog: CatalogItem[]) => {
-  const match = catalog.find(c => {
-    const modelMatch = c.model.trim().toLowerCase() === b.model.trim().toLowerCase();
-    const nameMatch = (c.name || "").trim().toLowerCase() === (b.name || "").trim().toLowerCase();
-    if (!modelMatch || !nameMatch) return false;
-    
-    // Exact match for non-box or explicit color
-    if (c.color.trim().toLowerCase() === b.color.trim().toLowerCase() && 
-        (c.variation || "").trim().toLowerCase() === (b.variation || "").trim().toLowerCase()) {
-      return true;
-    }
-    
-    // Grouped match for empty color Box
-    if (b.packageType === "box" && b.color === "" && (c.groupColor || c.groupVariation)) {
-      return true;
-    }
-    
-    return false;
-  });
-
-  if (match) {
-    if (match.groupColor || match.groupVariation) {
-      return `${match.model.trim().toLowerCase()}|${(match.name || "").trim().toLowerCase()}`;
-    }
-    return `${match.model.trim().toLowerCase()}|${(match.name || "").trim().toLowerCase()}|${match.color.trim().toLowerCase()}|${(match.variation || "").trim().toLowerCase()}|${(match.year || "").trim().toLowerCase()}`;
-  }
-
-  return `${b.model.trim().toLowerCase()}|${(b.name || "").trim().toLowerCase()}|${b.color.trim().toLowerCase()}|${(b.variation || "").trim().toLowerCase()}|${(b.year || "").trim().toLowerCase()}`;
+const getHash = (model: string, name: string, color: string, variation: string, year: string) => {
+  return `${(model||"").trim().toLowerCase()}|${(name||"").trim().toLowerCase()}|${(color||"").trim().toLowerCase()}|${(variation||"").trim().toLowerCase()}|${(year||"").trim().toLowerCase()}`;
 };
 
-const getUniqueIdForCatalogItem = (c: CatalogItem) => {
-  if (c.groupColor || c.groupVariation) {
-    return `${c.model.trim().toLowerCase()}|${(c.name || "").trim().toLowerCase()}`;
-  }
-  return `${c.model.trim().toLowerCase()}|${(c.name || "").trim().toLowerCase()}|${c.color.trim().toLowerCase()}|${(c.variation || "").trim().toLowerCase()}|${(c.year || "").trim().toLowerCase()}`;
+const getOwnedUniqueCount = (balls: GolfBall[], catalog: CatalogItem[]) => {
+  const ownedUniqueHashes = new Set<string>();
+  
+  balls.forEach(b => {
+    const isGroupBox = b.packageType === "box" && b.color === "" && catalog.some(c => 
+      c.model.trim().toLowerCase() === b.model.trim().toLowerCase() &&
+      (c.name || "").trim().toLowerCase() === (b.name || "").trim().toLowerCase() &&
+      (c.groupColor || c.groupVariation)
+    );
+
+    if (isGroupBox) {
+      catalog.filter(c => 
+        c.model.trim().toLowerCase() === b.model.trim().toLowerCase() &&
+        (c.name || "").trim().toLowerCase() === (b.name || "").trim().toLowerCase()
+      ).forEach(c => {
+        ownedUniqueHashes.add(getHash(c.model, c.name || "", c.color, c.variation || "", c.year || ""));
+      });
+    } else {
+      ownedUniqueHashes.add(getHash(b.model as string, b.name || "", b.color as string, b.variation || "", b.year || ""));
+    }
+  });
+  
+  return ownedUniqueHashes.size;
 };
 
 export default function App() {
@@ -1567,14 +1559,8 @@ export default function App() {
     return balls.reduce((sum, b) => sum + b.quantity, 0);
   }, [balls]);
 
-  const totalCatalogUniqueSize = useMemo(() => {
-    return new Set(catalog.map(getUniqueIdForCatalogItem)).size;
-  }, [catalog]);
-
   const totalUniqueModels = useMemo(() => {
-    return new Set(
-      balls.map(b => getUniqueIdForBall(b, catalog))
-    ).size;
+    return getOwnedUniqueCount(balls, catalog);
   }, [balls, catalog]);
 
   const eaCount = useMemo(() => {
@@ -1689,8 +1675,8 @@ export default function App() {
                 <div>
                   <span className="text-[10px] font-mono text-neutral-500 uppercase block tracking-wider font-bold">Unique Balls</span>
                   <span className="font-sans font-black text-2xl text-white tracking-tight">
-                    {new Set(sharedLockerBalls.map(b => getUniqueIdForBall(b, catalog))).size}
-                    <span className="text-sm text-neutral-500 ml-1">/ {totalCatalogUniqueSize}</span>
+                    {getOwnedUniqueCount(sharedLockerBalls, catalog)}
+                    <span className="text-sm text-neutral-500 ml-1">/ {catalog.length}</span>
                   </span>
                 </div>
                 <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
@@ -2135,7 +2121,7 @@ export default function App() {
               <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-neutral-850 bg-neutral-950">
                 <BallVaultIcon className="w-5 h-5 text-[#2563eb]" />
                 <span className="text-xs font-black uppercase tracking-wider text-neutral-300">
-                  Ball Vault ({totalCatalogUniqueSize} Available Designs)
+                  Ball Vault ({catalog.length} Available Designs)
                 </span>
               </div>
 
@@ -2256,7 +2242,7 @@ export default function App() {
                     </span>
                     <span className="font-sans font-black text-2xl text-white tracking-tight">
                       {totalUniqueModels}
-                      <span className="text-sm text-neutral-500 ml-1">/ {totalCatalogUniqueSize}</span>
+                      <span className="text-sm text-neutral-500 ml-1">/ {catalog.length}</span>
                     </span>
                   </div>
                   <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
@@ -2884,7 +2870,7 @@ export default function App() {
                   </div>
                   <div className="flex flex-col items-end gap-1.5 shrink-0">
                     <span className="text-[9px] bg-neutral-950 border border-neutral-850 text-neutral-400 px-2 py-0.5 rounded font-mono">
-                      {totalCatalogUniqueSize} DESIGNS
+                      {catalog.length} BALLS
                     </span>
                     <div className="flex items-center gap-1.5">
                       {catalog.length > 0 && (
