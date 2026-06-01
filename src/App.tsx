@@ -2308,35 +2308,6 @@ export default function App() {
                         <ChevronDown className="w-3 h-3 text-neutral-500 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                       </div>
                     )}
-                    {balls.length > 0 && (
-                      showDeleteAllLockerConfirm ? (
-                        <div className="flex items-center gap-1.5 bg-rose-950/30 border border-rose-900/60 rounded-lg p-0.5 px-2 animate-pulse">
-                          <span className="text-[10px] font-mono text-rose-300 uppercase font-black">Wipe All?</span>
-                          <button
-                            type="button"
-                            onClick={handleDeleteAllLocker}
-                            className="bg-rose-600 hover:bg-rose-500 text-white text-[9px] font-mono font-bold py-0.5 px-2 rounded cursor-pointer transition-all"
-                          >
-                            Confirm
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setShowDeleteAllLockerConfirm(false)}
-                            className="text-neutral-400 hover:text-white text-[9px] font-mono py-0.5 px-1 rounded cursor-pointer transition-all"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => setShowDeleteAllLockerConfirm(true)}
-                          className="text-[10px] font-mono text-neutral-500 hover:text-rose-450 border border-neutral-850 hover:border-rose-950/40 bg-neutral-950/40 px-2 py-0.5 rounded-md transition-all cursor-pointer"
-                        >
-                          Delete All
-                        </button>
-                      )
-                    )}
                   </div>
                 </div>
 
@@ -2441,6 +2412,8 @@ export default function App() {
         userProfile={userProfile}
         theme={theme}
         onThemeChange={handleSetTheme}
+        onDeleteBag={handleDeleteAllLocker}
+        hasBagItems={balls.length > 0}
         onProfileUpdate={(updatedUser) => {
           setCurrentUser(updatedUser);
           setUserProfile({

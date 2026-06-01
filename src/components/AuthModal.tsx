@@ -27,6 +27,8 @@ interface AuthModalProps {
   onProfileUpdate?: (updatedUser: any) => void;
   theme?: 'light' | 'dark' | 'system';
   onThemeChange?: (theme: 'light' | 'dark' | 'system') => void;
+  onDeleteBag?: () => void;
+  hasBagItems?: boolean;
 }
 
 const ACCENT_COLORS = [
@@ -202,9 +204,12 @@ export default function AuthModal({
   userProfile,
   onProfileUpdate,
   theme = "system",
-  onThemeChange
+  onThemeChange,
+  onDeleteBag,
+  hasBagItems
 }: AuthModalProps) {
   const [tab, setTab] = useState<"signin" | "signup" | "settings">("signin");
+  const [showDeleteBagConfirm, setShowDeleteBagConfirm] = useState(false);
   
   // Auth Form State
   const [email, setEmail] = useState("");
@@ -239,6 +244,7 @@ export default function AuthModal({
       setConfirmPassword("");
       setNewPassword("");
       setNewPasswordConfirm("");
+      setShowDeleteBagConfirm(false);
       
       if (currentUser) {
         setTab("settings");
@@ -1166,6 +1172,18 @@ export default function AuthModal({
                 )}
               </div>
 
+              {/* Delete Bag Section */}
+              <div className="pt-4 border-t border-neutral-900/60 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteBagConfirm(true)}
+                  disabled={!hasBagItems}
+                  className="w-full py-3 bg-rose-950/20 text-rose-500 font-extrabold font-mono rounded-xl text-xs uppercase tracking-wider hover:bg-rose-950/50 hover:text-rose-400 border border-rose-950/50 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Delete My Bag
+                </button>
+              </div>
+
               <div>
                 <label className="block text-[10px] font-mono uppercase text-neutral-400 mb-2">
                   Theme Accent Color
@@ -1237,6 +1255,41 @@ export default function AuthModal({
           )}
         </div>
       </div>
+
+      {/* Delete Bag Confirmation Modal */}
+      {showDeleteBagConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-neutral-900 border border-rose-900/50 rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-4 shadow-2xl animate-scale-in">
+            <AlertTriangle className="w-8 h-8 text-rose-500 mx-auto animate-pulse" />
+            <h4 className="text-white font-sans font-black text-base uppercase tracking-wider">
+              Delete My Bag
+            </h4>
+            <p className="text-xs text-neutral-400 leading-relaxed font-mono">
+              Are you absolutely sure you want to permanently delete all items in your bag? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 mt-6 pt-2 w-full">
+              <button
+                type="button"
+                onClick={() => setShowDeleteBagConfirm(false)}
+                className="flex-1 py-2.5 px-3 bg-neutral-950 border border-neutral-800 hover:bg-neutral-900 text-neutral-400 font-mono text-[10px] uppercase font-bold tracking-wider rounded-xl transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onDeleteBag?.();
+                  setShowDeleteBagConfirm(false);
+                  onClose();
+                }}
+                className="flex-1 py-2.5 px-3 bg-rose-600 hover:bg-rose-500 text-white font-mono text-[10px] uppercase font-bold tracking-wider rounded-xl transition-all cursor-pointer shadow-md shadow-rose-950/40"
+              >
+                Confirm Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
