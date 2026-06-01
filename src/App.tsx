@@ -256,6 +256,7 @@ export default function App() {
   });
 
   const [bagFilter, setBagFilter] = useState<'ea' | 'sleeve' | 'box' | null>(null);
+  const [bagSortBy, setBagSortBy] = useState<string>('added_desc');
 
   // State for searchable database catalog
   const [catalog, setCatalog] = useState<CatalogItem[]>(() => {
@@ -2289,6 +2290,25 @@ export default function App() {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {balls.length > 0 && (
+                      <div className="relative">
+                        <select
+                          value={bagSortBy}
+                          onChange={(e) => setBagSortBy(e.target.value)}
+                          className="appearance-none bg-neutral-950/40 border border-neutral-850 text-neutral-400 hover:text-white text-[10px] font-mono py-0.5 pl-2 pr-6 rounded-md transition-all cursor-pointer focus:outline-none focus:border-[#2563eb]"
+                        >
+                          <option value="added_desc">Sort: Added (New)</option>
+                          <option value="added_asc">Sort: Added (Old)</option>
+                          <option value="model_asc">Sort: Model (A-Z)</option>
+                          <option value="model_desc">Sort: Model (Z-A)</option>
+                          <option value="qty_desc">Sort: Qty (High-Low)</option>
+                          <option value="qty_asc">Sort: Qty (Low-High)</option>
+                          <option value="year_desc">Sort: Year (New)</option>
+                          <option value="year_asc">Sort: Year (Old)</option>
+                        </select>
+                        <ChevronDown className="w-3 h-3 text-neutral-500 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+                    )}
+                    {balls.length > 0 && (
                       showDeleteAllLockerConfirm ? (
                         <div className="flex items-center gap-1.5 bg-rose-950/30 border border-rose-900/60 rounded-lg p-0.5 px-2 animate-pulse">
                           <span className="text-[10px] font-mono text-rose-300 uppercase font-black">Wipe All?</span>
@@ -2366,8 +2386,22 @@ export default function App() {
                 ) : (
                   <div className="grid grid-cols-1 gap-4" id="owned-list-container">
                     {balls
-                      .filter(ball => !bagFilter || ball.packageType === bagFilter || (!ball.packageType && bagFilter === 'ea'))
-                      .map((ball) => (
+                      .map((ball, index) => ({ ball, index }))
+                      .filter(({ ball }) => !bagFilter || ball.packageType === bagFilter || (!ball.packageType && bagFilter === 'ea'))
+                      .sort((a, b) => {
+                        switch (bagSortBy) {
+                          case 'added_desc': return a.index - b.index;
+                          case 'added_asc': return b.index - a.index;
+                          case 'model_asc': return a.ball.model.localeCompare(b.ball.model) || (a.ball.name || "").localeCompare(b.ball.name || "");
+                          case 'model_desc': return b.ball.model.localeCompare(a.ball.model) || (b.ball.name || "").localeCompare(a.ball.name || "");
+                          case 'qty_desc': return b.ball.quantity - a.ball.quantity;
+                          case 'qty_asc': return a.ball.quantity - b.ball.quantity;
+                          case 'year_desc': return (b.ball.year || "").localeCompare(a.ball.year || "");
+                          case 'year_asc': return (a.ball.year || "").localeCompare(b.ball.year || "");
+                          default: return a.index - b.index;
+                        }
+                      })
+                      .map(({ ball }) => (
                       <OwnedBallCard
                         key={ball.id}
                         ball={ball}
