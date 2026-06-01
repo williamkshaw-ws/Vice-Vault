@@ -185,7 +185,14 @@ const getOwnedUniqueCount = (balls: GolfBall[], catalog: CatalogItem[]) => {
       (c.groupColor || c.groupVariation)
     );
 
-    if (isGroupBox) {
+    if (b.bundleItems && b.bundleItems.length > 0) {
+      b.bundleItems.forEach(item => {
+        const c = catalog.find(cat => cat.id === item.catalogId);
+        if (c) {
+          ownedUniqueHashes.add(getHash(c.model, c.name || "", c.color, c.variation || "", c.year || ""));
+        }
+      });
+    } else if (isGroupBox) {
       catalog.filter(c => 
         c.model.trim().toLowerCase() === b.model.trim().toLowerCase() &&
         (c.name || "").trim().toLowerCase() === (b.name || "").trim().toLowerCase()
@@ -1277,7 +1284,8 @@ export default function App() {
     customImageSleeve?: string,
     customImageBox?: string,
     name?: string,
-    variation?: string
+    variation?: string,
+    bundleItems?: { catalogId: string; qty: number }[]
   ) => {
     const today = new Date().toLocaleDateString();
     
@@ -1326,7 +1334,8 @@ export default function App() {
           customImageSleeve,
           customImageBox,
           name,
-          variation
+          variation,
+          bundleItems
         };
         return [newBall, ...prev];
       }
@@ -2401,6 +2410,7 @@ export default function App() {
                       <OwnedBallCard
                         key={ball.id}
                         ball={ball}
+                        catalog={globalCatalog}
                         onUpdateBall={handleUpdateBall}
                         onDelete={handleDeleteBall}
                       />
@@ -2912,6 +2922,7 @@ export default function App() {
 
               {!showXlsImporter ? (
                 <AddMissingBallForm 
+                  catalog={globalCatalog}
                   onAddCatalogItem={handleAddCatalogItem} 
                   onUpdateCatalogItem={handleUpdateCatalogItem}
                   editItem={editingItem}

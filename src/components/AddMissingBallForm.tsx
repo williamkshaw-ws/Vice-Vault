@@ -4,10 +4,11 @@
  */
 
 import React, { useState, useRef } from "react";
-import { CatalogItem } from "../types";
-import { Plus, Upload, Trash, Sparkles, CheckCircle2 } from "lucide-react";
+import { CatalogItem, BundleItem } from "../types";
+import { Plus, Upload, Trash, Sparkles, CheckCircle2, Box } from "lucide-react";
 
 interface AddMissingBallFormProps {
+  catalog: CatalogItem[];
   onAddCatalogItem: (newItem: Omit<CatalogItem, "id">) => void;
   onUpdateCatalogItem: (id: string, updatedFields: Partial<CatalogItem>) => void;
   editItem?: CatalogItem | null;
@@ -15,6 +16,7 @@ interface AddMissingBallFormProps {
 }
 
 export default function AddMissingBallForm({ 
+  catalog,
   onAddCatalogItem, 
   onUpdateCatalogItem,
   editItem = null,
@@ -29,6 +31,11 @@ export default function AddMissingBallForm({
   const [customImageBox, setCustomImageBox] = useState<string | undefined>(undefined);
   const [groupColor, setGroupColor] = useState(false);
   const [groupVariation, setGroupVariation] = useState(false);
+  const [isBundle, setIsBundle] = useState(false);
+  const [bundleItems, setBundleItems] = useState<BundleItem[]>([]);
+  const [bundleSearch, setBundleSearch] = useState("");
+  const [selectedBundleItem, setSelectedBundleItem] = useState<string>("");
+  const [bundleItemQty, setBundleItemQty] = useState(1);
   
   // Visual feedback states
   const [isDragActive, setIsDragActive] = useState(false);
@@ -48,6 +55,13 @@ export default function AddMissingBallForm({
       setCustomImage(editItem.customImage);
       setCustomImageSleeve(editItem.customImageSleeve);
       setCustomImageBox(editItem.customImageBox);
+      if (editItem.bundleItems && editItem.bundleItems.length > 0) {
+        setIsBundle(true);
+        setBundleItems(editItem.bundleItems);
+      } else {
+        setIsBundle(false);
+        setBundleItems([]);
+      }
     } else {
       setModel("");
       setName("");
@@ -58,8 +72,31 @@ export default function AddMissingBallForm({
       setCustomImage(undefined);
       setCustomImageSleeve(undefined);
       setCustomImageBox(undefined);
+      setIsBundle(false);
+      setBundleItems([]);
     }
   }, [editItem]);
+
+  const filteredCatalog = catalog.filter(c => 
+    c.model.toLowerCase().includes(bundleSearch.toLowerCase()) || 
+    (c.name && c.name.toLowerCase().includes(bundleSearch.toLowerCase())) ||
+    c.color.toLowerCase().includes(bundleSearch.toLowerCase())
+  ).slice(0, 20); // show up to 20 to avoid lag
+
+  const addBundleItem = () => {
+    if (!selectedBundleItem) return;
+    const existing = bundleItems.find(b => b.catalogId === selectedBundleItem);
+    if (existing) {
+      setBundleItems(bundleItems.map(b => b.catalogId === selectedBundleItem ? { ...b, qty: b.qty + bundleItemQty } : b));
+    } else {
+      setBundleItems([...bundleItems, { catalogId: selectedBundleItem, qty: bundleItemQty }]);
+    }
+    setBundleItemQty(1);
+  };
+
+  const removeBundleItem = (catalogId: string) => {
+    setBundleItems(bundleItems.filter(b => b.catalogId !== catalogId));
+  };
 
   // Helper to convert files to Base64 for localStorage storage
   const processFile = (file: File, type: "ball" | "sleeve" | "box") => {
@@ -96,6 +133,7 @@ export default function AddMissingBallForm({
       customImage,
       customImageSleeve,
       customImageBox,
+      bundleItems: isBundle && bundleItems.length > 0 ? bundleItems : undefined
     };
 
     if (editItem) {
@@ -123,6 +161,8 @@ export default function AddMissingBallForm({
         setCustomImage(undefined);
         setCustomImageSleeve(undefined);
         setCustomImageBox(undefined);
+        setIsBundle(false);
+        setBundleItems([]);
       }, 1200);
     }
   };
@@ -273,6 +313,96 @@ export default function AddMissingBallForm({
              </div>
           </div>
 
+          {/* Bundle Toggle */}
+           <div className="flex items-center gap-2 select-none cursor-pointer pb-1 px-1" onClick={() => setIsBundle(!isBundle)}>
+             <input
+               type="checkbox"
+               checked={isBundle}
+               onChange={() => {}}
+               className="w-4 h-4 rounded text-[#2563eb] bg-neutral-900 border-neutral-850 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+             />
+             <span className="text-[11px] uppercase font-mono tracking-wider text-[#2563eb] font-black whitespace-nowrap flex items-center gap-1.5">
+               <Box className="w-3.5 h-3.5" /> Is Bundle / Variety Pack?
+             </span>
+           </div>
+
+           {/* Bundle Configuration */}
+           {isBundle && (
+             <div className="bg-neutral-950 p-4 rounded-xl border border-neutral-800 space-y-4">
+                <span className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 font-bold mb-2">
+                  Bundle Contents
+                </span>
+                <div className="grid grid-cols-[1fr_auto_auto] gap-2 items-end">
+                  <div>
+                     <label className="block text-[9px] uppercase font-mono text-neutral-500 mb-1">Search Catalog</label>
+                     <div className="flex flex-col gap-1">
+                       <input
+                         type="text"
+                         placeholder="Type to filter..."
+                         value={bundleSearch}
+                         onChange={e => setBundleSearch(e.target.value)}
+                         className="w-full bg-neutral-900 border border-neutral-800 rounded-lg py-1.5 px-2 text-xs text-white"
+                       />
+                       <select 
+                         value={selectedBundleItem}
+                         onChange={e => setSelectedBundleItem(e.target.value)}
+                         className="w-full bg-neutral-900 border border-neutral-800 rounded-lg py-1.5 px-2 text-xs text-white"
+                       >
+                          <option value="">Select an item to add...</option>
+                          {filteredCatalog.map(c => (
+                            <option key={c.id} value={c.id}>
+                              {c.model} {c.name ? `"${c.name}"` : ""} - {c.color} {c.variation ? `(${c.variation})` : ""}
+                            </option>
+                          ))}
+                       </select>
+                     </div>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] uppercase font-mono text-neutral-500 mb-1">Qty</label>
+                    <input 
+                      type="number" 
+                      min="1"
+                      value={bundleItemQty}
+                      onChange={e => setBundleItemQty(parseInt(e.target.value) || 1)}
+                      className="w-16 bg-neutral-900 border border-neutral-800 rounded-lg py-1.5 px-2 text-xs text-white text-center"
+                    />
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={addBundleItem}
+                    disabled={!selectedBundleItem}
+                    className="bg-[#2563eb] text-white p-1.5 rounded-lg disabled:opacity-50"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+                
+                {/* Bundle Items List */}
+                {bundleItems.length > 0 && (
+                  <div className="space-y-2 mt-3">
+                    {bundleItems.map(item => {
+                      const catalogItem = catalog.find(c => c.id === item.catalogId);
+                      return (
+                        <div key={item.catalogId} className="flex items-center justify-between bg-neutral-900 p-2 rounded-lg border border-neutral-800">
+                          <div className="text-[11px] text-white flex-1 overflow-hidden text-ellipsis whitespace-nowrap pr-2">
+                            <span className="font-bold text-neutral-500 mr-2">{item.qty}x</span>
+                            {catalogItem ? `${catalogItem.model} ${catalogItem.name ? `"${catalogItem.name}"` : ""} - ${catalogItem.color}` : item.catalogId}
+                          </div>
+                          <button 
+                            type="button" 
+                            onClick={() => removeBundleItem(item.catalogId)}
+                            className="text-rose-500 hover:text-rose-400 p-1"
+                          >
+                            <Trash className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+             </div>
+           )}
+
           {/* Upload Custom Images Grid */}
           <div className="space-y-1.5">
             <span className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 font-bold">
@@ -421,6 +551,8 @@ export default function AddMissingBallForm({
                   setColor("");
                   setVariation("");
                   setCustomImage(undefined);
+                  setIsBundle(false);
+                  setBundleItems([]);
                 }
               }}
               className="px-3 py-1.5 bg-neutral-950 hover:bg-neutral-850 border border-neutral-800 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer text-[10px]"

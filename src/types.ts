@@ -49,6 +49,7 @@ export interface GolfBall {
   customImageBox?: string; // Custom uploaded box image
   name?: string;
   variation?: string;
+  bundleItems?: BundleItem[];
 }
 
 export interface CourseLog {
@@ -63,19 +64,41 @@ export interface CourseLog {
   notes?: string;
 }
 
+export interface BundleItem {
+  catalogId: string;
+  qty: number;
+}
+
 export interface CatalogItem {
-  id: string;
-  model: string;
-  name?: string;
-  color: string;
-  variation?: string;
+  id: string; // e.g. "PRO-WHITE" or "PRO-PLUS-WHITE-DRIP"
+  model: string; // e.g. "PRO", "PRO PLUS"
+  name?: string; // Optional: e.g. "Ice", "Nicklaus"
+  color: string; // e.g. "White", "Neon Red", "Mixed"
+  variation?: string; // e.g. "drip", "shade"
+  notes?: string; // e.g. "Matte finish"
   year?: string;
-  customImage?: string;
-  customImageSleeve?: string;
-  customImageBox?: string;
-  notes?: string;
-  groupColor?: boolean;
+  groupColor?: boolean; 
   groupVariation?: boolean;
+  customImage?: string; // Custom Base64 image
+  customImageSleeve?: string; // Custom Base64 image for sleeve
+  customImageBox?: string; // Custom Base64 image for box
+  bundleItems?: BundleItem[]; // Sub-items contained within this item
+}
+
+export interface BallStock {
+  model: string | boolean;
+  name?: string;
+  color: string | boolean;
+  variation?: string; // Added variation to individual balls
+  packageType: string;
+  qty: number;
+  condition: "New" | "Used";
+  year?: string;
+  notes?: string; // Optional design/logo notes
+  customImage?: string; // User's personal image of the ball
+  customImageSleeve?: string; // Custom Base64 image for sleeve
+  customImageBox?: string; // Custom Base64 image for box
+  bundleItems?: BundleItem[]; // Sub-items contained within this item if logged as a bundle
 }
 
 export interface FittingRecommendation {

@@ -4,13 +4,14 @@
  */
 
 import React, { useState } from "react";
-import { GolfBall, BallCondition } from "../types";
+import { GolfBall, BallCondition, CatalogItem } from "../types";
 import BallVisual from "./BallVisual";
-import { Trash2, Calendar, FileText, ChevronDown, Check, Save, Edit2, X, Package, MessageSquare, AlertTriangle } from "lucide-react";
+import { Trash2, Calendar, FileText, ChevronDown, ChevronUp, Check, Save, Edit2, X, Package, MessageSquare, AlertTriangle, Box } from "lucide-react";
 
 interface OwnedBallCardProps {
   key?: string | number;
   ball: GolfBall;
+  catalog: CatalogItem[];
   onUpdateBall: (id: string, updatedFields: Partial<GolfBall>) => void;
   onDelete: (id: string) => void;
 }
@@ -24,10 +25,12 @@ let currentlyEditingCard: {
 
 export default function OwnedBallCard({
   ball,
+  catalog,
   onUpdateBall,
   onDelete
 }: OwnedBallCardProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [showBundleContents, setShowBundleContents] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showUnsavedPrompt, setShowUnsavedPrompt] = useState(false);
   const [pendingProceed, setPendingProceed] = useState<(() => void) | null>(null);
@@ -664,6 +667,44 @@ export default function OwnedBallCard({
         </div>
 
       </div>
+
+      {/* Bundle Contents Accordion */}
+      {ball.bundleItems && ball.bundleItems.length > 0 && (
+        <div className="mt-4 pt-3 border-t border-neutral-800/70">
+          <button 
+            type="button"
+            onClick={() => setShowBundleContents(!showBundleContents)}
+            className="flex items-center gap-2 text-xs font-bold text-[#2563eb] hover:text-[#3b82f6] uppercase tracking-wider transition-colors"
+          >
+            <Box className="w-4 h-4" />
+            Contains {ball.bundleItems.reduce((acc, item) => acc + item.qty, 0)} Items
+            {showBundleContents ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+          
+          {showBundleContents && (
+            <div className="mt-3 space-y-2 pl-6 animate-fade-in">
+              {ball.bundleItems.map((item, idx) => {
+                const catItem = catalog.find(c => c.id === item.catalogId);
+                return (
+                  <div key={idx} className="flex items-center gap-2 text-xs text-neutral-300">
+                    <span className="font-bold text-neutral-500 w-6">{item.qty}x</span>
+                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                      <span className="font-sans font-bold text-white truncate">
+                        {catItem ? `${catItem.model}${catItem.name ? ` - ${catItem.name}` : ''}` : item.catalogId}
+                      </span>
+                      {catItem && (
+                        <span className="text-[10px] text-neutral-400 font-mono bg-neutral-950 px-1.5 py-0.5 rounded truncate">
+                          {catItem.color} {catItem.variation ? `(${catItem.variation})` : ''}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

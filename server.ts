@@ -1059,6 +1059,7 @@ async function saveGlobalCatalogItem(item: CatalogItem): Promise<void> {
       if (firestoreData.variation === undefined) firestoreData.variation = dbAdmin.firestore.FieldValue.delete();
       if (firestoreData.notes === undefined) firestoreData.notes = dbAdmin.firestore.FieldValue.delete();
       if (firestoreData.name === undefined) firestoreData.name = dbAdmin.firestore.FieldValue.delete();
+      if (firestoreData.bundleItems === undefined) firestoreData.bundleItems = dbAdmin.firestore.FieldValue.delete();
       await dbAdmin.collection("catalog").doc(id).set(firestoreData, { merge: true });
     } catch (error) {
       console.error("Firestore saveGlobalCatalogItem failed:", error);
@@ -2067,7 +2068,7 @@ app.post("/api/catalog", async (req, res) => {
     return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
   }
 
-  const { model, name, color, variation, groupColor, groupVariation, customImage, customImageSleeve, customImageBox } = req.body;
+  const { model, name, color, variation, notes, groupColor, groupVariation, customImage, customImageSleeve, customImageBox, bundleItems } = req.body;
   if (!model || !name || !color) {
     return res.status(400).json({ error: "Model, Name, and Color specifications are required." });
   }
@@ -2097,11 +2098,13 @@ app.post("/api/catalog", async (req, res) => {
     name: name.trim(),
     color: color.trim(),
     variation: variation ? variation.trim() : undefined,
+    notes: notes ? notes.trim() : undefined,
     groupColor: groupColor !== undefined ? !!groupColor : undefined,
     groupVariation: groupVariation !== undefined ? !!groupVariation : undefined,
     customImage: resolvedImage || (existingItem ? existingItem.customImage : undefined),
     customImageSleeve: resolvedImageSleeve || (existingItem ? existingItem.customImageSleeve : undefined),
-    customImageBox: resolvedImageBox || (existingItem ? existingItem.customImageBox : undefined)
+    customImageBox: resolvedImageBox || (existingItem ? existingItem.customImageBox : undefined),
+    bundleItems: bundleItems || undefined
   };
 
   await saveGlobalCatalogItem(newItem);
@@ -2320,7 +2323,7 @@ app.put("/api/catalog/:id", async (req, res) => {
   }
 
   const { id } = req.params;
-  const { model, name, color, variation, notes, groupColor, groupVariation, customImage, customImageSleeve, customImageBox } = req.body;
+  const { model, name, color, variation, notes, groupColor, groupVariation, customImage, customImageSleeve, customImageBox, bundleItems } = req.body;
 
   const catalog = await getGlobalCatalog();
   const currentItem = catalog.find(item => item.id === id);
@@ -2360,7 +2363,8 @@ app.put("/api/catalog/:id", async (req, res) => {
     groupVariation: groupVariation !== undefined ? !!groupVariation : currentItem.groupVariation,
     customImage: resolvedImage,
     customImageSleeve: resolvedImageSleeve,
-    customImageBox: resolvedImageBox
+    customImageBox: resolvedImageBox,
+    bundleItems: bundleItems !== undefined ? bundleItems : currentItem.bundleItems
   };
 
   if (newId !== id) {

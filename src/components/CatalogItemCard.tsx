@@ -26,7 +26,8 @@ interface CatalogItemCardProps {
     customImageSleeve?: string,
     customImageBox?: string,
     name?: string,
-    variation?: string
+    variation?: string,
+    bundleItems?: { catalogId: string; qty: number }[]
   ) => void;
 }
 
@@ -147,7 +148,8 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
       itemToAdd.customImageSleeve,
       itemToAdd.customImageBox,
       itemToAdd.name,
-      varToAdd
+      varToAdd,
+      itemToAdd.bundleItems
     );
 
     setJustAdded(true);
