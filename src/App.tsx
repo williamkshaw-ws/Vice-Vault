@@ -2448,7 +2448,7 @@ export default function App() {
                       <OwnedBallCard
                         key={ball.id}
                         ball={ball}
-                        catalog={globalCatalog}
+                        catalog={catalog}
                         onUpdateBall={handleUpdateBall}
                         onDelete={handleDeleteBall}
                       />
@@ -2960,7 +2960,7 @@ export default function App() {
 
               {!showXlsImporter ? (
                 <AddMissingBallForm 
-                  catalog={globalCatalog}
+                  catalog={catalog}
                   onAddCatalogItem={handleAddCatalogItem} 
                   onUpdateCatalogItem={handleUpdateCatalogItem}
                   editItem={editingItem}
