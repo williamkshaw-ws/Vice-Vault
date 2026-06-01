@@ -2326,7 +2326,7 @@ export default function App() {
                     <button 
                       type="button"
                       onClick={() => setBagFilter(bagFilter === 'ea' ? null : 'ea')}
-                      className={`flex flex-col p-1.5 rounded-lg transition-all cursor-pointer border ${bagFilter === 'ea' ? 'bg-neutral-900 border-black shadow-md' : 'bg-neutral-900/50 hover:bg-neutral-800/50 border-transparent'}`}
+                      className={`flex flex-col p-1.5 rounded-lg transition-all cursor-pointer border ${bagFilter === 'ea' ? 'bg-neutral-900 border-neutral-350 shadow-md' : 'bg-neutral-900/50 hover:bg-neutral-800/50 border-transparent'}`}
                     >
                       <span className={`text-[9px] uppercase tracking-wider transition-colors ${bagFilter === 'ea' ? 'text-neutral-400 font-bold' : 'text-neutral-500'}`}>Balls</span>
                       <span className="text-white font-black text-sm mt-0.5">{eaCount}</span>
@@ -2334,7 +2334,7 @@ export default function App() {
                     <button 
                       type="button"
                       onClick={() => setBagFilter(bagFilter === 'sleeve' ? null : 'sleeve')}
-                      className={`flex flex-col p-1.5 rounded-lg transition-all cursor-pointer border ${bagFilter === 'sleeve' ? 'bg-neutral-900 border-black shadow-md' : 'bg-neutral-900/50 hover:bg-neutral-800/50 border-transparent'}`}
+                      className={`flex flex-col p-1.5 rounded-lg transition-all cursor-pointer border ${bagFilter === 'sleeve' ? 'bg-neutral-900 border-neutral-350 shadow-md' : 'bg-neutral-900/50 hover:bg-neutral-800/50 border-transparent'}`}
                     >
                       <span className={`text-[9px] uppercase tracking-wider transition-colors ${bagFilter === 'sleeve' ? 'text-neutral-400 font-bold' : 'text-neutral-500'}`}>Sleeves</span>
                       <span className="text-white font-black text-sm mt-0.5">{sleeveCount}</span>
@@ -2342,7 +2342,7 @@ export default function App() {
                     <button 
                       type="button"
                       onClick={() => setBagFilter(bagFilter === 'box' ? null : 'box')}
-                      className={`flex flex-col p-1.5 rounded-lg transition-all cursor-pointer border ${bagFilter === 'box' ? 'bg-neutral-900 border-black shadow-md' : 'bg-neutral-900/50 hover:bg-neutral-800/50 border-transparent'}`}
+                      className={`flex flex-col p-1.5 rounded-lg transition-all cursor-pointer border ${bagFilter === 'box' ? 'bg-neutral-900 border-neutral-350 shadow-md' : 'bg-neutral-900/50 hover:bg-neutral-800/50 border-transparent'}`}
                     >
                       <span className={`text-[9px] uppercase tracking-wider transition-colors ${bagFilter === 'box' ? 'text-neutral-400 font-bold' : 'text-neutral-500'}`}>Boxes</span>
                       <span className="text-white font-black text-sm mt-0.5">{boxCount}</span>
