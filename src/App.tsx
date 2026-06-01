@@ -145,6 +145,16 @@ const filterLegacyBalls = (ballsList: any[]): GolfBall[] => {
   return ballsList.filter((b: any) => b && b.id && !/-V\d+$/.test(b.id));
 };
 
+const safeJSONParse = (str: string | null): any => {
+  if (!str) return null;
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    console.warn("Failed to parse JSON from localStorage:", e);
+    return null;
+  }
+};
+
 
 function sanitizeId(model: string, color: string, name?: string, variation?: string, year?: string): string {
   const clean = (s: string) => s.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "");
@@ -267,8 +277,16 @@ export default function App() {
 
   // State for searchable database catalog
   const [catalog, setCatalog] = useState<CatalogItem[]>(() => {
-    const saved = localStorage.getItem("vice_vault_catalog");
-    return saved ? JSON.parse(saved) : generateDefaultCatalog();
+    try {
+      const saved = localStorage.getItem("vice_vault_catalog");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.warn("Failed to parse catalog from localStorage", e);
+    }
+    return generateDefaultCatalog();
   });
 
   // Active search query
@@ -807,14 +825,14 @@ export default function App() {
             const cachedBag = localStorage.getItem("vice_vault_bag_" + user.uid);
             if (cachedBag) {
               try {
-                setBalls(filterLegacyBalls(JSON.parse(cachedBag)));
+                setBalls(filterLegacyBalls(safeJSONParse(cachedBag)));
                 setIsAuthLoading(false);
               } catch (e) {}
             }
 
             // 2. Load locker documents using the server API instead of client-side Firestore
             const lockerRes = await fetch(`/api/users/${user.uid}/locker`);
-            let finalBalls = cachedBag ? filterLegacyBalls(JSON.parse(cachedBag)) : filterLegacyBalls(balls);
+            let finalBalls = cachedBag ? filterLegacyBalls(safeJSONParse(cachedBag)) : filterLegacyBalls(balls);
             if (lockerRes.ok) {
               const lockerData = await lockerRes.json();
               if (lockerData && lockerData.balls !== null) {
@@ -852,7 +870,7 @@ export default function App() {
           setUserDropdownOpen(false);
 
           const savedBalls = localStorage.getItem("vice_vault_guest_v2");
-          setBalls(savedBalls ? filterLegacyBalls(JSON.parse(savedBalls)) : INITIAL_OWNED_BALLS);
+          setBalls(savedBalls ? filterLegacyBalls(safeJSONParse(savedBalls)) : INITIAL_OWNED_BALLS);
         }
         setIsAuthLoading(false);
       }
@@ -910,7 +928,7 @@ export default function App() {
       const cachedBag = localStorage.getItem("vice_vault_bag_" + currentUser.uid);
       if (cachedBag) {
         try {
-          setBalls(filterLegacyBalls(JSON.parse(cachedBag)));
+          setBalls(filterLegacyBalls(safeJSONParse(cachedBag)));
           setIsLoadingCloudData(false);
           setIsCloudDataLoaded(true);
         } catch (e) {}
@@ -2116,7 +2134,7 @@ export default function App() {
                             setUserDropdownOpen(false);
 
                             const savedBalls = localStorage.getItem("vice_vault_guest_v2");
-                            setBalls(savedBalls ? filterLegacyBalls(JSON.parse(savedBalls)) : INITIAL_OWNED_BALLS);
+                            setBalls(savedBalls ? filterLegacyBalls(safeJSONParse(savedBalls)) : INITIAL_OWNED_BALLS);
                           } catch (err) {
                             console.error("Sign out error:", err);
                           }
