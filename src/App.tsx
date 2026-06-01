@@ -792,13 +792,23 @@ export default function App() {
               userDocId = fallbackDocId;
             }
 
+            // Load cache immediately for instant UI render
+            const cachedBag = localStorage.getItem("vice_vault_bag_" + user.uid);
+            if (cachedBag) {
+              try {
+                setBalls(filterLegacyBalls(JSON.parse(cachedBag)));
+                setIsAuthLoading(false);
+              } catch (e) {}
+            }
+
             // 2. Load locker documents using the server API instead of client-side Firestore
             const lockerRes = await fetch(`/api/users/${user.uid}/locker`);
-            let finalBalls = filterLegacyBalls(balls);
+            let finalBalls = cachedBag ? filterLegacyBalls(JSON.parse(cachedBag)) : filterLegacyBalls(balls);
             if (lockerRes.ok) {
               const lockerData = await lockerRes.json();
               if (lockerData && lockerData.balls !== null) {
                 finalBalls = filterLegacyBalls(lockerData.balls);
+                localStorage.setItem("vice_vault_bag_" + user.uid, JSON.stringify(finalBalls));
               } else {
                 // If locker doesn't exist on server, upload current client balls (migration of guest data)
                 await fetch(`/api/users/${user.uid}/locker`, {
@@ -883,7 +893,17 @@ export default function App() {
   // Load mock user cloud data when mock user logs in or is loaded on mount
   useEffect(() => {
     if (currentUser && currentUser.isMock) {
-      setIsLoadingCloudData(true);
+      // Load cache immediately for instant UI render
+      const cachedBag = localStorage.getItem("vice_vault_bag_" + currentUser.uid);
+      if (cachedBag) {
+        try {
+          setBalls(filterLegacyBalls(JSON.parse(cachedBag)));
+          setIsLoadingCloudData(false);
+          setIsCloudDataLoaded(true);
+        } catch (e) {}
+      } else {
+        setIsLoadingCloudData(true);
+      }
       
       Promise.all([
         fetch(`/api/users/${currentUser.uid}/profile`).then(async (res) => {
@@ -910,7 +930,9 @@ export default function App() {
           if (res.ok) {
             const data = await res.json();
             if (data && data.balls !== null) {
-              setBalls(filterLegacyBalls(data.balls));
+              const parsedBalls = filterLegacyBalls(data.balls);
+              setBalls(parsedBalls);
+              localStorage.setItem("vice_vault_bag_" + currentUser.uid, JSON.stringify(parsedBalls));
             }
           }
         })
@@ -1120,6 +1142,7 @@ export default function App() {
         },
         body: JSON.stringify({ balls })
       }).catch(err => console.error("Error writing locker to server:", err));
+      localStorage.setItem("vice_vault_bag_" + currentUser.uid, JSON.stringify(balls));
     } else if (!currentUser) {
       localStorage.setItem("vice_vault_guest_v2", JSON.stringify(balls));
     }
