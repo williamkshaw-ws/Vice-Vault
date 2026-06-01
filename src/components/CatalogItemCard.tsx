@@ -6,7 +6,7 @@
 import React, { useState } from "react";
 import { CatalogItem, BallCondition } from "../types";
 import BallVisual from "./BallVisual";
-import { Plus, Check, ChevronDown, ChevronUp, Layers, HelpCircle, Package, MessageSquare, X } from "lucide-react";
+import { Plus, Check, ChevronDown, ChevronUp, Layers, HelpCircle, Package, MessageSquare, X, AlertTriangle } from "lucide-react";
 
 interface CatalogItemCardProps {
   key?: string | number;
@@ -30,6 +30,13 @@ interface CatalogItemCardProps {
   ) => void;
 }
 
+let currentlyAddingCard: {
+  id: string;
+  isDirty: () => boolean;
+  promptAndSwitch: (onProceed: () => void) => void;
+  discardAndClose: () => void;
+} | null = null;
+
 export default function CatalogItemCard({ item, subItems = [], onAddToLocker, isReadOnly = false }: CatalogItemCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [quantity, setQuantity] = useState(12); // Defaults to a standard Box
@@ -45,14 +52,77 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
   const [selectedYear, setSelectedYear] = useState<string>("");
 
   const [selectedItemId, setSelectedItemId] = useState(item.id);
+  const [showUnsavedPrompt, setShowUnsavedPrompt] = useState(false);
+  const [pendingProceed, setPendingProceed] = useState<(() => void) | null>(null);
+
   React.useEffect(() => {
     setSelectedItemId(item.id);
   }, [item.id]);
 
+  React.useEffect(() => {
+    if (isOpen && !justAdded) {
+      currentlyAddingCard = {
+        id: item.id,
+        isDirty: () => {
+          return quantity !== 12 ||
+            pkgType !== 'box' ||
+            (pkgType !== 'box' && playNumber !== 1) ||
+            condition !== BallCondition.NEW ||
+            notes.trim() !== "" ||
+            selectedYear !== "";
+        },
+        promptAndSwitch: (onProceed: () => void) => {
+          setShowUnsavedPrompt(true);
+          setPendingProceed(() => onProceed);
+        },
+        discardAndClose: () => {
+          setIsOpen(false);
+          currentlyAddingCard = null;
+        }
+      };
+    } else if (currentlyAddingCard?.id === item.id) {
+      currentlyAddingCard = null;
+    }
+  }, [isOpen, justAdded, quantity, pkgType, playNumber, condition, notes, selectedYear, item.id]);
+
   const activeItem = subItems.find(si => si.id === selectedItemId) || item;
 
-  const handleAddSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const startAdding = () => {
+    if (currentlyAddingCard && currentlyAddingCard.id !== item.id) {
+      if (currentlyAddingCard.isDirty()) {
+        currentlyAddingCard.promptAndSwitch(() => {
+          openThisCard();
+        });
+        return;
+      } else {
+        currentlyAddingCard.discardAndClose();
+      }
+    }
+    openThisCard();
+  };
+
+  const openThisCard = () => {
+    setQuantity(12);
+    setPkgType('box');
+    setPlayNumber(1);
+    setCustomNumberInput("");
+    setCondition(BallCondition.NEW);
+    setNotes("");
+    setSelectedYear("");
+    setIsOpen(true);
+  };
+
+  const handleCloseAdd = () => {
+    if (currentlyAddingCard?.id === item.id && currentlyAddingCard.isDirty()) {
+      setShowUnsavedPrompt(true);
+      setPendingProceed(() => () => {});
+    } else {
+      setIsOpen(false);
+      if (currentlyAddingCard?.id === item.id) currentlyAddingCard = null;
+    }
+  };
+
+  const submitAdd = () => {
 
     const itemToAdd = pkgType === 'box' ? item : activeItem;
     
@@ -81,14 +151,40 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
     );
 
     setJustAdded(true);
+    if (currentlyAddingCard?.id === item.id) currentlyAddingCard = null;
+
     setTimeout(() => {
       setJustAdded(false);
       setIsOpen(false);
-      // Reset form controls
       setNotes("");
       setPlayNumber(1);
       setCustomNumberInput("");
     }, 1200);
+  };
+
+  const handleAddSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    submitAdd();
+  };
+
+  const handlePromptSave = () => {
+    submitAdd();
+    setShowUnsavedPrompt(false);
+    if (pendingProceed) pendingProceed();
+    setPendingProceed(null);
+  };
+
+  const handlePromptDiscard = () => {
+    setIsOpen(false);
+    if (currentlyAddingCard?.id === item.id) currentlyAddingCard = null;
+    setShowUnsavedPrompt(false);
+    if (pendingProceed) pendingProceed();
+    setPendingProceed(null);
+  };
+
+  const handlePromptCancel = () => {
+    setShowUnsavedPrompt(false);
+    setPendingProceed(null);
   };
 
   const incrementQty = () => {
@@ -120,6 +216,40 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
       }`}
       id={`catalog-item-card-${item.id}`}
     >
+      {showUnsavedPrompt && (
+        <div className="absolute inset-0 bg-neutral-950/95 flex flex-col items-center justify-center p-3 text-center z-20 animate-fade-in backdrop-blur-sm rounded-xl">
+          <AlertTriangle className="w-5 h-5 text-amber-500 mb-1 animate-pulse" />
+          <h4 className="text-white font-sans font-black text-xs uppercase tracking-wider">
+            Unsaved Changes
+          </h4>
+          <p className="text-[10px] text-neutral-400 mt-0.5 max-w-[220px] leading-snug">
+            Add this to your bag before switching?
+          </p>
+          <div className="flex gap-2 mt-2 w-full max-w-[220px]">
+            <button
+              type="button"
+              onClick={handlePromptCancel}
+              className="flex-1 py-1 px-2 bg-neutral-950 border border-neutral-800 hover:bg-neutral-900 text-neutral-400 font-mono text-[9px] uppercase font-bold tracking-wider rounded-md transition-all cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handlePromptDiscard}
+              className="flex-1 py-1 px-2 bg-rose-600 hover:bg-rose-500 text-white font-mono text-[9px] uppercase font-bold tracking-wider rounded-md transition-all cursor-pointer shadow-md shadow-rose-950/40"
+            >
+              Discard
+            </button>
+            <button
+              type="button"
+              onClick={handlePromptSave}
+              className="flex-1 py-1 px-2 bg-[#2563eb] hover:bg-[#3b82f6] text-black font-mono text-[9px] uppercase font-bold tracking-wider rounded-md transition-all cursor-pointer shadow-md shadow-blue-900/20"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+      )}
       <div className="flex gap-4">
         {/* Ball Visual Display */}
         <div className="flex-shrink-0 flex items-center justify-center p-1 bg-neutral-950/40 rounded-xl border border-neutral-850/55 h-20 w-20">
@@ -158,7 +288,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
                 !isOpen ? (
                   <button
                     type="button"
-                    onClick={() => setIsOpen(true)}
+                    onClick={startAdding}
                     className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-[#2563eb] hover:bg-[#2563eb]/80 text-black transition-colors cursor-pointer"
                     id={`btn-open-add-${item.id}`}
                     title="Add to Bag"
@@ -168,7 +298,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
                 ) : (
                   <button
                     type="button"
-                    onClick={() => setIsOpen(false)}
+                    onClick={handleCloseAdd}
                     className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-rose-600 hover:bg-rose-500 text-white transition-colors cursor-pointer animate-fade-in"
                     id={`btn-close-add-${item.id}`}
                     title="Cancel Add"
