@@ -580,6 +580,7 @@ export default function App() {
       const updatedName = (updatedFields.name !== undefined ? (updatedFields.name ? updatedFields.name.trim() : null) : (originalItem.name || ""));
       const updatedColor = (updatedFields.color !== undefined ? updatedFields.color.trim() : originalItem.color);
       const updatedVariation = (updatedFields.variation !== undefined ? (updatedFields.variation ? updatedFields.variation.trim() : null) : originalItem.variation);
+      const updatedNotes = (updatedFields.notes !== undefined ? (updatedFields.notes ? updatedFields.notes.trim() : null) : originalItem.notes);
       const updatedGroupColor = (updatedFields.groupColor !== undefined ? updatedFields.groupColor : originalItem.groupColor);
       const updatedGroupVariation = (updatedFields.groupVariation !== undefined ? updatedFields.groupVariation : originalItem.groupVariation);
       
@@ -596,7 +597,8 @@ export default function App() {
             model: updatedModel,
             name: updatedName,
             color: updatedColor,
-            variation: updatedVariation,
+            variation: updatedVariation === null ? null : updatedVariation,
+            notes: updatedNotes === null ? null : updatedNotes,
             groupColor: updatedGroupColor,
             groupVariation: updatedGroupVariation,
             customImage: updatedFields.customImage,
@@ -617,9 +619,8 @@ export default function App() {
           name: updatedName === null ? undefined : updatedName,
           color: updatedColor,
           variation: updatedVariation === null ? undefined : updatedVariation,
+          notes: updatedNotes === null ? undefined : updatedNotes,
           groupColor: updatedGroupColor,
-          groupVariation: updatedGroupVariation,
-          notes: updatedFields.notes !== undefined ? updatedFields.notes.trim() : originalItem.notes,
           customImage: updatedFields.customImage !== undefined ? updatedFields.customImage : originalItem.customImage,
           customImageSleeve: updatedFields.customImageSleeve !== undefined ? updatedFields.customImageSleeve : originalItem.customImageSleeve,
           customImageBox: updatedFields.customImageBox !== undefined ? updatedFields.customImageBox : originalItem.customImageBox
@@ -637,7 +638,8 @@ export default function App() {
                 model: updatedModel.toUpperCase(),
                 color: updatedColor,
                 name: updatedName || undefined,
-                variation: updatedVariation,
+                variation: updatedVariation === null ? undefined : updatedVariation,
+                notes: updatedNotes === null ? undefined : updatedNotes,
                 customImage: updatedFields.customImage !== undefined ? updatedFields.customImage : ball.customImage,
                 customImageSleeve: updatedFields.customImageSleeve !== undefined ? updatedFields.customImageSleeve : ball.customImageSleeve,
                 customImageBox: updatedFields.customImageBox !== undefined ? updatedFields.customImageBox : ball.customImageBox

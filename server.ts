@@ -1055,7 +1055,11 @@ async function saveGlobalCatalogItem(item: CatalogItem): Promise<void> {
   if (dbAdmin) {
     try {
       const { id, ...data } = item;
-      await dbAdmin.collection("catalog").doc(id).set(data, { merge: true });
+      const firestoreData: any = { ...data };
+      if (firestoreData.variation === undefined) firestoreData.variation = dbAdmin.firestore.FieldValue.delete();
+      if (firestoreData.notes === undefined) firestoreData.notes = dbAdmin.firestore.FieldValue.delete();
+      if (firestoreData.name === undefined) firestoreData.name = dbAdmin.firestore.FieldValue.delete();
+      await dbAdmin.collection("catalog").doc(id).set(firestoreData, { merge: true });
     } catch (error) {
       console.error("Firestore saveGlobalCatalogItem failed:", error);
     }
@@ -2316,7 +2320,7 @@ app.put("/api/catalog/:id", async (req, res) => {
   }
 
   const { id } = req.params;
-  const { model, name, color, variation, groupColor, groupVariation, customImage, customImageSleeve, customImageBox } = req.body;
+  const { model, name, color, variation, notes, groupColor, groupVariation, customImage, customImageSleeve, customImageBox } = req.body;
 
   const catalog = await getGlobalCatalog();
   const currentItem = catalog.find(item => item.id === id);
@@ -2328,6 +2332,7 @@ app.put("/api/catalog/:id", async (req, res) => {
   const updatedName = name !== undefined ? (name === null ? undefined : name.trim()) : (currentItem.name || "");
   const updatedColor = color ? color.trim() : currentItem.color;
   const updatedVariation = variation !== undefined ? (variation === null ? undefined : variation.trim()) : currentItem.variation;
+  const updatedNotes = notes !== undefined ? (notes === null ? undefined : notes.trim()) : currentItem.notes;
 
   const newId = sanitizeId(updatedModel, updatedColor, updatedName, updatedVariation);
 
@@ -2350,6 +2355,7 @@ app.put("/api/catalog/:id", async (req, res) => {
     name: updatedName,
     color: updatedColor,
     variation: updatedVariation,
+    notes: updatedNotes,
     groupColor: groupColor !== undefined ? !!groupColor : currentItem.groupColor,
     groupVariation: groupVariation !== undefined ? !!groupVariation : currentItem.groupVariation,
     customImage: resolvedImage,
