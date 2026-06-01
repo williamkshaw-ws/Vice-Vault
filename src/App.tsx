@@ -226,6 +226,7 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<any | null>(null);
   const [userProfile, setUserProfile] = useState<{ uid: string; displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; shareBag?: boolean; shareToken?: string; pendingFriendRequestsCount?: number } | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isLoadingCloudData, setIsLoadingCloudData] = useState(false);
   const [isCloudDataLoaded, setIsCloudDataLoaded] = useState(false);
   const [accentColor, setAccentColor] = useState("#2563eb");
@@ -240,7 +241,7 @@ export default function App() {
 
   // State for tracked owned balls
   const [balls, setBalls] = useState<GolfBall[]>(() => {
-    const saved = localStorage.getItem("vice_vault_balls");
+    const saved = localStorage.getItem("vice_vault_guest_v2");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -675,14 +676,14 @@ export default function App() {
   // Firebase Auth listener and Cloud sync loader
   useEffect(() => {
     // Clean local storage once of any legacy mock balls to prevent uploading back
-    const saved = localStorage.getItem("vice_vault_balls");
+    const saved = localStorage.getItem("vice_vault_guest_v2");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
           const filtered = filterLegacyBalls(parsed);
           if (filtered.length !== parsed.length) {
-            localStorage.setItem("vice_vault_balls", JSON.stringify(filtered));
+            localStorage.setItem("vice_vault_guest_v2", JSON.stringify(filtered));
           }
         }
       } catch (e) {}
@@ -718,6 +719,7 @@ export default function App() {
         localStorage.removeItem("vice_vault_mock_user");
         
         setCurrentUser(user);
+        setIsLoadingCloudData(true);
         try {
           // 1. Load User Profile from the Server API (which resolves standard Firestore documents securely)
           let userDocData: any = null;
@@ -809,6 +811,7 @@ export default function App() {
         } finally {
           setIsLoadingCloudData(false);
           setIsCloudDataLoaded(true);
+          setIsAuthLoading(false);
         }
       } else {
         // Logged out / local-only fallback
@@ -818,9 +821,10 @@ export default function App() {
           setIsCloudDataLoaded(false);
           setUserDropdownOpen(false);
 
-          const savedBalls = localStorage.getItem("vice_vault_balls");
+          const savedBalls = localStorage.getItem("vice_vault_guest_v2");
           setBalls(savedBalls ? filterLegacyBalls(JSON.parse(savedBalls)) : INITIAL_OWNED_BALLS);
         }
+        setIsAuthLoading(false);
       }
     });
 
@@ -1110,7 +1114,7 @@ export default function App() {
         body: JSON.stringify({ balls })
       }).catch(err => console.error("Error writing locker to server:", err));
     } else if (!currentUser) {
-      localStorage.setItem("vice_vault_balls", JSON.stringify(balls));
+      localStorage.setItem("vice_vault_guest_v2", JSON.stringify(balls));
     }
   }, [balls, currentUser, isCloudDataLoaded]);
 
@@ -1433,7 +1437,7 @@ export default function App() {
     setBalls(INITIAL_OWNED_BALLS);
     const standardCatalog = generateDefaultCatalog();
     setCatalog(standardCatalog);
-    localStorage.removeItem("vice_vault_balls");
+    localStorage.removeItem("vice_vault_guest_v2");
     localStorage.removeItem("vice_vault_catalog");
     setSearchQuery("");
     setSelectedBrandFilter("ALL");
@@ -2050,7 +2054,7 @@ export default function App() {
                             setAccentColor("#2563eb");
                             setUserDropdownOpen(false);
 
-                            const savedBalls = localStorage.getItem("vice_vault_balls");
+                            const savedBalls = localStorage.getItem("vice_vault_guest_v2");
                             setBalls(savedBalls ? filterLegacyBalls(JSON.parse(savedBalls)) : INITIAL_OWNED_BALLS);
                           } catch (err) {
                             console.error("Sign out error:", err);
@@ -2328,7 +2332,12 @@ export default function App() {
                   </div>
                 )}
 
-                {balls.length === 0 ? (
+                {(isAuthLoading || isLoadingCloudData) ? (
+                  <div className="py-20 text-center rounded-3xl border border-neutral-850 bg-neutral-900/40 flex flex-col items-center justify-center shadow-inner">
+                    <RefreshCw className="w-8 h-8 text-[#2563eb] animate-spin mb-3 opacity-80" />
+                    <h4 className="font-bold text-neutral-400 text-xs uppercase tracking-wider">Loading Vault...</h4>
+                  </div>
+                ) : balls.length === 0 ? (
                   <div className="py-20 text-center rounded-3xl border-2 border-dashed border-neutral-850 bg-neutral-950/10 text-neutral-400">
                     <GolfBagIcon className="w-12 h-12 text-neutral-700 mx-auto mb-3" />
                     <h4 className="font-bold text-neutral-350 text-sm">Your bag is currently empty</h4>
