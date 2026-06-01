@@ -692,6 +692,43 @@ async function cleanDatabaseFields() {
   }
 }
 
+// Helper to upload base64 image to Firebase Storage
+async function uploadBase64ToStorage(base64Str: string | undefined, folder: string = "images"): Promise<string | undefined> {
+  if (!base64Str || !base64Str.startsWith('data:image/')) return base64Str;
+  if (!isFirebaseAdminInitialized) {
+    console.warn("Firebase Admin not initialized, skipping storage upload");
+    return base64Str;
+  }
+  
+  const matches = base64Str.match(/^data:image\/([a-zA-Z0-9+.-]+);base64,(.+)$/);
+  if (!matches || matches.length !== 3) {
+    return base64Str; // Not a valid base64 image string, return as is
+  }
+  
+  try {
+    const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+    const base64Data = matches[2];
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    // Create random filename
+    const uuid = 'xxxx-xxxx-xxxx'.replace(/[x]/g, () => (Math.random() * 16 | 0).toString(16));
+    const filename = `${folder}/${Date.now()}-${uuid}.${ext}`;
+    
+    const bucket = admin.storage().bucket();
+    const file = bucket.file(filename);
+    
+    await file.save(buffer, {
+      metadata: { contentType: `image/${ext}` }
+    });
+    
+    // Return Firebase Storage download URL
+    return `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(filename)}?alt=media`;
+  } catch (error) {
+    console.error("Failed to upload base64 image to storage:", error);
+    return base64Str; // Fallback to base64 on failure
+  }
+}
+
 // --- FIREBASE ADMIN SDK INTEGRATION SETUP ---
 const SERVICE_ACCOUNT_FILE = path.join(process.cwd(), "service-account.json");
 let dbAdmin: admin.firestore.Firestore | null = null;
@@ -701,8 +738,10 @@ if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
   try {
     const rawConfig = fs.readFileSync(SERVICE_ACCOUNT_FILE, "utf-8");
     const serviceAccount = JSON.parse(rawConfig);
+    const storageBucket = process.env.VITE_FIREBASE_STORAGE_BUCKET || process.env.FIREBASE_STORAGE_BUCKET || `${serviceAccount.project_id}.firebasestorage.app`;
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
+      credential: admin.credential.cert(serviceAccount),
+      storageBucket
     });
     dbAdmin = admin.firestore();
     dbAdmin.settings({ ignoreUndefinedProperties: true });
@@ -1495,6 +1534,22 @@ app.post("/api/users/:uid/locker", async (req, res) => {
   if (!balls) {
     return res.status(400).json({ error: "Balls array is required." });
   }
+
+  if (Array.isArray(balls)) {
+    for (let i = 0; i < balls.length; i++) {
+      const b = balls[i];
+      if (b.customImage?.startsWith('data:image/')) {
+        b.customImage = await uploadBase64ToStorage(b.customImage, `users/${uid}`);
+      }
+      if (b.customImageSleeve?.startsWith('data:image/')) {
+        b.customImageSleeve = await uploadBase64ToStorage(b.customImageSleeve, `users/${uid}`);
+      }
+      if (b.customImageBox?.startsWith('data:image/')) {
+        b.customImageBox = await uploadBase64ToStorage(b.customImageBox, `users/${uid}`);
+      }
+    }
+  }
+
   await saveUserLocker(uid, balls);
   res.json({ success: true });
 });
@@ -2101,9 +2156,9 @@ app.post("/api/catalog", async (req, res) => {
     notes: notes ? notes.trim() : undefined,
     groupColor: groupColor !== undefined ? !!groupColor : undefined,
     groupVariation: groupVariation !== undefined ? !!groupVariation : undefined,
-    customImage: resolvedImage || (existingItem ? existingItem.customImage : undefined),
-    customImageSleeve: resolvedImageSleeve || (existingItem ? existingItem.customImageSleeve : undefined),
-    customImageBox: resolvedImageBox || (existingItem ? existingItem.customImageBox : undefined),
+    customImage: await uploadBase64ToStorage(resolvedImage || (existingItem ? existingItem.customImage : undefined), "catalog"),
+    customImageSleeve: await uploadBase64ToStorage(resolvedImageSleeve || (existingItem ? existingItem.customImageSleeve : undefined), "catalog"),
+    customImageBox: await uploadBase64ToStorage(resolvedImageBox || (existingItem ? existingItem.customImageBox : undefined), "catalog"),
     bundleItems: bundleItems || undefined
   };
 
@@ -2361,9 +2416,9 @@ app.put("/api/catalog/:id", async (req, res) => {
     notes: updatedNotes,
     groupColor: groupColor !== undefined ? !!groupColor : currentItem.groupColor,
     groupVariation: groupVariation !== undefined ? !!groupVariation : currentItem.groupVariation,
-    customImage: resolvedImage,
-    customImageSleeve: resolvedImageSleeve,
-    customImageBox: resolvedImageBox,
+    customImage: await uploadBase64ToStorage(resolvedImage, "catalog"),
+    customImageSleeve: await uploadBase64ToStorage(resolvedImageSleeve, "catalog"),
+    customImageBox: await uploadBase64ToStorage(resolvedImageBox, "catalog"),
     bundleItems: bundleItems !== undefined ? bundleItems : currentItem.bundleItems
   };
 
@@ -2391,6 +2446,73 @@ app.delete("/api/catalog/:id", async (req, res) => {
 });
 
 // --- VITE DEV SERVICE MIDDLEWARE INTEGRATION ---
+// MIGRATION: Convert base64 to Firebase Storage
+app.post("/api/admin/migrate-images", async (req, res) => {
+  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  if (!(await verifyAdmin(actingUserId))) {
+    return res.status(403).json({ error: "Access Denied. Only Admin users can run migrations." });
+  }
+
+  let catalogCount = 0;
+  let lockerCount = 0;
+
+  try {
+    // Migrate catalog
+    const catalog = await getGlobalCatalog();
+    for (const item of catalog) {
+      let updated = false;
+      if (item.customImage?.startsWith('data:image/')) {
+        item.customImage = await uploadBase64ToStorage(item.customImage, "catalog");
+        updated = true;
+      }
+      if (item.customImageSleeve?.startsWith('data:image/')) {
+        item.customImageSleeve = await uploadBase64ToStorage(item.customImageSleeve, "catalog");
+        updated = true;
+      }
+      if (item.customImageBox?.startsWith('data:image/')) {
+        item.customImageBox = await uploadBase64ToStorage(item.customImageBox, "catalog");
+        updated = true;
+      }
+      if (updated) {
+        await saveGlobalCatalogItem(item);
+        catalogCount++;
+      }
+    }
+
+    // Migrate all users lockers
+    const users = await getUsersList();
+    for (const user of users) {
+      const balls = await getUserLocker(user.uid);
+      if (balls && Array.isArray(balls)) {
+        let updated = false;
+        for (const b of balls) {
+          if (b.customImage?.startsWith('data:image/')) {
+            b.customImage = await uploadBase64ToStorage(b.customImage, `users/${user.uid}`);
+            updated = true;
+          }
+          if (b.customImageSleeve?.startsWith('data:image/')) {
+            b.customImageSleeve = await uploadBase64ToStorage(b.customImageSleeve, `users/${user.uid}`);
+            updated = true;
+          }
+          if (b.customImageBox?.startsWith('data:image/')) {
+            b.customImageBox = await uploadBase64ToStorage(b.customImageBox, `users/${user.uid}`);
+            updated = true;
+          }
+        }
+        if (updated) {
+          await saveUserLocker(user.uid, balls);
+          lockerCount++;
+        }
+      }
+    }
+
+    res.json({ success: true, catalogMigrated: catalogCount, lockersMigrated: lockerCount });
+  } catch (err: any) {
+    console.error("Migration error:", err);
+    res.status(500).json({ error: err.message || "Migration failed" });
+  }
+});
+
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
