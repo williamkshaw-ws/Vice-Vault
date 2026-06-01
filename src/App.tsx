@@ -255,6 +255,8 @@ export default function App() {
     return INITIAL_OWNED_BALLS;
   });
 
+  const [bagFilter, setBagFilter] = useState<'ea' | 'sleeve' | 'box' | null>(null);
+
   // State for searchable database catalog
   const [catalog, setCatalog] = useState<CatalogItem[]>(() => {
     const saved = localStorage.getItem("vice_vault_catalog");
@@ -2321,18 +2323,30 @@ export default function App() {
                 {/* Package Type Counts Status Bar */}
                 {balls.length > 0 && (
                   <div className="grid grid-cols-3 gap-2 bg-neutral-950 p-2 rounded-xl border border-neutral-850/70 text-center text-xs font-mono">
-                    <div className="flex flex-col p-1.5 bg-neutral-900/50 rounded-lg">
-                      <span className="text-neutral-500 text-[9px] uppercase tracking-wider">Balls</span>
+                    <button 
+                      type="button"
+                      onClick={() => setBagFilter(bagFilter === 'ea' ? null : 'ea')}
+                      className={`flex flex-col p-1.5 rounded-lg transition-all cursor-pointer border ${bagFilter === 'ea' ? 'bg-neutral-900 border-black shadow-md' : 'bg-neutral-900/50 hover:bg-neutral-800/50 border-transparent'}`}
+                    >
+                      <span className={`text-[9px] uppercase tracking-wider transition-colors ${bagFilter === 'ea' ? 'text-neutral-400 font-bold' : 'text-neutral-500'}`}>Balls</span>
                       <span className="text-white font-black text-sm mt-0.5">{eaCount}</span>
-                    </div>
-                    <div className="flex flex-col p-1.5 bg-neutral-900/50 rounded-lg border-x border-neutral-850/10">
-                      <span className="text-neutral-500 text-[9px] uppercase tracking-wider">Sleeves</span>
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => setBagFilter(bagFilter === 'sleeve' ? null : 'sleeve')}
+                      className={`flex flex-col p-1.5 rounded-lg transition-all cursor-pointer border ${bagFilter === 'sleeve' ? 'bg-neutral-900 border-black shadow-md' : 'bg-neutral-900/50 hover:bg-neutral-800/50 border-transparent'}`}
+                    >
+                      <span className={`text-[9px] uppercase tracking-wider transition-colors ${bagFilter === 'sleeve' ? 'text-neutral-400 font-bold' : 'text-neutral-500'}`}>Sleeves</span>
                       <span className="text-white font-black text-sm mt-0.5">{sleeveCount}</span>
-                    </div>
-                    <div className="flex flex-col p-1.5 bg-neutral-900/50 rounded-lg">
-                      <span className="text-neutral-500 text-[9px] uppercase tracking-wider">Boxes</span>
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => setBagFilter(bagFilter === 'box' ? null : 'box')}
+                      className={`flex flex-col p-1.5 rounded-lg transition-all cursor-pointer border ${bagFilter === 'box' ? 'bg-neutral-900 border-black shadow-md' : 'bg-neutral-900/50 hover:bg-neutral-800/50 border-transparent'}`}
+                    >
+                      <span className={`text-[9px] uppercase tracking-wider transition-colors ${bagFilter === 'box' ? 'text-neutral-400 font-bold' : 'text-neutral-500'}`}>Boxes</span>
                       <span className="text-white font-black text-sm mt-0.5">{boxCount}</span>
-                    </div>
+                    </button>
                   </div>
                 )}
 
@@ -2351,7 +2365,9 @@ export default function App() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-4" id="owned-list-container">
-                    {balls.map((ball) => (
+                    {balls
+                      .filter(ball => !bagFilter || ball.packageType === bagFilter || (!ball.packageType && bagFilter === 'ea'))
+                      .map((ball) => (
                       <OwnedBallCard
                         key={ball.id}
                         ball={ball}
