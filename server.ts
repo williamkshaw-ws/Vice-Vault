@@ -2513,6 +2513,14 @@ app.post("/api/admin/migrate-images", async (req, res) => {
   }
 });
 
+app.get("/api/admin/status", (req, res) => {
+  res.json({
+    isFirebaseAdminInitialized,
+    hasServiceAccount: fs.existsSync(SERVICE_ACCOUNT_FILE),
+    envBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || process.env.FIREBASE_STORAGE_BUCKET || "none"
+  });
+});
+
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
