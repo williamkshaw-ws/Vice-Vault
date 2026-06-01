@@ -2231,9 +2231,13 @@ app.post("/api/catalog/bulk", async (req, res) => {
           }
         }
 
-        newItem.customImage = resolvedImage;
-        newItem.customImageSleeve = resolvedImageSleeve;
-        newItem.customImageBox = resolvedImageBox;
+        newItem.customImage = await uploadBase64ToStorage(resolvedImage, "catalog");
+        newItem.customImageSleeve = await uploadBase64ToStorage(resolvedImageSleeve, "catalog");
+        newItem.customImageBox = await uploadBase64ToStorage(resolvedImageBox, "catalog");
+        
+        resolvedImage = newItem.customImage;
+        resolvedImageSleeve = newItem.customImageSleeve;
+        resolvedImageBox = newItem.customImageBox;
 
         // Add to Firestore catalog collection in batch
         const catDocRef = dbAdmin.collection("catalog").doc(newId);
@@ -2302,9 +2306,9 @@ app.post("/api/catalog/bulk", async (req, res) => {
         }
       }
 
-      newItem.customImage = resolvedImage;
-      newItem.customImageSleeve = resolvedImageSleeve;
-      newItem.customImageBox = resolvedImageBox;
+      newItem.customImage = await uploadBase64ToStorage(resolvedImage, "catalog");
+      newItem.customImageSleeve = await uploadBase64ToStorage(resolvedImageSleeve, "catalog");
+      newItem.customImageBox = await uploadBase64ToStorage(resolvedImageBox, "catalog");
 
       const idx = localCatalog.findIndex(c => c.id === newId);
       if (idx > -1) {
