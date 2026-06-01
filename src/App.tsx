@@ -170,6 +170,43 @@ const hexToRgb = (hex: string) => {
   return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : "124, 179, 0";
 };
 
+const getUniqueIdForBall = (b: GolfBall, catalog: CatalogItem[]) => {
+  const match = catalog.find(c => {
+    const modelMatch = c.model.trim().toLowerCase() === b.model.trim().toLowerCase();
+    const nameMatch = (c.name || "").trim().toLowerCase() === (b.name || "").trim().toLowerCase();
+    if (!modelMatch || !nameMatch) return false;
+    
+    // Exact match for non-box or explicit color
+    if (c.color.trim().toLowerCase() === b.color.trim().toLowerCase() && 
+        (c.variation || "").trim().toLowerCase() === (b.variation || "").trim().toLowerCase()) {
+      return true;
+    }
+    
+    // Grouped match for empty color Box
+    if (b.packageType === "box" && b.color === "" && (c.groupColor || c.groupVariation)) {
+      return true;
+    }
+    
+    return false;
+  });
+
+  if (match) {
+    if (match.groupColor || match.groupVariation) {
+      return `${match.model.trim().toLowerCase()}|${(match.name || "").trim().toLowerCase()}`;
+    }
+    return `${match.model.trim().toLowerCase()}|${(match.name || "").trim().toLowerCase()}|${match.color.trim().toLowerCase()}|${(match.variation || "").trim().toLowerCase()}|${(match.year || "").trim().toLowerCase()}`;
+  }
+
+  return `${b.model.trim().toLowerCase()}|${(b.name || "").trim().toLowerCase()}|${b.color.trim().toLowerCase()}|${(b.variation || "").trim().toLowerCase()}|${(b.year || "").trim().toLowerCase()}`;
+};
+
+const getUniqueIdForCatalogItem = (c: CatalogItem) => {
+  if (c.groupColor || c.groupVariation) {
+    return `${c.model.trim().toLowerCase()}|${(c.name || "").trim().toLowerCase()}`;
+  }
+  return `${c.model.trim().toLowerCase()}|${(c.name || "").trim().toLowerCase()}|${c.color.trim().toLowerCase()}|${(c.variation || "").trim().toLowerCase()}|${(c.year || "").trim().toLowerCase()}`;
+};
+
 export default function App() {
   // Theme state: 'light' | 'dark' | 'system'
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>(() => {
@@ -1530,11 +1567,15 @@ export default function App() {
     return balls.reduce((sum, b) => sum + b.quantity, 0);
   }, [balls]);
 
+  const totalCatalogUniqueSize = useMemo(() => {
+    return new Set(catalog.map(getUniqueIdForCatalogItem)).size;
+  }, [catalog]);
+
   const totalUniqueModels = useMemo(() => {
     return new Set(
-      balls.map(b => `${b.model.trim().toLowerCase()}|${b.color.trim().toLowerCase()}|${(b.year || "").trim().toLowerCase()}`)
+      balls.map(b => getUniqueIdForBall(b, catalog))
     ).size;
-  }, [balls]);
+  }, [balls, catalog]);
 
   const eaCount = useMemo(() => {
     return balls.filter(b => b.packageType === "ea" || !b.packageType).reduce((sum, b) => sum + b.quantity, 0);
@@ -1648,8 +1689,8 @@ export default function App() {
                 <div>
                   <span className="text-[10px] font-mono text-neutral-500 uppercase block tracking-wider font-bold">Unique Balls</span>
                   <span className="font-sans font-black text-2xl text-white tracking-tight">
-                    {new Set(sharedLockerBalls.map(b => `${b.model.trim().toLowerCase()}|${b.color.trim().toLowerCase()}|${(b.year || "").trim().toLowerCase()}`)).size}
-                    <span className="text-sm text-neutral-500 ml-1">/ {catalog.length}</span>
+                    {new Set(sharedLockerBalls.map(b => getUniqueIdForBall(b, catalog))).size}
+                    <span className="text-sm text-neutral-500 ml-1">/ {totalCatalogUniqueSize}</span>
                   </span>
                 </div>
                 <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
@@ -2094,7 +2135,7 @@ export default function App() {
               <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-neutral-850 bg-neutral-950">
                 <BallVaultIcon className="w-5 h-5 text-[#2563eb]" />
                 <span className="text-xs font-black uppercase tracking-wider text-neutral-300">
-                  Ball Vault ({catalog.length} Available Designs)
+                  Ball Vault ({totalCatalogUniqueSize} Available Designs)
                 </span>
               </div>
 
@@ -2215,7 +2256,7 @@ export default function App() {
                     </span>
                     <span className="font-sans font-black text-2xl text-white tracking-tight">
                       {totalUniqueModels}
-                      <span className="text-sm text-neutral-500 ml-1">/ {catalog.length}</span>
+                      <span className="text-sm text-neutral-500 ml-1">/ {totalCatalogUniqueSize}</span>
                     </span>
                   </div>
                   <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
@@ -2843,7 +2884,7 @@ export default function App() {
                   </div>
                   <div className="flex flex-col items-end gap-1.5 shrink-0">
                     <span className="text-[9px] bg-neutral-950 border border-neutral-850 text-neutral-400 px-2 py-0.5 rounded font-mono">
-                      {catalog.length} BALLS
+                      {totalCatalogUniqueSize} DESIGNS
                     </span>
                     <div className="flex items-center gap-1.5">
                       {catalog.length > 0 && (
