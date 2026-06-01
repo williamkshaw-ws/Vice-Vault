@@ -738,7 +738,7 @@ if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
   try {
     const rawConfig = fs.readFileSync(SERVICE_ACCOUNT_FILE, "utf-8");
     const serviceAccount = JSON.parse(rawConfig);
-    const storageBucket = process.env.VITE_FIREBASE_STORAGE_BUCKET || process.env.FIREBASE_STORAGE_BUCKET || `${serviceAccount.project_id}.firebasestorage.app`;
+    const storageBucket = process.env.VITE_FIREBASE_STORAGE_BUCKET || process.env.FIREBASE_STORAGE_BUCKET || `${serviceAccount.project_id}.appspot.com`;
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
       storageBucket
