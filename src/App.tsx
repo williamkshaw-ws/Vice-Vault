@@ -1873,8 +1873,7 @@ export default function App() {
           
           {/* Logo & Brand statement */}
           <div className="flex items-center gap-3.5 text-center sm:text-left">
-            <div className="relative group">
-              <div className="absolute -inset-1 rounded-full blur-sm transition duration-1000 bg-gradient-to-r from-lime-500 to-emerald-500 opacity-20 group-hover:opacity-40" />
+            <div className="relative group flex items-center justify-center">
               <div className="relative w-11 h-11 flex items-center justify-center transition-colors">
                 <img src="/vault-logo.png" alt="Logo" className="w-11 h-11 object-contain drop-shadow-md scale-[2]" />
               </div>
