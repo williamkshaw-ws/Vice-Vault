@@ -2243,7 +2243,13 @@ app.post("/api/catalog/bulk", async (req, res) => {
         // Add to Firestore catalog collection in batch
         const catDocRef = dbAdmin.collection("catalog").doc(newId);
         const { id, ...dataToSave } = newItem;
-        batch.set(catDocRef, dataToSave, { merge: true });
+        const firestoreData: any = { ...dataToSave };
+        Object.keys(firestoreData).forEach(key => {
+          if (firestoreData[key] === undefined) {
+            firestoreData[key] = admin.firestore.FieldValue.delete();
+          }
+        });
+        batch.set(catDocRef, firestoreData, { merge: true });
         opCount++;
 
         // Add to preserved images in batch if images exist
