@@ -40,7 +40,9 @@ let currentlyAddingCard: {
 
 export default function CatalogItemCard({ item, subItems = [], onAddToLocker, isReadOnly = false }: CatalogItemCardProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [quantity, setQuantity] = useState(12); // Defaults to a standard Box
+  const isBundle = item.bundleItems && item.bundleItems.length > 0;
+  const bundleTotal = isBundle ? item.bundleItems!.reduce((acc, b) => acc + b.qty, 0) : 12;
+  const [quantity, setQuantity] = useState(isBundle ? bundleTotal : 12); // Defaults to a standard Box or Bundle Total
   const [pkgType, setPkgType] = useState<'sleeve' | 'box' | 'ea'>('box');
   const [playNumber, setPlayNumber] = useState<number>(1);
   const [customNumberInput, setCustomNumberInput] = useState<string>("");
@@ -190,8 +192,8 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
   };
 
   const incrementQty = () => {
-    if (pkgType === 'box') {
-      setQuantity((q) => q + 12);
+    if (isBundle || pkgType === 'box') {
+      setQuantity((q) => q + bundleTotal);
     } else if (pkgType === 'sleeve') {
       setQuantity((q) => q + 3);
     } else {
@@ -200,12 +202,12 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
   };
 
   const decrementQty = () => {
-    if (pkgType === 'box') {
-      setQuantity((q) => (q > 12 ? q - 12 : 12));
+    if (isBundle || pkgType === 'box') {
+      setQuantity((q) => Math.max(bundleTotal, q - bundleTotal));
     } else if (pkgType === 'sleeve') {
-      setQuantity((q) => (q > 3 ? q - 3 : 3));
+      setQuantity((q) => Math.max(3, q - 3));
     } else {
-      setQuantity((q) => (q > 1 ? q - 1 : 1));
+      setQuantity((q) => Math.max(1, q - 1));
     }
   };
 
@@ -460,7 +462,9 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
                     inputMode="numeric"
                     pattern="[0-9]*"
                     value={
-                      pkgType === 'box'
+                      isBundle
+                        ? Math.max(1, Math.round(quantity / bundleTotal))
+                        : pkgType === 'box'
                         ? Math.max(1, Math.round(quantity / 12))
                         : pkgType === 'sleeve'
                         ? Math.max(1, Math.round(quantity / 3))
@@ -468,7 +472,9 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
                     }
                     onChange={(e) => {
                       const val = Math.max(1, parseInt(e.target.value.replace(/[^0-9]/g, "")) || 1);
-                      if (pkgType === 'box') {
+                      if (isBundle) {
+                        setQuantity(val * bundleTotal);
+                      } else if (pkgType === 'box') {
                         setQuantity(val * 12);
                       } else if (pkgType === 'sleeve') {
                         setQuantity(val * 3);
@@ -489,38 +495,42 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
 
                 {/* Quick Presets */}
                 <div className="flex gap-1 flex-1 min-w-0">
+                  {!isBundle && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setQuantity(1);
+                          setPkgType('ea');
+                        }}
+                        className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
+                          pkgType === 'ea'
+                            ? "bg-[#2563eb] border-[#2563eb] text-neutral-950 font-bold"
+                            : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
+                        }`}
+                      >
+                        Ball
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setQuantity(3);
+                          setPkgType('sleeve');
+                        }}
+                        className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
+                          pkgType === 'sleeve'
+                            ? "bg-[#2563eb] border-[#2563eb] text-neutral-950 font-bold"
+                            : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
+                        }`}
+                      >
+                        Sleeve
+                      </button>
+                    </>
+                  )}
                   <button
                     type="button"
                     onClick={() => {
-                      setQuantity(1);
-                      setPkgType('ea');
-                    }}
-                    className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
-                      pkgType === 'ea'
-                        ? "bg-[#2563eb] border-[#2563eb] text-neutral-950 font-bold"
-                        : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
-                    }`}
-                  >
-                    Ball
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setQuantity(3);
-                      setPkgType('sleeve');
-                    }}
-                    className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
-                      pkgType === 'sleeve'
-                        ? "bg-[#2563eb] border-[#2563eb] text-neutral-950 font-bold"
-                        : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
-                    }`}
-                  >
-                    Sleeve
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setQuantity(12);
+                      setQuantity(isBundle ? bundleTotal : 12);
                       setPkgType('box');
                     }}
                     className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
@@ -529,7 +539,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
                         : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
                     }`}
                   >
-                    Box
+                    {isBundle ? 'Bundle' : 'Box'}
                   </button>
                 </div>
               </div>
