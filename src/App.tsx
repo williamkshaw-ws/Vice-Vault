@@ -1664,7 +1664,13 @@ export default function App() {
   }, [balls]);
 
   const boxCount = useMemo(() => {
-    return balls.filter(b => b.packageType === "box").reduce((sum, b) => sum + Math.round(b.quantity / 12), 0);
+    return balls.filter(b => b.packageType === "box").reduce((sum, b) => {
+      if (b.bundleItems && b.bundleItems.length > 0) {
+        const bundleTotal = b.bundleItems.reduce((acc, item) => acc + item.qty, 0);
+        return sum + Math.max(1, Math.round(b.quantity / bundleTotal));
+      }
+      return sum + Math.round(b.quantity / 12);
+    }, 0);
   }, [balls]);
 
   // Check if we are viewing a shared locker link
@@ -2413,7 +2419,7 @@ export default function App() {
                       onClick={() => setBagFilter(bagFilter === 'box' ? null : 'box')}
                       className={`flex flex-col p-1.5 rounded-lg transition-all cursor-pointer border ${bagFilter === 'box' ? 'bg-neutral-900 border-neutral-350 shadow-md' : 'bg-neutral-900/50 hover:bg-neutral-800/50 border-transparent'}`}
                     >
-                      <span className={`text-[9px] uppercase tracking-wider transition-colors ${bagFilter === 'box' ? 'text-neutral-400 font-bold' : 'text-neutral-500'}`}>Boxes</span>
+                      <span className={`text-[9px] uppercase tracking-wider transition-colors ${bagFilter === 'box' ? 'text-neutral-400 font-bold' : 'text-neutral-500'}`}>Boxes/Bundles</span>
                       <span className="text-white font-black text-sm mt-0.5">{boxCount}</span>
                     </button>
                   </div>
