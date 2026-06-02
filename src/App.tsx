@@ -1345,7 +1345,8 @@ export default function App() {
         const updated = [...prev];
         updated[existingIdx] = {
           ...updated[existingIdx],
-          quantity: updated[existingIdx].quantity + qty
+          quantity: updated[existingIdx].quantity + qty,
+          bundleItems
         };
         return updated;
       } else {
