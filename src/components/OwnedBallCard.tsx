@@ -12,8 +12,9 @@ interface OwnedBallCardProps {
   key?: string | number;
   ball: GolfBall;
   catalog: CatalogItem[];
-  onUpdateBall: (id: string, updatedFields: Partial<GolfBall>) => void;
-  onDelete: (id: string) => void;
+  onUpdateBall?: (id: string, updatedFields: Partial<GolfBall>) => void;
+  onDelete?: (id: string) => void;
+  readOnly?: boolean;
 }
 
 let currentlyEditingCard: {
@@ -27,7 +28,8 @@ export default function OwnedBallCard({
   ball,
   catalog,
   onUpdateBall,
-  onDelete
+  onDelete,
+  readOnly = false
 }: OwnedBallCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showBundleContents, setShowBundleContents] = useState(false);
@@ -89,6 +91,7 @@ export default function OwnedBallCard({
   }, [isEditing, editQty, editPkgType, editPlayNumber, editCondition, editNotes, editYear, ball]);
 
   const startEditing = () => {
+    if (readOnly) return;
     if (currentlyEditingCard && currentlyEditingCard.id !== ball.id) {
       if (currentlyEditingCard.isDirty()) {
         currentlyEditingCard.promptAndSwitch(() => {
@@ -145,14 +148,17 @@ export default function OwnedBallCard({
   };
 
   const handleSave = () => {
-    onUpdateBall(ball.id, {
-      quantity: editQty,
-      packageType: editPkgType,
-      customNumber: editPkgType === 'box' ? 1 : editPlayNumber,
-      condition: editCondition,
-      notes: editNotes.trim(),
-      year: editYear,
-    });
+    if (readOnly) return;
+    if (onUpdateBall) {
+      onUpdateBall(ball.id, {
+        quantity: editQty,
+        packageType: editPkgType,
+        customNumber: editPkgType === 'box' ? 1 : editPlayNumber,
+        condition: editCondition,
+        notes: editNotes.trim(),
+        year: editYear,
+      });
+    }
     setIsEditing(false);
     if (currentlyEditingCard?.id === ball.id) {
       currentlyEditingCard = null;
@@ -491,7 +497,7 @@ export default function OwnedBallCard({
           <p className="text-[10px] text-neutral-400 mt-0.5 max-w-[220px] leading-snug">
             Delete <strong>{ball.model}{ball.name ? ` - ${ball.name}` : ''} ({ball.color})</strong> from your list?
           </p>
-          <div className="flex gap-2 mt-2 w-full max-w-[180px]">
+              <div className="flex gap-2 mt-2 w-full max-w-[180px]">
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(false)}
@@ -502,7 +508,7 @@ export default function OwnedBallCard({
             <button
               type="button"
               onClick={() => {
-                onDelete(ball.id);
+                if (onDelete) onDelete(ball.id);
                 setShowDeleteConfirm(false);
               }}
               className="flex-1 py-1 px-2 bg-rose-600 hover:bg-rose-500 text-white font-mono text-[9px] uppercase font-bold tracking-wider rounded-md transition-all cursor-pointer shadow-md shadow-rose-950/40"
@@ -561,24 +567,26 @@ export default function OwnedBallCard({
               </div>
 
               {/* Action Buttons (Edit and Delete) */}
-              <div className="flex items-center gap-1 shrink-0">
-                <button
-                  type="button"
-                  onClick={startEditing}
-                  className="text-neutral-500 hover:text-[#2563eb] p-1 flex-shrink-0 cursor-pointer transition-colors"
-                  title="Edit Ball Details"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="text-neutral-500 hover:text-rose-400 p-1 flex-shrink-0 cursor-pointer transition-colors"
-                  title="Wipe stack"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
+              {!readOnly && (
+                <div className="flex gap-0.5 ml-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={startEditing}
+                    className="p-1 hover:bg-neutral-800 text-neutral-500 hover:text-white rounded transition-colors cursor-pointer"
+                    title="Edit ball"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="p-1 hover:bg-rose-500/20 text-neutral-500 hover:text-rose-400 rounded transition-colors cursor-pointer"
+                    title="Remove from bag"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Condition badge */}

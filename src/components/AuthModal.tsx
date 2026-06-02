@@ -538,7 +538,8 @@ export default function AuthModal({
           username: cleanUsername,
           preferredColor: preferredColor,
           role: data.role || userProfile?.role || "User",
-          shareBag: data.shareBag
+          shareBag: data.shareBag,
+          shareToken: data.shareToken
         });
         onClose();
         setIsLoading(false);

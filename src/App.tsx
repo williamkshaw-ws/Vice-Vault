@@ -1817,107 +1817,12 @@ export default function App() {
                       : ball.quantity;
 
                     return (
-                      <div 
+                      <OwnedBallCard 
                         key={ball.id} 
-                        className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 flex gap-4 hover:border-neutral-750 transition-all duration-300 relative overflow-hidden"
-                      >
-                        {/* Ball Visual representation */}
-                        <div className="flex-shrink-0 flex flex-col items-center justify-center p-1 bg-neutral-950 rounded-xl border border-neutral-850 h-22 w-22 shadow-inner relative">
-                          <BallVisual 
-                            color={ball.color} 
-                            model={ball.model} 
-                            number={ball.packageType === 'box' ? undefined : ball.customNumber} 
-                            size="md" 
-                            customImage={ball.customImage}
-                            customImageSleeve={ball.customImageSleeve}
-                            customImageBox={ball.customImageBox}
-                            packageType={ball.packageType}
-                          />
-                          {ball.packageType !== 'box' && (
-                            <div className="absolute -bottom-1 text-[8px] font-mono uppercase bg-neutral-950 border border-neutral-800 text-neutral-400 px-1.5 py-0.5 rounded leading-none scale-90">
-                              #{ball.customNumber}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Content details */}
-                        <div className="flex-1 min-w-0 flex flex-col justify-between">
-                          <div>
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="text-[9px] font-mono tracking-widest text-[#2563eb] uppercase font-black">
-                                {ball.model}
-                              </span>
-                              <span className={`text-[8px] px-1 py-0.2 rounded font-mono font-bold uppercase border tracking-wider scale-95 ${
-                                ball.packageType === 'box'
-                                  ? "bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-900/60 text-blue-700 dark:text-blue-400"
-                                  : ball.packageType === 'sleeve'
-                                  ? "bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-900/60 text-purple-700 dark:text-purple-400"
-                                  : "bg-teal-50 dark:bg-teal-950/40 border-teal-200 dark:border-teal-900/60 text-teal-700 dark:text-teal-400"
-                              }`}>
-                                {ball.packageType === 'box' ? 'Box' : ball.packageType === 'sleeve' ? 'Sleeve' : 'Ball'}
-                              </span>
-                            </div>
-                            <h4 className="font-sans font-black text-white text-base leading-tight truncate mt-0.5">
-                              {ball.color}
-                            </h4>
-
-                            {/* Condition badge */}
-                            <div className="mt-2 flex items-center gap-2 text-[10px] font-mono">
-                              <span className="text-neutral-500 uppercase">Condition:</span>
-                              <span className="text-neutral-300 font-bold border border-neutral-850 bg-neutral-950/40 px-2 py-0.5 rounded">
-                                {ball.condition}
-                              </span>
-                            </div>
-
-                            {/* Year Display */}
-                            {ball.year && (
-                              <div className="mt-1 flex items-center gap-2 text-[10px] font-mono">
-                                <span className="text-neutral-550 uppercase">Year:</span>
-                                <span className="text-neutral-300 font-bold border border-neutral-850 bg-neutral-950/40 px-2 py-0.5 rounded">
-                                  {ball.year}
-                                </span>
-                              </div>
-                            )}
-
-                            {/* Variation Display */}
-                            {ball.variation && (
-                              <div className="mt-1 flex items-center gap-2 text-[10px] font-mono">
-                                <span className="text-neutral-550 uppercase">Var:</span>
-                                <span className="text-neutral-300 font-bold border border-neutral-850 bg-neutral-950/40 px-2 py-0.5 rounded">
-                                  {ball.variation}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Quantity display */}
-                          <div className="mt-3 flex items-center justify-between gap-3 border-t border-neutral-850/60 pt-3 font-mono">
-                            <div className="flex-1 min-w-0 pr-1 flex items-center gap-1.5 text-xs text-neutral-455">
-                              <FileText className="w-3.5 h-3.5 text-neutral-500 flex-shrink-0" />
-                              <span className="italic truncate text-[11px] font-sans">
-                                {ball.notes || "No custom notes recorded."}
-                              </span>
-                            </div>
-                            <div className="px-3 py-1 bg-neutral-950 rounded-lg border border-neutral-850 text-xs font-mono font-black text-[#2563eb] shrink-0">
-                              <span>
-                                {displayQty}{" "}
-                                <span className="text-[10px] text-neutral-500 font-normal">
-                                  {ball.packageType === "box" 
-                                    ? (displayQty === 1 ? "Box" : "Boxes") 
-                                    : ball.packageType === "sleeve" 
-                                    ? (displayQty === 1 ? "Sleeve" : "Sleeves") 
-                                    : (displayQty === 1 ? "Ball" : "Balls")}
-                                </span>
-                                {ball.packageType !== "ea" && (
-                                  <span className="text-[9px] text-neutral-450 font-normal ml-1.5 font-sans">
-                                    ({ball.quantity} balls)
-                                  </span>
-                                )}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                        ball={ball} 
+                        catalog={catalog} 
+                        readOnly={true} 
+                      />
                     );
                   })}
                 </div>
