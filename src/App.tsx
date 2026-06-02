@@ -628,7 +628,8 @@ export default function App() {
             groupVariation: updatedGroupVariation,
             customImage: updatedFields.customImage,
             customImageSleeve: updatedFields.customImageSleeve,
-            customImageBox: updatedFields.customImageBox
+            customImageBox: updatedFields.customImageBox,
+            bundleItems: updatedFields.bundleItems
           })
         });
         if (!res.ok) {
@@ -1403,7 +1404,8 @@ export default function App() {
             groupVariation: newItem.groupVariation,
             customImage: newItem.customImage,
             customImageSleeve: newItem.customImageSleeve,
-            customImageBox: newItem.customImageBox
+            customImageBox: newItem.customImageBox,
+            bundleItems: newItem.bundleItems
           })
         });
         if (!res.ok) {
@@ -1425,7 +1427,8 @@ export default function App() {
           notes: newItem.notes ? newItem.notes.trim() : "",
           customImage: newItem.customImage || (existing ? existing.customImage : undefined),
           customImageSleeve: newItem.customImageSleeve || (existing ? existing.customImageSleeve : undefined),
-          customImageBox: newItem.customImageBox || (existing ? existing.customImageBox : undefined)
+          customImageBox: newItem.customImageBox || (existing ? existing.customImageBox : undefined),
+          bundleItems: newItem.bundleItems || (existing ? existing.bundleItems : undefined)
         };
       }
       setCatalog((prev) => {

@@ -1095,10 +1095,11 @@ async function saveGlobalCatalogItem(item: CatalogItem): Promise<void> {
     try {
       const { id, ...data } = item;
       const firestoreData: any = { ...data };
-      if (firestoreData.variation === undefined) firestoreData.variation = dbAdmin.firestore.FieldValue.delete();
-      if (firestoreData.notes === undefined) firestoreData.notes = dbAdmin.firestore.FieldValue.delete();
-      if (firestoreData.name === undefined) firestoreData.name = dbAdmin.firestore.FieldValue.delete();
-      if (firestoreData.bundleItems === undefined) firestoreData.bundleItems = dbAdmin.firestore.FieldValue.delete();
+      Object.keys(firestoreData).forEach(key => {
+        if (firestoreData[key] === undefined) {
+          firestoreData[key] = dbAdmin.firestore.FieldValue.delete();
+        }
+      });
       await dbAdmin.collection("catalog").doc(id).set(firestoreData, { merge: true });
     } catch (error) {
       console.error("Firestore saveGlobalCatalogItem failed:", error);
