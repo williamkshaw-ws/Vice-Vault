@@ -569,7 +569,8 @@ export default function App() {
           "Variation": item.variation || "",
           "Year": item.year || "",
           "Group By Color": item.groupColor ? "TRUE" : "FALSE",
-          "Group By Variation": item.groupVariation ? "TRUE" : "FALSE"
+          "Group By Variation": item.groupVariation ? "TRUE" : "FALSE",
+          "Bundle Data": item.bundleItems ? JSON.stringify(item.bundleItems) : ""
         };
 
         for (let i = 0; i < maxBallChunks; i++) {

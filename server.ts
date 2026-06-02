@@ -2185,7 +2185,7 @@ app.post("/api/catalog/bulk", async (req, res) => {
   const groupedItems: Record<string, CatalogItem> = {};
 
   for (const item of items) {
-    const { model, name, color, variation, groupColor, groupVariation, customImage, customImageSleeve, customImageBox } = item;
+    const { model, name, color, variation, groupColor, groupVariation, customImage, customImageSleeve, customImageBox, bundleItems } = item;
     if (!model || !name || !color) continue;
 
     const newId = sanitizeId(model, color, name, variation);
@@ -2202,7 +2202,8 @@ app.post("/api/catalog/bulk", async (req, res) => {
         groupVariation: groupVariation !== undefined ? !!groupVariation : undefined,
         customImage: customImage || (existing ? existing.customImage : undefined),
         customImageSleeve: customImageSleeve || (existing ? existing.customImageSleeve : undefined),
-        customImageBox: customImageBox || (existing ? existing.customImageBox : undefined)
+        customImageBox: customImageBox || (existing ? existing.customImageBox : undefined),
+        bundleItems: bundleItems || (existing ? existing.bundleItems : undefined)
       };
     }
   }

@@ -22,6 +22,7 @@ interface TempImportRow {
   customImage?: string;
   customImageSleeve?: string;
   customImageBox?: string;
+  bundleItems?: { catalogId: string; qty: number }[];
 }
 
 export default function XlsImporter({ onImportItems }: XlsImporterProps) {
@@ -232,6 +233,16 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
           groupVariation = parseBool(row[varGroupKey]);
         }
 
+        let bundleItems: any = undefined;
+        const bundleKey = Object.keys(row).find(k => k.toLowerCase().includes("bundle data"));
+        if (bundleKey && row[bundleKey]) {
+          try {
+            bundleItems = JSON.parse(String(row[bundleKey]));
+          } catch(e) {
+            console.error("Failed to parse bundle data for row", row);
+          }
+        }
+
         return {
           model: mVal,
           name: nameVal,
@@ -241,7 +252,8 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
           groupVariation,
           customImage: customImage || undefined,
           customImageSleeve: customImageSleeve || undefined,
-          customImageBox: customImageBox || undefined
+          customImageBox: customImageBox || undefined,
+          bundleItems
         };
       })
       .filter((row) => row.model.length > 0); // Need at least model name
@@ -336,7 +348,8 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
         groupVariation: row.groupVariation,
         customImage: row.customImage,
         customImageSleeve: row.customImageSleeve,
-        customImageBox: row.customImageBox
+        customImageBox: row.customImageBox,
+        bundleItems: row.bundleItems
       };
 
       return item;
