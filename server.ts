@@ -1097,7 +1097,7 @@ async function saveGlobalCatalogItem(item: CatalogItem): Promise<void> {
       const firestoreData: any = { ...data };
       Object.keys(firestoreData).forEach(key => {
         if (firestoreData[key] === undefined) {
-          firestoreData[key] = dbAdmin.firestore.FieldValue.delete();
+          firestoreData[key] = admin.firestore.FieldValue.delete();
         }
       });
       await dbAdmin.collection("catalog").doc(id).set(firestoreData, { merge: true });
