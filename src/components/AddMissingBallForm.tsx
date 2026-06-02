@@ -34,6 +34,7 @@ export default function AddMissingBallForm({
   const [isBundle, setIsBundle] = useState(false);
   const [bundleItems, setBundleItems] = useState<BundleItem[]>([]);
   const [bundleSearch, setBundleSearch] = useState("");
+  const [bundleModelFilter, setBundleModelFilter] = useState("All Models");
   const [selectedBundleItem, setSelectedBundleItem] = useState<string>("");
   const [bundleItemQty, setBundleItemQty] = useState(1);
   
@@ -77,11 +78,15 @@ export default function AddMissingBallForm({
     }
   }, [editItem]);
 
-  const filteredCatalog = catalog.filter(c => 
-    c.model.toLowerCase().includes(bundleSearch.toLowerCase()) || 
-    (c.name && c.name.toLowerCase().includes(bundleSearch.toLowerCase())) ||
-    c.color.toLowerCase().includes(bundleSearch.toLowerCase())
-  ).slice(0, 20); // show up to 20 to avoid lag
+  const availableModels = Array.from(new Set(catalog.map(c => c.model))).sort();
+
+  const filteredCatalog = catalog.filter(c => {
+    if (bundleModelFilter !== "All Models" && c.model !== bundleModelFilter) return false;
+    if (!bundleSearch.trim()) return true;
+    const searchWords = bundleSearch.toLowerCase().split(/\\s+/);
+    const combinedStr = `${c.model} ${c.name || ""} ${c.color} ${c.variation || ""}`.toLowerCase();
+    return searchWords.every(word => combinedStr.includes(word));
+  }).slice(0, 20); // show up to 20 to avoid lag
 
   const addBundleItem = () => {
     if (!selectedBundleItem) return;
@@ -336,13 +341,23 @@ export default function AddMissingBallForm({
                   <div>
                      <label className="block text-[9px] uppercase font-mono text-neutral-500 mb-1">Search Catalog</label>
                      <div className="flex flex-col gap-1">
-                       <input
-                         type="text"
-                         placeholder="Type to filter..."
-                         value={bundleSearch}
-                         onChange={e => setBundleSearch(e.target.value)}
-                         className="w-full bg-neutral-900 border border-neutral-800 rounded-lg py-1.5 px-2 text-xs text-white"
-                       />
+                       <div className="flex gap-1">
+                         <select 
+                           value={bundleModelFilter}
+                           onChange={e => setBundleModelFilter(e.target.value)}
+                           className="bg-neutral-900 border border-neutral-800 rounded-lg py-1.5 px-2 text-xs text-white w-[110px]"
+                         >
+                           <option value="All Models">All Models</option>
+                           {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
+                         </select>
+                         <input
+                           type="text"
+                           placeholder="Type to filter..."
+                           value={bundleSearch}
+                           onChange={e => setBundleSearch(e.target.value)}
+                           className="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg py-1.5 px-2 text-xs text-white min-w-0"
+                         />
+                       </div>
                        <select 
                          value={selectedBundleItem}
                          onChange={e => setSelectedBundleItem(e.target.value)}

@@ -2385,7 +2385,12 @@ app.put("/api/catalog/:id", async (req, res) => {
   const { model, name, color, variation, notes, groupColor, groupVariation, customImage, customImageSleeve, customImageBox, bundleItems } = req.body;
 
   const catalog = await getGlobalCatalog();
-  const currentItem = catalog.find(item => item.id === id);
+  let currentItem = catalog.find(item => item.id === id);
+  if (!currentItem) {
+    const decodedId = decodeURIComponent(id).toLowerCase();
+    currentItem = catalog.find(item => item.id.toLowerCase() === decodedId);
+  }
+  
   if (!currentItem) {
     return res.status(404).json({ error: "Design spec not found" });
   }
@@ -2426,8 +2431,8 @@ app.put("/api/catalog/:id", async (req, res) => {
     bundleItems: bundleItems !== undefined ? bundleItems : currentItem.bundleItems
   };
 
-  if (newId !== id) {
-    await deleteGlobalCatalogItem(id);
+  if (newId !== currentItem.id) {
+    await deleteGlobalCatalogItem(currentItem.id);
   }
   await saveGlobalCatalogItem(updatedItem);
   res.json(updatedItem);
@@ -2441,9 +2446,20 @@ app.delete("/api/catalog/:id", async (req, res) => {
   }
 
   const { id } = req.params;
-  const success = await deleteGlobalCatalogItem(id);
-  if (!success) {
+  const catalog = await getGlobalCatalog();
+  let currentItem = catalog.find(item => item.id === id);
+  if (!currentItem) {
+    const decodedId = decodeURIComponent(id).toLowerCase();
+    currentItem = catalog.find(item => item.id.toLowerCase() === decodedId);
+  }
+  
+  if (!currentItem) {
     return res.status(404).json({ error: "Design spec not found" });
+  }
+
+  const success = await deleteGlobalCatalogItem(currentItem.id);
+  if (!success) {
+    return res.status(500).json({ error: "Failed to delete spec" });
   }
 
   res.json({ success: true, message: "Successfully deleted spec" });
