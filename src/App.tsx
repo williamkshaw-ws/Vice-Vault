@@ -647,9 +647,11 @@ export default function App() {
           variation: updatedVariation === null ? undefined : updatedVariation,
           notes: updatedNotes === null ? undefined : updatedNotes,
           groupColor: updatedGroupColor,
+          groupVariation: updatedGroupVariation,
           customImage: updatedFields.customImage !== undefined ? updatedFields.customImage : originalItem.customImage,
           customImageSleeve: updatedFields.customImageSleeve !== undefined ? updatedFields.customImageSleeve : originalItem.customImageSleeve,
-          customImageBox: updatedFields.customImageBox !== undefined ? updatedFields.customImageBox : originalItem.customImageBox
+          customImageBox: updatedFields.customImageBox !== undefined ? updatedFields.customImageBox : originalItem.customImageBox,
+          bundleItems: updatedFields.bundleItems !== undefined ? updatedFields.bundleItems : originalItem.bundleItems
         };
         return prev.map((item) => (item.id === id ? newItem : item));
       });

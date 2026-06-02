@@ -138,7 +138,7 @@ export default function AddMissingBallForm({
       customImage,
       customImageSleeve,
       customImageBox,
-      bundleItems: isBundle && bundleItems.length > 0 ? bundleItems : undefined
+      bundleItems: isBundle && bundleItems.length > 0 ? bundleItems : []
     };
 
     if (editItem) {
