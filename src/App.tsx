@@ -2384,11 +2384,9 @@ export default function App() {
       <footer className="border-t border-neutral-850 bg-neutral-950 py-6 mt-12 text-neutral-600 text-xs">
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <span>© 2026 Golf Ball Vault. Clean, coordinates visual workspace.</span>
+            <span>© 2026 Golf Ball Vault.</span>
           </div>
           <div className="flex items-center gap-4 font-mono text-[10px]">
-            <span> Munich Design Engine ◄</span>
-            <span className="text-neutral-800">|</span>
             <span>All trade marks remain property of original owners.</span>
           </div>
         </div>
