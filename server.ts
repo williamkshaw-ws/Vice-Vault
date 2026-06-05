@@ -34,6 +34,7 @@ interface UserProfile {
   friends?: string[];
   friendRequestsIn?: string[];
   friendRequestsOut?: string[];
+  wishlist?: string[];
 }
 
 const OB_KEY = "ViceVaultSecretObfuscationKey_2026";
@@ -76,6 +77,7 @@ interface CatalogItem {
   notes?: string;
   groupColor?: boolean;
   groupVariation?: boolean;
+  bundleItems?: { catalogId: string; qty: number }[];
 }
 
 function isStrongPassword(password: string): boolean {
@@ -1211,6 +1213,7 @@ app.post("/api/auth/signup", async (req, res) => {
     role: newUser.role,
     shareBag: false,
     shareToken: encryptUsername(newUser.username || ""),
+    wishlist: newUser.wishlist || [],
     isMock: !isFirebaseAdminInitialized
   };
 
@@ -1289,6 +1292,7 @@ app.post("/api/auth/signin", async (req, res) => {
     role: user.role,
     shareBag: !!user.shareBag,
     shareToken: encryptUsername(user.username || ""),
+    wishlist: user.wishlist || [],
     isMock: true
   };
 
@@ -1478,7 +1482,8 @@ app.get("/api/friends/:id/bag/:friendUsername", async (req, res) => {
       displayName: friend.displayName,
       username: friend.username,
       avatarUrl: friend.avatarUrl,
-      preferredColor: friend.preferredColor
+      preferredColor: friend.preferredColor,
+      wishlist: friend.wishlist || []
     },
     balls
   });
@@ -1523,7 +1528,8 @@ app.get("/api/share/:token", async (req, res) => {
       username: user.username,
       avatarUrl: user.avatarUrl,
       preferredColor: user.preferredColor,
-      shareToken: token
+      shareToken: token,
+      wishlist: user.wishlist || []
     },
     balls
   });
@@ -1555,6 +1561,83 @@ app.post("/api/users/:uid/locker", async (req, res) => {
   res.json({ success: true });
 });
 
+// Toggle a catalog item in the user's wishlist
+app.post("/api/users/:uid/wishlist", async (req, res) => {
+  const { uid } = req.params;
+  const { catalogId } = req.body;
+  if (!catalogId) {
+    return res.status(400).json({ error: "catalogId is required." });
+  }
+
+  const resolvedId = await resolveUserDocId(uid);
+  
+  if (dbAdmin) {
+    try {
+      const userRef = dbAdmin.collection("users").doc(resolvedId);
+      const doc = await userRef.get();
+      if (doc.exists) {
+        const data = doc.data() || {};
+        let wishlist = Array.isArray(data.wishlist) ? [...data.wishlist] : [];
+        if (wishlist.includes(catalogId)) {
+          wishlist = wishlist.filter(id => id !== catalogId);
+        } else {
+          wishlist.push(catalogId);
+        }
+        await userRef.update({ wishlist });
+        return res.json({ success: true, wishlist });
+      }
+    } catch (e) {
+      console.error("Error updating wishlist in Firestore", e);
+    }
+  }
+
+  // Fallback to local file if Firestore is disabled
+  const users = await getUsersList();
+  const user = users.find(u => u.uid === resolvedId);
+  if (user) {
+    user.wishlist = user.wishlist || [];
+    if (user.wishlist.includes(catalogId)) {
+      user.wishlist = user.wishlist.filter(id => id !== catalogId);
+    } else {
+      user.wishlist.push(catalogId);
+    }
+    await saveUsers(users);
+    return res.json({ success: true, wishlist: user.wishlist });
+  }
+  
+  res.status(404).json({ error: "User not found" });
+});
+
+// Clear the user's wishlist
+app.post("/api/users/:uid/wishlist/clear", async (req, res) => {
+  const { uid } = req.params;
+
+  const resolvedId = await resolveUserDocId(uid);
+  
+  if (dbAdmin) {
+    try {
+      const userRef = dbAdmin.collection("users").doc(resolvedId);
+      const doc = await userRef.get();
+      if (doc.exists) {
+        await userRef.update({ wishlist: [] });
+        return res.json({ success: true, wishlist: [] });
+      }
+    } catch (e) {
+      console.error("Error clearing wishlist in Firestore", e);
+    }
+  }
+
+  // Fallback to local file if Firestore is disabled
+  const users = await getUsersList();
+  const user = users.find(u => u.uid === resolvedId);
+  if (user) {
+    user.wishlist = [];
+    await saveUserToDb(user);
+    res.json({ success: true, wishlist: [] });
+  } else {
+    res.status(404).json({ error: "User not found" });
+  }
+});
 
 
 // Fetch user profile details (Name, Username, avatarUrl, preferredColor, role)
@@ -1621,6 +1704,7 @@ app.get("/api/users/:id/profile", async (req, res) => {
     shareBag: !!user.shareBag,
     shareToken: encryptUsername(user.username || ""),
     pendingFriendRequestsCount: user.friendRequestsIn ? user.friendRequestsIn.length : 0,
+    wishlist: user.wishlist || [],
     isMock: false
   };
   res.json(clientUser);
@@ -1752,6 +1836,7 @@ app.patch("/api/users/:id/profile", async (req, res) => {
     role: user.role,
     shareBag: !!user.shareBag,
     shareToken: encryptUsername(user.username || ""),
+    wishlist: user.wishlist || [],
     isMock: true
   };
 

@@ -83,7 +83,7 @@ export default function AddMissingBallForm({
   const filteredCatalog = catalog.filter(c => {
     if (bundleModelFilter !== "All Models" && c.model !== bundleModelFilter) return false;
     if (!bundleSearch.trim()) return true;
-    const searchWords = bundleSearch.toLowerCase().split(/\\s+/);
+    const searchWords = bundleSearch.toLowerCase().split(/\s+/);
     const combinedStr = `${c.model} ${c.name || ""} ${c.color} ${c.variation || ""}`.toLowerCase();
     return searchWords.every(word => combinedStr.includes(word));
   }).slice(0, 20); // show up to 20 to avoid lag
@@ -345,17 +345,19 @@ export default function AddMissingBallForm({
                          <select 
                            value={bundleModelFilter}
                            onChange={e => setBundleModelFilter(e.target.value)}
-                           className="bg-neutral-900 border border-neutral-800 rounded-lg py-1.5 px-2 text-xs text-white w-[110px]"
+                           className="w-1/3 bg-neutral-900 border border-neutral-700 text-neutral-300 rounded-md px-2 py-1.5 text-xs focus:border-[#2563eb] outline-none"
                          >
                            <option value="All Models">All Models</option>
-                           {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
+                           {availableModels.map(m => (
+                             <option key={m} value={m}>{m}</option>
+                           ))}
                          </select>
-                         <input
-                           type="text"
-                           placeholder="Type to filter..."
+                         <input 
+                           type="text" 
+                           placeholder="Search by keyword..." 
                            value={bundleSearch}
                            onChange={e => setBundleSearch(e.target.value)}
-                           className="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg py-1.5 px-2 text-xs text-white min-w-0"
+                           className="w-2/3 bg-neutral-900 border border-neutral-700 text-neutral-300 rounded-md px-2 py-1.5 text-xs focus:border-[#2563eb] outline-none"
                          />
                        </div>
                        <select 

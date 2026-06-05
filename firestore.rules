@@ -21,19 +21,38 @@ service cloud.firestore {
 
     // Rules for the users collection
     match /users/{userId} {
-      // Allow user to get/write their own profile if they are logged in and their Auth UID matches the document's internal uid field
+      // Allow user to get/write their own profile
       allow read, write: if (request.auth != null && (
         (resource == null || resource.data.uid == request.auth.uid) &&
         (request.resource == null || request.resource.data.uid == request.auth.uid)
       )) || isAdmin();
+      
+      // Allow public read if shareBag is true
+      allow read: if resource.data.shareBag == true;
 
-      // Rules for nested user collections (e.g., users/{userId}/data/locker)
+      // Rules for locker subcollection
+      match /locker/{document=**} {
+        allow read, write: if (request.auth != null && 
+          exists(/databases/$(database)/documents/users/$(userId)) &&
+          get(/databases/$(database)/documents/users/$(userId)).data.uid == request.auth.uid
+        ) || isAdmin();
+        
+        // Allow public read if parent user has shareBag true
+        allow read: if exists(/databases/$(database)/documents/users/$(userId)) &&
+          get(/databases/$(database)/documents/users/$(userId)).data.shareBag == true;
+      }
+
+      // Rules for nested user data (legacy path)
       match /data/{document=**} {
         // Users can read/write their own locker data by checking the parent user doc's uid field.
         allow read, write: if (request.auth != null && 
           exists(/databases/$(database)/documents/users/$(userId)) &&
           get(/databases/$(database)/documents/users/$(userId)).data.uid == request.auth.uid
         ) || isAdmin();
+        
+        // Allow public read if parent user has shareBag true
+        allow read: if exists(/databases/$(database)/documents/users/$(userId)) &&
+          get(/databases/$(database)/documents/users/$(userId)).data.shareBag == true;
       }
     }
   }

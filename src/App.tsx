@@ -12,6 +12,8 @@ import * as XLSX from "xlsx";
 import XlsImporter from "./components/XlsImporter";
 import FriendsPortal from "./components/FriendsPortal";
 import OwnedBallCard from "./components/OwnedBallCard";
+import ImportExportModal from "./components/ImportExportModal";
+import VaultFilterBar from "./components/VaultFilterBar";
 import BallVisual from "./components/BallVisual";
 import { 
   Search, 
@@ -43,7 +45,8 @@ import {
   EyeOff,
   ShoppingBag,
   FileText,
-  Users
+  Users,
+  Heart
 } from "lucide-react";
 
 import { auth, db, isFirebaseConfigured } from "./firebase";
@@ -61,7 +64,13 @@ function GolfBagIcon({ className = "w-5 h-5 text-neutral-400" }: { className?: s
       <path d="M14 8L15.5 4M15.5 4C16.5 4 17 5 16 5" />
       {/* Main Bag Body */}
       <path d="M8 8 L9.5 21 C9.7 22 14.3 22 14.5 21 L16 8 Z" fill="#000" />
-      {/* Side Pocket */}
+## 5. Production Bug Fixes
+
+During the live deployment of the migration, several production issues were identified and resolved:
+1. **Firebase Storage Bucket Alignment**: Updated the default bucket URL in the backend server from `.appspot.com` to the newer `.firebasestorage.app` domain which aligned with the newly provisioned Firebase Spark plan storage bucket.
+2. **Firestore Payload Limits Bypass**: The initial API-based migration endpoint crashed the Render server due to the 11.5MB Base64 payload exceeding Firestore's 10MB batch limit. We bypassed the server and executed a secure, direct local script using the Firebase Admin SDK to seamlessly migrate all items.
+3. **App Crash Resilience**: Pushed a critical frontend fix to `App.tsx` utilizing a `safeJSONParse` helper to gracefully handle corrupted or empty strings in `localStorage` which were causing fatal React rendering crashes on boot.
+4. **Firebase Security Configuration**: Instructed the configuration of Firebase Storage security rules to allow public read access, resolving HTTP 403 Forbidden errors when fetching catalog images. Also registered the `vice-vault.onrender.com` domain in Firebase Auth to ensure OAuth login options remain fully functional.      {/* Side Pocket */}
       <path d="M8.5 11.5 C6.5 11.5 6.5 17 9.1 17.5" fill="#070707" />
       {/* Shoulder Strap */}
       <path d="M15.5 10 C18 11 18 16.5 14.5 18" />
@@ -241,8 +250,9 @@ export default function App() {
 
   // Firebase Auth & Cloud Sync states
   const [currentUser, setCurrentUser] = useState<any | null>(null);
-  const [userProfile, setUserProfile] = useState<{ uid: string; displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; shareBag?: boolean; shareToken?: string; pendingFriendRequestsCount?: number } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ uid: string; displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; shareBag?: boolean; shareToken?: string; pendingFriendRequestsCount?: number; wishlist?: string[] } | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [isImportExportModalOpen, setIsImportExportModalOpen] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isLoadingCloudData, setIsLoadingCloudData] = useState(false);
   const [isCloudDataLoaded, setIsCloudDataLoaded] = useState(false);
@@ -274,6 +284,7 @@ export default function App() {
 
   const [bagFilter, setBagFilter] = useState<'ea' | 'sleeve' | 'box' | null>(null);
   const [bagSortBy, setBagSortBy] = useState<string>('added_desc');
+  const [bagTab, setBagTab] = useState<"owned" | "wishlist">("owned");
 
   // State for searchable database catalog
   const [catalog, setCatalog] = useState<CatalogItem[]>(() => {
@@ -293,6 +304,90 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState("");
   // Quick filter to narrow core brand models
   const [selectedBrandFilter, setSelectedBrandFilter] = useState<string>("ALL");
+  // Catalog Filters
+  const [cFilterModel, setCFilterModel] = useState<string>("");
+  const [cFilterColor, setCFilterColor] = useState<string>("");
+  const [cFilterVariation, setCFilterVariation] = useState<string>("");
+  const [cFilterYear, setCFilterYear] = useState<string>("");
+  const [cFilterName, setCFilterName] = useState<string>("");
+  const [cFilterCondition, setCFilterCondition] = useState<string>("");
+
+  const catalogFilters = useMemo(() => ({
+    model: cFilterModel, setModel: setCFilterModel,
+    color: cFilterColor, setColor: setCFilterColor,
+    variation: cFilterVariation, setVariation: setCFilterVariation,
+    year: cFilterYear, setYear: setCFilterYear,
+    name: cFilterName, setName: setCFilterName,
+    condition: cFilterCondition, setCondition: setCFilterCondition
+  }), [cFilterModel, cFilterColor, cFilterVariation, cFilterYear, cFilterName, cFilterCondition]);
+
+  // Bag Filters
+  const [bFilterModel, setBFilterModel] = useState<string>("");
+  const [bFilterColor, setBFilterColor] = useState<string>("");
+  const [bFilterVariation, setBFilterVariation] = useState<string>("");
+  const [bFilterYear, setBFilterYear] = useState<string>("");
+  const [bFilterName, setBFilterName] = useState<string>("");
+  const [bFilterCondition, setBFilterCondition] = useState<string>("");
+
+  const bagFilters = useMemo(() => ({
+    model: bFilterModel, setModel: setBFilterModel,
+    color: bFilterColor, setColor: setBFilterColor,
+    variation: bFilterVariation, setVariation: setBFilterVariation,
+    year: bFilterYear, setYear: setBFilterYear,
+    name: bFilterName, setName: setBFilterName,
+    condition: bFilterCondition, setCondition: setBFilterCondition
+  }), [bFilterModel, bFilterColor, bFilterVariation, bFilterYear, bFilterName, bFilterCondition]);
+
+const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
+
+  const [sFilterModel, setSFilterModel] = useState<string>("");
+  const [sFilterColor, setSFilterColor] = useState<string>("");
+  const [sFilterVariation, setSFilterVariation] = useState<string>("");
+  const [sFilterYear, setSFilterYear] = useState<string>("");
+  const [sFilterName, setSFilterName] = useState<string>("");
+  const [sFilterCondition, setSFilterCondition] = useState<string>("");
+
+  const sharedFilters = useMemo(() => ({
+    model: sFilterModel, setModel: setSFilterModel,
+    color: sFilterColor, setColor: setSFilterColor,
+    variation: sFilterVariation, setVariation: setSFilterVariation,
+    year: sFilterYear, setYear: setSFilterYear,
+    name: sFilterName, setName: setSFilterName,
+    condition: sFilterCondition, setCondition: setSFilterCondition
+  }), [sFilterModel, sFilterColor, sFilterVariation, sFilterYear, sFilterName, sFilterCondition]);
+
+  const [swFilterModel, setSwFilterModel] = useState<string>("");
+  const [swFilterColor, setSwFilterColor] = useState<string>("");
+  const [swFilterVariation, setSwFilterVariation] = useState<string>("");
+  const [swFilterYear, setSwFilterYear] = useState<string>("");
+  const [swFilterName, setSwFilterName] = useState<string>("");
+
+  const sharedWishlistFilters = useMemo(() => ({
+    model: swFilterModel, setModel: setSwFilterModel,
+    color: swFilterColor, setColor: setSwFilterColor,
+    variation: swFilterVariation, setVariation: setSwFilterVariation,
+    year: swFilterYear, setYear: setSwFilterYear,
+    name: swFilterName, setName: setSwFilterName,
+  }), [swFilterModel, swFilterColor, swFilterVariation, swFilterYear, swFilterName]);
+
+
+  // Wishlist Filters
+  const [wFilterModel, setWFilterModel] = useState<string>("");
+  const [wFilterColor, setWFilterColor] = useState<string>("");
+  const [wFilterVariation, setWFilterVariation] = useState<string>("");
+  const [wFilterYear, setWFilterYear] = useState<string>("");
+  const [wFilterName, setWFilterName] = useState<string>("");
+  const [wFilterCondition, setWFilterCondition] = useState<string>("");
+
+  const wishlistFilters = useMemo(() => ({
+    model: wFilterModel, setModel: setWFilterModel,
+    color: wFilterColor, setColor: setWFilterColor,
+    variation: wFilterVariation, setVariation: setWFilterVariation,
+    year: wFilterYear, setYear: setWFilterYear,
+    name: wFilterName, setName: setWFilterName,
+    condition: wFilterCondition, setCondition: setWFilterCondition
+  }), [wFilterModel, wFilterColor, wFilterVariation, wFilterYear, wFilterName, wFilterCondition]);
+  const [showWishlistOnly, setShowWishlistOnly] = useState(false);
 
   // Secondary panel state: "browse" or "admin" inside database panel
   const [dbPanelTab, setDbPanelTab] = useState<"browse" | "admin" | "users" | "register">("browse");
@@ -370,7 +465,8 @@ export default function App() {
       isVaultManagerOpen ||
       selectedUserForBag ||
       authModalOpen ||
-      deletingUserId
+      deletingUserId ||
+      isImportExportModalOpen
     );
     if (isAnyModalOpen) {
       document.body.style.overflow = "hidden";
@@ -380,7 +476,7 @@ export default function App() {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isUserManagerOpen, isVaultManagerOpen, selectedUserForBag, authModalOpen, deletingUserId]);
+  }, [isUserManagerOpen, isVaultManagerOpen, selectedUserForBag, authModalOpen, deletingUserId, isImportExportModalOpen]);
 
   // Load shared locker data if share username is in query param
   useEffect(() => {
@@ -445,6 +541,70 @@ export default function App() {
         setAccentColor(userProfile.preferredColor);
       }    }
   }, [friendBagUsername, userProfile?.uid]);
+
+  // --- Export / Import Logic ---
+  const handleExportData = () => {
+    // Generate JSON payload without images
+    const exportData = balls.map((b) => {
+      const { image, sleeveImage, boxImage, packagingImage, ...rest } = b;
+      return rest;
+    });
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `vice_vault_bag_${new Date().toISOString().split("T")[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportData = async (importedData: GolfBall[]) => {
+    // Add new items and update existing ones if they match exactly on id/model/color/variation
+    let updatedBalls = [...balls];
+    let newItemsCount = 0;
+    let updatedItemsCount = 0;
+
+    for (const incoming of importedData) {
+      // Find exact match
+      const existingIdx = updatedBalls.findIndex(
+        (b) =>
+          b.id === incoming.id ||
+          (b.model === incoming.model &&
+            b.color === incoming.color &&
+            b.variation === incoming.variation)
+      );
+
+      if (existingIdx !== -1) {
+        // Merge quantities safely
+        updatedBalls[existingIdx] = {
+          ...updatedBalls[existingIdx],
+          quantity: incoming.quantity || updatedBalls[existingIdx].quantity,
+          packageType: incoming.packageType || updatedBalls[existingIdx].packageType,
+          year: incoming.year || updatedBalls[existingIdx].year,
+          notes: incoming.notes || updatedBalls[existingIdx].notes,
+          name: incoming.name || updatedBalls[existingIdx].name,
+          // Do not overwrite images if incoming doesn't have them
+        };
+        updatedItemsCount++;
+      } else {
+        // Add new item
+        updatedBalls.push({
+          ...incoming,
+          // Generate new unique ID if missing
+          id: incoming.id || crypto.randomUUID(),
+        });
+        newItemsCount++;
+      }
+    }
+
+    setBalls(updatedBalls);
+    showToast(`Imported! Added ${newItemsCount}, Updated ${updatedItemsCount}.`);
+  };
 
   // Add multiple catalog items from Excel/Spreadsheet import
   const handleXlsImportCatalogItems = async (newItems: Omit<CatalogItem, "id">[]) => {
@@ -779,7 +939,8 @@ export default function App() {
                   email: profileData.email,
                   uid: profileData.uid,
                   shareBag: profileData.shareBag,
-                  shareToken: profileData.shareToken, pendingFriendRequestsCount: profileData.pendingFriendRequestsCount || 0
+                  shareToken: profileData.shareToken, pendingFriendRequestsCount: profileData.pendingFriendRequestsCount || 0,
+                  wishlist: profileData.wishlist || []
                 };
                 userDocId = profileData.uid.startsWith("u-") ? profileData.uid : `u-${profileData.username}`;
               }
@@ -801,7 +962,8 @@ export default function App() {
                 createdAt: userDocData.createdAt,
                 email: userDocData.email || user.email || "",
                 shareBag: !!userDocData.shareBag,
-                shareToken: userDocData.shareToken
+                shareToken: userDocData.shareToken,
+                wishlist: userDocData.wishlist || []
               } as any);
               setAccentColor(userDocData.preferredColor || "#2563eb");
             } else {
@@ -819,7 +981,8 @@ export default function App() {
                 role: cleanUsername === "admin" ? "Admin" : "User",
                 createdAt: new Date().toISOString(),
                 email: user.email || "",
-                shareBag: false
+                shareBag: false,
+                wishlist: []
               } as any);
               setAccentColor("#2563eb");
               userDocId = fallbackDocId;
@@ -953,7 +1116,9 @@ export default function App() {
                 preferredColor: data.preferredColor || "#2563eb",
                 role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User",
                 shareBag: !!data.shareBag,
-                shareToken: data.shareToken, pendingFriendRequestsCount: data.pendingFriendRequestsCount || 0
+                shareToken: data.shareToken, 
+                pendingFriendRequestsCount: data.pendingFriendRequestsCount || 0,
+                wishlist: data.wishlist || []
               });
               setAccentColor(data.preferredColor || "#2563eb");
               // Keep local storage up to date with latest server-side profile
@@ -1327,9 +1492,15 @@ export default function App() {
     customImageBox?: string,
     name?: string,
     variation?: string,
-    bundleItems?: { catalogId: string; qty: number }[]
+    bundleItems?: { catalogId: string; qty: number }[],
+    catalogId?: string
   ) => {
     const today = new Date().toLocaleDateString();
+    
+    // Auto-remove from wishlist if present
+    if (catalogId && userProfile?.wishlist?.includes(catalogId)) {
+      handleToggleWishlist(catalogId);
+    }
     
     setBalls((prev) => {
       const resolvedPkgType = packageType || (qty >= 12 ? 'box' : qty >= 3 ? 'sleeve' : 'ea');
@@ -1449,6 +1620,56 @@ export default function App() {
     }
   };
 
+  const handleToggleWishlist = async (catalogId: string) => {
+    if (!currentUser || !userProfile) return;
+    
+    // Optimistic update
+    const prevWishlist = userProfile.wishlist || [];
+    const isWishlisted = prevWishlist.includes(catalogId);
+    const newWishlist = isWishlisted 
+      ? prevWishlist.filter(id => id !== catalogId)
+      : [...prevWishlist, catalogId];
+      
+    setUserProfile({ ...userProfile, wishlist: newWishlist });
+    
+    try {
+      const res = await fetch(`/api/users/${currentUser.uid}/wishlist`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": currentUser.uid
+        },
+        body: JSON.stringify({ catalogId })
+      });
+      if (!res.ok) throw new Error("Failed to update wishlist");
+    } catch (e) {
+      console.error(e);
+      // Revert optimistic update
+      setUserProfile({ ...userProfile, wishlist: prevWishlist });
+    }
+  };
+
+  const handleClearWishlist = async () => {
+    if (!currentUser || !userProfile) return;
+    
+    const prevWishlist = userProfile.wishlist || [];
+    setUserProfile({ ...userProfile, wishlist: [] });
+    
+    try {
+      const res = await fetch(`/api/users/${currentUser.uid}/wishlist/clear`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": currentUser.uid
+        }
+      });
+      if (!res.ok) throw new Error("Failed to clear wishlist");
+    } catch (e) {
+      console.error(e);
+      setUserProfile({ ...userProfile, wishlist: prevWishlist });
+    }
+  };
+
   // Update owned quantity stepper
   const handleUpdateQty = (id: string, newQty: number) => {
     setBalls((prev) => 
@@ -1543,13 +1764,27 @@ export default function App() {
         (item.notes && item.notes.toLowerCase().includes(query)) ||
         (item.year && item.year.toLowerCase().includes(query));
 
-      const matchesBrand = 
-        selectedBrandFilter === "ALL" || 
-        item.model === selectedBrandFilter;
+      const matchesBrand = selectedBrandFilter === "ALL" || item.model === selectedBrandFilter;
+      const matchesAdvancedModel = !cFilterModel || item.model === cFilterModel;
+      const matchesAdvancedColor = !cFilterColor || item.color === cFilterColor;
+      const matchesAdvancedVariation = !cFilterVariation || item.variation === cFilterVariation;
+      const matchesAdvancedYear = !cFilterYear || item.year === cFilterYear;
+      const matchesAdvancedName = !cFilterName || item.name === cFilterName;
 
-      return matchesSearch && matchesBrand;
+      const itemWishlisted = userProfile?.wishlist?.some(w => w === item.id || w.startsWith(`${item.id}-pkg-`));
+      const isWishlistTab = dbPanelTab === "wishlist";
+      const matchesWishlist = isWishlistTab
+        ? itemWishlisted
+        : (!showWishlistOnly || itemWishlisted);
+
+      // If showWishlistOnly is active, be agnostic to the filters and show full wishlist options
+      if (showWishlistOnly) {
+          return matchesSearch && matchesWishlist;
+      }
+
+      return matchesSearch && matchesBrand && matchesWishlist && matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName;
     });
-  }, [catalog, searchQuery, selectedBrandFilter]);
+  }, [catalog, searchQuery, selectedBrandFilter, showWishlistOnly, userProfile, dbPanelTab, cFilterModel, cFilterColor, cFilterVariation, cFilterYear, cFilterName]);
 
   // Unique models actually present in the registry catalog for the Filter Model buttons
   const registeredModels = useMemo(() => {
@@ -1598,9 +1833,9 @@ export default function App() {
     for (const item of sortedCatalog) {
       if (visited.has(item.id)) continue;
 
-      const shouldGroup = item.groupColor || item.groupVariation;
+      const shouldGroup = (item.groupColor || item.groupVariation) && dbPanelTab !== "wishlist";
       if (shouldGroup && item.name) {
-        const matching = sortedCatalog.filter(i => {
+        const matching = catalog.filter(i => {
           const sameModelName = i.model.trim().toLowerCase() === item.model.trim().toLowerCase() &&
                                 (i.name || "").trim().toLowerCase() === (item.name || "").trim().toLowerCase();
           
@@ -1645,7 +1880,7 @@ export default function App() {
     }
 
     return groups;
-  }, [sortedCatalog]);
+  }, [sortedCatalog, catalog]);
 
   // Calculate high level statistics for Locker
   const totalOwnedCount = useMemo(() => {
@@ -1796,20 +2031,104 @@ export default function App() {
               </div>
             </div>
 
-            {/* Bag Inventory */}
+            {/* Shared Inventory / Wishlist Container */}
             <div className="space-y-4">
-              <h3 className="font-sans font-black text-white text-sm uppercase tracking-wider flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4 text-neutral-400" />
-                Bag Inventory ({sharedLockerBalls.length} Items)
-              </h3>
+              <div className="flex items-center justify-between border-b border-neutral-850 pb-2 gap-2">
+                <div className="flex items-center gap-6">
+                  <button
+                    onClick={() => setSharedTab("owned")}
+                    className={`flex items-center gap-2 cursor-pointer pb-2 -mb-2.5 transition-colors border-b-2 ${
+                      sharedTab === "owned"
+                        ? "border-[#2563eb] text-white"
+                        : "border-transparent text-neutral-500 hover:text-neutral-300"
+                    }`}
+                  >
+                    <ShoppingBag className={`w-4 h-4 ${sharedTab === "owned" ? "text-neutral-400" : ""}`} />
+                    <h2 className="font-sans font-black text-sm uppercase tracking-wider">
+                      Bag Inventory
+                    </h2>
+                  </button>
+                  
+                  {sharedLockerOwner?.wishlist && (
+                    <button
+                      onClick={() => setSharedTab("wishlist")}
+                      className={`flex items-center gap-2 cursor-pointer pb-2 -mb-2.5 transition-colors border-b-2 ${
+                        sharedTab === "wishlist"
+                          ? "border-white text-white"
+                          : "border-transparent text-neutral-500 hover:text-neutral-300"
+                      }`}
+                    >
+                      <Heart className={`w-4 h-4 ${sharedTab === "wishlist" ? "fill-current text-rose-500" : ""}`} />
+                      <h2 className="font-sans font-black text-sm uppercase tracking-wider">
+                        Wishlist
+                      </h2>
+                    </button>
+                  )}
+                </div>
+              </div>
 
-              {sharedLockerBalls.length === 0 ? (
-                <div className="py-20 text-center rounded-3xl border border-neutral-850 bg-neutral-950/20 text-neutral-500 font-mono text-xs">
-                  This user's bag is empty.
+              {sharedTab === "wishlist" ? (
+                <div className="space-y-3">
+                  {sharedLockerOwner?.wishlist?.length > 0 && (
+                    <VaultFilterBar items={catalog.filter(c => sharedLockerOwner.wishlist.some(w => w === c.id || w.startsWith(`${c.id}-pkg-`)))} filters={sharedWishlistFilters} showCondition={false} />
+                  )}
+                  {!sharedLockerOwner?.wishlist?.length ? (
+                    <div className="py-20 text-center rounded-3xl border-2 border-dashed border-neutral-850 bg-neutral-950/10 text-neutral-400">
+                      <Heart className="w-12 h-12 text-neutral-700 mx-auto mb-3" />
+                      <h4 className="font-bold text-neutral-350 text-sm">This wishlist is empty</h4>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {Array.from(new Set(sharedLockerOwner.wishlist.map(id => id.replace(/-pkg-(box|ea)$/, ""))))
+                        .map(baseId => catalog.find(c => c.id === baseId))
+                        .filter(item => {
+                          if (!item) return false;
+                          const matchesAdvancedModel = !swFilterModel || item.model === swFilterModel;
+                          const matchesAdvancedColor = !swFilterColor || item.color === swFilterColor;
+                          const matchesAdvancedVariation = !swFilterVariation || item.variation === swFilterVariation;
+                          const matchesAdvancedYear = !swFilterYear || item.year === swFilterYear;
+                          const matchesAdvancedName = !swFilterName || item.name === swFilterName;
+                          return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName;
+                        })
+                        .map(item => {
+                          if (!item) return null;
+                          return (
+                          <CatalogItemCard
+                            key={item.id}
+                            item={item}
+                            isReadOnly={true}
+                            wishlistItems={sharedLockerOwner.wishlist}
+                            variant="wishlist"
+                            onAddToLocker={() => {}}
+                          />
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-4">
-                  {sharedLockerBalls.map((ball) => {
+                <div className="space-y-4">
+                  {sharedLockerBalls.length > 0 && (
+                    <VaultFilterBar items={sharedLockerBalls} filters={sharedFilters} showCondition={true} />
+                  )}
+
+                  {sharedLockerBalls.length === 0 ? (
+                    <div className="py-20 text-center rounded-3xl border border-neutral-850 bg-neutral-950/20 text-neutral-500 font-mono text-xs">
+                      This user's bag is empty.
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-4">
+                      {sharedLockerBalls
+                        .filter((ball) => {
+                      const matchesAdvancedModel = !sFilterModel || ball.model === sFilterModel;
+                      const matchesAdvancedColor = !sFilterColor || ball.color === sFilterColor;
+                      const matchesAdvancedVariation = !sFilterVariation || ball.variation === sFilterVariation;
+                      const matchesAdvancedYear = !sFilterYear || ball.year === sFilterYear;
+                      const matchesAdvancedName = !sFilterName || ball.name === sFilterName;
+                      const matchesAdvancedCondition = !sFilterCondition || ball.condition === sFilterCondition;
+                      return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName && matchesAdvancedCondition;
+                    })
+                    .map((ball) => {
                     const currentPkg = ball.packageType || "ea";
                     const displayQty = ball.packageType === "box" 
                       ? Math.max(1, Math.round(ball.quantity / 12)) 
@@ -1828,6 +2147,8 @@ export default function App() {
                   })}
                 </div>
               )}
+              </div>
+            )}
             </div>
           </main>
         </div>
@@ -2003,6 +2324,19 @@ export default function App() {
                           </span>
                         ) : null}
                       </button>
+
+                      {/* Manage Bag Data */}
+                      <button
+                        onClick={() => {
+                          setIsImportExportModalOpen(true);
+                          setUserDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-2.5 py-2 hover:bg-neutral-900 rounded-lg text-neutral-400 hover:text-white transition-colors flex items-center gap-2 cursor-pointer border border-transparent font-bold"
+                      >
+                        <Database size={12} className="text-neutral-500" />
+                        <span className="flex-1">Manage Bag Data</span>
+                      </button>
+
                       <div className="border-b border-neutral-900 my-1"></div>
 
                       {/* Theme selection row */}
@@ -2118,10 +2452,10 @@ export default function App() {
           <section className={`${currentUser ? "lg:col-span-6" : "lg:col-span-12 max-w-4xl mx-auto w-full"} space-y-6 ${!currentUser || mobileTab === "catalog" ? "block" : "hidden lg:block"}`}>
             
             {/* Database Panel Box */}
-            <div className="bg-neutral-950/40 border border-neutral-850 rounded-2xl overflow-hidden shadow-md">
+            <div className="bg-neutral-950/40 border border-neutral-850 rounded-2xl shadow-md">
               
               {/* Registry Database Header Banner (Static, removing redundant Admin Tab) */}
-              <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-neutral-850 bg-neutral-950">
+              <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-neutral-850 bg-neutral-950 rounded-t-2xl">
                 <BallVaultIcon className="w-5 h-5 text-[#2563eb]" />
                 <span className="text-xs font-black uppercase tracking-wider text-neutral-300">
                   Ball Vault ({catalog.length} Available Designs)
@@ -2136,49 +2470,8 @@ export default function App() {
                     {/* Database Search Filter control */}
                     <div className="space-y-3">
                       
-                      {/* Live keyword filter input */}
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" size={15} />
-                        <input
-                          type="text"
-                          placeholder="Search database by brand, model, or color..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full bg-neutral-950 hover:bg-neutral-900/60 border border-neutral-850 rounded-xl px-9 py-2 text-xs text-white placeholder-neutral-500 outline-none focus:border-stone-550 transition-all"
-                          id="catalog-search-input"
-                        />
-                        {searchQuery && (
-                          <button
-                            onClick={() => setSearchQuery("")}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-neutral-500 hover:text-white"
-                          >
-                            CLEAR
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Brand quick filter drop-down */}
-                      <div className="flex items-center gap-2 pt-1">
-                        <span className="text-[10px] font-mono uppercase text-neutral-450 shrink-0">Filter model:</span>
-                        <div className="relative flex-1 max-w-[180px]">
-                          <select
-                            value={selectedBrandFilter}
-                            onChange={(e) => setSelectedBrandFilter(e.target.value)}
-                            className="w-full bg-neutral-950 text-neutral-300 border border-neutral-850 hover:border-neutral-750 focus:border-[#2563eb] rounded-xl px-3 py-1.5 text-[11px] font-semibold outline-none transition-all cursor-pointer appearance-none pr-8 font-mono uppercase tracking-wider"
-                          >
-                            <option value="ALL">All Varieties</option>
-                            {registeredModels.map((m) => (
-                              <option key={m} value={m}>
-                                {m}
-                              </option>
-                            ))}
-                          </select>
-                          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-550">
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                            </svg>
-                          </div>
-                        </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <VaultFilterBar items={catalog} filters={catalogFilters} showCondition={false} />
                       </div>
 
                     </div>
@@ -2186,7 +2479,25 @@ export default function App() {
                     {/* Catalog results count label */}
                     <div className="flex items-center justify-between text-[10px] font-mono text-neutral-500 uppercase border-b border-neutral-850 pb-2">
                       <span>Showing {sortedCatalog.length} Matching Models</span>
-                      <span>{currentUser ? "Click + to add any to your Bag" : "Login to add balls to your bag"}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="hidden sm:inline">{currentUser ? "Click + to add any to your Bag" : "Login to add balls to your bag"}</span>
+                        {currentUser && (
+                          <label className="flex items-center gap-1.5 cursor-pointer group bg-neutral-900 border border-neutral-800 hover:border-neutral-700 px-2.5 py-1 rounded-md transition-colors shadow-sm">
+                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-400 group-hover:text-neutral-300 transition-colors">
+                              Wishlist
+                            </span>
+                            <div className="relative flex items-center justify-center">
+                              <input
+                                type="checkbox"
+                                checked={showWishlistOnly}
+                                onChange={(e) => setShowWishlistOnly(e.target.checked)}
+                                className="appearance-none w-3.5 h-3.5 rounded-sm border border-neutral-700 bg-neutral-950 checked:bg-rose-500 checked:border-rose-500 focus:outline-none transition-all cursor-pointer"
+                              />
+                              <Heart size={9} className={`absolute pointer-events-none transition-opacity ${showWishlistOnly ? 'opacity-100 text-white' : 'opacity-0'}`} weight="fill" />
+                            </div>
+                          </label>
+                        )}
+                      </div>
                     </div>
 
                     {/* Catalog item list */}
@@ -2221,6 +2532,8 @@ export default function App() {
                             subItems={group.subItems}
                             isReadOnly={!currentUser}
                             onAddToLocker={handleAddBallFromCatalog}
+                            wishlistItems={userProfile?.wishlist || []}
+                            onToggleWishlist={handleToggleWishlist}
                           />
                         ))}
                       </div>
@@ -2271,11 +2584,36 @@ export default function App() {
               {/* Owned Locker Container */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b border-neutral-850 pb-2 gap-2">
-                  <div className="flex items-center gap-2">
-                    <GolfBagIcon className="w-5 h-5 text-neutral-400" />
-                    <h2 className="font-sans font-black text-white text-base uppercase tracking-wider">
-                      My Bag
-                    </h2>
+                  <div className="flex items-center gap-6">
+                    <button
+                      onClick={() => setBagTab("owned")}
+                      className={`flex items-center gap-2 cursor-pointer pb-2 -mb-2.5 transition-colors border-b-2 ${
+                        bagTab === "owned"
+                          ? "border-[#2563eb] text-white"
+                          : "border-transparent text-neutral-500 hover:text-neutral-300"
+                      }`}
+                    >
+                      <GolfBagIcon className={`w-5 h-5 ${bagTab === "owned" ? "text-neutral-400" : ""}`} />
+                      <h2 className="font-sans font-black text-base uppercase tracking-wider">
+                        My Bag
+                      </h2>
+                    </button>
+                    
+                    {userProfile && (
+                      <button
+                        onClick={() => setBagTab("wishlist")}
+                        className={`flex items-center gap-2 cursor-pointer pb-2 -mb-2.5 transition-colors border-b-2 ${
+                          bagTab === "wishlist"
+                            ? "border-white text-white"
+                            : "border-transparent text-neutral-500 hover:text-neutral-300"
+                        }`}
+                      >
+                        <Heart className={`w-4 h-4 ${bagTab === "wishlist" ? "fill-current" : ""}`} />
+                        <h2 className="font-sans font-black text-base uppercase tracking-wider">
+                          Wishlist
+                        </h2>
+                      </button>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {balls.length > 0 && (
@@ -2335,23 +2673,91 @@ export default function App() {
                     <RefreshCw className="w-8 h-8 text-[#2563eb] animate-spin mb-3 opacity-80" />
                     <h4 className="font-bold text-neutral-400 text-xs uppercase tracking-wider">Loading Vault...</h4>
                   </div>
-                ) : balls.length === 0 ? (
-                  <div className="py-20 text-center rounded-3xl border-2 border-dashed border-neutral-850 bg-neutral-950/10 text-neutral-400">
-                    <GolfBagIcon className="w-12 h-12 text-neutral-700 mx-auto mb-3" />
-                    <h4 className="font-bold text-neutral-350 text-sm">Your bag is currently empty</h4>
-                    <p className="text-xs text-neutral-500 max-w-sm mx-auto mt-1 leading-relaxed">
-                      You don't have any balls recorded in your inventory. Explore the database on the left to locate and log your balls!
-                    </p>
+                ) : bagTab === "wishlist" ? (
+                  <div className="space-y-3">
+                    {userProfile?.wishlist?.length > 0 && (
+                      <VaultFilterBar items={catalog.filter(c => userProfile.wishlist.some(w => w === c.id || w.startsWith(`${c.id}-pkg-`)))} filters={wishlistFilters} showCondition={false}>
+                        <button
+                          onClick={() => {
+                            if (window.confirm("Are you sure you want to clear your wishlist?")) {
+                              handleClearWishlist();
+                            }
+                          }}
+                          className="shrink-0 text-[10px] uppercase font-bold text-rose-500 hover:text-rose-400 transition-colors cursor-pointer inline-flex items-center gap-1 bg-rose-500/10 hover:bg-rose-500/20 px-3 py-1.5 rounded-lg border border-rose-500/20 whitespace-nowrap"
+                        >
+                          <X className="w-3 h-3" /> Clear Wishlist
+                        </button>
+                      </VaultFilterBar>
+                    )}
+                    {!userProfile?.wishlist?.length ? (
+                      <div className="py-20 text-center rounded-3xl border-2 border-dashed border-neutral-850 bg-neutral-950/10 text-neutral-400">
+                        <Heart className="w-12 h-12 text-neutral-700 mx-auto mb-3" />
+                        <h4 className="font-bold text-neutral-350 text-sm">Your wishlist is empty</h4>
+                        <p className="text-xs text-neutral-500 max-w-sm mx-auto mt-1 leading-relaxed">
+                          Click the heart icon on any catalog item to add it to your wishlist.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {Array.from(new Set(userProfile.wishlist.map(id => id.replace(/-pkg-(box|ea)$/, ""))))
+                          .map(baseId => catalog.find(c => c.id === baseId))
+                          .filter(item => {
+                            if (!item) return false;
+                            const matchesAdvancedModel = !wFilterModel || item.model === wFilterModel;
+                            const matchesAdvancedColor = !wFilterColor || item.color === wFilterColor;
+                            const matchesAdvancedVariation = !wFilterVariation || item.variation === wFilterVariation;
+                            const matchesAdvancedYear = !wFilterYear || item.year === wFilterYear;
+                            const matchesAdvancedName = !wFilterName || item.name === wFilterName;
+                            return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName;
+                          })
+                          .map(item => {
+                            if (!item) return null;
+                            return (
+                            <CatalogItemCard
+                              key={item.id}
+                              item={item}
+                              isReadOnly={!currentUser}
+                              onAddToLocker={handleAddBallFromCatalog}
+                              wishlistItems={userProfile.wishlist}
+                              onToggleWishlist={handleToggleWishlist}
+                              variant="wishlist"
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-4" id="owned-list-container">
-                    {balls
-                      .map((ball, index) => ({ ball, index }))
-                      .filter(({ ball }) => !bagFilter || ball.packageType === bagFilter || (!ball.packageType && bagFilter === 'ea'))
-                      .sort((a, b) => {
-                        switch (bagSortBy) {
-                          case 'added_desc': return a.index - b.index;
-                          case 'added_asc': return b.index - a.index;
+                  <div className="space-y-4">
+                    {balls.length > 0 && (
+                      <VaultFilterBar items={balls} filters={bagFilters} showCondition={true} />
+                    )}
+                    {balls.length === 0 ? (
+                      <div className="py-20 text-center rounded-3xl border-2 border-dashed border-neutral-850 bg-neutral-950/10 text-neutral-400">
+                        <GolfBagIcon className="w-12 h-12 text-neutral-700 mx-auto mb-3" />
+                        <h4 className="font-bold text-neutral-350 text-sm">Your bag is currently empty</h4>
+                        <p className="text-xs text-neutral-500 max-w-sm mx-auto mt-1 leading-relaxed">
+                          You don't have any balls recorded in your inventory. Explore the database on the left to locate and log your balls!
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-4" id="owned-list-container">
+                        {balls
+                          .map((ball, index) => ({ ball, index }))
+                          .filter(({ ball }) => !bagFilter || ball.packageType === bagFilter || (!ball.packageType && bagFilter === 'ea'))
+                          .filter(({ ball }) => {
+                            const matchesAdvancedModel = !bFilterModel || ball.model === bFilterModel;
+                            const matchesAdvancedColor = !bFilterColor || ball.color === bFilterColor;
+                            const matchesAdvancedVariation = !bFilterVariation || ball.variation === bFilterVariation;
+                            const matchesAdvancedYear = !bFilterYear || ball.year === bFilterYear;
+                            const matchesAdvancedName = !bFilterName || ball.name === bFilterName;
+                            const matchesAdvancedCondition = !bFilterCondition || ball.condition === bFilterCondition;
+                            return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName && matchesAdvancedCondition;
+                          })
+                          .sort((a, b) => {
+                            switch (bagSortBy) {
+                              case 'added_desc': return a.index - b.index;
+                              case 'added_asc': return b.index - a.index;
                           case 'model_asc': return a.ball.model.localeCompare(b.ball.model) || (a.ball.name || "").localeCompare(b.ball.name || "");
                           case 'model_desc': return b.ball.model.localeCompare(a.ball.model) || (b.ball.name || "").localeCompare(a.ball.name || "");
                           case 'qty_desc': return b.ball.quantity - a.ball.quantity;
@@ -2370,6 +2776,8 @@ export default function App() {
                         onDelete={handleDeleteBall}
                       />
                     ))}
+                  </div>
+                )}
                   </div>
                 )}
               </div>
@@ -3684,6 +4092,14 @@ export default function App() {
           </div>
         );
       })()}
+
+      {/* Import/Export Modal */}
+      <ImportExportModal
+        isOpen={isImportExportModalOpen}
+        onClose={() => setIsImportExportModalOpen(false)}
+        onExport={handleExportData}
+        onImport={handleImportData}
+      />
 
        {/* Toast Notification */}
        {toast && (

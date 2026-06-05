@@ -123,5 +123,6 @@ export interface UserProfile {
   avatarUrl?: string;
   shareBag?: boolean;
   shareToken?: string;
+  wishlist?: string[]; // Array of catalog item IDs
   createdAt: string;
 }

@@ -60,36 +60,6 @@
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780357999825-4ce3-1dd6-6e1b.jpg?alt=media"
   },
   {
-    "id": "MULTIPLE-SELECTED_VARIETY-WHITE",
-    "bundleItems": [
-      {
-        "catalogId": "PRO_PLUS-STANDARD-WHITE",
-        "qty": 2
-      },
-      {
-        "catalogId": "PRO-STANDARD-WHITE",
-        "qty": 2
-      },
-      {
-        "catalogId": "PRO_SOFT-STANDARD-WHITE",
-        "qty": 2
-      },
-      {
-        "catalogId": "TOUR-STANDARD-WHITE",
-        "qty": 2
-      },
-      {
-        "catalogId": "DRIVE-STANDARD-WHITE",
-        "qty": 2
-      }
-    ],
-    "color": "White",
-    "name": "Selected Variety",
-    "model": "MULTIPLE",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780411676271-8863-e5ee-f59d.png?alt=media",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780411756033-40e3-5fec-0320.jpg?alt=media"
-  },
-  {
     "id": "MULTIPLE-VARIETY_PACK-MULTI_COLORED",
     "groupColor": false,
     "color": "Multi-colored",
@@ -97,41 +67,7 @@
     "name": "Variety Pack",
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780360045269-4890-503b-df13.jpg?alt=media",
     "model": "MULTIPLE",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780360046548-4d8c-99c3-3c8d.jpg?alt=media",
-    "bundleItems": [
-      {
-        "catalogId": "PRO-TRACER-FIREBALL",
-        "qty": 3
-      },
-      {
-        "catalogId": "PRO-NEON_DRIP-WATERMELON_BUBBLEGUM",
-        "qty": 3
-      },
-      {
-        "catalogId": "PRO-DRIP_SHADE-ROYAL_GOLD",
-        "qty": 3
-      },
-      {
-        "catalogId": "PRO_AIR-DRIP_SHADE-COTTON_CANDY",
-        "qty": 3
-      },
-      {
-        "catalogId": "PRO-TRACER-WHITE",
-        "qty": 3
-      },
-      {
-        "catalogId": "TOUR-ALL_OVER_PRINT-ZAP",
-        "qty": 3
-      },
-      {
-        "catalogId": "PRO_PLUS-STANDARD-WHITE",
-        "qty": 3
-      },
-      {
-        "catalogId": "DRIVE-STANDARD-YELLOW",
-        "qty": 3
-      }
-    ]
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780360046548-4d8c-99c3-3c8d.jpg?alt=media"
   },
   {
     "id": "PRO-ADIDAS-LIME_BLACK_DRIP",
@@ -748,20 +684,6 @@
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358009666-663b-e758-50d4.jpg?alt=media"
   },
   {
-    "id": "PRO-STANDARD_24_PACK-WHITE",
-    "bundleItems": [
-      {
-        "catalogId": "PRO-STANDARD-WHITE",
-        "qty": 24
-      }
-    ],
-    "color": "White",
-    "name": "Standard (24 Pack)",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780411853758-54e7-6aa6-2777.jpg?alt=media",
-    "model": "PRO",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780411854052-1380-4937-5109.jpg?alt=media"
-  },
-  {
     "id": "PRO-TAN-BROWN_WHITE",
     "groupColor": false,
     "color": "Brown White",
@@ -965,24 +887,6 @@
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358015956-402a-e809-1e07.jpg?alt=media",
     "model": "PRO AIR",
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358016186-68ac-1cb9-6f67.jpg?alt=media"
-  },
-  {
-    "id": "PRO_PLUS-BETHPAGE_STATION-BLUE_EUROPE",
-    "groupColor": true,
-    "bundleItems": [],
-    "color": "Blue (Europe)",
-    "groupVariation": false,
-    "name": "Bethpage Station",
-    "model": "PRO PLUS"
-  },
-  {
-    "id": "PRO_PLUS-BETHPAGE_STATION-RED_USA",
-    "groupColor": true,
-    "bundleItems": [],
-    "color": "Red (USA)",
-    "groupVariation": false,
-    "name": "Bethpage Station",
-    "model": "PRO PLUS"
   },
   {
     "id": "PRO_PLUS-BORDEAUX_RED-WHITE",

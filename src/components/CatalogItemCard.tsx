@@ -6,7 +6,7 @@
 import React, { useState } from "react";
 import { CatalogItem, BallCondition } from "../types";
 import BallVisual from "./BallVisual";
-import { Plus, Check, ChevronDown, ChevronUp, Layers, HelpCircle, Package, MessageSquare, X, AlertTriangle } from "lucide-react";
+import { Plus, Check, ChevronDown, ChevronUp, Layers, HelpCircle, Package, MessageSquare, X, AlertTriangle, Heart } from "lucide-react";
 
 interface CatalogItemCardProps {
   key?: string | number;
@@ -29,6 +29,9 @@ interface CatalogItemCardProps {
     variation?: string,
     bundleItems?: { catalogId: string; qty: number }[]
   ) => void;
+  wishlistItems?: string[];
+  onToggleWishlist?: (id: string) => void;
+  variant?: string;
 }
 
 let currentlyAddingCard: {
@@ -38,12 +41,18 @@ let currentlyAddingCard: {
   discardAndClose: () => void;
 } | null = null;
 
-export default function CatalogItemCard({ item, subItems = [], onAddToLocker, isReadOnly = false }: CatalogItemCardProps) {
+export default function CatalogItemCard({ item, subItems = [], onAddToLocker, isReadOnly = false, wishlistItems = [], onToggleWishlist, variant }: CatalogItemCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const isBundle = item.bundleItems && item.bundleItems.length > 0;
+  
+  // If the item is wishlisted specifically as an individual item (no -pkg-box suffix), default to 'ea'
+  const isWishlistedAsBox = wishlistItems.some(w => w === `${item.id}-pkg-box`);
+  const isWishlistedAsEa = wishlistItems.some(w => w === item.id || w === `${item.id}-pkg-ea`);
+  const initialPkgType = (!isBundle && isWishlistedAsEa && !isWishlistedAsBox) ? 'ea' : 'box';
+  
   const bundleTotal = isBundle ? item.bundleItems!.reduce((acc, b) => acc + b.qty, 0) : 12;
-  const [quantity, setQuantity] = useState(isBundle ? bundleTotal : 12); // Defaults to a standard Box or Bundle Total
-  const [pkgType, setPkgType] = useState<'sleeve' | 'box' | 'ea'>('box');
+  const [quantity, setQuantity] = useState(initialPkgType === 'ea' ? 1 : (isBundle ? bundleTotal : 12));
+  const [pkgType, setPkgType] = useState<'sleeve' | 'box' | 'ea'>(initialPkgType);
   const [playNumber, setPlayNumber] = useState<number>(1);
   const [customNumberInput, setCustomNumberInput] = useState<string>("");
   const [condition, setCondition] = useState<BallCondition>(BallCondition.NEW);
@@ -57,6 +66,28 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
   const [selectedItemId, setSelectedItemId] = useState(item.id);
   const [showUnsavedPrompt, setShowUnsavedPrompt] = useState(false);
   const [pendingProceed, setPendingProceed] = useState<(() => void) | null>(null);
+  
+  const [showWishlistPrompt, setShowWishlistPrompt] = useState(false);
+  const wishlistBtnRef = React.useRef<HTMLButtonElement>(null);
+  const [wishlistCoords, setWishlistCoords] = React.useState({ top: 0, left: 0, width: 224, openUpwards: false });
+
+  React.useEffect(() => {
+    if (showWishlistPrompt && wishlistBtnRef.current) {
+      const rect = wishlistBtnRef.current.getBoundingClientRect();
+      const popupHeight = 200; // estimated max-h
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      
+      const openUpwards = spaceBelow < popupHeight && spaceAbove > spaceBelow;
+      
+      setWishlistCoords({
+        top: openUpwards ? rect.top + window.scrollY : rect.bottom + window.scrollY,
+        left: rect.right + window.scrollX - 224, // 224px is w-56, align right edges
+        width: 224,
+        openUpwards
+      });
+    }
+  }, [showWishlistPrompt]);
 
   React.useEffect(() => {
     setSelectedItemId(item.id);
@@ -217,7 +248,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
         isOpen 
           ? "bg-neutral-900 border-[#2563eb]/50 shadow-md shadow-[#2563eb]/10" 
           : "bg-neutral-900/60 hover:bg-neutral-900 border-neutral-800 hover:border-neutral-700 hover:shadow-sm"
-      }`}
+      } ${showWishlistPrompt ? "z-[60]" : ""}`}
       id={`catalog-item-card-${item.id}`}
     >
       {showUnsavedPrompt && (
@@ -295,15 +326,93 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
 
               {!isReadOnly && (
                 !isOpen ? (
+                  <div className="relative flex items-center gap-2 flex-shrink-0">
                   <button
+                    ref={wishlistBtnRef}
                     type="button"
-                    onClick={startAdding}
-                    className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-[#2563eb] hover:bg-[#2563eb]/80 text-black transition-colors cursor-pointer"
-                    id={`btn-open-add-${item.id}`}
-                    title="Add to Bag"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const isWishlisted = wishlistItems.some(w => w === item.id || w.startsWith(`${item.id}-pkg-`));
+                      if (isWishlisted) {
+                        const idToToggle = wishlistItems.includes(`${item.id}-pkg-box`) ? `${item.id}-pkg-box` : wishlistItems.includes(item.id) ? item.id : `${item.id}-pkg-box`;
+                        onToggleWishlist?.(idToToggle);
+                      } else if (isBundle) {
+                        const idToToggle = wishlistItems.includes(`${item.id}-pkg-box`) ? `${item.id}-pkg-box` : wishlistItems.includes(item.id) ? item.id : `${item.id}-pkg-box`;
+                        onToggleWishlist?.(idToToggle);
+                      } else {
+                        setShowWishlistPrompt(!showWishlistPrompt);
+                      }
+                    }}
+                    className={`flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg transition-colors cursor-pointer ${
+                      wishlistItems.some(w => w === item.id || w.startsWith(`${item.id}-pkg-`) || (subItems && subItems.some(sub => w === sub.id)))
+                        ? 'bg-rose-500/20 text-rose-500 hover:bg-rose-500/30' 
+                        : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-white'
+                    }`}
+                    title="Wishlist Options"
                   >
-                    <Plus className="w-5 h-5" />
+                    <Heart className={`w-4 h-4 ${wishlistItems.some(w => w === item.id || w.startsWith(`${item.id}-pkg-`) || (subItems && subItems.some(sub => w === sub.id))) ? 'fill-current' : ''}`} />
                   </button>
+
+                  {showWishlistPrompt && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setShowWishlistPrompt(false); }} />
+                      <div 
+                        className={`absolute right-0 w-56 bg-neutral-900 border border-neutral-800 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in duration-150 flex flex-col ${wishlistCoords.openUpwards ? 'bottom-full mb-2 slide-in-from-bottom-2' : 'top-full mt-2 slide-in-from-top-2'}`}
+                        onClick={e => e.stopPropagation()}
+                      >
+                        {subItems.length > 0 ? (
+                          <div className="flex flex-col">
+                            <button 
+                              type="button"
+                              onClick={() => {
+                                onToggleWishlist?.(`${item.id}-pkg-box`); 
+                              }}
+                              className="text-left px-4 py-3 text-xs font-bold text-white hover:bg-neutral-800 border-b border-neutral-800 cursor-pointer flex justify-between items-center group"
+                            >
+                              <div className="flex flex-col">
+                                <span>Entire Box</span>
+                                <span className="text-[10px] text-neutral-500 font-mono font-normal">({item.groupColor ? 'Mixed Colors' : 'Mixed Variations'})</span>
+                              </div>
+                              <Heart className={`w-4 h-4 transition-colors shrink-0 ${wishlistItems.includes(`${item.id}-pkg-box`) ? 'fill-current text-rose-500' : 'text-neutral-600 group-hover:text-rose-500'}`} />
+                            </button>
+                            <div className="max-h-48 overflow-y-auto custom-scrollbar">
+                              {subItems.map(subItem => (
+                                <button
+                                  key={subItem.id}
+                                  type="button"
+                                  onClick={() => { onToggleWishlist?.(subItem.id); }}
+                                  className="w-full text-left px-4 py-3 text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 border-b border-neutral-800/50 cursor-pointer flex justify-between items-center group"
+                                >
+                                  <div className="flex flex-col">
+                                    <span>{subItem.color}</span>
+                                    {(subItem.variation || subItem.notes) && (
+                                      <span className="text-[10px] text-neutral-500 font-mono italic truncate max-w-[140px]">
+                                        {subItem.variation || subItem.notes}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <Heart className={`w-4 h-4 transition-colors shrink-0 ${wishlistItems.includes(subItem.id) ? 'fill-current text-rose-500' : 'text-neutral-600 group-hover:text-rose-500'}`} />
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ) : null}
+                      </div>
+                    </>
+                  )}
+
+                  {variant !== 'wishlist' && (
+                    <button
+                      type="button"
+                      onClick={startAdding}
+                      className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-[#2563eb] hover:bg-[#2563eb]/80 text-black transition-colors cursor-pointer"
+                      id={`btn-open-add-${item.id}`}
+                      title="Add to Bag"
+                    >
+                      <Plus className="w-5 h-5" />
+                    </button>
+                  )}
+                  </div>
                 ) : (
                   <button
                     type="button"
