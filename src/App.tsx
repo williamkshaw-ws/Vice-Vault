@@ -2540,7 +2540,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                           placeholder="Search entire vault (e.g., Red, Pro, 2021...)"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-10 py-3.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#2563eb] focus:border-[#2563eb] transition-all shadow-sm"
+                          className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-10 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#2563eb] focus:border-[#2563eb] transition-all shadow-sm"
                         />
                         {searchQuery && (
                           <button 
