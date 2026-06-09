@@ -3,7 +3,39 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+
+// Hook to convert external Firebase Storage URLs to base64 Data URLs so html-to-image never hits Safari CORS Security errors
+export function useBase64Image(url?: string) {
+  const [base64, setBase64] = useState<string | undefined>(url?.startsWith('data:') ? url : undefined);
+  
+  useEffect(() => {
+    if (!url || url.startsWith('data:')) {
+      setBase64(url);
+      return;
+    }
+    
+    let isMounted = true;
+    fetch(url)
+      .then(res => res.blob())
+      .then(blob => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (isMounted) setBase64(reader.result as string);
+        };
+        reader.readAsDataURL(blob);
+      })
+      .catch(err => {
+        console.error("Failed to load base64 for image", url, err);
+        if (isMounted) setBase64(url); // Fallback to raw url
+      });
+      
+    return () => { isMounted = false; };
+  }, [url]);
+
+  return base64;
+}
+
 import { BallColor, BallModel } from "../types";
 
 interface BallVisualProps {
@@ -30,6 +62,10 @@ export default function BallVisual({
   packageType = "ea"
 }: BallVisualProps) {
   // Sizing styles
+  const base64CustomImage = useBase64Image(customImage);
+  const base64CustomImageBox = useBase64Image(customImageBox);
+  const base64CustomImageSleeve = useBase64Image(customImageSleeve);
+
   const sizeClasses = {
     sm: "w-10 h-10 text-[9px]",
     md: "w-16 h-16 text-[12px]",
@@ -52,10 +88,10 @@ export default function BallVisual({
         id={`golfbox-custom-${size}`}
       >
         <img 
-          src={customImageBox} 
+          src={base64CustomImageBox} 
           alt="Custom Box Design" 
           className="absolute inset-0 w-full h-full object-contain"
-          referrerPolicy="no-referrer"
+          referrerPolicy="no-referrer" crossOrigin="anonymous"
         />
       </div>
     );
@@ -69,10 +105,10 @@ export default function BallVisual({
         id={`golfsleeve-custom-${size}`}
       >
         <img 
-          src={customImageSleeve} 
+          src={base64CustomImageSleeve} 
           alt="Custom Sleeve Design" 
           className="absolute inset-0 w-full h-full object-contain"
-          referrerPolicy="no-referrer"
+          referrerPolicy="no-referrer" crossOrigin="anonymous"
         />
       </div>
     );
@@ -452,10 +488,10 @@ export default function BallVisual({
         }}
       >
         <img 
-          src={customImage} 
+          src={base64CustomImage} 
           alt="Custom ball design" 
           className="absolute inset-0 w-full h-full object-cover"
-          referrerPolicy="no-referrer"
+          referrerPolicy="no-referrer" crossOrigin="anonymous"
         />
 
 

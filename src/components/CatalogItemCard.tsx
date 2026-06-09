@@ -7,9 +7,11 @@ import React, { useState } from "react";
 import { CatalogItem, BallCondition } from "../types";
 import BallVisual from "./BallVisual";
 import { Plus, Check, ChevronDown, ChevronUp, Layers, HelpCircle, Package, MessageSquare, X, AlertTriangle, Heart } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface CatalogItemCardProps {
   key?: string | number;
+  index?: number;
   item: CatalogItem;
   subItems?: CatalogItem[];
   isReadOnly?: boolean;
@@ -41,7 +43,7 @@ let currentlyAddingCard: {
   discardAndClose: () => void;
 } | null = null;
 
-export default function CatalogItemCard({ item, subItems = [], onAddToLocker, isReadOnly = false, wishlistItems = [], onToggleWishlist, variant }: CatalogItemCardProps) {
+export default function CatalogItemCard({ item, subItems = [], onAddToLocker, isReadOnly = false, wishlistItems = [], onToggleWishlist, variant, index = 0 }: CatalogItemCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const isBundle = item.bundleItems && item.bundleItems.length > 0;
   
@@ -243,7 +245,11 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
   };
 
   return (
-    <div 
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.3, delay: index * 0.04, ease: [0.23, 1, 0.32, 1] }}
       className={`relative rounded-xl border p-4 transition-all duration-300 ${
         isOpen 
           ? "bg-neutral-900 border-[#2563eb]/50 shadow-md shadow-[#2563eb]/10" 
@@ -691,6 +697,6 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
           </button>
         </form>
       )}
-    </div>
+    </motion.div>
   );
 }

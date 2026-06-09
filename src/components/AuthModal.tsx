@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor, Copy, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import {
   auth,
@@ -27,11 +28,10 @@ interface AuthModalProps {
   onProfileUpdate?: (updatedUser: any) => void;
   theme?: 'light' | 'dark' | 'system';
   onThemeChange?: (theme: 'light' | 'dark' | 'system') => void;
-  onDeleteBag?: () => void;
   hasBagItems?: boolean;
 }
 
-const ACCENT_COLORS = [
+export const ACCENT_COLORS = [
   { name: "Royal Blue", value: "#2563eb" },
   { name: "Neon Red", value: "#ff3366" },
   { name: "Gold", value: "#d4af37" },
@@ -205,11 +205,9 @@ export default function AuthModal({
   onProfileUpdate,
   theme = "system",
   onThemeChange,
-  onDeleteBag,
   hasBagItems
 }: AuthModalProps) {
   const [tab, setTab] = useState<"signin" | "signup" | "settings">("signin");
-  const [showDeleteBagConfirm, setShowDeleteBagConfirm] = useState(false);
   
   // Auth Form State
   const [email, setEmail] = useState("");
@@ -244,7 +242,6 @@ export default function AuthModal({
       setConfirmPassword("");
       setNewPassword("");
       setNewPasswordConfirm("");
-      setShowDeleteBagConfirm(false);
       
       if (currentUser) {
         setTab("settings");
@@ -277,8 +274,6 @@ export default function AuthModal({
       }
     }
   }, [isOpen]);
-
-  if (!isOpen) return null;
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -554,14 +549,20 @@ export default function AuthModal({
   const activeAvatarUrl = selectedPreset;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-      {/* Modal Container */}
-      <div 
-        className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200"
-        id="auth-modal-container"
-      >
-        {/* Header */}
-        <div className="flex justify-between items-center p-5 border-b border-neutral-850">
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+          {/* Modal Container */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh]"
+            id="auth-modal-container"
+          >
+            {/* Header */}
+            <div className="flex justify-between items-center p-5 border-b border-neutral-850">
           <div>
             <h2 className="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-[#2563eb] animate-pulse"></span>
@@ -1173,18 +1174,6 @@ export default function AuthModal({
                 )}
               </div>
 
-              {/* Delete Bag Section */}
-              <div className="pt-4 border-t border-neutral-900/60 mt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteBagConfirm(true)}
-                  disabled={!hasBagItems}
-                  className="w-full py-3 bg-rose-950/20 text-rose-500 font-extrabold font-mono rounded-xl text-xs uppercase tracking-wider hover:bg-rose-950/50 hover:text-rose-400 border border-rose-950/50 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Delete My Bag
-                </button>
-              </div>
-
               <div>
                 <label className="block text-[10px] font-mono uppercase text-neutral-400 mb-2">
                   Theme Accent Color
@@ -1255,42 +1244,10 @@ export default function AuthModal({
             </form>
           )}
         </div>
-      </div>
+      </motion.div>
 
-      {/* Delete Bag Confirmation Modal */}
-      {showDeleteBagConfirm && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-neutral-900 border border-rose-900/50 rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-4 shadow-2xl animate-scale-in">
-            <AlertTriangle className="w-8 h-8 text-rose-500 mx-auto animate-pulse" />
-            <h4 className="text-white font-sans font-black text-base uppercase tracking-wider">
-              Delete My Bag
-            </h4>
-            <p className="text-xs text-neutral-400 leading-relaxed font-mono">
-              Are you absolutely sure you want to permanently delete all items in your bag? This action cannot be undone.
-            </p>
-            <div className="flex gap-3 mt-6 pt-2 w-full">
-              <button
-                type="button"
-                onClick={() => setShowDeleteBagConfirm(false)}
-                className="flex-1 py-2.5 px-3 bg-neutral-950 border border-neutral-800 hover:bg-neutral-900 text-neutral-400 font-mono text-[10px] uppercase font-bold tracking-wider rounded-xl transition-all cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  onDeleteBag?.();
-                  setShowDeleteBagConfirm(false);
-                  onClose();
-                }}
-                className="flex-1 py-2.5 px-3 bg-rose-600 hover:bg-rose-500 text-white font-mono text-[10px] uppercase font-bold tracking-wider rounded-xl transition-all cursor-pointer shadow-md shadow-rose-950/40"
-              >
-                Confirm Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
+    )}
+  </AnimatePresence>
   );
 }

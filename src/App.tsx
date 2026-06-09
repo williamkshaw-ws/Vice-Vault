@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { GolfBall, CatalogItem, BallModel, BallColor, BallCondition } from "./types";
 import { VICE_BALLS_SPECS, COLOR_STYLES, SCRAPED_BALLS } from "./constants";
 import CatalogItemCard from "./components/CatalogItemCard";
@@ -12,6 +13,7 @@ import * as XLSX from "xlsx";
 import XlsImporter from "./components/XlsImporter";
 import FriendsPortal from "./components/FriendsPortal";
 import OwnedBallCard from "./components/OwnedBallCard";
+import TrophyCase from "./components/TrophyCase";
 import ImportExportModal from "./components/ImportExportModal";
 import VaultFilterBar from "./components/VaultFilterBar";
 import BallVisual from "./components/BallVisual";
@@ -46,7 +48,8 @@ import {
   ShoppingBag,
   FileText,
   Users,
-  Heart
+  Heart,
+  Trophy
 } from "lucide-react";
 
 import { auth, db, isFirebaseConfigured } from "./firebase";
@@ -226,6 +229,47 @@ const getOwnedUniqueCount = (balls: GolfBall[], catalog: CatalogItem[]) => {
   return ownedUniqueHashes.size;
 };
 
+const getUniqueCatalogItems = (balls: GolfBall[], catalog: CatalogItem[]): CatalogItem[] => {
+  const uniqueItems = new Map<string, CatalogItem>();
+  
+  balls.forEach(b => {
+    const isGroupBox = b.packageType === "box" && (b.color === "Mixed" || b.color === "" || b.variation === "Mixed" || b.variation === "") && catalog.some(c => 
+      c.model.trim().toLowerCase() === b.model.trim().toLowerCase() &&
+      (c.name || "").trim().toLowerCase() === (b.name || "").trim().toLowerCase() &&
+      (c.groupColor || c.groupVariation)
+    );
+
+    if (b.bundleItems && b.bundleItems.length > 0) {
+      b.bundleItems.forEach(item => {
+        const c = catalog.find(cat => cat.id === item.catalogId);
+        if (c) {
+          uniqueItems.set(c.id, c);
+        }
+      });
+    } else if (isGroupBox) {
+      catalog.filter(c => 
+        c.model.trim().toLowerCase() === b.model.trim().toLowerCase() &&
+        (c.name || "").trim().toLowerCase() === (b.name || "").trim().toLowerCase()
+      ).forEach(c => {
+        uniqueItems.set(c.id, c);
+      });
+    } else {
+      const c = catalog.find(cat => 
+        cat.model.trim().toLowerCase() === b.model.trim().toLowerCase() &&
+        (cat.name || cat.model).trim().toLowerCase() === (b.name || b.model).trim().toLowerCase() &&
+        cat.color.trim().toLowerCase() === b.color.trim().toLowerCase() &&
+        (cat.variation || "").trim().toLowerCase() === (b.variation || "").trim().toLowerCase() &&
+        (cat.year || "").trim().toLowerCase() === (b.year || "").trim().toLowerCase()
+      );
+      if (c) {
+        uniqueItems.set(c.id, c);
+      }
+    }
+  });
+  
+  return Array.from(uniqueItems.values());
+};
+
 export default function App() {
   // Theme state: 'light' | 'dark' | 'system'
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>(() => {
@@ -259,6 +303,8 @@ export default function App() {
   const [accentColor, setAccentColor] = useState("#2563eb");
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [guestDropdownOpen, setGuestDropdownOpen] = useState(false);
+  const [showClearWishlistConfirm, setShowClearWishlistConfirm] = useState(false);
+  const [showTrophyCase, setShowTrophyCase] = useState(false);
 
   // Shared Locker states
   const [sharedLockerOwner, setSharedLockerOwner] = useState<any | null>(null);
@@ -285,6 +331,12 @@ export default function App() {
   const [bagFilter, setBagFilter] = useState<'ea' | 'sleeve' | 'box' | null>(null);
   const [bagSortBy, setBagSortBy] = useState<string>('added_desc');
   const [bagTab, setBagTab] = useState<"owned" | "wishlist">("owned");
+
+  useEffect(() => {
+    if (bagTab === "wishlist") {
+      setShowTrophyCase(false);
+    }
+  }, [bagTab]);
 
   // State for searchable database catalog
   const [catalog, setCatalog] = useState<CatalogItem[]>(() => {
@@ -388,6 +440,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     condition: wFilterCondition, setCondition: setWFilterCondition
   }), [wFilterModel, wFilterColor, wFilterVariation, wFilterYear, wFilterName, wFilterCondition]);
   const [showWishlistOnly, setShowWishlistOnly] = useState(false);
+
+  const uniqueTrophyBalls = useMemo(() => getUniqueCatalogItems(balls, catalog), [balls, catalog]);
 
   // Secondary panel state: "browse" or "admin" inside database panel
   const [dbPanelTab, setDbPanelTab] = useState<"browse" | "admin" | "users" | "register">("browse");
@@ -2067,8 +2121,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                 </div>
               </div>
 
+              <AnimatePresence mode="wait">
               {sharedTab === "wishlist" ? (
-                <div className="space-y-3">
+                <motion.div key="shared-wishlist" initial={{opacity: 0, x: 20}} animate={{opacity: 1, x: 0}} exit={{opacity: 0, x: -20}} transition={{ duration: 0.2 }} className="space-y-3">
                   {sharedLockerOwner?.wishlist?.length > 0 && (
                     <VaultFilterBar items={catalog.filter(c => sharedLockerOwner.wishlist.some(w => w === c.id || w.startsWith(`${c.id}-pkg-`)))} filters={sharedWishlistFilters} showCondition={false} />
                   )}
@@ -2090,10 +2145,11 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                           const matchesAdvancedName = !swFilterName || item.name === swFilterName;
                           return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName;
                         })
-                        .map(item => {
+                        .map((item, index) => {
                           if (!item) return null;
                           return (
                           <CatalogItemCard
+                            index={index}
                             key={item.id}
                             item={item}
                             isReadOnly={true}
@@ -2105,9 +2161,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                       })}
                     </div>
                   )}
-                </div>
+                </motion.div>
               ) : (
-                <div className="space-y-4">
+                <motion.div key="shared-owned" initial={{opacity: 0, x: -20}} animate={{opacity: 1, x: 0}} exit={{opacity: 0, x: 20}} transition={{ duration: 0.2 }} className="space-y-4">
                   {sharedLockerBalls.length > 0 && (
                     <VaultFilterBar items={sharedLockerBalls} filters={sharedFilters} showCondition={true} />
                   )}
@@ -2128,7 +2184,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                       const matchesAdvancedCondition = !sFilterCondition || ball.condition === sFilterCondition;
                       return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName && matchesAdvancedCondition;
                     })
-                    .map((ball) => {
+                    .map((ball, index) => {
                     const currentPkg = ball.packageType || "ea";
                     const displayQty = ball.packageType === "box" 
                       ? Math.max(1, Math.round(ball.quantity / 12)) 
@@ -2138,6 +2194,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
                     return (
                       <OwnedBallCard 
+                        index={index}
                         key={ball.id} 
                         ball={ball} 
                         catalog={catalog} 
@@ -2147,8 +2204,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                   })}
                 </div>
               )}
-              </div>
+              </motion.div>
             )}
+            </AnimatePresence>
             </div>
           </main>
         </div>
@@ -2561,9 +2619,28 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                       <span className="text-sm text-neutral-500 ml-1">/ {catalog.length}</span>
                     </span>
                   </div>
-                  <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
-                    <GolfBallOutlineIcon className="w-5 h-5" />
-                  </div>
+                  <button 
+                    onClick={() => {
+                      if (bagTab !== "wishlist") {
+                        setShowTrophyCase(!showTrophyCase);
+                      }
+                    }}
+                    className={`w-10 h-10 rounded-full border border-neutral-800 flex items-center justify-center transition-colors bg-neutral-950 ${bagTab === "wishlist" ? "cursor-default" : "hover:bg-neutral-900 cursor-pointer"}`}
+                    title={bagTab === "wishlist" ? "" : "Toggle Trophy Case"}
+                    disabled={bagTab === "wishlist"}
+                  >
+                    <AnimatePresence mode="wait">
+                      {showTrophyCase ? (
+                        <motion.div key="trophy" initial={{ rotateY: 90, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ rotateY: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                          <Trophy className="w-5 h-5 text-yellow-500" />
+                        </motion.div>
+                      ) : (
+                        <motion.div key="ball" initial={{ rotateY: 90, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ rotateY: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                          <GolfBallOutlineIcon className="w-5 h-5 text-[#2563eb]" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </button>
                 </div>
 
                 <div className="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl flex items-center justify-between">
@@ -2668,21 +2745,18 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                   </div>
                 )}
 
+                <AnimatePresence mode="wait">
                 {(isAuthLoading || isLoadingCloudData) ? (
-                  <div className="py-20 text-center rounded-3xl border border-neutral-850 bg-neutral-900/40 flex flex-col items-center justify-center shadow-inner">
+                  <motion.div key="loading" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} transition={{ duration: 0.2 }} className="py-20 text-center rounded-3xl border border-neutral-850 bg-neutral-900/40 flex flex-col items-center justify-center shadow-inner">
                     <RefreshCw className="w-8 h-8 text-[#2563eb] animate-spin mb-3 opacity-80" />
                     <h4 className="font-bold text-neutral-400 text-xs uppercase tracking-wider">Loading Vault...</h4>
-                  </div>
+                  </motion.div>
                 ) : bagTab === "wishlist" ? (
-                  <div className="space-y-3">
+                  <motion.div key="wishlist" initial={{opacity: 0, x: 20}} animate={{opacity: 1, x: 0}} exit={{opacity: 0, x: -20}} transition={{ duration: 0.2 }} className="space-y-3">
                     {userProfile?.wishlist?.length > 0 && (
                       <VaultFilterBar items={catalog.filter(c => userProfile.wishlist.some(w => w === c.id || w.startsWith(`${c.id}-pkg-`)))} filters={wishlistFilters} showCondition={false}>
                         <button
-                          onClick={() => {
-                            if (window.confirm("Are you sure you want to clear your wishlist?")) {
-                              handleClearWishlist();
-                            }
-                          }}
+                          onClick={() => setShowClearWishlistConfirm(true)}
                           className="shrink-0 text-[10px] uppercase font-bold text-rose-500 hover:text-rose-400 transition-colors cursor-pointer inline-flex items-center gap-1 bg-rose-500/10 hover:bg-rose-500/20 px-3 py-1.5 rounded-lg border border-rose-500/20 whitespace-nowrap"
                         >
                           <X className="w-3 h-3" /> Clear Wishlist
@@ -2710,10 +2784,11 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                             const matchesAdvancedName = !wFilterName || item.name === wFilterName;
                             return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName;
                           })
-                          .map(item => {
+                          .map((item, index) => {
                             if (!item) return null;
                             return (
                             <CatalogItemCard
+                              index={index}
                               key={item.id}
                               item={item}
                               isReadOnly={!currentUser}
@@ -2726,9 +2801,19 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                         })}
                       </div>
                     )}
-                  </div>
+                  </motion.div>
                 ) : (
-                  <div className="space-y-4">
+                  <motion.div key="bag" initial={{opacity: 0, x: -20}} animate={{opacity: 1, x: 0}} exit={{opacity: 0, x: 20}} transition={{ duration: 0.2 }} className="space-y-4">
+                    <AnimatePresence mode="wait">
+                    {showTrophyCase ? (
+                      <motion.div key="trophycase" initial={{ rotateY: 90, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ rotateY: -90, opacity: 0 }} transition={{ duration: 0.3 }} style={{ perspective: 1000 }}>
+                        <TrophyCase 
+                          uniqueBalls={uniqueTrophyBalls}
+                          username={userProfile?.username || "GOLFER"}
+                        />
+                      </motion.div>
+                    ) : (
+                      <motion.div key="gridcase" initial={{ rotateY: -90, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ rotateY: 90, opacity: 0 }} transition={{ duration: 0.3 }} style={{ perspective: 1000 }}>
                     {balls.length > 0 && (
                       <VaultFilterBar items={balls} filters={bagFilters} showCondition={true} />
                     )}
@@ -2767,8 +2852,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                           default: return a.index - b.index;
                         }
                       })
-                      .map(({ ball }) => (
+                      .map(({ ball }, index) => (
                       <OwnedBallCard
+                        index={index}
                         key={ball.id}
                         ball={ball}
                         catalog={catalog}
@@ -2778,8 +2864,12 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                     ))}
                   </div>
                 )}
-                  </div>
+                      </motion.div>
+                    )}
+                    </AnimatePresence>
+                  </motion.div>
                 )}
+                </AnimatePresence>
               </div>
 
             </section>
@@ -2808,8 +2898,6 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         userProfile={userProfile}
         theme={theme}
         onThemeChange={handleSetTheme}
-        onDeleteBag={handleDeleteAllLocker}
-        hasBagItems={balls.length > 0}
         onProfileUpdate={(updatedUser) => {
           setCurrentUser(updatedUser);
           setUserProfile({
@@ -4099,7 +4187,55 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         onClose={() => setIsImportExportModalOpen(false)}
         onExport={handleExportData}
         onImport={handleImportData}
+        onDeleteBag={handleDeleteAllLocker}
+        hasBagItems={balls.length > 0}
       />
+
+      {/* Clear Wishlist Confirmation Modal */}
+      <AnimatePresence>
+      {showClearWishlistConfirm && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+        >
+          <motion.div 
+            initial={{ scale: 0.9, y: 10 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: 10 }}
+            className="bg-neutral-900 border border-rose-900/50 rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-4 shadow-2xl relative"
+          >
+            <AlertTriangle className="w-8 h-8 text-rose-500 mx-auto animate-pulse" />
+            <h4 className="text-white font-sans font-black text-base uppercase tracking-wider">
+              Clear Wishlist
+            </h4>
+            <p className="text-xs text-neutral-400 leading-relaxed font-mono">
+              Are you sure you want to remove all items from your wishlist? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 mt-6 pt-2 w-full">
+              <button
+                type="button"
+                onClick={() => setShowClearWishlistConfirm(false)}
+                className="flex-1 py-2.5 px-3 bg-neutral-950 border border-neutral-800 hover:bg-neutral-900 text-neutral-400 font-mono text-[10px] uppercase font-bold tracking-wider rounded-xl transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  handleClearWishlist();
+                  setShowClearWishlistConfirm(false);
+                }}
+                className="flex-1 py-2.5 px-3 bg-rose-600 hover:bg-rose-500 text-white font-mono text-[10px] uppercase font-extrabold tracking-wider rounded-xl transition-all cursor-pointer border-none"
+              >
+                Yes, Clear
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+      </AnimatePresence>
 
        {/* Toast Notification */}
        {toast && (

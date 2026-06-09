@@ -9,7 +9,8 @@
     "start": "node dist/server.cjs",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "backup": "./backup.sh"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
@@ -19,6 +20,9 @@
     "express": "^4.21.2",
     "firebase": "^12.13.0",
     "firebase-admin": "^13.10.0",
+    "framer-motion": "^12.40.0",
+    "html-to-image": "^1.11.13",
+    "html2canvas": "^1.4.1",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "puppeteer": "^25.0.4",

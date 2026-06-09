@@ -12,3 +12,6 @@ data/users_data/
 .antigravity/
 scratch/.venv/
 Vice_Golf_Ball_Catalog/
+backups/
+backup-*.zip
+Vice-Vault-Backup-*.zip

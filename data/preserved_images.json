@@ -7,5 +7,37 @@
   },
   "PRO_PLUS-GOLD_EDITION-WHITE-GOLD_NUM_1_EDITED": {
     "customImage": "imageA"
+  },
+  "PRO-COSMIC-BLUE_SUPERCLUSTER": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783696360-aad4-10a0-bb92.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358002247-a39a-861b-793e.webp?alt=media"
+  },
+  "PRO-COSMIC-AURORA_FIELDS": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783716987-81c0-9282-1675.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358001855-f927-e49b-7618.webp?alt=media"
+  },
+  "PRO-COSMIC-STELLAR_EMBER": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783736308-8b15-0206-a21d.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358002965-d51b-c592-8077.webp?alt=media"
+  },
+  "PRO-COSMIC-NEBULA_MIST": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783754578-4ddb-c72d-42e3.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358002611-5de0-520d-9ebe.webp?alt=media"
+  },
+  "PRO_AIR-TRACER-NEON_TIDE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783976337-66b3-2099-d277.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358015800-0107-dac1-6308.webp?alt=media"
+  },
+  "PRO_PLUS-TRACER-ARCTIC_BOMB": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783986450-26fd-f17f-f635.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358022536-1052-34bc-d2a4.webp?alt=media"
+  },
+  "PRO-TRACER-FIREBALL": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783995917-fe89-eff1-d650.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358010397-d14b-6712-a392.webp?alt=media"
+  },
+  "PRO-TRACER-YELLOW_GREEN-MAJOR_EDITION": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780784620341-b27f-8a72-186c.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358011194-dbce-58fc-0ac3.webp?alt=media"
   }
 }

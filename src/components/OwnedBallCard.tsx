@@ -10,6 +10,7 @@ import { Trash2, Calendar, FileText, ChevronDown, ChevronUp, Check, Save, Edit2,
 
 interface OwnedBallCardProps {
   key?: string | number;
+  index?: number;
   ball: GolfBall;
   catalog: CatalogItem[];
   onUpdateBall?: (id: string, updatedFields: Partial<GolfBall>) => void;
@@ -29,7 +30,8 @@ export default function OwnedBallCard({
   catalog,
   onUpdateBall,
   onDelete,
-  readOnly = false
+  readOnly = false,
+  index = 0
 }: OwnedBallCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showBundleContents, setShowBundleContents] = useState(false);

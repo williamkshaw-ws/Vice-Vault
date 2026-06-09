@@ -26,6 +26,10 @@ export default function AddMissingBallForm({
   const [name, setName] = useState("");
   const [color, setColor] = useState("");
   const [variation, setVariation] = useState("");
+  const [year, setYear] = useState("");
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: currentYear - 2012 + 1 }, (_, i) => String(2012 + i));
   const [customImage, setCustomImage] = useState<string | undefined>(undefined);
   const [customImageSleeve, setCustomImageSleeve] = useState<string | undefined>(undefined);
   const [customImageBox, setCustomImageBox] = useState<string | undefined>(undefined);
@@ -51,6 +55,7 @@ export default function AddMissingBallForm({
       setName(editItem.name || "");
       setColor(editItem.color);
       setVariation(editItem.variation || editItem.notes || "");
+      setYear(editItem.year || "");
       setGroupColor(!!editItem.groupColor);
       setGroupVariation(!!editItem.groupVariation);
       setCustomImage(editItem.customImage);
@@ -68,6 +73,7 @@ export default function AddMissingBallForm({
       setName("");
       setColor("");
       setVariation("");
+      setYear("");
       setGroupColor(false);
       setGroupVariation(false);
       setCustomImage(undefined);
@@ -132,6 +138,7 @@ export default function AddMissingBallForm({
       name: name.trim(),
       color: color.trim(),
       variation: variation.trim() ? variation.trim() : null,
+      year: year.trim() ? year.trim() : undefined,
       groupColor: groupColor || undefined,
       groupVariation: groupVariation || undefined,
       notes: variation.trim() ? variation.trim() : null,
@@ -161,6 +168,8 @@ export default function AddMissingBallForm({
         setName("");
         setColor("");
         setVariation("");
+        setYear("");
+      setYear("");
         setGroupColor(false);
         setGroupVariation(false);
         setCustomImage(undefined);
@@ -232,6 +241,7 @@ export default function AddMissingBallForm({
                />
              </div>
 
+
              {/* Name */}
              <div>
                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold whitespace-nowrap">
@@ -251,7 +261,7 @@ export default function AddMissingBallForm({
           </div>
 
           {/* Second Row: Color, Variation & Grouping */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_140px] gap-4 items-end">
              {/* Color */}
              <div>
                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold whitespace-nowrap">
@@ -315,6 +325,23 @@ export default function AddMissingBallForm({
                <span className="text-[9px] uppercase font-mono tracking-wider text-neutral-300 font-bold whitespace-nowrap">
                  Group By Var.
                </span>
+             </div>
+             {/* Year */}
+             <div>
+               <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold whitespace-nowrap">
+                 Year
+               </label>
+               <select
+                 value={year}
+                 onChange={(e) => setYear(e.target.value)}
+                 className="w-full h-[34px] bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-1 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all cursor-pointer appearance-none"
+                 style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2371717a%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem top 50%', backgroundSize: '0.65rem auto' }}
+               >
+                 <option value="">Unknown</option>
+                 {years.map(y => (
+                   <option key={y} value={y}>{y}</option>
+                 ))}
+               </select>
              </div>
           </div>
 
@@ -567,6 +594,8 @@ export default function AddMissingBallForm({
                   setName("");
                   setColor("");
                   setVariation("");
+        setYear("");
+      setYear("");
                   setCustomImage(undefined);
                   setIsBundle(false);
                   setBundleItems([]);
