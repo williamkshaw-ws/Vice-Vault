@@ -17,7 +17,7 @@ export default defineConfig(() => {
         includeAssets: ['vault-icon.png', 'vault-logo.png'],
         manifest: {
           name: 'Golf Ball Vault',
-          short_name: 'Vice Vault',
+          short_name: 'Golf Ball Vault',
           description: 'Premium Golf Ball Collection & Log Tracker',
           theme_color: '#0a0a0a',
           background_color: '#000000',
