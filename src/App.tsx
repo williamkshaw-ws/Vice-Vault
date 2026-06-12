@@ -2252,32 +2252,28 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       
       {/* Sleek Minimal Branded Header */}
       <header className="sticky top-0 z-30 shadow-sm transition-all duration-300 border-b border-neutral-850 bg-neutral-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4.5 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4.5 flex flex-row items-center justify-between gap-2 sm:gap-4">
           
-          {/* Logo & Brand statement */}
-          <div className="flex items-center gap-3.5 text-center sm:text-left">
+          {/* Left: Logo (and mobile name) */}
+          <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
             <div className="relative group flex items-center justify-center">
               <div className="relative w-11 h-11 flex items-center justify-center transition-colors">
-                <img src="/vault-logo.png" alt="Logo" className="w-11 h-11 object-contain drop-shadow-md scale-[2] translate-y-[4px]" />
+                <img src="/vault-logo.png" alt="Logo" className="h-9 sm:h-11 w-auto object-contain drop-shadow-md" />
               </div>
             </div>
-            <div>
-              <div className="flex items-center gap-2.5 justify-center sm:justify-start">
-                <h1 className="text-xl font-sans font-black tracking-tight text-white m-0 transition-all">
-                  GOLF BALL VAULT
-                </h1>
-                <span className="px-2 py-0.5 rounded font-mono font-black text-[9px] uppercase tracking-wider transition-all duration-300 bg-[#2563eb] text-black font-black">
-                  Pro-Edition
-                </span>
-              </div>
-              <p className="text-[11px] text-neutral-400 tracking-tight mt-0.5 max-w-sm">
-                Search, catalog, and oversee your custom golf ball collections with visual precision.
-              </p>
+            {/* Mobile text image stays grouped with the logo */}
+            <div className="block sm:hidden">
+              <img src="/vault-name-mobile.png" alt="Golfball Vault" className="h-9 w-auto object-contain" />
             </div>
           </div>
 
+          {/* Center: Desktop text image (absolutely centered) */}
+          <div className="hidden sm:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center justify-center pointer-events-none">
+            <img src="/vault-name-desktop.png" alt="Golfball Vault" className="h-11 w-auto object-contain pointer-events-auto" />
+          </div>
+
           {/* Double Actions: Dropdown Menus */}
-          <div className="flex items-center gap-3 flex-wrap justify-center">
+          <div className="flex items-center gap-3 justify-end shrink-0">
             
             {/* Quick login / Sync access */}
             {isLoadingCloudData ? (
@@ -2695,7 +2691,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                       }`}
                     >
                       <GolfBagIcon className={`w-5 h-5 ${bagTab === "owned" ? "text-neutral-400" : ""}`} />
-                      <h2 className="font-sans font-black text-base uppercase tracking-wider">
+                      <h2 className="font-sans font-black text-sm sm:text-base uppercase tracking-wider whitespace-nowrap">
                         My Bag
                       </h2>
                     </button>
@@ -2710,7 +2706,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                         }`}
                       >
                         <Heart className={`w-4 h-4 ${bagTab === "wishlist" ? "fill-current" : ""}`} />
-                        <h2 className="font-sans font-black text-base uppercase tracking-wider">
+                        <h2 className="font-sans font-black text-base uppercase tracking-wider whitespace-nowrap">
                           Wishlist
                         </h2>
                       </button>

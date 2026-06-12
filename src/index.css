@@ -12,6 +12,9 @@
   --color-lime-800: #1e3a8a;
   --color-lime-900: #172554;
   --color-lime-950: #0f172a;
+  
+  --font-sans: "EB Garamond", Garamond, serif;
+  --font-mono: "EB Garamond", Garamond, serif;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
