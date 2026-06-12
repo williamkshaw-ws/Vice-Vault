@@ -15,6 +15,7 @@ import FriendsPortal from "./components/FriendsPortal";
 import OwnedBallCard from "./components/OwnedBallCard";
 import TrophyCase from "./components/TrophyCase";
 import ImportExportModal from "./components/ImportExportModal";
+import LeaderboardModal from "./components/LeaderboardModal";
 import VaultFilterBar from "./components/VaultFilterBar";
 import BallVisual from "./components/BallVisual";
 import { 
@@ -294,8 +295,9 @@ export default function App() {
 
   // Firebase Auth & Cloud Sync states
   const [currentUser, setCurrentUser] = useState<any | null>(null);
-  const [userProfile, setUserProfile] = useState<{ uid: string; displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; shareBag?: boolean; shareToken?: string; pendingFriendRequestsCount?: number; wishlist?: string[] } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ uid: string; displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; shareBag?: boolean; shareToken?: string; pendingFriendRequestsCount?: number; wishlist?: string[]; optInLeaderboard?: boolean; } | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [isImportExportModalOpen, setIsImportExportModalOpen] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isLoadingCloudData, setIsLoadingCloudData] = useState(false);
@@ -1949,6 +1951,17 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     return getOwnedUniqueCount(balls, catalog);
   }, [balls, catalog]);
 
+  // Sync high-level stats to the backend whenever the bag or opt-in status changes
+  useEffect(() => {
+    if (currentUser && currentUser.uid && userProfile?.optInLeaderboard && isCloudDataLoaded) {
+      fetch(`/api/users/${currentUser.uid}/stats`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-user-id": currentUser.uid },
+        body: JSON.stringify({ totalUniqueBalls: totalUniqueModels, totalBalls: totalOwnedCount })
+      }).catch(err => console.error("Error updating leaderboard stats:", err));
+    }
+  }, [totalUniqueModels, totalOwnedCount, currentUser, userProfile?.optInLeaderboard, isCloudDataLoaded]);
+
   const eaCount = useMemo(() => {
     return balls.filter(b => b.packageType === "ea" || !b.packageType).reduce((sum, b) => sum + b.quantity, 0);
   }, [balls]);
@@ -2275,6 +2288,24 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           {/* Double Actions: Dropdown Menus */}
           <div className="flex items-center gap-3 justify-end shrink-0">
             
+            {/* Leaderboard Button */}
+            <button
+              onClick={async () => {
+                if (userProfile && userProfile.uid) {
+                  await fetch(`/api/users/${userProfile.uid}/stats`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "x-user-id": userProfile.uid },
+                    body: JSON.stringify({ totalUniqueBalls: totalUniqueModels, totalBalls: totalOwnedCount })
+                  }).catch(e => console.error("Error:", e));
+                }
+                setShowLeaderboard(true);
+              }}
+              className="text-neutral-500 hover:text-[#d4af37] border border-transparent hover:border-[#d4af37]/30 transition-all cursor-pointer flex items-center justify-center p-2 rounded-xl bg-transparent hover:bg-[#d4af37]/10"
+              title="Global Leaderboard"
+            >
+              <Trophy size={18} />
+            </button>
+
             {/* Quick login / Sync access */}
             {isLoadingCloudData ? (
               <div className="flex items-center gap-2 text-neutral-500 text-[11px] font-mono border border-neutral-850 px-4 py-2 rounded-xl bg-neutral-950">
@@ -2909,6 +2940,13 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           </div>
         </div>
       </footer>
+
+      {/* Leaderboard Modal */}
+      <LeaderboardModal 
+        isOpen={showLeaderboard}
+        onClose={() => setShowLeaderboard(false)}
+        currentUserUsername={userProfile?.username || currentUser?.username}
+      />
 
       {/* Firebase Auth Modal */}
       <AuthModal 

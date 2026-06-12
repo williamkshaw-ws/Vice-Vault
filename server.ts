@@ -35,6 +35,9 @@ interface UserProfile {
   friendRequestsIn?: string[];
   friendRequestsOut?: string[];
   wishlist?: string[];
+  optInLeaderboard?: boolean;
+  totalUniqueBalls?: number;
+  totalBalls?: number;
 }
 
 const OB_KEY = "ViceVaultSecretObfuscationKey_2026";
@@ -1705,6 +1708,9 @@ app.get("/api/users/:id/profile", async (req, res) => {
     shareToken: encryptUsername(user.username || ""),
     pendingFriendRequestsCount: user.friendRequestsIn ? user.friendRequestsIn.length : 0,
     wishlist: user.wishlist || [],
+    optInLeaderboard: !!user.optInLeaderboard,
+    totalUniqueBalls: user.totalUniqueBalls || 0,
+    totalBalls: user.totalBalls || 0,
     isMock: false
   };
   res.json(clientUser);
@@ -1713,7 +1719,7 @@ app.get("/api/users/:id/profile", async (req, res) => {
 // Update user profile details (Name, Username, avatarUrl, preferredColor)
 app.patch("/api/users/:id/profile", async (req, res) => {
   const { id } = req.params;
-  const { displayName, username, avatarUrl, preferredColor, password, shareBag } = req.body;
+  const { displayName, username, avatarUrl, preferredColor, password, shareBag, optInLeaderboard } = req.body;
 
   if (!displayName || !displayName.trim()) {
     return res.status(400).json({ error: "Display name is required." });
@@ -1769,6 +1775,9 @@ app.patch("/api/users/:id/profile", async (req, res) => {
   }
   if (shareBag !== undefined) {
     user.shareBag = !!shareBag;
+  }
+  if (optInLeaderboard !== undefined) {
+    user.optInLeaderboard = !!optInLeaderboard;
   }
   if (password !== undefined && password !== "") {
     if (!isStrongPassword(password)) {
@@ -1837,10 +1846,49 @@ app.patch("/api/users/:id/profile", async (req, res) => {
     shareBag: !!user.shareBag,
     shareToken: encryptUsername(user.username || ""),
     wishlist: user.wishlist || [],
+    optInLeaderboard: !!user.optInLeaderboard,
+    totalUniqueBalls: user.totalUniqueBalls || 0,
+    totalBalls: user.totalBalls || 0,
     isMock: true
   };
 
   res.json(clientUser);
+});
+
+// Update user stats directly from the client when saving locker
+app.post("/api/users/:uid/stats", async (req, res) => {
+  const { uid } = req.params;
+  const { totalUniqueBalls, totalBalls } = req.body;
+  
+  const resolvedId = await resolveUserDocId(uid);
+  const users = await getUsersList();
+  const user = users.find(u => u.uid === resolvedId);
+  if (!user) {
+    return res.status(404).json({ error: "User not found." });
+  }
+
+  user.totalUniqueBalls = totalUniqueBalls || 0;
+  user.totalBalls = totalBalls || 0;
+  
+  await saveUserToDb(user);
+  res.json({ success: true });
+});
+
+// Get global leaderboard
+app.get("/api/leaderboard", async (req, res) => {
+  const users = await getUsersList();
+  const leaderboardUsers = users
+    .filter(u => u.optInLeaderboard)
+    .map(u => ({
+      username: u.username,
+      displayName: u.displayName,
+      avatarUrl: u.avatarUrl,
+      totalUniqueBalls: u.totalUniqueBalls || 0,
+      totalBalls: u.totalBalls || 0
+    }))
+    .sort((a, b) => b.totalUniqueBalls - a.totalUniqueBalls);
+    
+  res.json(leaderboardUsers);
 });
 
 // --- USER API ENDPOINTS ---

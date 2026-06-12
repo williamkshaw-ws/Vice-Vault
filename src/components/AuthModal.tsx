@@ -24,7 +24,7 @@ interface AuthModalProps {
   onClose: () => void;
   onMockLogin?: (user: any) => void;
   currentUser?: any;
-  userProfile?: { displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; createdAt?: string; email?: string; shareBag?: boolean; shareToken?: string } | null;
+  userProfile?: { displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; createdAt?: string; email?: string; shareBag?: boolean; shareToken?: string; optInLeaderboard?: boolean; } | null;
   onProfileUpdate?: (updatedUser: any) => void;
   theme?: 'light' | 'dark' | 'system';
   onThemeChange?: (theme: 'light' | 'dark' | 'system') => void;
@@ -220,6 +220,7 @@ export default function AuthModal({
   const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
   const [shareBag, setShareBag] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [optInLeaderboard, setOptInLeaderboard] = useState(false);
   
   // Avatar Selection State
   const [selectedPreset, setSelectedPreset] = useState("preset-1");
@@ -251,11 +252,13 @@ export default function AuthModal({
         const colorVal = userProfile?.preferredColor || currentUser.preferredColor || "#2563eb";
         const avatarVal = userProfile?.avatarUrl || currentUser.photoURL || "preset-1";
         const shareBagVal = userProfile?.shareBag || currentUser.shareBag || false;
+        const optInLeaderboardVal = userProfile?.optInLeaderboard || currentUser.optInLeaderboard || false;
         
         setDisplayName(nameVal);
         setUsername(usernameVal);
         setPreferredColor(colorVal);
         setShareBag(shareBagVal);
+        setOptInLeaderboard(optInLeaderboardVal);
         
         if (avatarVal.startsWith("preset-")) {
           setSelectedPreset(avatarVal);
@@ -271,6 +274,7 @@ export default function AuthModal({
         setPreferredColor("#2563eb");
         setSelectedPreset("preset-1");
         setShareBag(false);
+        setOptInLeaderboard(false);
       }
     }
   }, [isOpen]);
@@ -457,7 +461,8 @@ export default function AuthModal({
           username: cleanUsername,
           avatarUrl: finalAvatar,
           preferredColor,
-          shareBag
+          shareBag,
+          optInLeaderboard
         };
         if (newPassword) {
           updateData.password = newPassword;
@@ -508,7 +513,8 @@ export default function AuthModal({
         username: cleanUsername,
         avatarUrl: finalAvatar,
         preferredColor: preferredColor,
-        shareBag
+        shareBag,
+        optInLeaderboard
       };
 
       const res = await fetch(`/api/users/${currentUser.uid}/profile`, {
@@ -534,7 +540,8 @@ export default function AuthModal({
           preferredColor: preferredColor,
           role: data.role || userProfile?.role || "User",
           shareBag: data.shareBag,
-          shareToken: data.shareToken
+          shareToken: data.shareToken,
+          optInLeaderboard: data.optInLeaderboard
         });
         onClose();
         setIsLoading(false);
@@ -1172,6 +1179,27 @@ export default function AuthModal({
                     Sharing is currently disabled. Toggle on to generate a public viewer link.
                   </div>
                 )}
+              </div>
+
+              {/* Leaderboard Opt-in Section */}
+              <div className="bg-neutral-950/30 border border-neutral-850 p-3.5 rounded-xl space-y-3 font-mono text-xs">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-white font-bold block">Global Leaderboard</span>
+                    <span className="text-neutral-550 text-[10px] block mt-0.5">Opt-in to display your stats on the leaderboard</span>
+                  </div>
+                  
+                  {/* Toggle Switch */}
+                  <label className="relative inline-flex items-center cursor-pointer select-none">
+                    <input 
+                      type="checkbox" 
+                      checked={optInLeaderboard} 
+                      onChange={(e) => setOptInLeaderboard(e.target.checked)} 
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-neutral-400 peer-checked:after:bg-black after:border-neutral-800 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-neutral-600 peer-checked:bg-[#2563eb]"></div>
+                  </label>
+                </div>
               </div>
 
               <div>

@@ -5,7 +5,9 @@
     "color": "White",
     "groupVariation": false,
     "name": "LIV Golf",
-    "model": "DRIVE"
+    "model": "DRIVE",
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781112751272-bd43-7ada-24a4.png?alt=media"
   },
   {
     "id": "DRIVE-PSYCHO_BUNNY-WHITE",
@@ -13,7 +15,9 @@
     "color": "White",
     "groupVariation": false,
     "name": "Psycho Bunny",
-    "model": "DRIVE"
+    "model": "DRIVE",
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781112612736-2d66-08f7-4eea.png?alt=media"
   },
   {
     "id": "DRIVE-STANDARD-BLUE",
@@ -271,47 +275,47 @@
   },
   {
     "id": "PRO-COSMIC-AURORA_FIELDS",
-    "model": "PRO",
-    "name": "Cosmic",
-    "color": "Aurora Fields",
     "groupColor": true,
+    "color": "Aurora Fields",
     "groupVariation": false,
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783716987-81c0-9282-1675.png?alt=media",
+    "name": "Cosmic",
+    "model": "PRO",
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358001855-f927-e49b-7618.webp?alt=media",
-    "bundleItems": []
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783716987-81c0-9282-1675.png?alt=media"
   },
   {
     "id": "PRO-COSMIC-BLUE_SUPERCLUSTER",
-    "model": "PRO",
-    "name": "Cosmic",
-    "color": "Blue Supercluster",
     "groupColor": true,
+    "color": "Blue Supercluster",
     "groupVariation": false,
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783696360-aad4-10a0-bb92.png?alt=media",
+    "name": "Cosmic",
+    "model": "PRO",
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358002247-a39a-861b-793e.webp?alt=media",
-    "bundleItems": []
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783696360-aad4-10a0-bb92.png?alt=media"
   },
   {
     "id": "PRO-COSMIC-NEBULA_MIST",
-    "model": "PRO",
-    "name": "Cosmic",
-    "color": "Nebula Mist",
     "groupColor": true,
+    "color": "Nebula Mist",
     "groupVariation": false,
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783754578-4ddb-c72d-42e3.png?alt=media",
+    "name": "Cosmic",
+    "model": "PRO",
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358002611-5de0-520d-9ebe.webp?alt=media",
-    "bundleItems": []
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783754578-4ddb-c72d-42e3.png?alt=media"
   },
   {
     "id": "PRO-COSMIC-STELLAR_EMBER",
-    "model": "PRO",
-    "name": "Cosmic",
-    "color": "Stellar Ember",
     "groupColor": true,
+    "color": "Stellar Ember",
     "groupVariation": false,
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783736308-8b15-0206-a21d.png?alt=media",
+    "name": "Cosmic",
+    "model": "PRO",
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358002965-d51b-c592-8077.webp?alt=media",
-    "bundleItems": []
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783736308-8b15-0206-a21d.png?alt=media"
   },
   {
     "id": "PRO-DRIP-LIME_BLACK",
@@ -361,9 +365,10 @@
     "color": "Neon Sunset",
     "groupVariation": false,
     "name": "Drip Shade",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358005427-791d-6513-bc47.webp?alt=media",
     "model": "PRO",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358005612-6920-8494-0814.webp?alt=media"
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781096901198-3efa-b461-93db.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781096902020-869c-ccf7-1a69.png?alt=media"
   },
   {
     "id": "PRO-DRIP_SHADE-ROYAL_GOLD",
@@ -371,7 +376,9 @@
     "color": "Royal Gold",
     "groupVariation": false,
     "name": "Drip Shade",
-    "model": "PRO"
+    "model": "PRO",
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781096955198-87e4-783e-265b.png?alt=media"
   },
   {
     "id": "PRO-FLAMINGO-PINK",
@@ -462,13 +469,27 @@
     "model": "PRO"
   },
   {
-    "id": "PRO-GREG_MIKE-BLUE-SMILE",
+    "id": "PRO-GREG_MIKE-BLUE-LOUDMOUF",
     "groupColor": false,
+    "bundleItems": [],
+    "notes": "LOUDMOUF",
     "color": "Blue",
     "groupVariation": false,
     "name": "Greg Mike",
     "model": "PRO",
-    "variation": "Smile"
+    "variation": "LOUDMOUF",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099312081-1eed-30fc-26c6.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099312454-00c0-b3d4-1ea1.png?alt=media"
+  },
+  {
+    "id": "PRO-GREG_MIKE-GREEN-LOUDMOUF",
+    "bundleItems": [],
+    "color": "Green",
+    "name": "Greg Mike",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781096295266-0bf2-9e9a-c475.png?alt=media",
+    "model": "PRO",
+    "variation": "LOUDMOUF",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781096296956-ffdd-545f-4047.png?alt=media"
   },
   {
     "id": "PRO-GREG_MIKE-WHITE-EYE",
@@ -477,7 +498,22 @@
     "groupVariation": false,
     "name": "Greg Mike",
     "model": "PRO",
-    "variation": "Eye"
+    "variation": "Eye",
+    "bundleItems": [],
+    "notes": "Eye",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099322679-f34c-b601-e58f.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099322956-6083-27b6-44f2.png?alt=media"
+  },
+  {
+    "id": "PRO-GREG_MIKE-YELLOW-SMILEY",
+    "bundleItems": [],
+    "color": "Yellow",
+    "name": "Greg Mike",
+    "model": "PRO",
+    "variation": "Smiley",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781096360327-3905-5262-61f5.png?alt=media",
+    "notes": "Smiley",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099142186-cd11-4b7d-28eb.png?alt=media"
   },
   {
     "id": "PRO-JUNIOR-WHITE",
@@ -485,9 +521,10 @@
     "color": "White",
     "groupVariation": false,
     "name": "Junior",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358005776-f204-0232-d171.webp?alt=media",
     "model": "PRO",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358005975-5955-f9d0-eae6.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358005975-5955-f9d0-eae6.webp?alt=media",
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097070113-f335-c5bc-7a23.png?alt=media"
   },
   {
     "id": "PRO-JUNIOR-YELLOW",
@@ -495,9 +532,10 @@
     "color": "Yellow",
     "groupVariation": false,
     "name": "Junior",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358006153-3787-f508-d12e.webp?alt=media",
     "model": "PRO",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358006330-e2b4-a86a-fb64.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358006330-e2b4-a86a-fb64.webp?alt=media",
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097247845-f7b3-b6df-1947.png?alt=media"
   },
   {
     "id": "PRO-LIV_GOLF-YELLOW_BLACK_DRIP",
@@ -584,9 +622,10 @@
     "color": "Black",
     "groupVariation": false,
     "name": "Moonrock",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358006502-db0f-9eb2-f6ad.webp?alt=media",
     "model": "PRO",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358006777-bf46-b78d-a3a8.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358006777-bf46-b78d-a3a8.webp?alt=media",
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097625467-cb89-4546-d198.png?alt=media"
   },
   {
     "id": "PRO-NEON-LIME",
@@ -615,15 +654,49 @@
     "color": "Watermelon Bubblegum",
     "groupVariation": false,
     "name": "Neon Drip",
-    "model": "PRO"
+    "model": "PRO",
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781096984251-e599-9110-36ed.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781096984629-ff23-7a81-4daf.webp?alt=media"
   },
   {
-    "id": "PRO-NEVER_OUTGUNNED-WHITE",
+    "id": "PRO-NEVER_OUTGUNNED-WHITE-12",
     "groupColor": false,
+    "bundleItems": [],
+    "notes": "#12",
     "color": "White",
-    "groupVariation": false,
+    "groupVariation": true,
     "name": "Never Outgunned",
-    "model": "PRO"
+    "model": "PRO",
+    "variation": "#12"
+  },
+  {
+    "id": "PRO-NEVER_OUTGUNNED-WHITE-23",
+    "bundleItems": [],
+    "color": "White",
+    "groupVariation": true,
+    "name": "Never Outgunned",
+    "model": "PRO",
+    "variation": "#23"
+  },
+  {
+    "id": "PRO-NEVER_OUTGUNNED-WHITE-34",
+    "bundleItems": [],
+    "color": "White",
+    "groupVariation": true,
+    "name": "Never Outgunned",
+    "model": "PRO",
+    "variation": "#34"
+  },
+  {
+    "id": "PRO-NEVER_OUTGUNNED-WHITE-93",
+    "bundleItems": [],
+    "color": "White",
+    "groupVariation": true,
+    "name": "Never Outgunned",
+    "model": "PRO",
+    "notes": "#93",
+    "variation": "#93"
   },
   {
     "id": "PRO-OAKMONT_US_OPEN-RED_BLUE_DRIP",
@@ -663,9 +736,10 @@
     "color": "Gold",
     "groupVariation": false,
     "name": "Pro(st)",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358007969-35af-1b83-4a2c.webp?alt=media",
     "model": "PRO",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358008151-ab1c-079c-38af.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358008151-ab1c-079c-38af.webp?alt=media",
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781098785525-6bfc-48a9-9d63.png?alt=media"
   },
   {
     "id": "PRO-PRO_ST_CHARACTER-WHITE-BRATWURST",
@@ -771,9 +845,10 @@
     "color": "Brown White",
     "groupVariation": false,
     "name": "Tan",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358009892-942a-2562-6fde.webp?alt=media",
     "model": "PRO",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358010072-4167-7106-1aac.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358010072-4167-7106-1aac.webp?alt=media",
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781098753375-2283-32b8-3d19.png?alt=media"
   },
   {
     "id": "PRO-TCAF-PRUPLE_DRIP",
@@ -785,14 +860,14 @@
   },
   {
     "id": "PRO-TRACER-FIREBALL",
-    "model": "PRO",
-    "name": "Tracer",
-    "color": "Fireball",
     "groupColor": false,
+    "color": "Fireball",
     "groupVariation": false,
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783995917-fe89-eff1-d650.png?alt=media",
+    "name": "Tracer",
+    "model": "PRO",
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358010397-d14b-6712-a392.webp?alt=media",
-    "bundleItems": []
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783995917-fe89-eff1-d650.png?alt=media"
   },
   {
     "id": "PRO-TRACER-WHITE",
@@ -806,16 +881,16 @@
   },
   {
     "id": "PRO-TRACER-YELLOW_GREEN-MAJOR_EDITION",
-    "model": "PRO",
-    "name": "Tracer",
-    "color": "Yellow/Green",
-    "variation": "Major Edition",
-    "notes": "Major Edition",
     "groupColor": false,
+    "color": "Yellow/Green",
     "groupVariation": false,
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780784620341-b27f-8a72-186c.png?alt=media",
+    "name": "Tracer",
+    "model": "PRO",
+    "variation": "Major Edition",
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358011194-dbce-58fc-0ac3.webp?alt=media",
-    "bundleItems": []
+    "bundleItems": [],
+    "notes": "Major Edition",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780784620341-b27f-8a72-186c.png?alt=media"
   },
   {
     "id": "PRO-VICE_LINKS-GOLD_DRIP",
@@ -840,6 +915,54 @@
     "groupVariation": false,
     "name": "Wild Winds",
     "model": "PRO"
+  },
+  {
+    "id": "PRO-ZARAHOME_1_3-WHITE-1_GOLFER",
+    "bundleItems": [],
+    "notes": "1- Golfer",
+    "color": "White",
+    "groupVariation": true,
+    "name": "ZaraHome (1 & 3)",
+    "model": "PRO",
+    "variation": "1- Golfer",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099613246-5c9c-8e5c-3f06.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099613551-9166-e862-a04a.png?alt=media"
+  },
+  {
+    "id": "PRO-ZARAHOME_1_3-WHITE-3_BALL",
+    "bundleItems": [],
+    "notes": "3- Ball",
+    "color": "White",
+    "groupVariation": true,
+    "name": "ZaraHome (1 & 3)",
+    "model": "PRO",
+    "variation": "3- Ball",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099620800-bbd9-9e54-7016.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099621145-7664-0e22-588c.png?alt=media"
+  },
+  {
+    "id": "PRO-ZARAHOME_2_4-WHITE-2_CLUBS",
+    "bundleItems": [],
+    "notes": "2- Clubs",
+    "color": "White",
+    "groupVariation": true,
+    "name": "ZaraHome (2 & 4)",
+    "model": "PRO",
+    "variation": "2- Clubs",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099493621-2bfd-17da-9b19.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099494633-d86a-2cce-11e8.png?alt=media"
+  },
+  {
+    "id": "PRO-ZARAHOME_2_4-WHITE-4_GREEN",
+    "bundleItems": [],
+    "notes": "4- Green",
+    "color": "White",
+    "groupVariation": true,
+    "model": "PRO",
+    "variation": "4- Green",
+    "name": "ZaraHome (2 & 4)",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099504346-1515-ee56-5949.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099504620-4e4f-fa7e-2a9a.png?alt=media"
   },
   {
     "id": "PRO_AIR-DRIP-PETROL_YELLOW",
@@ -869,9 +992,10 @@
     "color": "Cotton Candy",
     "groupVariation": false,
     "name": "Drip Shade",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358012708-62da-487d-6ad7.webp?alt=media",
     "model": "PRO AIR",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358012866-624d-7e22-6085.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358012866-624d-7e22-6085.webp?alt=media",
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097433972-0c16-2900-a856.png?alt=media"
   },
   {
     "id": "PRO_AIR-GREEN_MILE_CLUB-WHITE-16",
@@ -955,14 +1079,14 @@
   },
   {
     "id": "PRO_AIR-TRACER-NEON_TIDE",
-    "model": "PRO AIR",
-    "name": "Tracer",
-    "color": "Neon Tide",
     "groupColor": false,
+    "color": "Neon Tide",
     "groupVariation": false,
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783976337-66b3-2099-d277.png?alt=media",
+    "name": "Tracer",
+    "model": "PRO AIR",
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358015800-0107-dac1-6308.webp?alt=media",
-    "bundleItems": []
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783976337-66b3-2099-d277.png?alt=media"
   },
   {
     "id": "PRO_AIR-TRACER-WHITE",
@@ -981,7 +1105,10 @@
     "color": "Blue (Europe)",
     "groupVariation": false,
     "name": "Bethpage Station",
-    "model": "PRO PLUS"
+    "model": "PRO PLUS",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100127615-8591-93eb-d9a9.png?alt=media",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100127063-8eed-c1d8-a464.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100127908-4f35-98e6-dc9e.png?alt=media"
   },
   {
     "id": "PRO_PLUS-BETHPAGE_STATION-RED_USA",
@@ -990,7 +1117,10 @@
     "color": "Red (USA)",
     "groupVariation": false,
     "name": "Bethpage Station",
-    "model": "PRO PLUS"
+    "model": "PRO PLUS",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099923759-8348-3b91-9ee5.png?alt=media",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099923252-45e9-45e4-aa7a.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099924054-972e-499a-fef4.png?alt=media"
   },
   {
     "id": "PRO_PLUS-BORDEAUX_RED-WHITE",
@@ -1006,9 +1136,10 @@
     "color": "White",
     "groupVariation": false,
     "name": "Divot Dudes",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358016663-bb95-ed9e-f76e.webp?alt=media",
     "model": "PRO PLUS",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358016834-81f5-769b-431f.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358016834-81f5-769b-431f.webp?alt=media",
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097525432-c79e-3b42-a0aa.png?alt=media"
   },
   {
     "id": "PRO_PLUS-DRIP-LIME_BLACK",
@@ -1411,14 +1542,14 @@
   },
   {
     "id": "PRO_PLUS-TRACER-ARCTIC_BOMB",
-    "model": "PRO PLUS",
-    "name": "Tracer",
-    "color": "Arctic Bomb",
     "groupColor": false,
+    "color": "Arctic Bomb",
     "groupVariation": false,
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783986450-26fd-f17f-f635.png?alt=media",
+    "name": "Tracer",
+    "model": "PRO PLUS",
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358022536-1052-34bc-d2a4.webp?alt=media",
-    "bundleItems": []
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783986450-26fd-f17f-f635.png?alt=media"
   },
   {
     "id": "PRO_PLUS-TRACER-WHITE",
@@ -1604,9 +1735,11 @@
     "color": "Lime",
     "groupVariation": false,
     "name": "Neon",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358025841-a33a-1b89-dc5c.jpg?alt=media",
     "model": "PRO SOFT",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358026043-6b5e-8e4a-25ce.jpg?alt=media"
+    "bundleItems": [],
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100439559-291e-8cf5-483d.jpg?alt=media",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100439149-c187-14a0-a685.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100439798-783d-8e80-5291.jpg?alt=media"
   },
   {
     "id": "PRO_SOFT-NEON-RED",
@@ -1614,7 +1747,11 @@
     "color": "Red",
     "groupVariation": false,
     "name": "Neon",
-    "model": "PRO SOFT"
+    "model": "PRO SOFT",
+    "bundleItems": [],
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100467138-c72a-a429-2650.jpg?alt=media",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100466768-f68f-4ee5-fb44.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100467362-2393-63b2-5dbc.png?alt=media"
   },
   {
     "id": "PRO_SOFT-STANDARD-WHITE",
@@ -1633,6 +1770,17 @@
     "groupVariation": false,
     "name": "Tailgate",
     "model": "PRO SOFT"
+  },
+  {
+    "id": "PRO_ZERO-STANDARD-WHITE",
+    "groupColor": false,
+    "bundleItems": [],
+    "color": "White",
+    "groupVariation": false,
+    "name": "Standard",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099802711-15b8-e786-d8f0.jpg?alt=media",
+    "model": "PRO ZERO",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099803031-c906-51bf-a6be.jpg?alt=media"
   },
   {
     "id": "TOUR-ALL_OVER_PRINT-SKETCH",
@@ -1674,9 +1822,10 @@
     "groupVariation": false,
     "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358028633-2920-78c5-6c0c.jpg?alt=media",
     "name": "Junior",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358028477-f15d-3b1c-6430.webp?alt=media",
     "model": "TOUR",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358028799-f11c-d6b8-ecf7.jpg?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358028799-f11c-d6b8-ecf7.jpg?alt=media",
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097319425-ea8e-0644-ca70.png?alt=media"
   },
   {
     "id": "TOUR-JUNIOR-WHITE_ORANGE",
@@ -1685,9 +1834,10 @@
     "groupVariation": false,
     "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358029203-7692-5dc0-3146.jpg?alt=media",
     "name": "Junior",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358029014-4d61-d44b-488e.jpg?alt=media",
     "model": "TOUR",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358029386-3786-acfa-8b2c.jpg?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358029386-3786-acfa-8b2c.jpg?alt=media",
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097327696-8951-7fff-f8ac.png?alt=media"
   },
   {
     "id": "TOUR-JUNIOR-YELLOW_BLUE",
@@ -1695,9 +1845,10 @@
     "color": "Yellow/Blue",
     "groupVariation": false,
     "name": "Junior",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358029612-b5df-00da-8986.webp?alt=media",
     "model": "TOUR",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358029767-4c25-50de-dfac.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358029767-4c25-50de-dfac.webp?alt=media",
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097355430-02cc-34a0-b494.png?alt=media"
   },
   {
     "id": "TOUR-JUNIOR-YELLOW_ORANGE",
@@ -1705,9 +1856,10 @@
     "color": "Yellow/Orange",
     "groupVariation": false,
     "name": "Junior",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358029918-af91-6a8a-0346.webp?alt=media",
     "model": "TOUR",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358030076-6d28-df47-4fce.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358030076-6d28-df47-4fce.webp?alt=media",
+    "bundleItems": [],
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097362924-969a-27e6-9eae.png?alt=media"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-EUR1",
@@ -1716,7 +1868,10 @@
     "groupVariation": true,
     "name": "Ryder Cup",
     "model": "TOUR",
-    "variation": "EUR1"
+    "variation": "EUR1",
+    "bundleItems": [],
+    "notes": "EUR1",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781112997767-d0c6-d95b-a777.png?alt=media"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-EUR2",
@@ -1725,7 +1880,10 @@
     "groupVariation": true,
     "name": "Ryder Cup",
     "model": "TOUR",
-    "variation": "EUR2"
+    "variation": "EUR2",
+    "bundleItems": [],
+    "notes": "EUR2",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113021856-9fb9-2e42-7b60.png?alt=media"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-EUR3",
@@ -1734,7 +1892,10 @@
     "groupVariation": true,
     "name": "Ryder Cup",
     "model": "TOUR",
-    "variation": "EUR3"
+    "variation": "EUR3",
+    "bundleItems": [],
+    "notes": "EUR3",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113031232-847c-7706-2ca0.png?alt=media"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USA1",
@@ -1743,7 +1904,10 @@
     "groupVariation": true,
     "name": "Ryder Cup",
     "model": "TOUR",
-    "variation": "USA1"
+    "variation": "USA1",
+    "bundleItems": [],
+    "notes": "USA1",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113044308-719a-428d-4202.png?alt=media"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USA2",
@@ -1752,7 +1916,10 @@
     "groupVariation": true,
     "name": "Ryder Cup",
     "model": "TOUR",
-    "variation": "USA2"
+    "variation": "USA2",
+    "bundleItems": [],
+    "notes": "USA2",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113054242-f327-4ea1-7c58.png?alt=media"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USA3",
@@ -1761,7 +1928,10 @@
     "groupVariation": true,
     "name": "Ryder Cup",
     "model": "TOUR",
-    "variation": "USA3"
+    "variation": "USA3",
+    "bundleItems": [],
+    "notes": "USA3",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113066218-50e0-8408-0477.png?alt=media"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USVEU1",
@@ -1770,7 +1940,10 @@
     "groupVariation": true,
     "name": "Ryder Cup",
     "model": "TOUR",
-    "variation": "USvEU1"
+    "variation": "USvEU1",
+    "bundleItems": [],
+    "notes": "USvEU1",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113105014-bc34-568f-4c48.png?alt=media"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USVEU2",
@@ -1779,7 +1952,10 @@
     "groupVariation": true,
     "name": "Ryder Cup",
     "model": "TOUR",
-    "variation": "USvEU2"
+    "variation": "USvEU2",
+    "bundleItems": [],
+    "notes": "USvEU2",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113115329-4281-0390-542a.png?alt=media"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USVEU3",
@@ -1788,7 +1964,10 @@
     "groupVariation": true,
     "name": "Ryder Cup",
     "model": "TOUR",
-    "variation": "USvEU3"
+    "variation": "USvEU3",
+    "bundleItems": [],
+    "notes": "USvEU3",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113125120-7bc8-cbdc-db00.png?alt=media"
   },
   {
     "id": "TOUR-STANDARD-WHITE",
@@ -1800,13 +1979,5 @@
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358030258-d1dd-dc18-b052.jpg?alt=media",
     "model": "TOUR",
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358030780-fb0d-5f67-345d.jpg?alt=media"
-  },
-  {
-    "id": "ZERO-STANDARD-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Standard",
-    "model": "ZERO"
   }
 ]

@@ -1,65 +1,60 @@
-import sys
+import re
 
-path = '/Users/williamkshaw/antigravity/Vice-Vault/src/components/CatalogItemCard.tsx'
-with open(path, 'r') as f:
-    content = f.read()
+with open("src/components/CatalogItemCard.tsx", "r") as f:
+    text = f.read()
 
-target1 = """      className={`relative rounded-xl border p-4 transition-all duration-300 ${
+text = text.replace(
+    'import { Plus, Check, ChevronDown, ChevronUp, Layers, HelpCircle, Package, MessageSquare, X, AlertTriangle, Heart } from "lucide-react";',
+    'import { Plus, Check, ChevronDown, ChevronUp, Layers, HelpCircle, Package, MessageSquare, X, AlertTriangle, Heart } from "lucide-react";\nimport { motion, AnimatePresence } from "framer-motion";'
+)
+
+text = text.replace(
+    'interface CatalogItemCardProps {\n  key?: string | number;\n  item: CatalogItem;',
+    'interface CatalogItemCardProps {\n  key?: string | number;\n  index?: number;\n  item: CatalogItem;'
+)
+
+text = text.replace(
+    'export default function CatalogItemCard({ item, subItems = [], onAddToLocker, isReadOnly = false, wishlistItems = [], onToggleWishlist, variant }: CatalogItemCardProps) {',
+    'export default function CatalogItemCard({ item, subItems = [], onAddToLocker, isReadOnly = false, wishlistItems = [], onToggleWishlist, variant, index = 0 }: CatalogItemCardProps) {'
+)
+
+old_div = """  return (
+    <div 
+      className={`relative rounded-xl border p-4 transition-all duration-300 ${
         isOpen 
           ? "bg-neutral-900 border-[#2563eb]/50 shadow-md shadow-[#2563eb]/10" 
           : "bg-neutral-900/60 hover:bg-neutral-900 border-neutral-800 hover:border-neutral-700 hover:shadow-sm"
-      }`}"""
-replacement1 = """      className={`relative rounded-xl border p-4 transition-all duration-300 ${
+      } ${showWishlistPrompt ? "z-[60]" : ""}`}
+      id={`catalog-item-card-${item.id}`}
+    >"""
+
+new_div = """  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.3, delay: index * 0.04, ease: [0.23, 1, 0.32, 1] }}
+      className={`relative rounded-xl border p-4 transition-all duration-300 ${
         isOpen 
           ? "bg-neutral-900 border-[#2563eb]/50 shadow-md shadow-[#2563eb]/10" 
           : "bg-neutral-900/60 hover:bg-neutral-900 border-neutral-800 hover:border-neutral-700 hover:shadow-sm"
-      } ${showWishlistPrompt ? "z-[60]" : ""}`}"""
+      } ${showWishlistPrompt ? "z-[60]" : ""}`}
+      id={`catalog-item-card-${item.id}`}
+    >"""
+text = text.replace(old_div, new_div)
 
-content = content.replace(target1, replacement1)
+old_end = """        </form>
+      )}
+    </div>
+  );
+}"""
+new_end = """        </form>
+      )}
+    </motion.div>
+  );
+}"""
+text = text.replace(old_end, new_end)
 
-target2 = """                  {showWishlistPrompt && createPortal(
-                    <div className="fixed inset-0 z-40" style={{ pointerEvents: 'auto' }} onClick={() => setShowWishlistPrompt(false)}>
-                      <div 
-                        className={`absolute w-56 bg-neutral-900 border border-neutral-800 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in duration-150 flex flex-col ${wishlistCoords.openUpwards ? 'slide-in-from-bottom-2' : 'mt-2 slide-in-from-top-2'}`}
-                        style={{
-                          top: wishlistCoords.top,
-                          left: wishlistCoords.left,
-                          transform: wishlistCoords.openUpwards ? "translateY(calc(-100% - 8px))" : "none"
-                        }}
-                        onClick={e => e.stopPropagation()}
-                      >"""
-replacement2 = """                  {showWishlistPrompt && (
-                    <>
-                      <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setShowWishlistPrompt(false); }} />
-                      <div 
-                        className={`absolute right-0 w-56 bg-neutral-900 border border-neutral-800 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in duration-150 flex flex-col ${wishlistCoords.openUpwards ? 'bottom-full mb-2 slide-in-from-bottom-2' : 'top-full mt-2 slide-in-from-top-2'}`}
-                        onClick={e => e.stopPropagation()}
-                      >"""
-
-content = content.replace(target2, replacement2)
-
-target3 = """                        {subItems.length > 1 ? (
-                          <div className="flex flex-col">"""
-replacement3 = """                        {subItems.length > 0 ? (
-                          <div className="flex flex-col">"""
-
-content = content.replace(target3, replacement3)
-
-target4 = """                          </div>
-                        ) : null}
-                      </div>
-                    </div>,
-                    document.body
-                  )}"""
-replacement4 = """                          </div>
-                        ) : null}
-                      </div>
-                    </>
-                  )}"""
-
-content = content.replace(target4, replacement4)
-
-with open(path, 'w') as f:
-    f.write(content)
-print("Fixed!")
+with open("src/components/CatalogItemCard.tsx", "w") as f:
+    f.write(text)
 

@@ -571,7 +571,7 @@ export default function OwnedBallCard({
 
               {/* Action Buttons (Edit and Delete) */}
               {!readOnly && (
-                <div className="flex gap-0.5 ml-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                <div className="flex gap-0.5 ml-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                   <button
                     type="button"
                     onClick={startEditing}
