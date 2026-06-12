@@ -183,8 +183,6 @@ export default function LeaderboardModal({ isOpen, onClose, currentUserUsername 
               )}
             </div>
             
-            {/* Footer gradient fade */}
-            <div className="h-6 w-full absolute bottom-0 bg-gradient-to-t from-neutral-950 to-transparent pointer-events-none"></div>
           </motion.div>
         </div>
       )}
