@@ -2271,7 +2271,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
             <div className="relative group flex items-center justify-center">
               <div className="relative w-11 h-11 flex items-center justify-center transition-colors">
-                <img src="/vault-logo.png" alt="Logo" className="h-9 sm:h-11 w-auto object-contain drop-shadow-md" />
+                <img src="/vault-icon.png" alt="Logo" className="h-9 sm:h-11 w-auto object-contain drop-shadow-md" />
               </div>
             </div>
             {/* Mobile text image stays grouped with the logo */}
