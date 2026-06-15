@@ -1647,6 +1647,18 @@ app.post("/api/users/:uid/wishlist/clear", async (req, res) => {
 app.get("/api/users/:id/profile", async (req, res) => {
   const { id } = req.params;
   const resolvedId = await resolveUserDocId(id);
+  
+  if (dbAdmin) {
+    try {
+      const docSnap = await dbAdmin.collection("users").doc(resolvedId).get();
+      if (docSnap.exists) {
+        return res.json({ uid: docSnap.id, ...docSnap.data() });
+      }
+    } catch (e) {
+      console.error("Firestore error loading profile:", e);
+    }
+  }
+
   const users = await getUsersList();
   let user = users.find(u => u.uid === resolvedId);
   

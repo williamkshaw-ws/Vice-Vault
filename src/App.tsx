@@ -980,10 +980,15 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           // 1. Load User Profile from the Server API (which resolves standard Firestore documents securely)
           let userDocData: any = null;
           let userDocId: string = "";
+          let lockerRes: Response | undefined;
 
           if (db) {
             try {
-              const profileRes = await fetch(`/api/users/${user.uid}/profile`);
+              const [profileRes, lRes] = await Promise.all([
+                fetch(`/api/users/${user.uid}/profile`),
+                fetch(`/api/users/${user.uid}/locker`)
+              ]);
+              lockerRes = lRes;
               if (profileRes.ok) {
                 const profileData = await profileRes.json();
                 userDocData = {
@@ -1053,10 +1058,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
               } catch (e) {}
             }
 
-            // 2. Load locker documents using the server API instead of client-side Firestore
-            const lockerRes = await fetch(`/api/users/${user.uid}/locker`);
+            // 2. Process locker documents using the server API response
             let finalBalls = cachedBag ? filterLegacyBalls(safeJSONParse(cachedBag)) : filterLegacyBalls(balls);
-            if (lockerRes.ok) {
+            // Re-use lockerRes from the Promise.all array above
+            if (typeof lockerRes !== 'undefined' && lockerRes.ok) {
               const lockerData = await lockerRes.json();
               if (lockerData && lockerData.balls !== null) {
                 finalBalls = filterLegacyBalls(lockerData.balls);
@@ -2797,7 +2802,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                 )}
 
                 <AnimatePresence mode="wait">
-                {(isAuthLoading || isLoadingCloudData) ? (
+                {(isAuthLoading || (isLoadingCloudData && balls.length === 0 && !localStorage.getItem("vice_vault_bag_" + userProfile?.uid))) ? (
                   <motion.div key="loading" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} transition={{ duration: 0.2 }} className="py-20 text-center rounded-3xl border border-neutral-850 bg-neutral-900/40 flex flex-col items-center justify-center shadow-inner">
                     <RefreshCw className="w-8 h-8 text-[#2563eb] animate-spin mb-3 opacity-80" />
                     <h4 className="font-bold text-neutral-400 text-xs uppercase tracking-wider">Loading Vault...</h4>
