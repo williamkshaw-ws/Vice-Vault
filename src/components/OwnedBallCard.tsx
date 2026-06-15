@@ -3,10 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import html2canvas from "html2canvas";
 import { GolfBall, BallCondition, CatalogItem } from "../types";
 import BallVisual from "./BallVisual";
-import { Trash2, Calendar, FileText, ChevronDown, ChevronUp, Check, Save, Edit2, X, Package, MessageSquare, AlertTriangle, Box } from "lucide-react";
+import { Trash2, Calendar, FileText, ChevronDown, ChevronUp, Check, Save, Edit2, X, Package, MessageSquare, AlertTriangle, Box, Share2, Loader2 } from "lucide-react";
+import { TradingCardRenderer } from "./TradingCardRenderer";
+import { toPng } from "html-to-image";
 
 interface OwnedBallCardProps {
   key?: string | number;
@@ -38,6 +41,158 @@ export default function OwnedBallCard({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showUnsavedPrompt, setShowUnsavedPrompt] = useState(false);
   const [pendingProceed, setPendingProceed] = useState<(() => void) | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
+  const [exportCustomImage, setExportCustomImage] = useState<string | undefined>(undefined);
+  const [exportCustomImageBox, setExportCustomImageBox] = useState<string | undefined>(undefined);
+  const [exportCustomImageSleeve, setExportCustomImageSleeve] = useState<string | undefined>(undefined);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const catalogItem = catalog.find(c => c.id === ball.id);
+
+  const downscaleImageToDataUrl = async (url: string | undefined): Promise<string | undefined> => {
+    if (!url) return undefined;
+    
+    return new Promise((resolve) => {
+      const processImage = (src: string, isDataUri: boolean) => {
+        let isResolved = false;
+        const img = new Image();
+        // ONLY set crossOrigin for network URLs. Setting it for data: URIs causes Safari to fire onerror!
+        if (!isDataUri) {
+          img.crossOrigin = "anonymous";
+        }
+        
+        const timeout = setTimeout(() => {
+          if (!isResolved) {
+            console.error("Image decode timed out");
+            isResolved = true;
+            resolve(""); // DO NOT return the massive 15MB src, it will crash Safari SVG!
+          }
+        }, 4000);
+
+        img.onload = () => {
+          if (isResolved) return;
+          isResolved = true;
+          clearTimeout(timeout);
+          const canvas = document.createElement("canvas");
+          const maxSize = 512;
+          let width = img.width;
+          let height = img.height;
+          
+          if (width > maxSize || height > maxSize) {
+            if (width > height) {
+              height = Math.round((height * maxSize) / width);
+              width = maxSize;
+            } else {
+              width = Math.round((width * maxSize) / height);
+              height = maxSize;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedDataUrl = canvas.toDataURL("image/png");
+            resolve(compressedDataUrl);
+          } else {
+            resolve("");
+          }
+        };
+        img.onerror = () => {
+          if (isResolved) return;
+          isResolved = true;
+          clearTimeout(timeout);
+          console.error("Image failed to load in downscaler for src:", src.substring(0, 50) + "...");
+          resolve(""); // DO NOT return the massive 15MB src, it will crash Safari SVG!
+        };
+        img.src = src;
+      };
+
+      // If it's already a base64 string from local storage, we MUST downscale it!
+      if (url.startsWith('data:')) {
+        processImage(url, true);
+        return;
+      }
+
+      // For network URLs, skip fetch and load directly via Image object
+      // This bypasses strict fetch() opaque response blocking in Safari
+      processImage(url, false);
+    });
+  };
+
+  const handleShare = async () => {
+    if (!cardRef.current) return;
+    setIsSharing(true);
+    try {
+      // 1. On-demand downscale the images to prevent Safari canvas memory crashes
+      // MUST USE EXACT SAME FALLBACK LOGIC AS TRADING CARD RENDERER!
+      const targetBox = ball.customImageBox || ball.customImage || ball.customImageSleeve || catalogItem?.customImageBox || catalogItem?.customImage;
+      const targetSleeve = ball.customImageSleeve || ball.customImage || ball.customImageBox || catalogItem?.customImageSleeve || catalogItem?.customImage;
+      const targetEa = ball.customImage || ball.customImageBox || ball.customImageSleeve || catalogItem?.customImage;
+
+      // Preload HTTP images to ensure they are fully downloaded and decoded before html-to-image captures the DOM
+      const preloadImage = (src: string): Promise<void> => {
+        return new Promise((resolve) => {
+          if (!src.startsWith('http')) return resolve();
+          let isResolved = false;
+          const timeout = setTimeout(() => {
+            if (!isResolved) {
+              isResolved = true;
+              resolve();
+            }
+          }, 3000);
+          
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => { if(!isResolved){ isResolved=true; clearTimeout(timeout); resolve(); }};
+          img.onerror = () => { if(!isResolved){ isResolved=true; clearTimeout(timeout); resolve(); }};
+          img.src = src;
+        });
+      };
+
+      // Process all images through the downscaler, which will convert them to safe local Base64 strings.
+      // This completely insulates html-to-image from EVER needing to make a network request or deal with CORS.
+      if (targetBox) {
+        setExportCustomImageBox(await downscaleImageToDataUrl(targetBox));
+      }
+      if (targetSleeve) {
+        setExportCustomImageSleeve(await downscaleImageToDataUrl(targetSleeve));
+      }
+      if (targetEa) {
+        setExportCustomImage(await downscaleImageToDataUrl(targetEa));
+      }
+
+      // Wait a moment for React state to update the DOM with the compressed images, and for Safari
+      // to fully paint the massive downscaled images onto the DOM before we take the canvas snapshot.
+      await new Promise(r => setTimeout(r, 1500));
+
+      const isDark = document.documentElement.classList.contains('dark');
+
+      const dataUrl = await toPng(cardRef.current, {
+        backgroundColor: isDark ? '#0a0a0a' : '#f5f5f5',
+        pixelRatio: 2,
+        skipFonts: true
+      });
+      
+      const filenameIdentifier = ball.name ? ball.name.replace(/\s+/g, '-').toLowerCase() : ball.color.replace(/\s+/g, '-').toLowerCase();
+      const modelSafe = typeof ball.model === 'string' ? ball.model.replace(/\s+/g, '-').toLowerCase() : 'custom';
+      
+      const link = document.createElement("a");
+      link.download = `vice-vault-${modelSafe}-${filenameIdentifier}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err: any) {
+      console.error("Failed to generate trading card", err);
+      alert(`Failed to generate trading card: ${err.message || String(err)}`);
+    } finally {
+      setIsSharing(false);
+      // Clean up memory
+      setExportCustomImage(undefined);
+      setExportCustomImageBox(undefined);
+      setExportCustomImageSleeve(undefined);
+    }
+  };
 
   // Parse version and notes from ball (handling legacy bracketed format if necessary)
   const getVersionAndNotes = (b: GolfBall) => {
@@ -64,6 +219,8 @@ export default function OwnedBallCard({
   );
   const [editCondition, setEditCondition] = useState<BallCondition>(ball.condition);
   const [editNotes, setEditNotes] = useState<string>(currentNotes);
+  const [editCustomImageBox, setEditCustomImageBox] = useState(ball.customImageBox || ball.customImage || "");
+  const [editCustomImage, setEditCustomImage] = useState(ball.customImage || "");
   const [editYear, setEditYear] = useState<string>(ball.year || "2012");
 
   React.useEffect(() => {
@@ -76,6 +233,7 @@ export default function OwnedBallCard({
             (editPkgType !== 'box' && editPlayNumber !== (ball.customNumber || 1)) ||
             editCondition !== ball.condition ||
             editNotes.trim() !== currentNotes ||
+            editCustomImageBox !== (ball.customImageBox || ball.customImage || "") ||
             editYear !== (ball.year || "2012");
         },
         promptAndSwitch: (onProceed: () => void) => {
@@ -90,7 +248,7 @@ export default function OwnedBallCard({
     } else if (currentlyEditingCard?.id === ball.id) {
       currentlyEditingCard = null;
     }
-  }, [isEditing, editQty, editPkgType, editPlayNumber, editCondition, editNotes, editYear, ball]);
+  }, [isEditing, editQty, editPkgType, editPlayNumber, editCondition, editNotes, editCustomImageBox, editYear, ball]);
 
   const startEditing = () => {
     if (readOnly) return;
@@ -115,6 +273,7 @@ export default function OwnedBallCard({
     setEditCustomNumberInput([1, 2, 3, 4].includes(ball.customNumber) ? "" : String(ball.customNumber || ""));
     setEditCondition(ball.condition);
     setEditNotes(notes);
+    setEditCustomImageBox(ball.customImageBox || ball.customImage || "");
     setEditYear(ball.year || "2012");
     setIsEditing(true);
   };
@@ -158,6 +317,8 @@ export default function OwnedBallCard({
         customNumber: editPkgType === 'box' ? 1 : editPlayNumber,
         condition: editCondition,
         notes: editNotes.trim(),
+        customImageBox: editCustomImageBox,
+        customImage: editCustomImage,
         year: editYear,
       });
     }
@@ -463,6 +624,38 @@ export default function OwnedBallCard({
               className="w-full bg-neutral-950 text-xs py-1.5 px-3 rounded text-neutral-300 border border-neutral-850 focus:border-neutral-750 outline-none"
             />
           </div>
+
+          {/* Image URL Input (For Boxes) */}
+          {editPkgType === 'box' && (
+            <div className="mt-2">
+              <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1 flex items-center gap-1">
+                <Box className="w-3 h-3 text-neutral-500" /> Box Image URL
+              </label>
+              <input
+                type="url"
+                placeholder="Paste an ImgBB link here..."
+                value={editCustomImageBox}
+                onChange={(e) => setEditCustomImageBox(e.target.value)}
+                className="w-full bg-neutral-950 text-xs py-1.5 px-3 rounded text-neutral-300 border border-neutral-850 focus:border-neutral-750 outline-none"
+              />
+            </div>
+          )}
+
+          {/* Image URL Input (For Balls) */}
+          {editPkgType !== 'box' && editPkgType !== 'sleeve' && (
+            <div className="mt-2">
+              <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1 flex items-center gap-1">
+                <Package className="w-3 h-3 text-neutral-500" /> Ball Image URL
+              </label>
+              <input
+                type="url"
+                placeholder="Paste an ImgBB link here..."
+                value={editCustomImage}
+                onChange={(e) => setEditCustomImage(e.target.value)}
+                className="w-full bg-neutral-950 text-xs py-1.5 px-3 rounded text-neutral-300 border border-neutral-850 focus:border-neutral-750 outline-none"
+              />
+            </div>
+          )}
         </div>
 
         {/* Action Buttons */}
@@ -550,7 +743,7 @@ export default function OwnedBallCard({
               <div className="truncate">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-[9px] font-mono tracking-widest text-[#2563eb] uppercase font-black">
-                    {ball.model}{ball.name ? ` - ${ball.name}` : ''}
+                    {ball.model}
                   </span>
                   <span className={`text-[8px] px-1 py-0.2 rounded font-mono font-bold uppercase border tracking-wider scale-95 ${
                     ball.bundleItems && ball.bundleItems.length > 0
@@ -564,14 +757,23 @@ export default function OwnedBallCard({
                     {ball.bundleItems && ball.bundleItems.length > 0 ? 'Bundle' : ball.packageType === 'box' ? 'Box' : ball.packageType === 'sleeve' ? 'Sleeve' : 'Ball'}
                   </span>
                 </div>
-                <h4 className="font-sans font-black text-white text-base leading-tight truncate mt-0.5" title={ball.color}>
-                  {ball.color}
+                <h4 className="font-sans font-black text-white text-base leading-tight truncate mt-0.5" title={ball.name || "Standard Edition"}>
+                  {ball.name || "Standard Edition"}
                 </h4>
               </div>
 
               {/* Action Buttons (Edit and Delete) */}
               {!readOnly && (
                 <div className="flex gap-0.5 ml-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleShare}
+                    disabled={isSharing}
+                    className="p-1 hover:bg-neutral-800 text-neutral-500 hover:text-white rounded transition-colors cursor-pointer disabled:opacity-50"
+                    title="Export Trading Card"
+                  >
+                    {isSharing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Share2 className="w-3.5 h-3.5" />}
+                  </button>
                   <button
                     type="button"
                     onClick={startEditing}
@@ -595,8 +797,26 @@ export default function OwnedBallCard({
             {/* Condition badge */}
             <div className="mt-2 flex items-center gap-2">
               <span className="text-[10px] font-mono text-neutral-500 uppercase">Condition:</span>
-              <span className={`text-[10px] py-0.5 px-2 rounded font-bold border select-none transition-all ${getConditionColor(ball.condition)}`}>
+              <span className={`text-[10px] py-0.5 px-2 rounded font-bold border-none transition-all ${getConditionColor(ball.condition).replace(/border[-a-z0-9/]*\s?/g, '')}`}>
                 {ball.condition}
+              </span>
+            </div>
+
+            {/* Variation Display */}
+            {(ball.variation || currentVersion !== "Standard Edition") && (
+              <div className="mt-1.5 flex items-center gap-2">
+                <span className="text-[10px] font-mono text-neutral-500 uppercase">Variation:</span>
+                <span className="bg-neutral-950/60 p-0.5 px-1.5 rounded text-neutral-400 text-[10px] font-mono font-bold select-none">
+                  {ball.variation || currentVersion}
+                </span>
+              </div>
+            )}
+
+            {/* Color Display */}
+            <div className="mt-1.5 flex items-center gap-2">
+              <span className="text-[10px] font-mono text-neutral-500 uppercase">Color:</span>
+              <span className="bg-neutral-950/60 p-0.5 px-1.5 rounded text-neutral-400 text-[10px] font-mono font-bold select-none">
+                {ball.color}
               </span>
             </div>
 
@@ -604,18 +824,8 @@ export default function OwnedBallCard({
             {ball.year && (
               <div className="mt-1.5 flex items-center gap-2">
                 <span className="text-[10px] font-mono text-neutral-500 uppercase">Year:</span>
-                <span className="text-[10px] py-0.5 px-2 rounded font-bold border border-neutral-800 bg-neutral-950 text-neutral-300 select-none">
+                <span className="bg-neutral-950/60 p-0.5 px-1.5 rounded text-neutral-400 text-[10px] font-mono font-bold select-none">
                   {ball.year}
-                </span>
-              </div>
-            )}
-
-            {/* Variation Display */}
-            {(ball.variation || currentVersion !== "Standard Edition") && (
-              <div className="mt-1.5 flex items-center gap-2">
-                <span className="text-[10px] font-mono text-neutral-500 uppercase">Variation:</span>
-                <span className="text-[9px] font-mono font-bold bg-neutral-950 border border-neutral-800 text-neutral-450 px-1.5 py-0.5 rounded select-none">
-                  {ball.variation || currentVersion}
                 </span>
               </div>
             )}
@@ -730,6 +940,16 @@ export default function OwnedBallCard({
           )}
         </div>
       )}
+      {/* Hidden Trading Card Renderer for Export */}
+      <TradingCardRenderer 
+        ref={cardRef} 
+        ball={ball} 
+        catalogItem={catalogItem} 
+        exportCustomImage={exportCustomImage}
+        exportCustomImageBox={exportCustomImageBox}
+        exportCustomImageSleeve={exportCustomImageSleeve}
+        isDarkTheme={document.documentElement.classList.contains('dark')}
+      />
     </div>
   );
 }

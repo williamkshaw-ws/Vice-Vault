@@ -98,8 +98,8 @@
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358008151-ab1c-079c-38af.webp?alt=media"
   },
   "PRO-GREG_MIKE-YELLOW-SMILEY": {
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099142186-cd11-4b7d-28eb.png?alt=media",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781096360327-3905-5262-61f5.png?alt=media"
+    "customImage": "https://i.ibb.co/ZptHvRBw/Adobe-Express-file-2.png",
+    "customImageBox": "https://i.ibb.co/LXdH0tFh/greg-mike-smiley.png"
   },
   "PRO-GREG_MIKE-BLUE-LOUDMOUF": {
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099312081-1eed-30fc-26c6.png?alt=media",
@@ -141,5 +141,14 @@
   },
   "TOUR-RYDER_CUP-WHITE-USVEU3": {
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113125120-7bc8-cbdc-db00.png?alt=media"
+  },
+  "PRO_SOFT-NEON-RED": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100466768-f68f-4ee5-fb44.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100467138-c72a-a429-2650.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781536204008-b381-313a-82a7.jpg?alt=media"
+  },
+  "PRO-GREG_MIKE-GREEN-LOUDMOUF": {
+    "customImage": "https://i.ibb.co/HTXbHP4Z/Adobe-Express-file-6.png",
+    "customImageBox": "https://i.ibb.co/8DzVDcMH/loudmouf-box.png"
   }
 }

@@ -5,37 +5,6 @@
 
 import React, { useState, useEffect } from "react";
 
-// Hook to convert external Firebase Storage URLs to base64 Data URLs so html-to-image never hits Safari CORS Security errors
-export function useBase64Image(url?: string) {
-  const [base64, setBase64] = useState<string | undefined>(url?.startsWith('data:') ? url : undefined);
-  
-  useEffect(() => {
-    if (!url || url.startsWith('data:')) {
-      setBase64(url);
-      return;
-    }
-    
-    let isMounted = true;
-    fetch(url)
-      .then(res => res.blob())
-      .then(blob => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          if (isMounted) setBase64(reader.result as string);
-        };
-        reader.readAsDataURL(blob);
-      })
-      .catch(err => {
-        console.error("Failed to load base64 for image", url, err);
-        if (isMounted) setBase64(url); // Fallback to raw url
-      });
-      
-    return () => { isMounted = false; };
-  }, [url]);
-
-  return base64;
-}
-
 import { BallColor, BallModel } from "../types";
 
 interface BallVisualProps {
@@ -62,10 +31,6 @@ export default function BallVisual({
   packageType = "ea"
 }: BallVisualProps) {
   // Sizing styles
-  const base64CustomImage = useBase64Image(customImage);
-  const base64CustomImageBox = useBase64Image(customImageBox);
-  const base64CustomImageSleeve = useBase64Image(customImageSleeve);
-
   const sizeClasses = {
     sm: "w-10 h-10 text-[9px]",
     md: "w-16 h-16 text-[12px]",
@@ -84,14 +49,14 @@ export default function BallVisual({
   if (packageType === "box" && customImageBox) {
     return (
       <div 
-        className={`relative inline-flex items-center justify-center rounded-xl border border-neutral-800 shadow-md select-none overflow-hidden shrink-0 ${sizeClasses[size]} ${className} bg-neutral-950`}
+        className={`inline-flex items-center justify-center rounded-xl border border-neutral-800 shadow-md select-none shrink-0 overflow-hidden ${sizeClasses[size]} ${className} bg-neutral-950`}
         id={`golfbox-custom-${size}`}
       >
         <img 
-          src={base64CustomImageBox} 
+          src={customImageBox} 
           alt="Custom Box Design" 
-          className="absolute inset-0 w-full h-full object-contain"
-          referrerPolicy="no-referrer" crossOrigin="anonymous"
+          className="w-full h-full object-contain" 
+          crossOrigin={customImageBox.startsWith('http') ? "anonymous" : undefined}
         />
       </div>
     );
@@ -101,14 +66,14 @@ export default function BallVisual({
   if (packageType === "sleeve" && customImageSleeve) {
     return (
       <div 
-        className={`relative inline-flex items-center justify-center rounded-xl border border-neutral-800 shadow-md select-none overflow-hidden shrink-0 ${sizeClasses[size]} ${className} bg-neutral-950`}
+        className={`relative inline-flex items-center justify-center rounded-xl border border-neutral-800 shadow-md select-none shrink-0 overflow-hidden ${sizeClasses[size]} ${className} bg-neutral-950`}
         id={`golfsleeve-custom-${size}`}
       >
         <img 
-          src={base64CustomImageSleeve} 
+          src={customImageSleeve} 
           alt="Custom Sleeve Design" 
-          className="absolute inset-0 w-full h-full object-contain"
-          referrerPolicy="no-referrer" crossOrigin="anonymous"
+          className="w-full h-full object-contain" 
+          crossOrigin={customImageSleeve.startsWith('http') ? "anonymous" : undefined}
         />
       </div>
     );
@@ -365,7 +330,7 @@ export default function BallVisual({
           {customImage ? (
             <g>
               <circle cx={ballCx} cy={ballCy} r={ballR} fill="#fff" stroke="#475569" strokeWidth="1" />
-              <image href={customImage} x={ballCx - ballR} y={ballCy - ballR} width={ballR * 2} height={ballR * 2} clipPath="url(#boxBallClip)" />
+              <image href={customImage} xlinkHref={customImage} x={ballCx - ballR} y={ballCy - ballR} width={ballR * 2} height={ballR * 2} clipPath="url(#boxBallClip)" />
               {/* Dimple overlay over custom image */}
               <circle cx={ballCx} cy={ballCy} r={ballR} fill="transparent" stroke="rgba(0,0,0,0.1)" strokeWidth="0.8" strokeDasharray="1 1.5" clipPath="url(#boxBallClip)" />
             </g>
@@ -453,7 +418,7 @@ export default function BallVisual({
           {customImage ? (
             <g>
               <circle cx={ballCx} cy={ballCy} r={ballR} fill="#fff" stroke="#475569" strokeWidth="1" />
-              <image href={customImage} x={ballCx - ballR} y={ballCy - ballR} width={ballR * 2} height={ballR * 2} clipPath="url(#sleeveBallClip)" />
+              <image href={customImage} xlinkHref={customImage} x={ballCx - ballR} y={ballCy - ballR} width={ballR * 2} height={ballR * 2} clipPath="url(#sleeveBallClip)" />
               <circle cx={ballCx} cy={ballCy} r={ballR} fill="transparent" stroke="rgba(0,0,0,0.1)" strokeWidth="0.8" strokeDasharray="1 1.5" clipPath="url(#sleeveBallClip)" />
             </g>
           ) : (
@@ -473,46 +438,34 @@ export default function BallVisual({
   // --- RENDER SINGLE BALL VISUAL (DEFAULT) ---
   const config = getColorConfigs();
 
-  // If there is an uploaded custom image, render it inside a 3D physical dimple bubble!
+  // If there is an uploaded custom image, render it inside an SVG using a pattern fill!
+  // This bypasses Safari's infamous bug where it drops raster images with border-radius: 50% in foreignObject canvas renders.
   if (customImage) {
     return (
       <div 
-        className={`relative inline-flex items-center justify-center rounded-full aspect-square border shadow-md select-none overflow-hidden shrink-0 ${sizeClasses[size]} ${className}`}
+        className={`relative inline-flex items-center justify-center aspect-square shrink-0 ${sizeClasses[size]} ${className}`}
         id={`golfball-custom-${size}`}
-        style={{
-          boxShadow: size === "xl" 
-            ? "inset -12px -12px 30px rgba(0,0,0,0.55), inset 12px 12px 25px rgba(255,255,255,0.45), 0 10px 20px rgba(0,0,0,0.3)" 
-            : size === "lg"
-            ? "inset -8px -8px 20px rgba(0,0,0,0.5), inset 8px 8px 15px rgba(255,255,255,0.4), 0 6px 12px rgba(0,0,0,0.2)"
-            : "inset -4px -4px 10px rgba(0,0,0,0.45), inset 4px 4px 8px rgba(255,255,255,0.35), 0 4px 6px rgba(0,0,0,0.15)"
-        }}
       >
-        <img 
-          src={base64CustomImage} 
-          alt="Custom ball design" 
-          className="absolute inset-0 w-full h-full object-cover"
-          referrerPolicy="no-referrer" crossOrigin="anonymous"
-        />
+        <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full drop-shadow-md">
+          <defs>
+            <pattern id={`imgPattern-${size}`} patternUnits="userSpaceOnUse" width="100" height="100">
+              <image href={customImage} x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid slice" />
+            </pattern>
+            <radialGradient id={`ballShine-${size}`} cx="35%" cy="35%" r="65%">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.4)" />
+              <stop offset="60%" stopColor="rgba(255,255,255,0.0)" />
+              <stop offset="100%" stopColor="rgba(0,0,0,0.4)" />
+            </radialGradient>
+          </defs>
+          
+          {/* Base image filled circle */}
+          <circle cx="50" cy="50" r="49" fill={`url(#imgPattern-${size})`} stroke="#475569" strokeWidth="1" />
+          
+          {/* 3D dimple and shine overlay */}
+          <circle cx="50" cy="50" r="49" fill={`url(#ballShine-${size})`} />
+          <circle cx="50" cy="50" r="49" fill="transparent" stroke="rgba(0,0,0,0.15)" strokeWidth="1" strokeDasharray="1.5 2" />
+        </svg>
 
-
-        {/* Shading layer */}
-        <div 
-          className="absolute inset-0 rounded-full pointer-events-none"
-          style={{
-            boxShadow: size === "xl" 
-              ? "inset -12px -12px 30px rgba(0,0,0,0.55), inset 12px 12px 25px rgba(255,255,255,0.45)" 
-              : size === "lg"
-              ? "inset -8px -8px 20px rgba(0,0,0,0.5), inset 8px 8px 15px rgba(255,255,255,0.4)"
-              : "inset -4px -4px 10px rgba(0,0,0,0.45), inset 4px 4px 8px rgba(255,255,255,0.35)"
-          }}
-        />
-        {/* Sphere highlight */}
-        <div 
-          className="absolute top-[4%] left-[10%] w-[35%] h-[35%] rounded-full opacity-50 pointer-events-none"
-          style={{
-            background: "radial-gradient(circle, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 75%)"
-          }}
-        />
       </div>
     );
   }

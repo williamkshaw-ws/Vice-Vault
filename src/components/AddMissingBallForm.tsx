@@ -5,7 +5,7 @@
 
 import React, { useState, useRef } from "react";
 import { CatalogItem, BundleItem } from "../types";
-import { Plus, Upload, Trash, Sparkles, CheckCircle2, Box } from "lucide-react";
+import { Plus, Upload, Trash, Sparkles, CheckCircle2, Box, X } from "lucide-react";
 
 interface AddMissingBallFormProps {
   catalog: CatalogItem[];
@@ -41,6 +41,10 @@ export default function AddMissingBallForm({
   const [bundleModelFilter, setBundleModelFilter] = useState("All Models");
   const [selectedBundleItem, setSelectedBundleItem] = useState<string>("");
   const [bundleItemQty, setBundleItemQty] = useState(1);
+  
+  type ActiveModal = "ball" | "sleeve" | "box" | null;
+  const [activeModal, setActiveModal] = useState<ActiveModal>(null);
+  const [modalUrlInput, setModalUrlInput] = useState("");
   
   // Visual feedback states
   const [isDragActive, setIsDragActive] = useState(false);
@@ -455,7 +459,7 @@ export default function AddMissingBallForm({
             <div className="grid grid-cols-3 gap-3">
               {/* Ball Image */}
               <div 
-                onClick={() => ballInputRef.current?.click()}
+                onClick={() => { if (!customImage) setActiveModal("ball"); }}
                 className={`relative border border-dashed rounded-xl p-2.5 flex flex-col items-center justify-center gap-1 cursor-pointer h-16 text-center transition-all ${
                   customImage ? "border-neutral-700 bg-neutral-950/60" : "border-neutral-800 bg-neutral-950 hover:bg-neutral-900/60 hover:border-neutral-700"
                 }`}
@@ -497,7 +501,7 @@ export default function AddMissingBallForm({
 
               {/* Sleeve Image */}
               <div 
-                onClick={() => sleeveInputRef.current?.click()}
+                onClick={() => { if (!customImageSleeve) setActiveModal("sleeve"); }}
                 className={`relative border border-dashed rounded-xl p-2.5 flex flex-col items-center justify-center gap-1 cursor-pointer h-16 text-center transition-all ${
                   customImageSleeve ? "border-neutral-700 bg-neutral-950/60" : "border-neutral-800 bg-neutral-950 hover:bg-neutral-900/60 hover:border-neutral-700"
                 }`}
@@ -539,7 +543,7 @@ export default function AddMissingBallForm({
 
               {/* Box Image */}
               <div 
-                onClick={() => boxInputRef.current?.click()}
+                onClick={() => { if (!customImageBox) setActiveModal("box"); }}
                 className={`relative border border-dashed rounded-xl p-2.5 flex flex-col items-center justify-center gap-1 cursor-pointer h-16 text-center transition-all ${
                   customImageBox ? "border-neutral-700 bg-neutral-950/60" : "border-neutral-800 bg-neutral-950 hover:bg-neutral-900/60 hover:border-neutral-700"
                 }`}
@@ -578,8 +582,8 @@ export default function AddMissingBallForm({
                   </>
                 )}
               </div>
-            </div>
           </div>
+        </div>
 
           {/* Actions */}
           <div className="flex gap-2 justify-end pt-2 border-t border-neutral-800">
@@ -613,6 +617,72 @@ export default function AddMissingBallForm({
             </button>
           </div>
         </form>
+      )}
+
+      {/* Image Upload Modal */}
+      {activeModal && (
+        <div className="absolute inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-neutral-900 border border-neutral-700 rounded-xl p-5 w-full max-w-sm shadow-2xl relative">
+            <button 
+              onClick={() => setActiveModal(null)}
+              className="absolute top-3 right-3 text-neutral-400 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <h4 className="font-bold text-white mb-4 flex items-center gap-2">
+              <Upload className="w-4 h-4 text-[#2563eb]" />
+              Provide {activeModal.charAt(0).toUpperCase() + activeModal.slice(1)} Image
+            </h4>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs text-neutral-400 mb-1">Option 1: Paste URL (Recommended)</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="url"
+                    placeholder="e.g. https://i.ibb.co/..."
+                    value={modalUrlInput}
+                    onChange={e => setModalUrlInput(e.target.value)}
+                    className="flex-1 bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-xs text-white outline-none focus:border-[#2563eb]"
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      if (!modalUrlInput) return;
+                      if (activeModal === 'ball') setCustomImage(modalUrlInput);
+                      if (activeModal === 'sleeve') setCustomImageSleeve(modalUrlInput);
+                      if (activeModal === 'box') setCustomImageBox(modalUrlInput);
+                      setActiveModal(null);
+                      setModalUrlInput("");
+                    }}
+                    className="bg-[#2563eb] text-white px-3 py-2 rounded text-xs font-bold hover:bg-blue-600 transition-colors"
+                  >
+                    Save
+                  </button>
+                </div>
+                <p className="text-[9px] text-neutral-500 mt-1">
+                  Pasting a link from ImgBB securely bypasses Safari's strict export bugs.
+                </p>
+              </div>
+
+              <div className="relative border-t border-neutral-800 pt-4 mt-2">
+                <label className="block text-xs text-neutral-400 mb-2">Option 2: Local File</label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (activeModal === 'ball') ballInputRef.current?.click();
+                    if (activeModal === 'sleeve') sleeveInputRef.current?.click();
+                    if (activeModal === 'box') boxInputRef.current?.click();
+                    setActiveModal(null);
+                  }}
+                  className="w-full bg-neutral-800 hover:bg-neutral-700 text-white rounded py-2 px-3 text-xs font-bold border border-neutral-700 transition-colors"
+                >
+                  Browse Device...
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -483,13 +483,14 @@
   },
   {
     "id": "PRO-GREG_MIKE-GREEN-LOUDMOUF",
-    "bundleItems": [],
-    "color": "Green",
-    "name": "Greg Mike",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781096295266-0bf2-9e9a-c475.png?alt=media",
     "model": "PRO",
+    "name": "Greg Mike",
+    "color": "Green",
     "variation": "LOUDMOUF",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781096296956-ffdd-545f-4047.png?alt=media"
+    "notes": "LOUDMOUF",
+    "customImage": "https://i.ibb.co/HTXbHP4Z/Adobe-Express-file-6.png",
+    "customImageBox": "https://i.ibb.co/8DzVDcMH/loudmouf-box.png",
+    "bundleItems": []
   },
   {
     "id": "PRO-GREG_MIKE-WHITE-EYE",
@@ -506,14 +507,14 @@
   },
   {
     "id": "PRO-GREG_MIKE-YELLOW-SMILEY",
-    "bundleItems": [],
-    "color": "Yellow",
-    "name": "Greg Mike",
     "model": "PRO",
+    "name": "Greg Mike",
+    "color": "Yellow",
     "variation": "Smiley",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781096360327-3905-5262-61f5.png?alt=media",
     "notes": "Smiley",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099142186-cd11-4b7d-28eb.png?alt=media"
+    "customImage": "https://i.ibb.co/ZptHvRBw/Adobe-Express-file-2.png",
+    "customImageBox": "https://i.ibb.co/LXdH0tFh/greg-mike-smiley.png",
+    "bundleItems": []
   },
   {
     "id": "PRO-JUNIOR-WHITE",
@@ -1743,15 +1744,15 @@
   },
   {
     "id": "PRO_SOFT-NEON-RED",
-    "groupColor": false,
-    "color": "Red",
-    "groupVariation": false,
-    "name": "Neon",
     "model": "PRO SOFT",
-    "bundleItems": [],
-    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100467138-c72a-a429-2650.jpg?alt=media",
+    "name": "Neon",
+    "color": "Red",
+    "groupColor": false,
+    "groupVariation": false,
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100466768-f68f-4ee5-fb44.jpg?alt=media",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100467362-2393-63b2-5dbc.png?alt=media"
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100467138-c72a-a429-2650.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781536204008-b381-313a-82a7.jpg?alt=media",
+    "bundleItems": []
   },
   {
     "id": "PRO_SOFT-STANDARD-WHITE",
