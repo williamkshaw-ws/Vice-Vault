@@ -38,8 +38,6 @@ interface CatalogItemCardProps {
 
 let currentlyAddingCard: {
   id: string;
-  isDirty: () => boolean;
-  promptAndSwitch: (onProceed: () => void) => void;
   discardAndClose: () => void;
 } | null = null;
 
@@ -67,8 +65,6 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
   const [selectedYear, setSelectedYear] = useState<string>(defaultYear);
 
   const [selectedItemId, setSelectedItemId] = useState(item.id);
-  const [showUnsavedPrompt, setShowUnsavedPrompt] = useState(false);
-  const [pendingProceed, setPendingProceed] = useState<(() => void) | null>(null);
   
   const [showWishlistPrompt, setShowWishlistPrompt] = useState(false);
   const wishlistBtnRef = React.useRef<HTMLButtonElement>(null);
@@ -100,18 +96,6 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
     if (isOpen && !justAdded) {
       currentlyAddingCard = {
         id: item.id,
-        isDirty: () => {
-          return quantity !== 12 ||
-            pkgType !== 'box' ||
-            (pkgType !== 'box' && playNumber !== 1) ||
-            condition !== BallCondition.NEW ||
-            notes.trim() !== "" ||
-            selectedYear !== "";
-        },
-        promptAndSwitch: (onProceed: () => void) => {
-          setShowUnsavedPrompt(true);
-          setPendingProceed(() => onProceed);
-        },
         discardAndClose: () => {
           setIsOpen(false);
           currentlyAddingCard = null;
@@ -120,7 +104,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
     } else if (currentlyAddingCard?.id === item.id) {
       currentlyAddingCard = null;
     }
-  }, [isOpen, justAdded, quantity, pkgType, playNumber, condition, notes, selectedYear, item.id]);
+  }, [isOpen, justAdded, item.id]);
 
   const activeItem = subItems.find(si => si.id === selectedItemId) || item;
 
@@ -132,14 +116,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
 
   const startAdding = () => {
     if (currentlyAddingCard && currentlyAddingCard.id !== item.id) {
-      if (currentlyAddingCard.isDirty()) {
-        currentlyAddingCard.promptAndSwitch(() => {
-          openThisCard();
-        });
-        return;
-      } else {
-        currentlyAddingCard.discardAndClose();
-      }
+      currentlyAddingCard.discardAndClose();
     }
     openThisCard();
   };
@@ -151,18 +128,12 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
     setCustomNumberInput("");
     setCondition(BallCondition.NEW);
     setNotes("");
-    setSelectedYear("");
     setIsOpen(true);
   };
 
   const handleCloseAdd = () => {
-    if (currentlyAddingCard?.id === item.id && currentlyAddingCard.isDirty()) {
-      setShowUnsavedPrompt(true);
-      setPendingProceed(() => () => {});
-    } else {
-      setIsOpen(false);
-      if (currentlyAddingCard?.id === item.id) currentlyAddingCard = null;
-    }
+    setIsOpen(false);
+    if (currentlyAddingCard?.id === item.id) currentlyAddingCard = null;
   };
 
   const submitAdd = () => {
@@ -212,25 +183,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
     submitAdd();
   };
 
-  const handlePromptSave = () => {
-    submitAdd();
-    setShowUnsavedPrompt(false);
-    if (pendingProceed) pendingProceed();
-    setPendingProceed(null);
-  };
 
-  const handlePromptDiscard = () => {
-    setIsOpen(false);
-    if (currentlyAddingCard?.id === item.id) currentlyAddingCard = null;
-    setShowUnsavedPrompt(false);
-    if (pendingProceed) pendingProceed();
-    setPendingProceed(null);
-  };
-
-  const handlePromptCancel = () => {
-    setShowUnsavedPrompt(false);
-    setPendingProceed(null);
-  };
 
   const incrementQty = () => {
     if (isBundle || pkgType === 'box') {
@@ -265,45 +218,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
       } ${showWishlistPrompt ? "z-[60]" : ""}`}
       id={`catalog-item-card-${item.id}`}
     >
-      {showUnsavedPrompt && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in" style={{ position: 'fixed' }}>
-          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-4 shadow-2xl animate-scale-in">
-            <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto animate-pulse" />
-            <h4 className="text-white font-sans font-black text-base uppercase tracking-wider">
-              Unsaved Changes
-            </h4>
-            <p className="text-xs text-neutral-400 leading-relaxed font-mono">
-              Add this to your bag before switching?
-            </p>
-            <div className="flex gap-3 mt-6 pt-2 w-full">
-              <button
-                type="button"
-                onClick={() => {
-                  handlePromptCancel();
-                  document.getElementById(`catalog-item-card-${item.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }}
-                className="flex-1 py-2.5 px-3 bg-neutral-950 border border-neutral-800 hover:bg-neutral-900 text-neutral-400 font-mono text-[10px] uppercase font-bold tracking-wider rounded-xl transition-all cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handlePromptDiscard}
-                className="flex-1 py-2.5 px-3 bg-rose-600 hover:bg-rose-500 text-white font-mono text-[10px] uppercase font-bold tracking-wider rounded-xl transition-all cursor-pointer shadow-md shadow-rose-950/40"
-              >
-                Discard
-              </button>
-              <button
-                type="button"
-                onClick={handlePromptSave}
-                className="flex-1 py-2.5 px-3 bg-[#2563eb] hover:bg-[#3b82f6] text-black font-mono text-[10px] uppercase font-bold tracking-wider rounded-xl transition-all cursor-pointer shadow-md shadow-blue-900/20"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
       <div className="flex gap-4">
         {/* Ball Visual Display */}
         <div className="flex-shrink-0 flex items-center justify-center p-1 bg-neutral-950/40 rounded-xl border border-neutral-850/55 h-20 w-20">
