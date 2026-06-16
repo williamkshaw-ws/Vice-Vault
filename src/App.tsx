@@ -1447,7 +1447,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         c.model.trim().toLowerCase() === b.model.trim().toLowerCase() &&
         c.color.trim().toLowerCase() === b.color.trim().toLowerCase() &&
         (c.name || "").trim().toLowerCase() === (b.name || "").trim().toLowerCase() &&
-        (c.variation || "").trim().toLowerCase() === (b.variation || "").trim().toLowerCase()
+        (c.variation || "").trim().toLowerCase() === (b.variation || b.version || "").trim().toLowerCase()
       );
 
       if (match) {
@@ -1483,7 +1483,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         const legacyMatch = catalog.find(c =>
           c.model.trim().toLowerCase() === b.model.trim().toLowerCase() &&
           c.color.trim().toLowerCase() === b.color.trim().toLowerCase() &&
-          (c.name || "").trim().toLowerCase() === (b.name || "").trim().toLowerCase()
+          (c.variation || "").trim().toLowerCase() === (b.variation || b.version || "").trim().toLowerCase()
         );
         if (legacyMatch) {
           let updatedB = { ...b };
