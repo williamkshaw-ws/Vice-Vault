@@ -483,14 +483,14 @@
   },
   {
     "id": "PRO-GREG_MIKE-GREEN-LOUDMOUF",
-    "model": "PRO",
-    "name": "Greg Mike",
+    "bundleItems": [],
     "color": "Green",
+    "name": "Greg Mike",
+    "model": "PRO",
     "variation": "LOUDMOUF",
     "notes": "LOUDMOUF",
     "customImage": "https://i.ibb.co/HTXbHP4Z/Adobe-Express-file-6.png",
-    "customImageBox": "https://i.ibb.co/8DzVDcMH/loudmouf-box.png",
-    "bundleItems": []
+    "customImageBox": "https://i.ibb.co/8DzVDcMH/loudmouf-box.png"
   },
   {
     "id": "PRO-GREG_MIKE-WHITE-EYE",
@@ -507,14 +507,14 @@
   },
   {
     "id": "PRO-GREG_MIKE-YELLOW-SMILEY",
-    "model": "PRO",
-    "name": "Greg Mike",
+    "bundleItems": [],
     "color": "Yellow",
+    "name": "Greg Mike",
+    "model": "PRO",
     "variation": "Smiley",
     "notes": "Smiley",
     "customImage": "https://i.ibb.co/ZptHvRBw/Adobe-Express-file-2.png",
-    "customImageBox": "https://i.ibb.co/LXdH0tFh/greg-mike-smiley.png",
-    "bundleItems": []
+    "customImageBox": "https://i.ibb.co/LXdH0tFh/greg-mike-smiley.png"
   },
   {
     "id": "PRO-JUNIOR-WHITE",
@@ -1744,15 +1744,15 @@
   },
   {
     "id": "PRO_SOFT-NEON-RED",
-    "model": "PRO SOFT",
-    "name": "Neon",
-    "color": "Red",
     "groupColor": false,
+    "color": "Red",
     "groupVariation": false,
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100466768-f68f-4ee5-fb44.jpg?alt=media",
+    "name": "Neon",
+    "model": "PRO SOFT",
+    "bundleItems": [],
     "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100467138-c72a-a429-2650.jpg?alt=media",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781536204008-b381-313a-82a7.jpg?alt=media",
-    "bundleItems": []
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100466768-f68f-4ee5-fb44.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781536204008-b381-313a-82a7.jpg?alt=media"
   },
   {
     "id": "PRO_SOFT-STANDARD-WHITE",

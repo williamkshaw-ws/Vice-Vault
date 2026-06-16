@@ -1463,6 +1463,11 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           localChanged = true;
         }
         
+        if (b.year !== match.year) {
+          updatedB.year = match.year;
+          localChanged = true;
+        }
+        
         if ('variations' in updatedB) {
           delete (updatedB as any).variations;
           localChanged = true;
@@ -1489,6 +1494,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           }
           if (!b.variation && legacyMatch.variation) {
             updatedB.variation = legacyMatch.variation;
+            localChanged = true;
+          }
+          if (b.year !== legacyMatch.year) {
+            updatedB.year = legacyMatch.year;
             localChanged = true;
           }
           if ('variations' in updatedB) {
@@ -1644,6 +1653,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             name: newItem.name,
             color: newItem.color,
             variation: newItem.variation,
+            year: newItem.year,
+            notes: newItem.notes,
             groupColor: newItem.groupColor,
             groupVariation: newItem.groupVariation,
             customImage: newItem.customImage,
@@ -1666,6 +1677,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           name: newItem.name ? newItem.name.trim() : "",
           color: newItem.color.trim(),
           variation: newItem.variation ? newItem.variation.trim() : undefined,
+          year: newItem.year ? newItem.year.trim() : undefined,
           groupColor: newItem.groupColor,
           groupVariation: newItem.groupVariation,
           notes: newItem.notes ? newItem.notes.trim() : "",
