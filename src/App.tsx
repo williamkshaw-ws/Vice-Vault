@@ -1480,11 +1480,31 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         }
       } else {
         // If there's no exact match with variation, try matching by model, color, name only for legacy healing
-        const legacyMatch = catalog.find(c =>
+        let legacyMatch = catalog.find(c =>
           c.model.trim().toLowerCase() === b.model.trim().toLowerCase() &&
           c.color.trim().toLowerCase() === b.color.trim().toLowerCase() &&
           (c.variation || "").trim().toLowerCase() === (b.variation || b.version || "").trim().toLowerCase()
         );
+
+        if (!legacyMatch) {
+          // Fuzzy match for legacy items that lack structured variations
+          const possibleMatches = catalog.filter(c => 
+            c.model.trim().toLowerCase() === b.model.trim().toLowerCase() &&
+            c.color.trim().toLowerCase() === b.color.trim().toLowerCase()
+          );
+          
+          if (possibleMatches.length === 1) {
+            legacyMatch = possibleMatches[0];
+          } else if (possibleMatches.length > 1) {
+            legacyMatch = possibleMatches.find(c => 
+              (c.variation && (b.notes || "").toLowerCase().includes(c.variation.toLowerCase())) ||
+              (c.name && (b.notes || "").toLowerCase().includes(c.name.toLowerCase())) ||
+              (c.variation && (b.name || "").toLowerCase().includes(c.variation.toLowerCase())) ||
+              (c.variation && (b.variation || b.version || "").toLowerCase().includes(c.variation.toLowerCase())) ||
+              ((b.variation || b.version) && (c.variation || "").toLowerCase().includes((b.variation || b.version || "").toLowerCase()))
+            ) || possibleMatches[0];
+          }
+        }
         if (legacyMatch) {
           let updatedB = { ...b };
           let localChanged = false;
