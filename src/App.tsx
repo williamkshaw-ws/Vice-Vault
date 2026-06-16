@@ -260,7 +260,7 @@ const getUniqueCatalogItems = (balls: GolfBall[], catalog: CatalogItem[]): Catal
         (cat.name || cat.model).trim().toLowerCase() === (b.name || b.model).trim().toLowerCase() &&
         cat.color.trim().toLowerCase() === b.color.trim().toLowerCase() &&
         (cat.variation || "").trim().toLowerCase() === (b.variation || "").trim().toLowerCase() &&
-        (cat.year || "").trim().toLowerCase() === (b.year || "").trim().toLowerCase()
+        ((cat.year || "").trim().toLowerCase() === (b.year || "").trim().toLowerCase() || !cat.year)
       );
       if (c) {
         uniqueItems.set(c.id, c);
