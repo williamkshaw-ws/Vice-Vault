@@ -886,14 +886,33 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       if (originalItem) {
         setBalls((prev) =>
           prev.map((ball) => {
-            if (ball.model === originalItem.model && ball.color === originalItem.color && ball.variation === originalItem.variation) {
+            const normalize = (s?: string) => (s || "").replace(/[^a-z0-9]/gi, "").toLowerCase();
+            const modelMatch = normalize(ball.model) === normalize(originalItem.model);
+            
+            const colorMatch = normalize(ball.color) === normalize(originalItem.color);
+            const nameAsColorMatch = normalize(ball.color) === normalize(originalItem.name) && normalize(originalItem.name) !== "";
+            const isGroupColorMatch = originalItem.groupColor && normalize(ball.color) === normalize("Mixed");
+            const finalColorMatch = colorMatch || nameAsColorMatch || isGroupColorMatch;
+
+            const varMatch = normalize(ball.variation) === normalize(originalItem.variation);
+            const isGroupVarMatch = originalItem.groupVariation && normalize(ball.variation) === normalize("Mixed");
+            const finalVarMatch = varMatch || isGroupVarMatch;
+
+            const nameMatch = normalize(ball.name) === normalize(originalItem.name);
+            const isNameValid = nameMatch || !ball.name || nameAsColorMatch;
+
+            const isExactMatch = ball.catalogId === originalItem.id;
+            const isStringMatch = modelMatch && finalColorMatch && finalVarMatch && isNameValid;
+
+            if (isExactMatch || isStringMatch) {
               return {
                 ...ball,
+                catalogId: isExactMatch ? newId : ball.catalogId,
                 model: updatedModel.toUpperCase(),
-                color: updatedColor,
+                color: (ball.packageType === 'box' && (updatedFields.groupColor !== undefined ? updatedFields.groupColor : originalItem.groupColor)) ? "Mixed" : updatedColor,
                 name: updatedName || undefined,
-                variation: updatedVariation === null ? undefined : updatedVariation,
-                year: updatedFields.year === null ? undefined : updatedFields.year,
+                variation: (ball.packageType === 'box' && (updatedFields.groupVariation !== undefined ? updatedFields.groupVariation : originalItem.groupVariation)) ? "Mixed" : (updatedVariation === null ? undefined : updatedVariation),
+                year: !ball.year ? (updatedFields.year === null ? undefined : updatedFields.year) : ball.year,
                 notes: updatedNotes === null ? undefined : updatedNotes,
                 customImage: updatedFields.customImage !== undefined ? updatedFields.customImage : ball.customImage,
                 customImageSleeve: updatedFields.customImageSleeve !== undefined ? updatedFields.customImageSleeve : ball.customImageSleeve,
@@ -1436,143 +1455,81 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   }, [balls, currentUser]);
 
 
-  // Self-heal / hydrate legacy owned balls with name and variation from the catalog
+  // Modern synchronization: Ensure bag items stay perfectly synced with catalog changes (e.g. Name, Year)
   useEffect(() => {
     if (catalog.length === 0 || balls.length === 0) return;
 
     let changed = false;
     const updatedBalls = balls.map(b => {
-      // Find matching catalog item (matching model, color, name, variation)
-      const match = catalog.find(c => 
-        c.model.trim().toLowerCase() === b.model.trim().toLowerCase() &&
-        c.color.trim().toLowerCase() === b.color.trim().toLowerCase() &&
-        (c.name || "").trim().toLowerCase() === (b.name || "").trim().toLowerCase() &&
-        (c.variation || "").trim().toLowerCase() === (b.variation || b.version || "").trim().toLowerCase()
-      );
+      // STRICT MATCH ONLY: We no longer do legacy fuzzy matching. 
+      // Bag items must have the correct model, color (or name-as-color fallback), and variation to sync.
+      const normalize = (s?: string) => (s || "").replace(/[^a-z0-9]/gi, "").toLowerCase();
+      
+      let match;
+      if (b.catalogId) {
+        match = catalog.find(c => c.id === b.catalogId);
+      } else {
+        match = catalog.find(c => {
+          const modelMatch = normalize(c.model) === normalize(b.model);
+          if (!modelMatch) return false;
+
+          const colorMatch = normalize(c.color) === normalize(b.color);
+          const nameAsColorMatch = normalize(c.name) === normalize(b.color) && normalize(c.name) !== "";
+          const isGroupColorMatch = c.groupColor && normalize(b.color) === normalize("Mixed");
+          const finalColorMatch = colorMatch || nameAsColorMatch || isGroupColorMatch;
+          
+          const nameMatch = normalize(c.name) === normalize(b.name);
+          
+          const varMatch = normalize(c.variation) === normalize(b.variation);
+          const isGroupVarMatch = c.groupVariation && normalize(b.variation) === normalize("Mixed");
+          const finalVarMatch = varMatch || isGroupVarMatch;
+
+          // Name MUST match if it is provided, unless we are matching the specific edge-case where name == color (Cosmic).
+          const isNameValid = nameMatch || !b.name || nameAsColorMatch;
+
+          return finalColorMatch && finalVarMatch && isNameValid;
+        });
+      }
 
       if (match) {
         let updatedB = { ...b };
         let localChanged = false;
         
-        if (!b.name && match.name) {
+        // Heal broken catalogIds
+        if (b.catalogId !== match.id) {
+          updatedB.catalogId = match.id;
+          localChanged = true;
+        }
+
+        // Sync Name
+        if (b.name !== match.name) {
           updatedB.name = match.name;
           localChanged = true;
         }
-        
-        if (!b.variation && match.variation) {
-          updatedB.variation = match.variation;
-          localChanged = true;
-        }
-        
-        if (b.year !== match.year) {
+
+        // Sync Year ONLY if missing
+        if (!b.year && match.year) {
           updatedB.year = match.year;
           localChanged = true;
         }
-        
-        if ('variations' in updatedB) {
-          delete (updatedB as any).variations;
+
+        // Sync Color (preserving Mixed for grouped boxes)
+        const correctColor = (b.packageType === 'box' && match.groupColor) ? "Mixed" : match.color;
+        if (b.color !== correctColor) {
+          updatedB.color = correctColor;
           localChanged = true;
         }
 
+        // Sync Variation (preserving Mixed for grouped boxes)
+        const correctVar = (b.packageType === 'box' && match.groupVariation) ? "Mixed" : (match.variation || undefined);
+        if (b.variation !== correctVar) {
+          updatedB.variation = correctVar;
+          localChanged = true;
+        }
+        
         if (localChanged) {
           changed = true;
           return updatedB;
-        }
-      } else {
-        // If there's no exact match with variation, try matching by model, color, name only for legacy healing
-        let legacyMatch = catalog.find(c =>
-          c.model.trim().toLowerCase() === b.model.trim().toLowerCase() &&
-          c.color.trim().toLowerCase() === b.color.trim().toLowerCase() &&
-          (c.variation || "").trim().toLowerCase() === (b.variation || b.version || "").trim().toLowerCase()
-        );
-
-        if (!legacyMatch) {
-          // Extremely robust fuzzy match for legacy items with chaotic/fragmented data
-          const normalize = (s?: string) => (s || "").replace(/[^a-z0-9]/gi, "").toLowerCase();
-          
-          let bestMatch = null;
-          let bestScore = -1;
-
-          for (const c of catalog) {
-            // Must AT LEAST match model (e.g. both are PRO)
-            if (c.model.trim().toLowerCase() !== b.model.trim().toLowerCase()) continue;
-
-            let score = 0;
-            const cColor = c.color.trim().toLowerCase();
-            const bColor = b.color.trim().toLowerCase();
-            const cColorNorm = normalize(c.color);
-            const bColorNorm = normalize(b.color);
-            const cNameNorm = normalize(c.name);
-            const bNameNorm = normalize(b.name);
-            const cVarNorm = normalize(c.variation);
-            const bVarNorm = normalize(b.variation || b.version);
-            const bNotesNorm = normalize(b.notes);
-
-            // Base Color Match
-            if (cColor === bColor) {
-              score += 10;
-            } else if (
-              cColorNorm === bNameNorm || cColorNorm === bVarNorm ||
-              cNameNorm === bColorNorm || cVarNorm === bColorNorm
-            ) {
-              // Cross-match: User put "Cosmic" in color, but catalog has "Cosmic" in name
-              score += 8;
-            } else {
-              // If color fundamentally doesn't match anywhere, skip this item
-              continue;
-            }
-
-            // Exact Field Matches
-            if (cNameNorm && cNameNorm === bNameNorm) score += 10;
-            if (cVarNorm && cVarNorm === bVarNorm) score += 10;
-            
-            // Cross-Field Exact Matches
-            if (cNameNorm && cNameNorm === bVarNorm) score += 8;
-            if (cVarNorm && cVarNorm === bNameNorm) score += 8;
-
-            // Substring Matches (e.g. "ZaraHome13" includes "ZaraHome")
-            if (cNameNorm && bNameNorm && (cNameNorm.includes(bNameNorm) || bNameNorm.includes(cNameNorm))) score += 5;
-            if (cVarNorm && bVarNorm && (cVarNorm.includes(bVarNorm) || bVarNorm.includes(cVarNorm))) score += 5;
-            if (cNameNorm && bVarNorm && (cNameNorm.includes(bVarNorm) || bVarNorm.includes(cNameNorm))) score += 4;
-
-            // Notes Substring Matches
-            if (cNameNorm && bNotesNorm.includes(cNameNorm)) score += 3;
-            if (cVarNorm && bNotesNorm.includes(cVarNorm)) score += 3;
-
-            // Penalize generic fallback (if we only matched color and nothing else, it's a weak match)
-            if (score > bestScore && score >= 8) {
-              bestScore = score;
-              bestMatch = c;
-            }
-          }
-          
-          legacyMatch = bestMatch;
-        }
-        if (legacyMatch) {
-          let updatedB = { ...b };
-          let localChanged = false;
-          
-          if (!b.name && legacyMatch.name) {
-            updatedB.name = legacyMatch.name;
-            localChanged = true;
-          }
-          if (!b.variation && legacyMatch.variation) {
-            updatedB.variation = legacyMatch.variation;
-            localChanged = true;
-          }
-          if (b.year !== legacyMatch.year) {
-            updatedB.year = legacyMatch.year;
-            localChanged = true;
-          }
-          if ('variations' in updatedB) {
-            delete (updatedB as any).variations;
-            localChanged = true;
-          }
-          
-          if (localChanged) {
-            changed = true;
-            return updatedB;
-          }
         }
       }
       return b;
@@ -1692,7 +1649,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           customImageBox,
           name,
           variation,
-          bundleItems
+          bundleItems,
+          catalogId: catalogId || undefined
         };
         return [newBall, ...prev];
       }

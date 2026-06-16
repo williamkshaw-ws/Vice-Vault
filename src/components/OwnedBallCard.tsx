@@ -194,21 +194,8 @@ export default function OwnedBallCard({
     }
   };
 
-  // Parse version and notes from ball (handling legacy bracketed format if necessary)
-  const getVersionAndNotes = (b: GolfBall) => {
-    let version = b.version || "Standard Edition";
-    let notes = b.notes || "";
-    if (!b.version && notes.startsWith("[")) {
-      const match = notes.match(/^\[(.*?)\]\s*(.*)$/);
-      if (match) {
-        version = match[1];
-        notes = match[2];
-      }
-    }
-    return { version, notes };
-  };
-
-  const { version: currentVersion, notes: currentNotes } = getVersionAndNotes(ball);
+  const currentVariation = ball.variation || "Standard Edition";
+  const currentNotes = ball.notes || "";
 
   // Edit fields state
   const [editQty, setEditQty] = useState(ball.quantity);
@@ -266,7 +253,7 @@ export default function OwnedBallCard({
   };
 
   const openThisCard = () => {
-    const { notes } = getVersionAndNotes(ball);
+    const notes = currentNotes;
     setEditQty(ball.quantity);
     setEditPkgType(ball.packageType || 'ea');
     setEditPlayNumber(ball.customNumber || 1);
@@ -803,11 +790,11 @@ export default function OwnedBallCard({
             </div>
 
             {/* Variation Display */}
-            {(ball.variation || currentVersion !== "Standard Edition") && (
+            {(ball.variation || currentVariation !== "Standard Edition") && (
               <div className="mt-1.5 flex items-center gap-2">
                 <span className="text-[10px] font-mono text-neutral-500 uppercase">Variation:</span>
                 <span className="bg-neutral-950/60 p-0.5 px-1.5 rounded text-neutral-400 text-[10px] font-mono font-bold select-none">
-                  {ball.variation || currentVersion}
+                  {ball.variation || currentVariation}
                 </span>
               </div>
             )}

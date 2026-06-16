@@ -150,5 +150,353 @@
   "PRO-GREG_MIKE-GREEN-LOUDMOUF": {
     "customImage": "https://i.ibb.co/HTXbHP4Z/Adobe-Express-file-6.png",
     "customImageBox": "https://i.ibb.co/8DzVDcMH/loudmouf-box.png"
+  },
+  "PRO-GREG_MIKES-GREEN-LOUDMOUF": {
+    "customImage": "https://i.ibb.co/HTXbHP4Z/Adobe-Express-file-6.png",
+    "customImageBox": "https://i.ibb.co/8DzVDcMH/loudmouf-box.png"
+  },
+  "PRO-COSMIC_COLLECTION-AURORA_FIELDS": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783716987-81c0-9282-1675.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358001855-f927-e49b-7618.webp?alt=media"
+  },
+  "PRO-COSMIC_COLLECTION-BLUE_SUPERCLUSTER": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783696360-aad4-10a0-bb92.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358002247-a39a-861b-793e.webp?alt=media"
+  },
+  "PRO-COSMIC_COLLECTION-NEBULA_MIST": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783754578-4ddb-c72d-42e3.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358002611-5de0-520d-9ebe.webp?alt=media"
+  },
+  "PRO-COSMIC_COLLECTION-STELLAR_EMBER": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783736308-8b15-0206-a21d.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358002965-d51b-c592-8077.webp?alt=media"
+  },
+  "PRO-COSMIC_COLLECTIONS-AURORA_FIELDS": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783716987-81c0-9282-1675.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358001855-f927-e49b-7618.webp?alt=media"
+  },
+  "PRO-COSMIC_COLLECTIONS-BLUE_SUPERCLUSTER": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783696360-aad4-10a0-bb92.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358002247-a39a-861b-793e.webp?alt=media"
+  },
+  "PRO-COSMIC_COLLECTIONS-NEBULA_MIST": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783754578-4ddb-c72d-42e3.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358002611-5de0-520d-9ebe.webp?alt=media"
+  },
+  "PRO-COSMIC_COLLECTIONS-STELLAR_EMBER": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783736308-8b15-0206-a21d.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358002965-d51b-c592-8077.webp?alt=media"
+  },
+  "PRO-ZARAHOME_1_3-WHITE-1_GOLFER": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099613246-5c9c-8e5c-3f06.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099613551-9166-e862-a04a.png?alt=media"
+  },
+  "PRO-ZARAHOME_1_3-WHITE-3_BALL": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099620800-bbd9-9e54-7016.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099621145-7664-0e22-588c.png?alt=media"
+  },
+  "PRO-ZARAHOME_2_4-WHITE-2_CLUBS": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099493621-2bfd-17da-9b19.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099494633-d86a-2cce-11e8.png?alt=media"
+  },
+  "PRO-ZARAHOME_2_4-WHITE-4_GREEN": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099504346-1515-ee56-5949.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099504620-4e4f-fa7e-2a9a.png?alt=media"
+  },
+  "PRO-ZARA_HOME_1_3-WHITE-1_GOLFER": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099613246-5c9c-8e5c-3f06.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099613551-9166-e862-a04a.png?alt=media"
+  },
+  "PRO-ZARA_HOME_1_3-WHITE-3_BALL": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099620800-bbd9-9e54-7016.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099621145-7664-0e22-588c.png?alt=media"
+  },
+  "PRO-ZARA_HOME_2_4-WHITE-2_CLUBS": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099493621-2bfd-17da-9b19.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099494633-d86a-2cce-11e8.png?alt=media"
+  },
+  "PRO-ZARA_HOME_2_4-WHITE-4_GREEN": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099504346-1515-ee56-5949.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099504620-4e4f-fa7e-2a9a.png?alt=media"
+  },
+  "PRO-ZARA_HOME_1_3-WHITE-GOLFER_BALL": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099613246-5c9c-8e5c-3f06.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099613551-9166-e862-a04a.png?alt=media"
+  },
+  "PRO-ZARA_HOME_2_4-WHITE-CLUBS_GREEN": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099493621-2bfd-17da-9b19.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099494633-d86a-2cce-11e8.png?alt=media"
+  },
+  "DRIVE-STANDARD-BLUE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780357996470-cb4e-422e-f880.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780357997493-c226-82ec-5f80.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780357997723-5fd0-1671-f966.jpg?alt=media"
+  },
+  "DRIVE-STANDARD-PINK": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780357997981-310a-8621-049a.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780357998210-7d51-72b2-838f.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780357998423-520f-7e23-3298.jpg?alt=media"
+  },
+  "DRIVE-STANDARD-WHITE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780357998697-a9c3-b2d4-9a7d.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780357998915-a0a1-ab5b-4fa6.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780357999131-823f-2855-ecdc.jpg?alt=media"
+  },
+  "DRIVE-STANDARD-YELLOW": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780357999386-6e7a-9b6a-d64c.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780357999633-6332-f374-0262.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780357999825-4ce3-1dd6-6e1b.jpg?alt=media"
+  },
+  "MULTIPLE-SELECTED_VARIETY-WHITE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780411756033-40e3-5fec-0320.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780411676271-8863-e5ee-f59d.png?alt=media"
+  },
+  "MULTIPLE-VARIETY_PACK-MULTI_COLORED": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780360045269-4890-503b-df13.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780360046548-4d8c-99c3-3c8d.jpg?alt=media"
+  },
+  "PRO-101-NEON_LIME": {
+    "customImage": "https://i.ibb.co/Df5nsvzt/Adobe-Express-file-2.png"
+  },
+  "PRO-BEAR-GOLD": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000068-e28e-0e69-b9e2.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000266-2c8e-bb63-7893.webp?alt=media"
+  },
+  "PRO-BEAR-WHITE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000483-7b44-aecf-b26b.webp?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000653-67e2-13e6-8151.webp?alt=media"
+  },
+  "PRO-BEASTIN-FROST_BLUE": {
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000875-d0ed-ca12-8bea.webp?alt=media"
+  },
+  "PRO-BEASTIN-LIMEADE": {
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358001074-2b65-cbc1-4cd4.webp?alt=media"
+  },
+  "PRO-BEASTIN-ORANGE_BLAST": {
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358001278-0332-1eee-f6d7.webp?alt=media"
+  },
+  "PRO-BEASTIN-WATERMELON_PUNCH": {
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358001476-576d-44f4-acbc.webp?alt=media"
+  },
+  "PRO-DRIP-LIME_BLACK": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358003148-665f-28b7-6584.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358003402-8422-1aab-22f5.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358003619-ef21-ac28-f2f5.jpg?alt=media"
+  },
+  "PRO-DRIP-RED_BLUE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358003851-ab04-e7b6-629e.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358004081-2ac8-e5d5-73f4.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358004287-b27e-82b9-7417.jpg?alt=media"
+  },
+  "PRO-DRIP-YELLOW_GREEN": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358004531-1c9c-5d72-76ad.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358004733-d26b-cb23-e6c1.jpg?alt=media"
+  },
+  "PRO-DRIP_SHADE-GALAXY": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358004949-d598-9173-07db.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358005191-a680-e7f5-0049.jpg?alt=media"
+  },
+  "PRO-NEON-LIME": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358006949-7939-5542-c8a6.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358007113-fcaa-5831-1c77.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358007334-6bb9-64dd-386b.jpg?alt=media"
+  },
+  "PRO-NEON-RED": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358007577-242d-2f0d-3ba2.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358007761-aba9-e60b-a35f.jpg?alt=media"
+  },
+  "PRO-SHADE-RED_ORANGE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358008336-653d-34bb-abd5.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358008516-fccb-a8b1-50a6.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358008726-13f4-6e14-89c2.jpg?alt=media"
+  },
+  "PRO-STANDARD-ICE_BLUE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358008946-b7a1-0be7-2eaa.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358009128-d258-5225-2aff.jpg?alt=media"
+  },
+  "PRO-STANDARD-WHITE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358009336-b102-665d-0303.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358009498-98d7-44d2-fc7a.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358009666-663b-e758-50d4.jpg?alt=media"
+  },
+  "PRO-STANDARD_24_PACK-WHITE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780411853758-54e7-6aa6-2777.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780411854052-1380-4937-5109.jpg?alt=media"
+  },
+  "PRO-TRACER-WHITE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358010558-c9aa-5fda-5b3b.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358010782-c2d8-1ccd-f7f4.jpg?alt=media"
+  },
+  "PRO_AIR-DRIP-PETROL_YELLOW": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358011372-a77c-4751-9fc9.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358011636-484e-2564-10ce.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358011824-7661-745f-dfad.jpg?alt=media"
+  },
+  "PRO_AIR-DRIP-RED_BLACK": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358012011-c886-7bdd-8ae9.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358012250-938c-d733-989d.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358012471-8b3e-966d-0375.jpg?alt=media"
+  },
+  "PRO_AIR-NEON-LIME": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358013025-a972-13e1-9c80.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358013272-4dce-8c48-0103.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358013465-ed31-54d3-ae1d.jpg?alt=media"
+  },
+  "PRO_AIR-NEON-PINK": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358013714-6a3c-b53d-9d95.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358013949-472f-5929-bbea.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358014160-3298-f1bb-c2c0.jpg?alt=media"
+  },
+  "PRO_AIR-NEON_DRIP-RED_BLACK": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358014407-6cd5-0189-bbcd.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358014651-7d1a-be92-9331.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358014849-3eb4-948a-1862.jpg?alt=media"
+  },
+  "PRO_AIR-STANDARD-WHITE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358015057-2b8d-59bd-89e2.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358015258-e3b5-2c52-6027.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358015409-e97b-e65c-8c4e.jpg?alt=media"
+  },
+  "PRO_AIR-TRACER-WHITE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358015956-402a-e809-1e07.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358016186-68ac-1cb9-6f67.jpg?alt=media"
+  },
+  "PRO_PLUS-BETHPAGE_STATION-BLUE_EUROPE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100127063-8eed-c1d8-a464.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100127615-8591-93eb-d9a9.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100127908-4f35-98e6-dc9e.png?alt=media"
+  },
+  "PRO_PLUS-BETHPAGE_STATION-RED_USA": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099923252-45e9-45e4-aa7a.png?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099923759-8348-3b91-9ee5.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099924054-972e-499a-fef4.png?alt=media"
+  },
+  "PRO_PLUS-DRIP-LIME_BLACK": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358016992-35c9-b620-6ea9.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358017218-838d-3f55-58ed.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358017421-2523-2ed3-c83a.jpg?alt=media"
+  },
+  "PRO_PLUS-DRIP-NAVY_ORANGE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358017633-74e6-7453-401b.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358017835-75c7-44e2-90d1.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358018014-6f7c-f34f-07b0.jpg?alt=media"
+  },
+  "PRO_PLUS-LETTERS_TO_TROON-WHITE-FOX": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358018237-a014-97c2-531c.webp?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358018399-6edf-4dbe-0f1d.webp?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358018598-cec7-2466-5fec.webp?alt=media"
+  },
+  "PRO_PLUS-LETTERS_TO_TROON-WHITE-SEAL": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358018782-d45e-ee54-9604.webp?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358018954-97ce-5e3b-a8b4.webp?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358019158-ab1c-3892-2c72.webp?alt=media"
+  },
+  "PRO_PLUS-LETTERS_TO_TROON-WHITE-WELL": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358019327-744f-3102-07b9.webp?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358019487-be3c-9d05-b71a.webp?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358019702-37ae-4db0-b415.webp?alt=media"
+  },
+  "PRO_PLUS-NEON-LIME": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358019884-feb3-b63a-1666.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358020101-6ef3-2c99-d943.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358020278-667d-1bf9-fd1c.jpg?alt=media"
+  },
+  "PRO_PLUS-SHADE-ORANGE_YELLOW": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358020512-13d7-dd86-b033.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358020661-5bbd-92d1-e127.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358020885-3c12-8388-d47b.jpg?alt=media"
+  },
+  "PRO_PLUS-STANDARD-BLACK": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358021107-0f71-9dcc-6d03.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358021253-b149-de63-7e34.jpg?alt=media"
+  },
+  "PRO_PLUS-STANDARD-GOLD": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358021419-7a77-f541-1a6d.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358021621-f8fc-a43c-eaa8.jpg?alt=media"
+  },
+  "PRO_PLUS-STANDARD-WHITE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358021831-1110-0595-153a.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358021979-a567-2233-1387.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358022170-78b0-f224-8660.jpg?alt=media"
+  },
+  "PRO_PLUS-TRACER-WHITE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358022687-a4c2-6bf3-d951.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358022909-707f-bb9d-a913.jpg?alt=media"
+  },
+  "PRO_SOFT-DRIP-RED_BLACK": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358023105-26be-f193-9e36.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358023334-1705-c0fe-b883.jpg?alt=media"
+  },
+  "PRO_SOFT-HUE-BLUE_LIGHT": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358023515-3a72-6f61-719a.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358023677-a218-ef5d-e8c8.jpg?alt=media"
+  },
+  "PRO_SOFT-HUE-LIVING_CORAL": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358023890-dc25-e159-f391.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358024053-d114-fe57-aa14.jpg?alt=media"
+  },
+  "PRO_SOFT-HUE-PEACH_PARFAIT": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358024206-424b-81e0-beea.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358024357-0ca6-7291-32a4.webp?alt=media"
+  },
+  "PRO_SOFT-MATTE-WHITE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358024526-24de-7dd2-15ac.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358024678-4e97-fcc6-6537.jpg?alt=media"
+  },
+  "PRO_SOFT-MATTE_NEON-LIME": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358024828-b36c-3ccc-e3d6.webp?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358024980-4385-2747-7766.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358025178-3905-2892-8a34.jpg?alt=media"
+  },
+  "PRO_SOFT-MATTE_NEON-RED": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358025340-6dc1-abaf-fce6.webp?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358025503-f01b-adef-28b0.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358025683-171d-eb4e-802a.jpg?alt=media"
+  },
+  "PRO_SOFT-NEON-LIME": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100439149-c187-14a0-a685.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100439559-291e-8cf5-483d.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100439798-783d-8e80-5291.jpg?alt=media"
+  },
+  "PRO_SOFT-STANDARD-WHITE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358026215-64d3-7780-45fb.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358026407-650b-1b45-93e8.jpg?alt=media"
+  },
+  "PRO_ZERO-STANDARD-WHITE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099802711-15b8-e786-d8f0.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099803031-c906-51bf-a6be.jpg?alt=media"
+  },
+  "TOUR-ALL_OVER_PRINT-SKETCH": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358026598-9437-b5ef-3418.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358026803-a785-f125-19eb.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358027000-44da-3834-b88e.jpg?alt=media"
+  },
+  "TOUR-ALL_OVER_PRINT-ZAP": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358027251-0a1c-cc32-9d87.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358027455-4c53-73f4-04da.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358027663-d694-b79e-1f57.jpg?alt=media"
+  },
+  "TOUR-GRAY-GRAY": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358027889-c0f6-06da-d518.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358028061-2221-5dc6-ee27.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358028243-3ad7-b1a3-4c72.jpg?alt=media"
+  },
+  "TOUR-JUNIOR-WHITE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097319425-ea8e-0644-ca70.png?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358028633-2920-78c5-6c0c.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358028799-f11c-d6b8-ecf7.jpg?alt=media"
+  },
+  "TOUR-JUNIOR-YELLOW": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097355430-02cc-34a0-b494.png?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358029767-4c25-50de-dfac.webp?alt=media"
+  },
+  "TOUR-STANDARD-WHITE": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358030258-d1dd-dc18-b052.jpg?alt=media",
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358030446-ac12-fc4e-99e4.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358030780-fb0d-5f67-345d.jpg?alt=media"
+  },
+  "PRO-STANDARD-GLACIER_BLAST": {
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358008946-b7a1-0be7-2eaa.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358009128-d258-5225-2aff.jpg?alt=media"
   }
 }

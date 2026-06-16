@@ -41,7 +41,6 @@ export interface GolfBall {
   packageType?: 'ea' | 'sleeve' | 'box'; // Package style
   customNumber: number; // Ball play-number (e.g., 1, 2, 3, 4, 77)
   notes: string;
-  version?: string; // Ball version/edition (e.g. Standard Edition)
   year?: string; // Optional year (e.g. 2026)
   dateAdded: string;
   customImage?: string; // Custom uploaded base64 image representation

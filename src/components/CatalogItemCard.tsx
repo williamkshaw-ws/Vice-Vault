@@ -63,7 +63,8 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: currentYear - 2012 + 1 }, (_, i) => String(2012 + i));
-  const [selectedYear, setSelectedYear] = useState<string>("");
+  const defaultYear = item.year || "";
+  const [selectedYear, setSelectedYear] = useState<string>(defaultYear);
 
   const [selectedItemId, setSelectedItemId] = useState(item.id);
   const [showUnsavedPrompt, setShowUnsavedPrompt] = useState(false);
@@ -122,6 +123,12 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
   }, [isOpen, justAdded, quantity, pkgType, playNumber, condition, notes, selectedYear, item.id]);
 
   const activeItem = subItems.find(si => si.id === selectedItemId) || item;
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setSelectedYear(activeItem.year || item.year || "");
+    }
+  }, [isOpen, activeItem.year, item.year]);
 
   const startAdding = () => {
     if (currentlyAddingCard && currentlyAddingCard.id !== item.id) {
@@ -184,7 +191,8 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
       itemToAdd.customImageBox,
       itemToAdd.name,
       varToAdd,
-      itemToAdd.bundleItems
+      itemToAdd.bundleItems,
+      itemToAdd.id
     );
 
     setJustAdded(true);
