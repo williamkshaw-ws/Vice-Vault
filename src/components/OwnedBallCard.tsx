@@ -823,7 +823,7 @@ export default function OwnedBallCard({
             {/* Year Display */}
             {ball.year && (
               <div className="mt-1.5 flex items-center gap-2">
-                <span className="text-[10px] font-mono text-neutral-500 uppercase">Year:</span>
+                <span className="text-[10px] font-mono text-neutral-500 uppercase">Release Year:</span>
                 <span className="bg-neutral-950/60 p-0.5 px-1.5 rounded text-neutral-400 text-[10px] font-mono font-bold select-none">
                   {ball.year}
                 </span>
