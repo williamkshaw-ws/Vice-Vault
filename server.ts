@@ -2331,7 +2331,7 @@ app.post("/api/catalog/bulk", async (req, res) => {
   const groupedItems: Record<string, CatalogItem> = {};
 
   for (const item of items) {
-    const { model, name, color, variation, groupColor, groupVariation, customImage, customImageSleeve, customImageBox, bundleItems } = item;
+    const { model, name, color, variation, year, groupColor, groupVariation, customImage, customImageSleeve, customImageBox, bundleItems } = item;
     if (!model || !name || !color) continue;
 
     const newId = sanitizeId(model, color, name, variation);
@@ -2344,6 +2344,7 @@ app.post("/api/catalog/bulk", async (req, res) => {
         name: name.trim(),
         color: color.trim(),
         variation: variation ? variation.trim() : undefined,
+        year: year ? year.trim() : (existing ? existing.year : undefined),
         groupColor: groupColor !== undefined ? !!groupColor : undefined,
         groupVariation: groupVariation !== undefined ? !!groupVariation : undefined,
         customImage: customImage || (existing ? existing.customImage : undefined),

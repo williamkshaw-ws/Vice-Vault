@@ -91,7 +91,9 @@
     "name": "Selected Variety",
     "model": "MULTIPLE",
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780411676271-8863-e5ee-f59d.png?alt=media",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780411756033-40e3-5fec-0320.jpg?alt=media"
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780411756033-40e3-5fec-0320.jpg?alt=media",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "MULTIPLE-VARIETY_PACK-MULTI_COLORED",
@@ -155,27 +157,27 @@
   },
   {
     "id": "PRO-ADIDAS_TREFOIL_STAN_SMITH-GREEN",
-    "groupColor": true,
     "color": "Green",
     "groupVariation": false,
     "name": "Adidas Trefoil/Stan Smith",
-    "model": "PRO"
+    "model": "PRO",
+    "groupColor": false
   },
   {
     "id": "PRO-ADIDAS_TREFOIL_STAN_SMITH-RED",
-    "groupColor": true,
     "color": "Red",
     "groupVariation": false,
     "name": "Adidas Trefoil/Stan Smith",
-    "model": "PRO"
+    "model": "PRO",
+    "groupColor": false
   },
   {
     "id": "PRO-ADIDAS_TREFOIL_STAN_SMITH-WHITE",
-    "groupColor": true,
     "color": "White",
     "groupVariation": false,
     "name": "Adidas Trefoil/Stan Smith",
-    "model": "PRO"
+    "model": "PRO",
+    "groupColor": false
   },
   {
     "id": "PRO-AMEN-YELLOW_GREEN_DRIP",
@@ -195,32 +197,32 @@
   },
   {
     "id": "PRO-BEAR-GOLD",
-    "groupColor": true,
     "color": "Gold",
     "groupVariation": false,
     "name": "Bear",
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000068-e28e-0e69-b9e2.jpg?alt=media",
     "model": "PRO",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000266-2c8e-bb63-7893.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000266-2c8e-bb63-7893.webp?alt=media",
+    "groupColor": false
   },
   {
     "id": "PRO-BEAR-WHITE",
-    "groupColor": true,
     "color": "White",
     "groupVariation": false,
     "name": "Bear",
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000483-7b44-aecf-b26b.webp?alt=media",
     "model": "PRO",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000653-67e2-13e6-8151.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000653-67e2-13e6-8151.webp?alt=media",
+    "groupColor": false
   },
   {
     "id": "PRO-BEASTIN-FROST_BLUE",
-    "groupColor": true,
     "color": "Frost Blue",
     "groupVariation": false,
     "name": "Beastin'",
     "model": "PRO",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000875-d0ed-ca12-8bea.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000875-d0ed-ca12-8bea.webp?alt=media",
+    "groupColor": false
   },
   {
     "id": "PRO-BEASTIN-GLACIER",
@@ -232,30 +234,30 @@
   },
   {
     "id": "PRO-BEASTIN-LIMEADE",
-    "groupColor": true,
     "color": "Limeade",
     "groupVariation": false,
     "name": "Beastin'",
     "model": "PRO",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358001074-2b65-cbc1-4cd4.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358001074-2b65-cbc1-4cd4.webp?alt=media",
+    "groupColor": false
   },
   {
     "id": "PRO-BEASTIN-ORANGE_BLAST",
-    "groupColor": true,
     "color": "Orange Blast",
     "groupVariation": false,
     "name": "Beastin'",
     "model": "PRO",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358001278-0332-1eee-f6d7.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358001278-0332-1eee-f6d7.webp?alt=media",
+    "groupColor": false
   },
   {
     "id": "PRO-BEASTIN-WATERMELON_PUNCH",
-    "groupColor": true,
     "color": "Watermelon Punch",
     "groupVariation": false,
     "name": "Beastin'",
     "model": "PRO",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358001476-576d-44f4-acbc.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358001476-576d-44f4-acbc.webp?alt=media",
+    "groupColor": false
   },
   {
     "id": "PRO-BOUNTY-BLACK",
@@ -275,47 +277,47 @@
   },
   {
     "id": "PRO-COSMIC-AURORA_FIELDS",
-    "groupColor": true,
     "color": "Aurora Fields",
     "groupVariation": false,
     "name": "Cosmic",
     "model": "PRO",
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358001855-f927-e49b-7618.webp?alt=media",
     "bundleItems": [],
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783716987-81c0-9282-1675.png?alt=media"
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783716987-81c0-9282-1675.png?alt=media",
+    "groupColor": false
   },
   {
     "id": "PRO-COSMIC-BLUE_SUPERCLUSTER",
-    "groupColor": true,
     "color": "Blue Supercluster",
     "groupVariation": false,
     "name": "Cosmic",
     "model": "PRO",
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358002247-a39a-861b-793e.webp?alt=media",
     "bundleItems": [],
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783696360-aad4-10a0-bb92.png?alt=media"
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783696360-aad4-10a0-bb92.png?alt=media",
+    "groupColor": false
   },
   {
     "id": "PRO-COSMIC-NEBULA_MIST",
-    "groupColor": true,
     "color": "Nebula Mist",
     "groupVariation": false,
     "name": "Cosmic",
     "model": "PRO",
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358002611-5de0-520d-9ebe.webp?alt=media",
     "bundleItems": [],
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783754578-4ddb-c72d-42e3.png?alt=media"
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783754578-4ddb-c72d-42e3.png?alt=media",
+    "groupColor": false
   },
   {
     "id": "PRO-COSMIC-STELLAR_EMBER",
-    "groupColor": true,
     "color": "Stellar Ember",
     "groupVariation": false,
     "name": "Cosmic",
     "model": "PRO",
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358002965-d51b-c592-8077.webp?alt=media",
     "bundleItems": [],
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783736308-8b15-0206-a21d.png?alt=media"
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780783736308-8b15-0206-a21d.png?alt=media",
+    "groupColor": false
   },
   {
     "id": "PRO-DRIP-LIME_BLACK",
@@ -392,73 +394,73 @@
     "id": "PRO-GOOD_SUNDAYS-WHITE-EAT_THIS",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Good Sundays",
     "model": "PRO",
-    "variation": "Eat This"
+    "variation": "Eat This",
+    "groupVariation": false
   },
   {
     "id": "PRO-GOOD_SUNDAYS-WHITE-I_HEART_HOLES",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Good Sundays",
     "model": "PRO",
-    "variation": "I Heart Holes"
+    "variation": "I Heart Holes",
+    "groupVariation": false
   },
   {
     "id": "PRO-GOOD_SUNDAYS-WHITE-SLAP_ON_ME",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Good Sundays",
     "model": "PRO",
-    "variation": "Slap On Me"
+    "variation": "Slap On Me",
+    "groupVariation": false
   },
   {
     "id": "PRO-GOOD_SUNDAYS-WHITE-YES_U_CAN",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Good Sundays",
     "model": "PRO",
-    "variation": "Yes U Can"
+    "variation": "Yes U Can",
+    "groupVariation": false
   },
   {
     "id": "PRO-GOOFBALLZ-BLUE-1_SUSHI",
     "groupColor": false,
     "color": "Blue",
-    "groupVariation": true,
     "name": "GoofBallz",
     "model": "PRO",
-    "variation": "1 - Sushi"
+    "variation": "1 - Sushi",
+    "groupVariation": false
   },
   {
     "id": "PRO-GOOFBALLZ-BLUE-2_DONUT",
     "groupColor": false,
     "color": "Blue",
-    "groupVariation": true,
     "name": "GoofBallz",
     "model": "PRO",
-    "variation": "2 - Donut"
+    "variation": "2 - Donut",
+    "groupVariation": false
   },
   {
     "id": "PRO-GOOFBALLZ-YELLOW-3_HOT_DOG",
     "groupColor": false,
     "color": "Yellow",
-    "groupVariation": true,
     "name": "GoofBallz",
     "model": "PRO",
-    "variation": "3 - Hot Dog"
+    "variation": "3 - Hot Dog",
+    "groupVariation": false
   },
   {
     "id": "PRO-GOOFBALLZ-YELLOW-4_ICE_CREAM",
     "groupColor": false,
     "color": "Yellow",
-    "groupVariation": true,
     "name": "GoofBallz",
     "model": "PRO",
-    "variation": "4 - Ice Cream"
+    "variation": "4 - Ice Cream",
+    "groupVariation": false
   },
   {
     "id": "PRO-GO_NUTZ-WHITE",
@@ -490,7 +492,9 @@
     "variation": "LOUDMOUF",
     "notes": "LOUDMOUF",
     "customImage": "https://i.ibb.co/HTXbHP4Z/Adobe-Express-file-6.png",
-    "customImageBox": "https://i.ibb.co/8DzVDcMH/loudmouf-box.png"
+    "customImageBox": "https://i.ibb.co/8DzVDcMH/loudmouf-box.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-GREG_MIKE-WHITE-EYE",
@@ -514,7 +518,9 @@
     "variation": "Smiley",
     "notes": "Smiley",
     "customImage": "https://i.ibb.co/ZptHvRBw/Adobe-Express-file-2.png",
-    "customImageBox": "https://i.ibb.co/LXdH0tFh/greg-mike-smiley.png"
+    "customImageBox": "https://i.ibb.co/LXdH0tFh/greg-mike-smiley.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-JUNIOR-WHITE",
@@ -550,64 +556,64 @@
     "id": "PRO-LOCAL_LEGEND-WHITE-AMEN",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Local Legend",
     "model": "PRO",
-    "variation": "Amen"
+    "variation": "Amen",
+    "groupVariation": false
   },
   {
     "id": "PRO-LOCAL_LEGEND-WHITE-MAGNOLIA",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Local Legend",
     "model": "PRO",
-    "variation": "Magnolia"
+    "variation": "Magnolia",
+    "groupVariation": false
   },
   {
     "id": "PRO-LOCAL_LEGEND-WHITE-SANDWICH",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Local Legend",
     "model": "PRO",
-    "variation": "Sandwich"
+    "variation": "Sandwich",
+    "groupVariation": false
   },
   {
     "id": "PRO-LOCAL_LEGEND_10_YEARS-LIME-AMEN",
     "groupColor": false,
     "color": "Lime",
-    "groupVariation": true,
     "name": "Local Legend 10 Years",
     "model": "PRO",
-    "variation": "Amen"
+    "variation": "Amen",
+    "groupVariation": false
   },
   {
     "id": "PRO-LOCAL_LEGEND_10_YEARS-LIME-LOCAL_LEGEND",
     "groupColor": false,
     "color": "Lime",
-    "groupVariation": true,
     "name": "Local Legend 10 Years",
     "model": "PRO",
-    "variation": "Local Legend"
+    "variation": "Local Legend",
+    "groupVariation": false
   },
   {
     "id": "PRO-LOCAL_LEGEND_10_YEARS-LIME-MAGNOLIA",
     "groupColor": false,
     "color": "Lime",
-    "groupVariation": true,
     "name": "Local Legend 10 Years",
     "model": "PRO",
-    "variation": "Magnolia"
+    "variation": "Magnolia",
+    "groupVariation": false
   },
   {
     "id": "PRO-LOCAL_LEGEND_10_YEARS-LIME-SANDWICH",
     "groupColor": false,
     "color": "Lime",
-    "groupVariation": true,
     "name": "Local Legend 10 Years",
     "model": "PRO",
-    "variation": "Sandwich"
+    "variation": "Sandwich",
+    "groupVariation": false
   },
   {
     "id": "PRO-MONACO_OKTOBERFEST-WHITE",
@@ -666,38 +672,41 @@
     "bundleItems": [],
     "notes": "#12",
     "color": "White",
-    "groupVariation": true,
     "name": "Never Outgunned",
     "model": "PRO",
-    "variation": "#12"
+    "variation": "#12",
+    "groupVariation": false
   },
   {
     "id": "PRO-NEVER_OUTGUNNED-WHITE-23",
     "bundleItems": [],
     "color": "White",
-    "groupVariation": true,
     "name": "Never Outgunned",
     "model": "PRO",
-    "variation": "#23"
+    "variation": "#23",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-NEVER_OUTGUNNED-WHITE-34",
     "bundleItems": [],
     "color": "White",
-    "groupVariation": true,
     "name": "Never Outgunned",
     "model": "PRO",
-    "variation": "#34"
+    "variation": "#34",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-NEVER_OUTGUNNED-WHITE-93",
     "bundleItems": [],
     "color": "White",
-    "groupVariation": true,
     "name": "Never Outgunned",
     "model": "PRO",
     "notes": "#93",
-    "variation": "#93"
+    "variation": "#93",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-OAKMONT_US_OPEN-RED_BLUE_DRIP",
@@ -746,37 +755,37 @@
     "id": "PRO-PRO_ST_CHARACTER-WHITE-BRATWURST",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Pro(st) Character",
     "model": "PRO",
-    "variation": "Bratwurst"
+    "variation": "Bratwurst",
+    "groupVariation": false
   },
   {
     "id": "PRO-PRO_ST_CHARACTER-WHITE-FRIENDS",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Pro(st) Character",
     "model": "PRO",
-    "variation": "Friends"
+    "variation": "Friends",
+    "groupVariation": false
   },
   {
     "id": "PRO-PRO_ST_CHARACTER-WHITE-MUG",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Pro(st) Character",
     "model": "PRO",
-    "variation": "Mug"
+    "variation": "Mug",
+    "groupVariation": false
   },
   {
     "id": "PRO-PRO_ST_CHARACTER-WHITE-MUG_IN_GOLF_CART",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Pro(st) Character",
     "model": "PRO",
-    "variation": "Mug in Golf Cart"
+    "variation": "Mug in Golf Cart",
+    "groupVariation": false
   },
   {
     "id": "PRO-SHADE-NIGHTHAWK",
@@ -838,7 +847,9 @@
     "name": "Standard (24 Pack)",
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780411853758-54e7-6aa6-2777.jpg?alt=media",
     "model": "PRO",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780411854052-1380-4937-5109.jpg?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780411854052-1380-4937-5109.jpg?alt=media",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-TAN-BROWN_WHITE",
@@ -922,48 +933,52 @@
     "bundleItems": [],
     "notes": "1- Golfer",
     "color": "White",
-    "groupVariation": true,
     "name": "ZaraHome (1 & 3)",
     "model": "PRO",
     "variation": "1- Golfer",
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099613246-5c9c-8e5c-3f06.png?alt=media",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099613551-9166-e862-a04a.png?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099613551-9166-e862-a04a.png?alt=media",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-ZARAHOME_1_3-WHITE-3_BALL",
     "bundleItems": [],
     "notes": "3- Ball",
     "color": "White",
-    "groupVariation": true,
     "name": "ZaraHome (1 & 3)",
     "model": "PRO",
     "variation": "3- Ball",
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099620800-bbd9-9e54-7016.png?alt=media",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099621145-7664-0e22-588c.png?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099621145-7664-0e22-588c.png?alt=media",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-ZARAHOME_2_4-WHITE-2_CLUBS",
     "bundleItems": [],
     "notes": "2- Clubs",
     "color": "White",
-    "groupVariation": true,
     "name": "ZaraHome (2 & 4)",
     "model": "PRO",
     "variation": "2- Clubs",
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099493621-2bfd-17da-9b19.png?alt=media",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099494633-d86a-2cce-11e8.png?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099494633-d86a-2cce-11e8.png?alt=media",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-ZARAHOME_2_4-WHITE-4_GREEN",
     "bundleItems": [],
     "notes": "4- Green",
     "color": "White",
-    "groupVariation": true,
     "model": "PRO",
     "variation": "4- Green",
     "name": "ZaraHome (2 & 4)",
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099504346-1515-ee56-5949.png?alt=media",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099504620-4e4f-fa7e-2a9a.png?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099504620-4e4f-fa7e-2a9a.png?alt=media",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_AIR-DRIP-PETROL_YELLOW",
@@ -1002,37 +1017,37 @@
     "id": "PRO_AIR-GREEN_MILE_CLUB-WHITE-16",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Green Mile Club",
     "model": "PRO AIR",
-    "variation": "16"
+    "variation": "16",
+    "groupVariation": false
   },
   {
     "id": "PRO_AIR-GREEN_MILE_CLUB-WHITE-17",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Green Mile Club",
     "model": "PRO AIR",
-    "variation": "17"
+    "variation": "17",
+    "groupVariation": false
   },
   {
     "id": "PRO_AIR-GREEN_MILE_CLUB-WHITE-18",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Green Mile Club",
     "model": "PRO AIR",
-    "variation": "18"
+    "variation": "18",
+    "groupVariation": false
   },
   {
     "id": "PRO_AIR-GREEN_MILE_CLUB-WHITE-28",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Green Mile Club",
     "model": "PRO AIR",
-    "variation": "28"
+    "variation": "28",
+    "groupVariation": false
   },
   {
     "id": "PRO_AIR-NEON-LIME",
@@ -1101,7 +1116,6 @@
   },
   {
     "id": "PRO_PLUS-BETHPAGE_STATION-BLUE_EUROPE",
-    "groupColor": true,
     "bundleItems": [],
     "color": "Blue (Europe)",
     "groupVariation": false,
@@ -1109,11 +1123,11 @@
     "model": "PRO PLUS",
     "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100127615-8591-93eb-d9a9.png?alt=media",
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100127063-8eed-c1d8-a464.jpg?alt=media",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100127908-4f35-98e6-dc9e.png?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781100127908-4f35-98e6-dc9e.png?alt=media",
+    "groupColor": false
   },
   {
     "id": "PRO_PLUS-BETHPAGE_STATION-RED_USA",
-    "groupColor": true,
     "bundleItems": [],
     "color": "Red (USA)",
     "groupVariation": false,
@@ -1121,7 +1135,8 @@
     "model": "PRO PLUS",
     "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099923759-8348-3b91-9ee5.png?alt=media",
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099923252-45e9-45e4-aa7a.png?alt=media",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099924054-972e-499a-fef4.png?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781099924054-972e-499a-fef4.png?alt=media",
+    "groupColor": false
   },
   {
     "id": "PRO_PLUS-BORDEAUX_RED-WHITE",
@@ -1192,37 +1207,37 @@
     "id": "PRO_PLUS-HERITAGE_COLLECTION-WHITE-1_MAGNOLIA",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Heritage Collection",
     "model": "PRO PLUS",
-    "variation": "1 - Magnolia"
+    "variation": "1 - Magnolia",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-HERITAGE_COLLECTION-WHITE-2_CLUBHOUSE",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Heritage Collection",
     "model": "PRO PLUS",
-    "variation": "2 - Clubhouse"
+    "variation": "2 - Clubhouse",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-HERITAGE_COLLECTION-WHITE-3_OAK_TREE",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Heritage Collection",
     "model": "PRO PLUS",
-    "variation": "3 - Oak Tree"
+    "variation": "3 - Oak Tree",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-HERITAGE_COLLECTION-WHITE-4_CLUBS",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Heritage Collection",
     "model": "PRO PLUS",
-    "variation": "4 - Clubs"
+    "variation": "4 - Clubs",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-LEGEND_LEGACY-WHITE-LEGACY",
@@ -1246,37 +1261,37 @@
     "id": "PRO_PLUS-LETTERS_TO_TROON-WHITE-FOX",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358018399-6edf-4dbe-0f1d.webp?alt=media",
     "name": "Letters to Troon",
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358018237-a014-97c2-531c.webp?alt=media",
     "model": "PRO PLUS",
     "variation": "Fox",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358018598-cec7-2466-5fec.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358018598-cec7-2466-5fec.webp?alt=media",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-LETTERS_TO_TROON-WHITE-SEAL",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358018954-97ce-5e3b-a8b4.webp?alt=media",
     "name": "Letters to Troon",
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358018782-d45e-ee54-9604.webp?alt=media",
     "model": "PRO PLUS",
     "variation": "Seal",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358019158-ab1c-3892-2c72.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358019158-ab1c-3892-2c72.webp?alt=media",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-LETTERS_TO_TROON-WHITE-WELL",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358019487-be3c-9d05-b71a.webp?alt=media",
     "name": "Letters to Troon",
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358019327-744f-3102-07b9.webp?alt=media",
     "model": "PRO PLUS",
     "variation": "Well",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358019702-37ae-4db0-b415.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358019702-37ae-4db0-b415.webp?alt=media",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-NEON-LIME",
@@ -1293,37 +1308,37 @@
     "id": "PRO_PLUS-ODE_TO_AUGUSTA-WHITE-11_AMEN_CORNER",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Ode to Augusta",
     "model": "PRO PLUS",
-    "variation": "11 - Amen Corner"
+    "variation": "11 - Amen Corner",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-ODE_TO_AUGUSTA-WHITE-12_GOLDEN_BELL",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Ode to Augusta",
     "model": "PRO PLUS",
-    "variation": "12 - Golden Bell"
+    "variation": "12 - Golden Bell",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-ODE_TO_AUGUSTA-WHITE-16_RED_BUD",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Ode to Augusta",
     "model": "PRO PLUS",
-    "variation": "16 - Red Bud"
+    "variation": "16 - Red Bud",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-ODE_TO_AUGUSTA-WHITE-5_MAGNOLIA",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Ode to Augusta",
     "model": "PRO PLUS",
-    "variation": "5  - Magnolia"
+    "variation": "5  - Magnolia",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-PINE_HURST-ORANGE",
@@ -1355,109 +1370,109 @@
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-CHUNK",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Chunk"
+    "variation": "Chunk",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-FIN",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Fin"
+    "variation": "Fin",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-JUICED",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Juiced"
+    "variation": "Juiced",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-KLAWS",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Klaws"
+    "variation": "Klaws",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-MOONMAN",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Moonman"
+    "variation": "Moonman",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-MULLIGAN_MARCHER",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Mulligan Marcher"
+    "variation": "Mulligan Marcher",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-PITTED",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Pitted"
+    "variation": "Pitted",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-PRICKLY_PAR",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Prickly Par"
+    "variation": "Prickly Par",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-ROO",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Roo"
+    "variation": "Roo",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-SLICE",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Slice"
+    "variation": "Slice",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-STINGER_STRAT",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Stinger Strat"
+    "variation": "Stinger Strat",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-THE_DROPOUT",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "The Dropout"
+    "variation": "The Dropout",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-ROYAL_RUSH-WHITE",
@@ -1582,73 +1597,73 @@
     "id": "PRO_PLUS-WINNER_WINNER-WHITE-05_LOBSTER",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Winner Winner",
     "model": "PRO PLUS",
-    "variation": "05 - Lobster"
+    "variation": "05 - Lobster",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-WINNER_WINNER-WHITE-22_SUSHI",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Winner Winner",
     "model": "PRO PLUS",
-    "variation": "22 - Sushi"
+    "variation": "22 - Sushi",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-WINNER_WINNER-WHITE-89_BURGER",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Winner Winner",
     "model": "PRO PLUS",
-    "variation": "89 - Burger"
+    "variation": "89 - Burger",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-WINNER_WINNER-WHITE-94_TARTE",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Winner Winner",
     "model": "PRO PLUS",
-    "variation": "94 - Tarte"
+    "variation": "94 - Tarte",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-YOU_LL_NEVER_PUTT_ALONE-WHITE-1_FLOWER",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "You'll Never Putt Alone",
     "model": "PRO PLUS",
-    "variation": "1 - Flower"
+    "variation": "1 - Flower",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-YOU_LL_NEVER_PUTT_ALONE-WHITE-2_SUN",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "You'll Never Putt Alone",
     "model": "PRO PLUS",
-    "variation": "2 - Sun"
+    "variation": "2 - Sun",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-YOU_LL_NEVER_PUTT_ALONE-WHITE-3_OCTOPUS",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "You'll Never Putt Alone",
     "model": "PRO PLUS",
-    "variation": "3 - Octopus"
+    "variation": "3 - Octopus",
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-YOU_LL_NEVER_PUTT_ALONE-WHITE-4_WALRUS",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "You'll Never Putt Alone",
     "model": "PRO PLUS",
-    "variation": "4 - Walrus"
+    "variation": "4 - Walrus",
+    "groupVariation": false
   },
   {
     "id": "PRO_SOFT-CYPRESS-WHITE",
@@ -1817,158 +1832,177 @@
     "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358028243-3ad7-b1a3-4c72.jpg?alt=media"
   },
   {
+    "id": "TOUR-JUNIOR-WHITE",
+    "groupColor": false,
+    "bundleItems": [],
+    "color": "White",
+    "groupVariation": false,
+    "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358028633-2920-78c5-6c0c.jpg?alt=media",
+    "name": "Junior",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097319425-ea8e-0644-ca70.png?alt=media",
+    "model": "TOUR",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358028799-f11c-d6b8-ecf7.jpg?alt=media"
+  },
+  {
     "id": "TOUR-JUNIOR-WHITE_BLUE",
-    "groupColor": true,
+    "groupColor": false,
     "color": "White/Blue",
     "groupVariation": false,
     "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358028633-2920-78c5-6c0c.jpg?alt=media",
     "name": "Junior",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097319425-ea8e-0644-ca70.png?alt=media",
     "model": "TOUR",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358028799-f11c-d6b8-ecf7.jpg?alt=media",
-    "bundleItems": [],
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097319425-ea8e-0644-ca70.png?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358028799-f11c-d6b8-ecf7.jpg?alt=media"
   },
   {
     "id": "TOUR-JUNIOR-WHITE_ORANGE",
-    "groupColor": true,
+    "groupColor": false,
     "color": "White/Orange",
     "groupVariation": false,
     "customImageSleeve": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358029203-7692-5dc0-3146.jpg?alt=media",
     "name": "Junior",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097327696-8951-7fff-f8ac.png?alt=media",
     "model": "TOUR",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358029386-3786-acfa-8b2c.jpg?alt=media",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358029386-3786-acfa-8b2c.jpg?alt=media"
+  },
+  {
+    "id": "TOUR-JUNIOR-YELLOW",
+    "groupColor": false,
     "bundleItems": [],
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097327696-8951-7fff-f8ac.png?alt=media"
+    "color": "Yellow",
+    "groupVariation": false,
+    "name": "Junior",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097355430-02cc-34a0-b494.png?alt=media",
+    "model": "TOUR",
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358029767-4c25-50de-dfac.webp?alt=media"
   },
   {
     "id": "TOUR-JUNIOR-YELLOW_BLUE",
-    "groupColor": true,
+    "groupColor": false,
     "color": "Yellow/Blue",
     "groupVariation": false,
     "name": "Junior",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097355430-02cc-34a0-b494.png?alt=media",
     "model": "TOUR",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358029767-4c25-50de-dfac.webp?alt=media",
-    "bundleItems": [],
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097355430-02cc-34a0-b494.png?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358029767-4c25-50de-dfac.webp?alt=media"
   },
   {
     "id": "TOUR-JUNIOR-YELLOW_ORANGE",
-    "groupColor": true,
+    "groupColor": false,
     "color": "Yellow/Orange",
     "groupVariation": false,
     "name": "Junior",
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097362924-969a-27e6-9eae.png?alt=media",
     "model": "TOUR",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358030076-6d28-df47-4fce.webp?alt=media",
-    "bundleItems": [],
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781097362924-969a-27e6-9eae.png?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358030076-6d28-df47-4fce.webp?alt=media"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-EUR1",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Ryder Cup",
     "model": "TOUR",
     "variation": "EUR1",
     "bundleItems": [],
     "notes": "EUR1",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781112997767-d0c6-d95b-a777.png?alt=media"
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781112997767-d0c6-d95b-a777.png?alt=media",
+    "groupVariation": false
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-EUR2",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Ryder Cup",
     "model": "TOUR",
     "variation": "EUR2",
     "bundleItems": [],
     "notes": "EUR2",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113021856-9fb9-2e42-7b60.png?alt=media"
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113021856-9fb9-2e42-7b60.png?alt=media",
+    "groupVariation": false
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-EUR3",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Ryder Cup",
     "model": "TOUR",
     "variation": "EUR3",
     "bundleItems": [],
     "notes": "EUR3",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113031232-847c-7706-2ca0.png?alt=media"
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113031232-847c-7706-2ca0.png?alt=media",
+    "groupVariation": false
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USA1",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Ryder Cup",
     "model": "TOUR",
     "variation": "USA1",
     "bundleItems": [],
     "notes": "USA1",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113044308-719a-428d-4202.png?alt=media"
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113044308-719a-428d-4202.png?alt=media",
+    "groupVariation": false
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USA2",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Ryder Cup",
     "model": "TOUR",
     "variation": "USA2",
     "bundleItems": [],
     "notes": "USA2",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113054242-f327-4ea1-7c58.png?alt=media"
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113054242-f327-4ea1-7c58.png?alt=media",
+    "groupVariation": false
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USA3",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Ryder Cup",
     "model": "TOUR",
     "variation": "USA3",
     "bundleItems": [],
     "notes": "USA3",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113066218-50e0-8408-0477.png?alt=media"
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113066218-50e0-8408-0477.png?alt=media",
+    "groupVariation": false
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USVEU1",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Ryder Cup",
     "model": "TOUR",
     "variation": "USvEU1",
     "bundleItems": [],
     "notes": "USvEU1",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113105014-bc34-568f-4c48.png?alt=media"
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113105014-bc34-568f-4c48.png?alt=media",
+    "groupVariation": false
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USVEU2",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Ryder Cup",
     "model": "TOUR",
     "variation": "USvEU2",
     "bundleItems": [],
     "notes": "USvEU2",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113115329-4281-0390-542a.png?alt=media"
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113115329-4281-0390-542a.png?alt=media",
+    "groupVariation": false
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USVEU3",
     "groupColor": false,
     "color": "White",
-    "groupVariation": true,
     "name": "Ryder Cup",
     "model": "TOUR",
     "variation": "USvEU3",
     "bundleItems": [],
     "notes": "USvEU3",
-    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113125120-7bc8-cbdc-db00.png?alt=media"
+    "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1781113125120-7bc8-cbdc-db00.png?alt=media",
+    "groupVariation": false
   },
   {
     "id": "TOUR-STANDARD-WHITE",

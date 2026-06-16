@@ -278,7 +278,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
   };
 
   const handleMappingChange = (
-    key: "model" | "name" | "color" | "variation",
+    key: "model" | "name" | "color" | "variation" | "year",
     selectedHeader: string
   ) => {
     const nextMapping = { ...columnMapping, [key]: selectedHeader };
@@ -298,7 +298,8 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
             nextMapping.model,
             nextMapping.name,
             nextMapping.color,
-            nextMapping.variation
+            nextMapping.variation,
+            nextMapping.year
           );
         } catch (err) {}
       };
@@ -308,7 +309,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
 
   const handleRowChange = (
     index: number,
-    key: "model" | "name" | "color" | "variation",
+    key: "model" | "name" | "color" | "variation" | "year",
     value: string
   ) => {
     setParsedRows((prev) =>

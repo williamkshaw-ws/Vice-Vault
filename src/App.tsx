@@ -713,6 +713,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
               name: item.name ? item.name.trim() : "",
               color: item.color.trim(),
               variation: item.variation ? item.variation.trim() : undefined,
+              year: item.year ? item.year.trim() : undefined,
               groupColor: !!item.groupColor,
               groupVariation: !!item.groupVariation,
               customImage: item.customImage || (existingInCatalog ? existingInCatalog.customImage : undefined),
