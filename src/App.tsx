@@ -1487,23 +1487,66 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         );
 
         if (!legacyMatch) {
-          // Fuzzy match for legacy items that lack structured variations
-          const possibleMatches = catalog.filter(c => 
-            c.model.trim().toLowerCase() === b.model.trim().toLowerCase() &&
-            c.color.trim().toLowerCase() === b.color.trim().toLowerCase()
-          );
+          // Extremely robust fuzzy match for legacy items with chaotic/fragmented data
+          const normalize = (s?: string) => (s || "").replace(/[^a-z0-9]/gi, "").toLowerCase();
           
-          if (possibleMatches.length === 1) {
-            legacyMatch = possibleMatches[0];
-          } else if (possibleMatches.length > 1) {
-            legacyMatch = possibleMatches.find(c => 
-              (c.variation && (b.notes || "").toLowerCase().includes(c.variation.toLowerCase())) ||
-              (c.name && (b.notes || "").toLowerCase().includes(c.name.toLowerCase())) ||
-              (c.variation && (b.name || "").toLowerCase().includes(c.variation.toLowerCase())) ||
-              (c.variation && (b.variation || b.version || "").toLowerCase().includes(c.variation.toLowerCase())) ||
-              ((b.variation || b.version) && (c.variation || "").toLowerCase().includes((b.variation || b.version || "").toLowerCase()))
-            ) || possibleMatches[0];
+          let bestMatch = null;
+          let bestScore = -1;
+
+          for (const c of catalog) {
+            // Must AT LEAST match model (e.g. both are PRO)
+            if (c.model.trim().toLowerCase() !== b.model.trim().toLowerCase()) continue;
+
+            let score = 0;
+            const cColor = c.color.trim().toLowerCase();
+            const bColor = b.color.trim().toLowerCase();
+            const cColorNorm = normalize(c.color);
+            const bColorNorm = normalize(b.color);
+            const cNameNorm = normalize(c.name);
+            const bNameNorm = normalize(b.name);
+            const cVarNorm = normalize(c.variation);
+            const bVarNorm = normalize(b.variation || b.version);
+            const bNotesNorm = normalize(b.notes);
+
+            // Base Color Match
+            if (cColor === bColor) {
+              score += 10;
+            } else if (
+              cColorNorm === bNameNorm || cColorNorm === bVarNorm ||
+              cNameNorm === bColorNorm || cVarNorm === bColorNorm
+            ) {
+              // Cross-match: User put "Cosmic" in color, but catalog has "Cosmic" in name
+              score += 8;
+            } else {
+              // If color fundamentally doesn't match anywhere, skip this item
+              continue;
+            }
+
+            // Exact Field Matches
+            if (cNameNorm && cNameNorm === bNameNorm) score += 10;
+            if (cVarNorm && cVarNorm === bVarNorm) score += 10;
+            
+            // Cross-Field Exact Matches
+            if (cNameNorm && cNameNorm === bVarNorm) score += 8;
+            if (cVarNorm && cVarNorm === bNameNorm) score += 8;
+
+            // Substring Matches (e.g. "ZaraHome13" includes "ZaraHome")
+            if (cNameNorm && bNameNorm && (cNameNorm.includes(bNameNorm) || bNameNorm.includes(cNameNorm))) score += 5;
+            if (cVarNorm && bVarNorm && (cVarNorm.includes(bVarNorm) || bVarNorm.includes(cVarNorm))) score += 5;
+            if (cNameNorm && bVarNorm && (cNameNorm.includes(bVarNorm) || bVarNorm.includes(cNameNorm))) score += 4;
+
+            // Notes Substring Matches
+            if (cNameNorm && bNotesNorm.includes(cNameNorm)) score += 3;
+            if (cVarNorm && bNotesNorm.includes(cVarNorm)) score += 3;
+
+            // Penalize generic fallback (if we only matched color and nothing else, it's a weak match)
+            if (score > bestScore && score >= 8) {
+              bestScore = score;
+              bestMatch = c;
+            }
           }
+          
+          legacyMatch = bestMatch;
         }
         if (legacyMatch) {
           let updatedB = { ...b };
