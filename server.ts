@@ -2269,7 +2269,7 @@ app.post("/api/catalog", async (req, res) => {
     return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
   }
 
-  const { model, name, color, variation, notes, groupColor, groupVariation, customImage, customImageSleeve, customImageBox, bundleItems } = req.body;
+  const { model, name, color, variation, notes, year, groupColor, groupVariation, customImage, customImageSleeve, customImageBox, bundleItems } = req.body;
   if (!model || !name || !color) {
     return res.status(400).json({ error: "Model, Name, and Color specifications are required." });
   }
@@ -2300,6 +2300,7 @@ app.post("/api/catalog", async (req, res) => {
     color: color.trim(),
     variation: variation ? variation.trim() : undefined,
     notes: notes ? notes.trim() : undefined,
+    year: year ? year.trim() : undefined,
     groupColor: groupColor !== undefined ? !!groupColor : undefined,
     groupVariation: groupVariation !== undefined ? !!groupVariation : undefined,
     customImage: await uploadBase64ToStorage(resolvedImage || (existingItem ? existingItem.customImage : undefined), "catalog"),
@@ -2535,7 +2536,7 @@ app.put("/api/catalog/:id", async (req, res) => {
   }
 
   const { id } = req.params;
-  const { model, name, color, variation, notes, groupColor, groupVariation, customImage, customImageSleeve, customImageBox, bundleItems } = req.body;
+  const { model, name, color, variation, notes, year, groupColor, groupVariation, customImage, customImageSleeve, customImageBox, bundleItems } = req.body;
 
   const catalog = await getGlobalCatalog();
   let currentItem = catalog.find(item => item.id === id);
@@ -2553,6 +2554,7 @@ app.put("/api/catalog/:id", async (req, res) => {
   const updatedColor = color ? color.trim() : currentItem.color;
   const updatedVariation = variation !== undefined ? (variation === null ? undefined : variation.trim()) : currentItem.variation;
   const updatedNotes = notes !== undefined ? (notes === null ? undefined : notes.trim()) : currentItem.notes;
+  const updatedYear = year !== undefined ? (year === null ? undefined : year.trim()) : currentItem.year;
 
   const newId = sanitizeId(updatedModel, updatedColor, updatedName, updatedVariation);
 
@@ -2576,6 +2578,7 @@ app.put("/api/catalog/:id", async (req, res) => {
     color: updatedColor,
     variation: updatedVariation,
     notes: updatedNotes,
+    year: updatedYear,
     groupColor: groupColor !== undefined ? !!groupColor : currentItem.groupColor,
     groupVariation: groupVariation !== undefined ? !!groupVariation : currentItem.groupVariation,
     customImage: await uploadBase64ToStorage(resolvedImage, "catalog"),

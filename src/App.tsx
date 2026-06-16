@@ -777,16 +777,22 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         return { item, ballChunks, sleeveChunks, boxChunks };
       });
 
-      const dataToExport = mapped.map(({ item, ballChunks, sleeveChunks, boxChunks }) => {
-        const row: Record<string, any> = {
-          "Model": item.model,
-          "Name": item.name || "",
-          "Color": item.color,
-          "Variation": item.variation || "",
-          "Year": item.year || "",
-          "Group By Color": item.groupColor ? "TRUE" : "FALSE",
-          "Group By Variation": item.groupVariation ? "TRUE" : "FALSE",
-          "Bundle Data": item.bundleItems ? JSON.stringify(item.bundleItems) : ""
+      const dataToExport = catalog.map((c) => {
+        const itemData = mapped.find(m => m.item.id === c.id);
+        const ballChunks = itemData?.ballChunks || [];
+        const sleeveChunks = itemData?.sleeveChunks || [];
+        const boxChunks = itemData?.boxChunks || [];
+
+        const row: any = {
+          Model: c.model,
+          Name: c.name || "",
+          Color: c.color,
+          Variation: c.variation || "",
+          Year: c.year || "",
+          Notes: c.notes || "",
+          "Group Color": c.groupColor ? "TRUE" : "FALSE",
+          "Group By Variation": c.groupVariation ? "TRUE" : "FALSE",
+          "Bundle Data": c.bundleItems ? JSON.stringify(c.bundleItems) : ""
         };
 
         for (let i = 0; i < maxBallChunks; i++) {
@@ -840,6 +846,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             name: updatedName,
             color: updatedColor,
             variation: updatedVariation === null ? null : updatedVariation,
+            year: updatedFields.year === null ? null : updatedFields.year,
             notes: updatedNotes === null ? null : updatedNotes,
             groupColor: updatedGroupColor,
             groupVariation: updatedGroupVariation,
