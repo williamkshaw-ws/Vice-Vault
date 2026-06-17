@@ -216,10 +216,11 @@
     "name": "Bear",
     "color": "Gold",
     "year": "2023",
-    "groupColor": false,
+    "groupColor": true,
     "groupVariation": false,
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000068-e28e-0e69-b9e2.jpg?alt=media",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000266-2c8e-bb63-7893.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000266-2c8e-bb63-7893.webp?alt=media",
+    "bundleItems": []
   },
   {
     "id": "PRO-BEAR-WHITE",
@@ -227,10 +228,11 @@
     "name": "Bear",
     "color": "White",
     "year": "2023",
-    "groupColor": false,
+    "groupColor": true,
     "groupVariation": false,
     "customImage": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000483-7b44-aecf-b26b.webp?alt=media",
-    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000653-67e2-13e6-8151.webp?alt=media"
+    "customImageBox": "https://firebasestorage.googleapis.com/v0/b/vice-vault-f52e4.firebasestorage.app/o/catalog%2F1780358000653-67e2-13e6-8151.webp?alt=media",
+    "bundleItems": []
   },
   {
     "id": "PRO-BEASTIN-FROST_BLUE",
