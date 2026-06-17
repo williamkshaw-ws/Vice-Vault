@@ -1296,6 +1296,7 @@ app.post("/api/auth/signin", async (req, res) => {
     shareBag: !!user.shareBag,
     shareToken: encryptUsername(user.username || ""),
     wishlist: user.wishlist || [],
+    wishlistDates: user.wishlistDates || {},
     isMock: true
   };
 
@@ -1486,7 +1487,8 @@ app.get("/api/friends/:id/bag/:friendUsername", async (req, res) => {
       username: friend.username,
       avatarUrl: friend.avatarUrl,
       preferredColor: friend.preferredColor,
-      wishlist: friend.wishlist || []
+      wishlist: friend.wishlist || [],
+      wishlistDates: friend.wishlistDates || {}
     },
     balls
   });
@@ -1532,7 +1534,8 @@ app.get("/api/share/:token", async (req, res) => {
       avatarUrl: user.avatarUrl,
       preferredColor: user.preferredColor,
       shareToken: token,
-      wishlist: user.wishlist || []
+      wishlist: user.wishlist || [],
+      wishlistDates: user.wishlistDates || {}
     },
     balls
   });
@@ -1581,13 +1584,16 @@ app.post("/api/users/:uid/wishlist", async (req, res) => {
       if (doc.exists) {
         const data = doc.data() || {};
         let wishlist = Array.isArray(data.wishlist) ? [...data.wishlist] : [];
+        let wishlistDates = data.wishlistDates || {};
         if (wishlist.includes(catalogId)) {
           wishlist = wishlist.filter(id => id !== catalogId);
+          delete wishlistDates[catalogId];
         } else {
           wishlist.push(catalogId);
+          if (req.body.dateAdded) wishlistDates[catalogId] = req.body.dateAdded;
         }
-        await userRef.update({ wishlist });
-        return res.json({ success: true, wishlist });
+        await userRef.update({ wishlist, wishlistDates });
+        return res.json({ success: true, wishlist, wishlistDates });
       }
     } catch (e) {
       console.error("Error updating wishlist in Firestore", e);
@@ -1599,13 +1605,16 @@ app.post("/api/users/:uid/wishlist", async (req, res) => {
   const user = users.find(u => u.uid === resolvedId);
   if (user) {
     user.wishlist = user.wishlist || [];
+    user.wishlistDates = user.wishlistDates || {};
     if (user.wishlist.includes(catalogId)) {
       user.wishlist = user.wishlist.filter(id => id !== catalogId);
+      delete user.wishlistDates[catalogId];
     } else {
       user.wishlist.push(catalogId);
+      if (req.body.dateAdded) user.wishlistDates[catalogId] = req.body.dateAdded;
     }
     await saveUsers(users);
-    return res.json({ success: true, wishlist: user.wishlist });
+    return res.json({ success: true, wishlist: user.wishlist, wishlistDates: user.wishlistDates });
   }
   
   res.status(404).json({ error: "User not found" });
@@ -1622,8 +1631,8 @@ app.post("/api/users/:uid/wishlist/clear", async (req, res) => {
       const userRef = dbAdmin.collection("users").doc(resolvedId);
       const doc = await userRef.get();
       if (doc.exists) {
-        await userRef.update({ wishlist: [] });
-        return res.json({ success: true, wishlist: [] });
+        await userRef.update({ wishlist: [], wishlistDates: {} });
+        return res.json({ success: true, wishlist: [], wishlistDates: {} });
       }
     } catch (e) {
       console.error("Error clearing wishlist in Firestore", e);
@@ -1635,8 +1644,9 @@ app.post("/api/users/:uid/wishlist/clear", async (req, res) => {
   const user = users.find(u => u.uid === resolvedId);
   if (user) {
     user.wishlist = [];
+    user.wishlistDates = {};
     await saveUserToDb(user);
-    res.json({ success: true, wishlist: [] });
+    res.json({ success: true, wishlist: [], wishlistDates: {} });
   } else {
     res.status(404).json({ error: "User not found" });
   }
@@ -1720,6 +1730,7 @@ app.get("/api/users/:id/profile", async (req, res) => {
     shareToken: encryptUsername(user.username || ""),
     pendingFriendRequestsCount: user.friendRequestsIn ? user.friendRequestsIn.length : 0,
     wishlist: user.wishlist || [],
+    wishlistDates: user.wishlistDates || {},
     optInLeaderboard: !!user.optInLeaderboard,
     totalUniqueBalls: user.totalUniqueBalls || 0,
     totalBalls: user.totalBalls || 0,
@@ -1858,6 +1869,7 @@ app.patch("/api/users/:id/profile", async (req, res) => {
     shareBag: !!user.shareBag,
     shareToken: encryptUsername(user.username || ""),
     wishlist: user.wishlist || [],
+    wishlistDates: user.wishlistDates || {},
     optInLeaderboard: !!user.optInLeaderboard,
     totalUniqueBalls: user.totalUniqueBalls || 0,
     totalBalls: user.totalBalls || 0,

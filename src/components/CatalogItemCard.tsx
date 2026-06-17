@@ -32,6 +32,7 @@ interface CatalogItemCardProps {
     bundleItems?: { catalogId: string; qty: number }[]
   ) => void;
   wishlistItems?: string[];
+  wishlistDates?: Record<string, string>;
   onToggleWishlist?: (id: string) => void;
   variant?: string;
 }
@@ -41,7 +42,7 @@ let currentlyAddingCard: {
   discardAndClose: () => void;
 } | null = null;
 
-export default function CatalogItemCard({ item, subItems = [], onAddToLocker, isReadOnly = false, wishlistItems = [], onToggleWishlist, variant, index = 0 }: CatalogItemCardProps) {
+export default function CatalogItemCard({ item, subItems = [], onAddToLocker, isReadOnly = false, wishlistItems = [], wishlistDates = {}, onToggleWishlist, variant, index = 0 }: CatalogItemCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const isBundle = item.bundleItems && item.bundleItems.length > 0;
   
@@ -238,22 +239,100 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
           <div>
             <div className="flex items-start justify-between gap-2">
               <div className="truncate font-sans">
-                <h4 className="font-sans font-black text-white text-base leading-tight truncate" title={activeItem.model}>
-                  {activeItem.model}{activeItem.name ? ` - ${activeItem.name}` : ''}
-                </h4>
-                <p className="text-xs text-[#2563eb] font-mono font-medium truncate mt-0.5">
-                  {item.groupColor && (!isOpen || pkgType === 'box') ? "Mixed" : activeItem.color}
-                </p>
-                {!(item.groupVariation && subItems.length > 1) && (activeItem.variation || activeItem.notes) && (
-                  <p className="text-[10px] text-neutral-400 font-mono mt-1 break-words line-clamp-2 italic leading-tight" title={
-                    activeItem.variation || activeItem.notes
-                  }>
-                    "{activeItem.variation || activeItem.notes}"
-                  </p>
+                {variant === "wishlist" ? (
+                  <>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[9px] font-mono tracking-widest text-[#2563eb] uppercase font-black">
+                        {activeItem.model}
+                      </span>
+                      <span className={`text-[8px] px-1 py-0.2 rounded font-mono font-bold uppercase border tracking-wider scale-95 ${
+                        isBundle
+                          ? "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/60 text-amber-700 dark:text-amber-400"
+                          : pkgType === 'box'
+                          ? "bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-900/60 text-blue-700 dark:text-blue-400"
+                          : pkgType === 'sleeve'
+                          ? "bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-900/60 text-purple-700 dark:text-purple-400"
+                          : "bg-teal-50 dark:bg-teal-950/40 border-teal-200 dark:border-teal-900/60 text-teal-700 dark:text-teal-400"
+                      }`}>
+                        {isBundle ? 'Bundle' : pkgType === 'box' ? 'Box' : pkgType === 'sleeve' ? 'Sleeve' : 'Ball'}
+                      </span>
+                    </div>
+                    <h4 className="font-sans font-black text-white text-base leading-tight truncate mt-0.5" title={activeItem.name || "Standard Edition"}>
+                      {activeItem.name || "Standard Edition"}
+                    </h4>
+                  </>
+                ) : (
+                  <div className="flex items-center gap-1.5">
+                    <h4 className="font-sans font-black text-white text-base leading-tight truncate" title={activeItem.model}>
+                      {activeItem.model}{activeItem.name ? ` - ${activeItem.name}` : ''}
+                    </h4>
+                    {activeItem.year && (
+                      <span className="text-[9px] font-mono bg-neutral-900 border border-neutral-800 text-neutral-450 px-1.5 py-0.5 rounded leading-none shrink-0 select-none">
+                        {activeItem.year}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {variant !== "wishlist" && (
+                  <>
+                    <p className="text-xs text-[#2563eb] font-mono font-medium truncate mt-0.5">
+                      {item.groupColor && (!isOpen || pkgType === 'box') ? "Mixed" : activeItem.color}
+                    </p>
+                    {!(item.groupVariation && subItems.length > 1) && (activeItem.variation || activeItem.notes) && (
+                      <p className="text-[10px] text-neutral-400 font-mono mt-1 break-words line-clamp-2 italic leading-tight" title={
+                        activeItem.variation || activeItem.notes
+                      }>
+                        "{activeItem.variation || activeItem.notes}"
+                      </p>
+                    )}
+                  </>
+                )}
+
+                {variant === "wishlist" && (
+                  <div className="mt-2 space-y-1.5">
+                    {/* Variation if any */}
+                    {!(item.groupVariation && subItems.length > 1) && (activeItem.variation || activeItem.notes) && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono text-neutral-500 uppercase">Variation:</span>
+                        <span className="bg-neutral-950/60 p-0.5 px-1.5 rounded text-neutral-400 text-[10px] font-mono font-bold select-none truncate max-w-[150px]">
+                          {activeItem.variation || activeItem.notes}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* Color */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono text-neutral-500 uppercase">Color:</span>
+                      <span className="bg-neutral-950/60 p-0.5 px-1.5 rounded text-neutral-400 text-[10px] font-mono font-bold select-none">
+                        {item.groupColor && (!isOpen || pkgType === 'box') ? "Mixed" : activeItem.color}
+                      </span>
+                    </div>
+
+                    {/* Year */}
+                    {activeItem.year && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono text-neutral-500 uppercase">Release Year:</span>
+                        <span className="bg-neutral-950/60 p-0.5 px-1.5 rounded text-neutral-400 text-[10px] font-mono font-bold select-none">
+                          {activeItem.year}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Added */}
+                    {(wishlistDates[item.id] || wishlistDates[`${item.id}-pkg-box`] || wishlistDates[`${item.id}-pkg-ea`]) && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono text-neutral-500 uppercase">ADDED:</span>
+                        <span className="bg-neutral-950/60 p-0.5 px-1.5 rounded text-neutral-400 text-[10px] font-mono font-bold select-none">
+                          {wishlistDates[item.id] || wishlistDates[`${item.id}-pkg-box`] || wishlistDates[`${item.id}-pkg-ea`]}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
 
-              {!isReadOnly && (
+            {!isReadOnly && (
                 !isOpen ? (
                   <div className="relative flex items-center gap-2 flex-shrink-0">
                   <button

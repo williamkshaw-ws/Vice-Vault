@@ -123,5 +123,6 @@ export interface UserProfile {
   shareBag?: boolean;
   shareToken?: string;
   wishlist?: string[]; // Array of catalog item IDs
+  wishlistDates?: Record<string, string>; // Maps catalog item ID to date added
   createdAt: string;
 }

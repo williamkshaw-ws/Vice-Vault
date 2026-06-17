@@ -332,12 +332,14 @@ export default function App() {
 
   const [bagFilter, setBagFilter] = useState<'ea' | 'sleeve' | 'box' | null>(null);
   const [bagSortBy, setBagSortBy] = useState<string>('added_desc');
+  const [catalogSortBy, setCatalogSortBy] = useState<string>('model_asc');
   const [bagTab, setBagTab] = useState<"owned" | "wishlist">("owned");
 
   useEffect(() => {
     if (bagTab === "wishlist") {
       setShowTrophyCase(false);
     }
+    setBagSortBy('added_desc');
   }, [bagTab]);
 
   // State for searchable database catalog
@@ -356,6 +358,8 @@ export default function App() {
 
   // Active search query
   const [searchQuery, setSearchQuery] = useState("");
+  const [bagSearchQuery, setBagSearchQuery] = useState("");
+  const [wishlistSearchQuery, setWishlistSearchQuery] = useState("");
   // Quick filter to narrow core brand models
   const [selectedBrandFilter, setSelectedBrandFilter] = useState<string>("ALL");
   // Catalog Filters
@@ -1729,12 +1733,21 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     
     // Optimistic update
     const prevWishlist = userProfile.wishlist || [];
+    const prevWishlistDates = userProfile.wishlistDates || {};
     const isWishlisted = prevWishlist.includes(catalogId);
+    
     const newWishlist = isWishlisted 
       ? prevWishlist.filter(id => id !== catalogId)
       : [...prevWishlist, catalogId];
       
-    setUserProfile({ ...userProfile, wishlist: newWishlist });
+    const newWishlistDates = { ...prevWishlistDates };
+    if (isWishlisted) {
+      delete newWishlistDates[catalogId];
+    } else {
+      newWishlistDates[catalogId] = new Date().toLocaleDateString();
+    }
+      
+    setUserProfile({ ...userProfile, wishlist: newWishlist, wishlistDates: newWishlistDates });
     
     try {
       const res = await fetch(`/api/users/${currentUser.uid}/wishlist`, {
@@ -1743,13 +1756,13 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           "Content-Type": "application/json",
           "x-user-id": currentUser.uid
         },
-        body: JSON.stringify({ catalogId })
+        body: JSON.stringify({ catalogId, dateAdded: new Date().toLocaleDateString() })
       });
       if (!res.ok) throw new Error("Failed to update wishlist");
     } catch (e) {
       console.error(e);
       // Revert optimistic update
-      setUserProfile({ ...userProfile, wishlist: prevWishlist });
+      setUserProfile({ ...userProfile, wishlist: prevWishlist, wishlistDates: prevWishlistDates });
     }
   };
 
@@ -1901,14 +1914,33 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     ).sort();
   }, [catalog]);
 
-  // Sort Catalog alphabetically by Model, then by Name, then by Color, then by Variation (Notes), then by Year
+  // Sort Catalog dynamically based on catalogSortBy
   const sortedCatalog = useMemo(() => {
     return [...filteredCatalog].sort((a, b) => {
-      const modelA = a.model.trim().toLowerCase();
-      const modelB = b.model.trim().toLowerCase();
-      if (modelA < modelB) return -1;
-      if (modelA > modelB) return 1;
+      const getCmp = () => {
+        switch (catalogSortBy) {
+          case 'model_desc':
+            return b.model.localeCompare(a.model) || (b.name || "").localeCompare(a.name || "");
+          case 'year_desc': {
+            const yearA = a.year || "0000";
+            const yearB = b.year || "0000";
+            return yearB.localeCompare(yearA) || a.model.localeCompare(b.model);
+          }
+          case 'year_asc': {
+            const yearA = a.year || "9999";
+            const yearB = b.year || "9999";
+            return yearA.localeCompare(yearB) || a.model.localeCompare(b.model);
+          }
+          case 'model_asc':
+          default:
+            return a.model.localeCompare(b.model) || (a.name || "").localeCompare(b.name || "");
+        }
+      };
+      
+      const cmp = getCmp();
+      if (cmp !== 0) return cmp;
 
+      // Tie-breakers: Name, Color, Variation, Year
       const nameA = (a.name || "").trim().toLowerCase();
       const nameB = (b.name || "").trim().toLowerCase();
       if (nameA < nameB) return -1;
@@ -1931,7 +1963,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
       return 0;
     });
-  }, [filteredCatalog]);
+  }, [filteredCatalog, catalogSortBy]);
 
   // Group catalog items dynamically based on groupColor and groupVariation flags
   const groupedCatalog = useMemo(() => {
@@ -2219,6 +2251,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                             item={item}
                             isReadOnly={true}
                             wishlistItems={sharedLockerOwner.wishlist}
+                            wishlistDates={sharedLockerOwner.wishlistDates || {}}
                             variant="wishlist"
                             onAddToLocker={() => {}}
                           />
@@ -2592,11 +2625,31 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             <div className="bg-neutral-950/40 border border-neutral-850 rounded-2xl shadow-md">
               
               {/* Registry Database Header Banner (Static, removing redundant Admin Tab) */}
-              <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-neutral-850 bg-neutral-950 rounded-t-2xl">
-                <BallVaultIcon className="w-5 h-5 text-[#2563eb]" />
-                <span className="text-xs font-black uppercase tracking-wider text-neutral-300">
-                  Ball Vault ({catalog.length} Available Designs)
-                </span>
+              <div className="flex items-center justify-between px-4 py-3.5 border-b border-neutral-850 bg-neutral-950 rounded-t-2xl">
+                <div className="flex items-center gap-2.5">
+                  <BallVaultIcon className="w-5 h-5 text-[#2563eb]" />
+                  <span className="text-xs font-black uppercase tracking-wider text-neutral-300">
+                    Ball Vault ({catalog.length} Available Designs)
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-2 shrink-0">
+                  {catalog.length > 0 && (
+                    <div className="relative">
+                      <select
+                        value={catalogSortBy}
+                        onChange={(e) => setCatalogSortBy(e.target.value)}
+                        className="appearance-none bg-neutral-950/40 border border-neutral-850 text-neutral-400 hover:text-white text-[10px] font-mono py-0.5 pl-2 pr-6 rounded-md transition-all cursor-pointer focus:outline-none focus:border-[#2563eb]"
+                      >
+                        <option value="model_asc">Sort: Model (A-Z)</option>
+                        <option value="model_desc">Sort: Model (Z-A)</option>
+                        <option value="year_desc">Sort: Year (New)</option>
+                        <option value="year_asc">Sort: Year (Old)</option>
+                      </select>
+                      <ChevronDown className="w-3 h-3 text-neutral-500 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Panel tab content rendering */}
@@ -2638,6 +2691,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                       <span>Showing {sortedCatalog.length} Matching Models</span>
                       <div className="flex items-center gap-3">
                         <span className="hidden sm:inline">{currentUser ? "Click + to add any to your Bag" : "Login to add balls to your bag"}</span>
+                        
                         {currentUser && (
                           <label className="flex items-center gap-1.5 cursor-pointer group bg-neutral-900 border border-neutral-800 hover:border-neutral-700 px-2.5 py-1 rounded-md transition-colors shadow-sm">
                             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-400 group-hover:text-neutral-300 transition-colors">
@@ -2690,6 +2744,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                             isReadOnly={!currentUser}
                             onAddToLocker={handleAddBallFromCatalog}
                             wishlistItems={userProfile?.wishlist || []}
+                            wishlistDates={userProfile?.wishlistDates || {}}
                             onToggleWishlist={handleToggleWishlist}
                           />
                         ))}
@@ -2803,8 +2858,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                           <option value="added_asc">Sort: Added (Old)</option>
                           <option value="model_asc">Sort: Model (A-Z)</option>
                           <option value="model_desc">Sort: Model (Z-A)</option>
-                          <option value="qty_desc">Sort: Qty (High-Low)</option>
-                          <option value="qty_asc">Sort: Qty (Low-High)</option>
+                          {bagTab !== "wishlist" && <option value="qty_desc">Sort: Qty (High-Low)</option>}
+                          {bagTab !== "wishlist" && <option value="qty_asc">Sort: Qty (Low-High)</option>}
                           <option value="year_desc">Sort: Year (New)</option>
                           <option value="year_asc">Sort: Year (Old)</option>
                         </select>
@@ -2853,14 +2908,33 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                 ) : bagTab === "wishlist" ? (
                   <motion.div key="wishlist" initial={{opacity: 0, x: 20}} animate={{opacity: 1, x: 0}} exit={{opacity: 0, x: -20}} transition={{ duration: 0.2 }} className="space-y-3">
                     {userProfile?.wishlist?.length > 0 && (
-                      <VaultFilterBar items={catalog.filter(c => userProfile.wishlist.some(w => w === c.id || w.startsWith(`${c.id}-pkg-`)))} filters={wishlistFilters} showCondition={false}>
-                        <button
-                          onClick={() => setShowClearWishlistConfirm(true)}
-                          className="shrink-0 text-[10px] uppercase font-bold text-rose-500 hover:text-rose-400 transition-colors cursor-pointer inline-flex items-center gap-1 bg-rose-500/10 hover:bg-rose-500/20 px-3 py-1.5 rounded-lg border border-rose-500/20 whitespace-nowrap"
-                        >
-                          <X className="w-3 h-3" /> Clear Wishlist
-                        </button>
-                      </VaultFilterBar>
+                      <div className="flex flex-col gap-3">
+                        <div className="relative group">
+                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <Search className="h-4 w-4 text-neutral-500 group-focus-within:text-[#2563eb] transition-colors" />
+                          </div>
+                          <input
+                            type="text"
+                            value={wishlistSearchQuery}
+                            onChange={(e) => setWishlistSearchQuery(e.target.value)}
+                            placeholder="Search wishlist (e.g., Red, Pro, 2021...)"
+                            className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-10 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#2563eb] focus:border-[#2563eb] transition-all shadow-sm"
+                          />
+                          {wishlistSearchQuery && (
+                            <button onClick={() => setWishlistSearchQuery("")} className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-neutral-500 hover:text-white transition-colors">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                          )}
+                        </div>
+                        <VaultFilterBar items={catalog.filter(c => userProfile.wishlist.some(w => w === c.id || w.startsWith(`${c.id}-pkg-`)))} filters={wishlistFilters} showCondition={false}>
+                          <button
+                            onClick={() => setShowClearWishlistConfirm(true)}
+                            className="shrink-0 text-[10px] uppercase font-bold text-rose-500 hover:text-rose-400 transition-colors cursor-pointer inline-flex items-center gap-1 bg-rose-500/10 hover:bg-rose-500/20 px-3 py-1.5 rounded-lg border border-rose-500/20 whitespace-nowrap"
+                          >
+                            <X className="w-3 h-3" /> Clear Wishlist
+                          </button>
+                        </VaultFilterBar>
+                      </div>
                     )}
                     {!userProfile?.wishlist?.length ? (
                       <div className="py-20 text-center rounded-3xl border-2 border-dashed border-neutral-850 bg-neutral-950/10 text-neutral-400">
@@ -2876,12 +2950,47 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                           .map(baseId => catalog.find(c => c.id === baseId))
                           .filter(item => {
                             if (!item) return false;
+                            
+                            // Apply Search
+                            if (wishlistSearchQuery) {
+                              const q = wishlistSearchQuery.toLowerCase();
+                              const matchesSearch = 
+                                item.model.toLowerCase().includes(q) || 
+                                item.color.toLowerCase().includes(q) ||
+                                (item.name && item.name.toLowerCase().includes(q)) ||
+                                (item.variation && item.variation.toLowerCase().includes(q)) ||
+                                (item.notes && item.notes.toLowerCase().includes(q)) ||
+                                (item.year && item.year.toLowerCase().includes(q));
+                              if (!matchesSearch) return false;
+                            }
+
+                            // Apply Advanced Filters
                             const matchesAdvancedModel = !wFilterModel || item.model === wFilterModel;
                             const matchesAdvancedColor = !wFilterColor || item.color === wFilterColor;
                             const matchesAdvancedVariation = !wFilterVariation || item.variation === wFilterVariation;
                             const matchesAdvancedYear = !wFilterYear || item.year === wFilterYear;
                             const matchesAdvancedName = !wFilterName || item.name === wFilterName;
                             return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName;
+                          })
+                          .sort((a, b) => {
+                            if (!a || !b) return 0;
+                            switch (bagSortBy) {
+                              case 'added_desc': {
+                                const dA = new Date(userProfile?.wishlistDates?.[a.id] || userProfile?.wishlistDates?.[`${a.id}-pkg-box`] || userProfile?.wishlistDates?.[`${a.id}-pkg-ea`] || 0).getTime();
+                                const dB = new Date(userProfile?.wishlistDates?.[b.id] || userProfile?.wishlistDates?.[`${b.id}-pkg-box`] || userProfile?.wishlistDates?.[`${b.id}-pkg-ea`] || 0).getTime();
+                                return dB - dA;
+                              }
+                              case 'added_asc': {
+                                const dA = new Date(userProfile?.wishlistDates?.[a.id] || userProfile?.wishlistDates?.[`${a.id}-pkg-box`] || userProfile?.wishlistDates?.[`${a.id}-pkg-ea`] || 0).getTime();
+                                const dB = new Date(userProfile?.wishlistDates?.[b.id] || userProfile?.wishlistDates?.[`${b.id}-pkg-box`] || userProfile?.wishlistDates?.[`${b.id}-pkg-ea`] || 0).getTime();
+                                return dA - dB;
+                              }
+                              case 'model_asc': return a.model.localeCompare(b.model) || (a.name || "").localeCompare(b.name || "");
+                              case 'model_desc': return b.model.localeCompare(a.model) || (b.name || "").localeCompare(a.name || "");
+                              case 'year_desc': return (b.year || "").localeCompare(a.year || "");
+                              case 'year_asc': return (a.year || "").localeCompare(b.year || "");
+                              default: return 0;
+                            }
                           })
                           .map((item, index) => {
                             if (!item) return null;
@@ -2893,6 +3002,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                               isReadOnly={!currentUser}
                               onAddToLocker={handleAddBallFromCatalog}
                               wishlistItems={userProfile.wishlist}
+                              wishlistDates={userProfile.wishlistDates || {}}
                               onToggleWishlist={handleToggleWishlist}
                               variant="wishlist"
                             />
@@ -2914,7 +3024,26 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                     ) : (
                       <motion.div key="gridcase" initial={{ rotateY: -90, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ rotateY: 90, opacity: 0 }} transition={{ duration: 0.3 }} style={{ perspective: 1000 }}>
                     {balls.length > 0 && (
-                      <VaultFilterBar items={balls} filters={bagFilters} showCondition={true} />
+                      <div className="flex flex-col gap-3">
+                        <div className="relative group">
+                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <Search className="h-4 w-4 text-neutral-500 group-focus-within:text-[#2563eb] transition-colors" />
+                          </div>
+                          <input
+                            type="text"
+                            value={bagSearchQuery}
+                            onChange={(e) => setBagSearchQuery(e.target.value)}
+                            placeholder="Search bag (e.g., Red, Pro, 2021...)"
+                            className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-10 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#2563eb] focus:border-[#2563eb] transition-all shadow-sm"
+                          />
+                          {bagSearchQuery && (
+                            <button onClick={() => setBagSearchQuery("")} className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-neutral-500 hover:text-white transition-colors">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                          )}
+                        </div>
+                        <VaultFilterBar items={balls} filters={bagFilters} showCondition={true} />
+                      </div>
                     )}
                     {balls.length === 0 ? (
                       <div className="py-20 text-center rounded-3xl border-2 border-dashed border-neutral-850 bg-neutral-950/10 text-neutral-400">
@@ -2930,6 +3059,20 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                           .map((ball, index) => ({ ball, index }))
                           .filter(({ ball }) => !bagFilter || ball.packageType === bagFilter || (!ball.packageType && bagFilter === 'ea'))
                           .filter(({ ball }) => {
+                            // Apply Search
+                            if (bagSearchQuery) {
+                              const q = bagSearchQuery.toLowerCase();
+                              const matchesSearch = 
+                                ball.model.toLowerCase().includes(q) || 
+                                ball.color.toLowerCase().includes(q) ||
+                                (ball.name && ball.name.toLowerCase().includes(q)) ||
+                                (ball.variation && ball.variation.toLowerCase().includes(q)) ||
+                                (ball.notes && ball.notes.toLowerCase().includes(q)) ||
+                                (ball.year && ball.year.toLowerCase().includes(q));
+                              if (!matchesSearch) return false;
+                            }
+
+                            // Apply Advanced Filters
                             const matchesAdvancedModel = !bFilterModel || ball.model === bFilterModel;
                             const matchesAdvancedColor = !bFilterColor || ball.color === bFilterColor;
                             const matchesAdvancedVariation = !bFilterVariation || ball.variation === bFilterVariation;
