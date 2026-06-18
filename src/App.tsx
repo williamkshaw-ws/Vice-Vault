@@ -855,9 +855,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             notes: updatedNotes === null ? null : updatedNotes,
             groupColor: updatedGroupColor,
             groupVariation: updatedGroupVariation,
-            customImage: updatedFields.customImage,
-            customImageSleeve: updatedFields.customImageSleeve,
-            customImageBox: updatedFields.customImageBox,
+            customImage: updatedFields.customImage !== undefined ? updatedFields.customImage : originalItem.customImage,
+            customImageSleeve: updatedFields.customImageSleeve !== undefined ? updatedFields.customImageSleeve : originalItem.customImageSleeve,
+            customImageBox: updatedFields.customImageBox !== undefined ? updatedFields.customImageBox : originalItem.customImageBox,
             bundleItems: updatedFields.bundleItems
           })
         });
