@@ -2369,6 +2369,19 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           {/* Double Actions: Dropdown Menus */}
           <div className="flex items-center gap-3 justify-end shrink-0">
             
+            {/* Discord Community Button */}
+            <a
+              href="https://discord.gg/Kpnqnyx5VW"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-neutral-500 hover:text-[#5865F2] border border-transparent hover:border-[#5865F2]/30 transition-all cursor-pointer flex items-center justify-center p-2 rounded-xl bg-transparent hover:bg-[#5865F2]/10"
+              title="Join our Discord Community"
+            >
+              <svg width="18" height="18" viewBox="0 0 127.14 96.36" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M107.7 8.07A105.15 105.15 0 0 0 81.47 0a72.06 72.06 0 0 0-3.36 6.83 109.27 109.27 0 0 0-29.08 0 72.37 72.37 0 0 0-3.39-6.83 105.41 105.41 0 0 0-26.25 8.09C2.04 33.72-2.38 58.62.9 83.25a105.73 105.73 0 0 0 32.22 13.11 76.67 76.67 0 0 0 6.89-11.3 70.36 70.36 0 0 1-10.9-5.18c.92-.66 1.8-1.34 2.67-2 22.18 10.15 46.12 10.15 68.12 0 .88.66 1.76 1.34 2.68 2a71.8 71.8 0 0 1-10.92 5.17 77.54 77.54 0 0 0 6.89 11.3 105.3 105.3 0 0 0 32.26-13.13c3.78-29.35-3.32-53.7-23.11-75.2zM42.45 65.46c-5.3 0-9.66-4.9-9.66-10.93s4.25-10.94 9.66-10.94c5.44 0 9.71 4.93 9.66 10.94 0 6.02-4.26 10.93-9.66 10.93zm42.24 0c-5.3 0-9.66-4.9-9.66-10.93s4.25-10.94 9.66-10.94c5.44 0 9.71 4.93 9.66 10.94 0 6.02-4.25 10.93-9.66 10.93z"/>
+              </svg>
+            </a>
+            
             {/* Leaderboard Button */}
             <button
               onClick={async () => {
