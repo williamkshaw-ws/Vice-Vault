@@ -74,7 +74,7 @@ During the live deployment of the migration, several production issues were iden
 1. **Firebase Storage Bucket Alignment**: Updated the default bucket URL in the backend server from `.appspot.com` to the newer `.firebasestorage.app` domain which aligned with the newly provisioned Firebase Spark plan storage bucket.
 2. **Firestore Payload Limits Bypass**: The initial API-based migration endpoint crashed the Render server due to the 11.5MB Base64 payload exceeding Firestore's 10MB batch limit. We bypassed the server and executed a secure, direct local script using the Firebase Admin SDK to seamlessly migrate all items.
 3. **App Crash Resilience**: Pushed a critical frontend fix to `App.tsx` utilizing a `safeJSONParse` helper to gracefully handle corrupted or empty strings in `localStorage` which were causing fatal React rendering crashes on boot.
-4. **Firebase Security Configuration**: Instructed the configuration of Firebase Storage security rules to allow public read access, resolving HTTP 403 Forbidden errors when fetching catalog images. Also registered the `vice-vault.onrender.com` domain in Firebase Auth to ensure OAuth login options remain fully functional.      {/* Side Pocket */}
+4. **Firebase Security Configuration**: Instructed the configuration of Firebase Storage security rules to allow public read access, resolving HTTP 403 Forbidden errors when fetching catalog images. Also registered the `golf-ball-vault.onrender.com` domain in Firebase Auth to ensure OAuth login options remain fully functional.      {/* Side Pocket */}
       <path d="M8.5 11.5 C6.5 11.5 6.5 17 9.1 17.5" fill="#070707" />
       {/* Shoulder Strap */}
       <path d="M15.5 10 C18 11 18 16.5 14.5 18" />
@@ -2313,7 +2313,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   }
 
   return (
-    <div className="min-h-screen transition-all duration-300 font-sans bg-black text-neutral-100 selection:bg-[#2563eb] selection:text-black" id="vice-vault-app">
+    <div className="min-h-screen transition-all duration-300 font-sans bg-black text-neutral-100 selection:bg-[#2563eb] selection:text-black" id="golf-ball-vault-app">
       <style>{`
         :root {
           --theme-accent-color: ${accentColor};

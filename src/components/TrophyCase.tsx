@@ -32,7 +32,7 @@ export default function TrophyCase({ uniqueBalls, username = "My" }: TrophyCaseP
       });
       
       const link = document.createElement('a');
-      link.download = `vice-vault-collection.png`;
+      link.download = `golf-ball-vault-collection.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {

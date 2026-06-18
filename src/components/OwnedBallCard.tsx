@@ -179,7 +179,7 @@ export default function OwnedBallCard({
       const modelSafe = typeof ball.model === 'string' ? ball.model.replace(/\s+/g, '-').toLowerCase() : 'custom';
       
       const link = document.createElement("a");
-      link.download = `vice-vault-${modelSafe}-${filenameIdentifier}.png`;
+      link.download = `golf-ball-vault-${modelSafe}-${filenameIdentifier}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err: any) {
