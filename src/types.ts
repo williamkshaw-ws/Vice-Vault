@@ -10,7 +10,7 @@ export enum BallModel {
   PRO_AIR = "PRO AIR",
   PRO_JUNIOR = "PRO JUNIOR",
   TOUR = "TOUR",
-  TOUR_JUNIOR = "TOUR TOUR JUNIOR",
+  TOUR_JUNIOR = "TOUR JUNIOR",
   DRIVE = "DRIVE"
 }
 

@@ -5,6 +5,7 @@ import { createServer as createViteServer } from "vite";
 import { fileURLToPath } from "url";
 import admin from "firebase-admin";
 import crypto from "crypto";
+import rateLimit from "express-rate-limit";
 import { BallModel } from "./src/types";
 import { VICE_BALLS_SPECS, COLOR_STYLES, SCRAPED_BALLS } from "./src/constants";
 
@@ -40,28 +41,29 @@ interface UserProfile {
   totalBalls?: number;
 }
 
-const OB_KEY = "ViceVaultSecretObfuscationKey_2026";
+const SECRET_KEY = process.env.SHARE_SECRET || "ViceVaultSecretObfuscationKey_2026";
+const AES_KEY = crypto.createHash('sha256').update(SECRET_KEY).digest();
 
 function encryptUsername(username: string): string {
   if (!username) return "";
-  const buffer = Buffer.from(username, "utf-8");
-  const keyBuf = Buffer.from(OB_KEY, "utf-8");
-  const result = Buffer.alloc(buffer.length);
-  for (let i = 0; i < buffer.length; i++) {
-    result[i] = buffer[i] ^ keyBuf[i % keyBuf.length];
-  }
-  return result.toString("base64url");
+  // Use deterministic IV so share links remain static
+  const iv = crypto.createHash('md5').update(username + SECRET_KEY).digest();
+  const cipher = crypto.createCipheriv('aes-256-cbc', AES_KEY, iv);
+  let encrypted = cipher.update(username, 'utf8', 'base64url');
+  encrypted += cipher.final('base64url');
+  return iv.toString('base64url') + '.' + encrypted;
 }
 
 function decryptUsername(token: string): string | null {
   try {
-    const buffer = Buffer.from(token, "base64url");
-    const keyBuf = Buffer.from(OB_KEY, "utf-8");
-    const result = Buffer.alloc(buffer.length);
-    for (let i = 0; i < buffer.length; i++) {
-      result[i] = buffer[i] ^ keyBuf[i % keyBuf.length];
-    }
-    return result.toString("utf-8");
+    const parts = token.split('.');
+    if (parts.length !== 2) return null;
+    const iv = Buffer.from(parts[0], 'base64url');
+    const encryptedText = parts[1];
+    const decipher = crypto.createDecipheriv('aes-256-cbc', AES_KEY, iv);
+    let decrypted = decipher.update(encryptedText, 'base64url', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
   } catch (err) {
     return null;
   }
@@ -118,9 +120,19 @@ function cleanUsernameString(username: string): string {
 }
 
 const app = express();
+app.set('trust proxy', 1);
+
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 app.use(express.json({ limit: "15mb" }));
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Limit each IP to 20 auth requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many login attempts from this IP, please try again after 15 minutes" }
+});
 
 // Paths for JSON file persistence
 const DATA_DIR = path.join(process.cwd(), "data");
@@ -714,7 +726,10 @@ async function uploadBase64ToStorage(base64Str: string | null | undefined, folde
     formData.append("image", base64Data);
     
     // ImgBB API Key
-    const API_KEY = "0cb746c617523b112d5628b170b3f1b3";
+    const API_KEY = process.env.IMGBB_API_KEY;
+    if (!API_KEY) {
+      throw new Error("IMGBB_API_KEY is missing from environment variables");
+    }
     
     const response = await fetch(`https://api.imgbb.com/1/upload?key=${API_KEY}`, {
       method: 'POST',
@@ -1145,7 +1160,7 @@ async function deleteGlobalCatalogItem(id: string): Promise<boolean> {
 // --- MOCK AUTHENTICATION API ENDPOINTS ---
 
 // Auth SignUp
-app.post("/api/auth/signup", async (req, res) => {
+app.post("/api/auth/signup", authLimiter, async (req, res) => {
   const { email, password, username, displayName, avatarUrl, preferredColor } = req.body;
   
   if (!email || !password || !username || !displayName) {
@@ -1228,7 +1243,7 @@ app.post("/api/auth/signup", async (req, res) => {
 });
 
 // Resolve username to email address
-app.get("/api/auth/resolve-email", async (req, res) => {
+app.get("/api/auth/resolve-email", authLimiter, async (req, res) => {
   const { username } = req.query;
   if (!username || typeof username !== "string") {
     return res.status(400).json({ error: "Username query parameter is required." });
@@ -1263,7 +1278,7 @@ app.get("/api/auth/resolve-email", async (req, res) => {
 });
 
 // Auth SignIn
-app.post("/api/auth/signin", async (req, res) => {
+app.post("/api/auth/signin", authLimiter, async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -1502,6 +1517,12 @@ app.get("/api/friends/:id/bag/:friendUsername", async (req, res) => {
 // User specific Locker APIs
 app.get("/api/users/:uid/locker", async (req, res) => {
   const { uid } = req.params;
+  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  
+  if (!actingUserId || (actingUserId !== uid && !(await verifyAdmin(actingUserId)))) {
+    return res.status(403).json({ error: "Access Denied." });
+  }
+
   const balls = await getUserLocker(uid);
   res.json({ balls });
 });
@@ -1547,6 +1568,12 @@ app.get("/api/share/:token", async (req, res) => {
 
 app.post("/api/users/:uid/locker", async (req, res) => {
   const { uid } = req.params;
+  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  
+  if (!actingUserId || (actingUserId !== uid && !(await verifyAdmin(actingUserId)))) {
+    return res.status(403).json({ error: "Access Denied." });
+  }
+
   const { balls } = req.body;
   if (!balls) {
     return res.status(400).json({ error: "Balls array is required." });
@@ -1661,12 +1688,28 @@ app.post("/api/users/:uid/wishlist/clear", async (req, res) => {
 app.get("/api/users/:id/profile", async (req, res) => {
   const { id } = req.params;
   const resolvedId = await resolveUserDocId(id);
+  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  
+  const isOwnerOrAdmin = actingUserId === resolvedId || (await verifyAdmin(actingUserId));
   
   if (dbAdmin) {
     try {
       const docSnap = await dbAdmin.collection("users").doc(resolvedId).get();
       if (docSnap.exists) {
-        return res.json({ uid: docSnap.id, ...docSnap.data() });
+        const data = docSnap.data();
+        if (isOwnerOrAdmin) {
+          return res.json({ uid: docSnap.id, ...data });
+        } else {
+          return res.json({
+            uid: docSnap.id,
+            displayName: data?.displayName,
+            username: data?.username,
+            avatarUrl: data?.avatarUrl,
+            preferredColor: data?.preferredColor,
+            role: data?.role,
+            shareBag: data?.shareBag
+          });
+        }
       }
     } catch (e) {
       console.error("Firestore error loading profile:", e);
@@ -1722,25 +1765,36 @@ app.get("/api/users/:id/profile", async (req, res) => {
   if (!user) {
     return res.status(404).json({ error: "User not found." });
   }
-  const clientUser = {
-    uid: user.uid,
-    email: user.email,
-    displayName: user.displayName,
-    photoURL: user.avatarUrl,
-    username: user.username,
-    preferredColor: user.preferredColor,
-    role: user.role,
-    shareBag: !!user.shareBag,
-    shareToken: encryptUsername(user.username || ""),
-    pendingFriendRequestsCount: user.friendRequestsIn ? user.friendRequestsIn.length : 0,
-    wishlist: user.wishlist || [],
-    wishlistDates: user.wishlistDates || {},
-    optInLeaderboard: !!user.optInLeaderboard,
-    totalUniqueBalls: user.totalUniqueBalls || 0,
-    totalBalls: user.totalBalls || 0,
-    isMock: false
-  };
-  res.json(clientUser);
+  
+  if (isOwnerOrAdmin) {
+    const clientUser = {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+      photoURL: user.avatarUrl,
+      username: user.username,
+      preferredColor: user.preferredColor,
+      role: user.role,
+      shareBag: !!user.shareBag,
+      shareToken: encryptUsername(user.username || ""),
+      pendingFriendRequestsCount: user.friendRequestsIn ? user.friendRequestsIn.length : 0,
+      friends: user.friends || [],
+      wishlist: user.wishlist || [],
+      wishlistDates: user.wishlistDates || {}
+    };
+    return res.json(clientUser);
+  } else {
+    const publicUser = {
+      uid: user.uid,
+      displayName: user.displayName,
+      photoURL: user.avatarUrl,
+      username: user.username,
+      preferredColor: user.preferredColor,
+      role: user.role,
+      shareBag: !!user.shareBag
+    };
+    return res.json(publicUser);
+  }
 });
 
 // Update user profile details (Name, Username, avatarUrl, preferredColor)
