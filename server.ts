@@ -2281,9 +2281,9 @@ app.get("/api/catalog", async (req, res) => {
 // POST: Add new design to catalog (Admin only)
 app.post("/api/catalog", async (req, res) => {
   const actingUserId = req.headers["x-user-id"] as string | undefined;
-  // if (!(await verifyAdmin(actingUserId))) {
-  //   return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
-  // }
+  if (!(await verifyAdmin(actingUserId))) {
+    return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
+  }
 
   const { model, name, color, variation, notes, year, groupColor, groupVariation, customImage, customImageSleeve, customImageBox, bundleItems } = req.body;
   if (!model || !name || !color) {
@@ -2548,13 +2548,12 @@ app.post("/api/catalog/clear", async (req, res) => {
 // PUT: Save changes to existing catalog design (Admin only)
 app.put("/api/catalog/:id", async (req, res) => {
   const actingUserId = req.headers["x-user-id"] as string | undefined;
-  // if (!(await verifyAdmin(actingUserId))) {
-  //   return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
-  // }
+  if (!(await verifyAdmin(actingUserId))) {
+    return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
+  }
 
   const { id } = req.params;
   const { model, name, color, variation, notes, year, groupColor, groupVariation, customImage, customImageSleeve, customImageBox, bundleItems } = req.body;
-  console.log("PUT /api/catalog/:id req.body.bundleItems:", bundleItems);
 
   const catalog = await getGlobalCatalog();
   let currentItem = catalog.find(item => item.id === id);
