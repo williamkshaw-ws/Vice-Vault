@@ -38,7 +38,7 @@ const TradingCardRendererComponent = ({ ball, catalogItem, exportCustomImage, ex
             
             {/* Authenticity Stamp */}
             <div className="w-11 h-11 rounded-full border-2 border-[#cca300] relative shrink-0">
-              <span className="absolute top-[2px] left-[13px] text-[#cca300] font-black text-xl font-serif leading-none">G</span>
+              <span className="absolute top-[0px] left-[11.5px] text-[#cca300] font-black text-xl font-serif leading-none">G</span>
             </div>
           </div>
 
