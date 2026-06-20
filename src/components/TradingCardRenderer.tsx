@@ -38,7 +38,7 @@ const TradingCardRendererComponent = ({ ball, catalogItem, exportCustomImage, ex
             
             {/* Authenticity Stamp */}
             <div className="w-11 h-11 rounded-full border-2 border-[#cca300] flex items-center justify-center shrink-0">
-              <span className="text-[#cca300] font-black text-xl font-serif" style={{ transform: "translateY(-2px)" }}>G</span>
+              <span className="text-[#cca300] font-black text-xl font-serif relative -top-[2px] leading-none">G</span>
             </div>
           </div>
 
