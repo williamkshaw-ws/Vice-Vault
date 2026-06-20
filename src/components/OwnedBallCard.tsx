@@ -9,7 +9,6 @@ import { GolfBall, BallCondition, CatalogItem } from "../types";
 import BallVisual from "./BallVisual";
 import { Trash2, Calendar, FileText, ChevronDown, ChevronUp, Check, Save, Edit2, X, Package, MessageSquare, AlertTriangle, Box, Share2, Loader2 } from "lucide-react";
 import { TradingCardRenderer } from "./TradingCardRenderer";
-import { toPng } from "html-to-image";
 
 interface OwnedBallCardProps {
   key?: string | number;
@@ -162,11 +161,13 @@ export default function OwnedBallCard({
 
       const isDark = document.documentElement.classList.contains('dark');
 
-      const dataUrl = await toPng(cardRef.current, {
+      const canvas = await html2canvas(cardRef.current!, {
         backgroundColor: isDark ? '#0a0a0a' : '#f5f5f5',
-        pixelRatio: 2,
-        skipFonts: true
+        scale: 2,
+        useCORS: true,
+        allowTaint: false
       });
+      const dataUrl = canvas.toDataURL("image/png");
       
       const filenameIdentifier = ball.name ? ball.name.replace(/\s+/g, '-').toLowerCase() : ball.color.replace(/\s+/g, '-').toLowerCase();
       const modelSafe = typeof ball.model === 'string' ? ball.model.replace(/\s+/g, '-').toLowerCase() : 'custom';

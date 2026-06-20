@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { CatalogItem } from '../types';
 import BallVisual from './BallVisual';
 import { Camera, Loader2 } from 'lucide-react';
-import { toPng } from 'html-to-image';
+import html2canvas from 'html2canvas';
 
 interface TrophyCaseProps {
   uniqueBalls: CatalogItem[];
@@ -21,15 +21,16 @@ export default function TrophyCase({ uniqueBalls, username = "My" }: TrophyCaseP
       setIsSaving(true);
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      const dataUrl = await toPng(posterRef.current, { 
-        cacheBust: true, 
-        pixelRatio: 2,
-        skipFonts: true,
-        filter: (node) => {
-          if (node instanceof HTMLElement && node.id === 'noise-overlay') return false;
-          return true;
+      const canvas = await html2canvas(posterRef.current!, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        ignoreElements: (node) => {
+          if (node.id === 'noise-overlay') return true;
+          return false;
         }
       });
+      const dataUrl = canvas.toDataURL("image/png");
       
       const link = document.createElement('a');
       link.download = `golf-ball-vault-collection.png`;
