@@ -55,7 +55,7 @@ export default function BallVisual({
         <img 
           src={customImageBox} 
           alt="Custom Box Design" 
-          className="w-full h-full object-contain" 
+          className="max-w-full max-h-full w-auto h-auto object-contain" 
           crossOrigin={customImageBox.startsWith('http') ? "anonymous" : undefined}
         />
       </div>
@@ -72,7 +72,7 @@ export default function BallVisual({
         <img 
           src={customImageSleeve} 
           alt="Custom Sleeve Design" 
-          className="w-full h-full object-contain" 
+          className="max-w-full max-h-full w-auto h-auto object-contain" 
           crossOrigin={customImageSleeve.startsWith('http') ? "anonymous" : undefined}
         />
       </div>

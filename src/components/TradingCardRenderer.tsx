@@ -20,7 +20,7 @@ const TradingCardRendererComponent = ({ ball, catalogItem, exportCustomImage, ex
     }, []);
 
     const content = (
-      <div className={`${isDarkTheme ? "dark" : ""} fixed top-[-10000px] left-[-10000px] pointer-events-none z-[-9999]`}>
+      <div className={`${isDarkTheme ? "dark" : ""} fixed top-0 left-0 opacity-0 pointer-events-none z-[-9999]`}>
         <div 
           ref={ref}
           className="w-[500px] h-[700px] bg-neutral-950 p-8 flex flex-col relative overflow-hidden rounded-3xl"
@@ -60,7 +60,7 @@ const TradingCardRendererComponent = ({ ball, catalogItem, exportCustomImage, ex
 
           {/* Player/Item Info */}
           <div className="z-10 shrink-0 min-w-0">
-            <h1 className="text-[42px] font-black text-[#cca300] uppercase tracking-tight leading-tight pb-1 mb-1 font-sans whitespace-nowrap overflow-hidden text-ellipsis">
+            <h1 className="text-[36px] font-black text-[#cca300] uppercase tracking-tight leading-tight pb-1 mb-1 font-sans whitespace-normal break-words line-clamp-2">
               {ball.name || catalogItem?.name || ball.color}
             </h1>
             <h3 className="text-xl font-bold text-white uppercase tracking-widest mb-5">
