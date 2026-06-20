@@ -28,7 +28,7 @@ const TradingCardRendererComponent = ({ ball, catalogItem, exportCustomImage, ex
           {/* Header Section */}
           <div className="flex justify-between items-start mb-6 z-10 shrink-0">
             <div className="flex flex-col min-w-0">
-              <h2 className="text-[26px] font-black text-white tracking-[0.15em] uppercase leading-none whitespace-nowrap">
+              <h2 className="text-[26px] font-black text-white tracking-[0.15em] uppercase leading-tight whitespace-nowrap">
                 GOLF BALL VAULT
               </h2>
               <p className="text-[10px] font-bold text-[#cca300] uppercase tracking-[0.2em] mt-1.5">
@@ -38,13 +38,13 @@ const TradingCardRendererComponent = ({ ball, catalogItem, exportCustomImage, ex
             
             {/* Authenticity Stamp */}
             <div className="w-11 h-11 rounded-full border-2 border-[#cca300] flex items-center justify-center shrink-0">
-              <span className="text-[#cca300] font-black text-xl font-serif leading-none">G</span>
+              <span className="text-[#cca300] font-black text-xl font-serif leading-tight pb-1">G</span>
             </div>
           </div>
 
           {/* Main Visual Window */}
           {/* min-h-0 is absolutely critical here to prevent tall portrait images from stretching the flex column! */}
-          <div className="flex-1 min-h-0 flex items-center justify-center bg-neutral-900 border border-neutral-800 rounded-2xl mb-6 p-2">
+          <div className="flex-1 min-h-0 flex items-center justify-center rounded-2xl mb-6">
             <BallVisual 
               size="xl" 
               color={ball.color} 
@@ -54,13 +54,13 @@ const TradingCardRendererComponent = ({ ball, catalogItem, exportCustomImage, ex
               customImage={ball.packageType === 'ea' ? (exportCustomImage || ball.customImage || ball.customImageBox || ball.customImageSleeve || catalogItem?.customImage) : undefined}
               customImageSleeve={ball.packageType === 'sleeve' ? (exportCustomImageSleeve || ball.customImageSleeve || ball.customImage || ball.customImageBox || catalogItem?.customImageSleeve || catalogItem?.customImage) : undefined}
               customImageBox={ball.packageType === 'box' ? (exportCustomImageBox || ball.customImageBox || ball.customImage || ball.customImageSleeve || catalogItem?.customImageBox || catalogItem?.customImage) : undefined}
-              className="!w-full !h-full object-contain !bg-transparent !border-none !shadow-none" 
+              className="!w-full !h-full object-contain !bg-transparent !border-none !shadow-none !rounded-none" 
             />
           </div>
 
           {/* Player/Item Info */}
           <div className="z-10 shrink-0 min-w-0">
-            <h1 className="text-[42px] font-black text-[#cca300] uppercase tracking-tight leading-none mb-1 font-sans whitespace-nowrap truncate">
+            <h1 className="text-[42px] font-black text-[#cca300] uppercase tracking-tight leading-tight pb-1 mb-1 font-sans whitespace-nowrap overflow-hidden text-ellipsis">
               {ball.name || catalogItem?.name || ball.color}
             </h1>
             <h3 className="text-xl font-bold text-white uppercase tracking-widest mb-5">
@@ -71,19 +71,19 @@ const TradingCardRendererComponent = ({ ball, catalogItem, exportCustomImage, ex
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-3">
                 <span className="block text-[10px] text-neutral-500 font-bold tracking-widest uppercase mb-1">Color</span>
-                <span className="block text-[15px] text-white font-black leading-none">{ball.color}</span>
+                <span className="block text-[15px] text-white font-black leading-tight pb-1">{ball.color}</span>
               </div>
               <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-3">
                 <span className="block text-[10px] text-neutral-500 font-bold tracking-widest uppercase mb-1">Condition</span>
-                <span className="block text-[15px] text-white font-black leading-none">{ball.condition}</span>
+                <span className="block text-[15px] text-white font-black leading-tight pb-1">{ball.condition}</span>
               </div>
               <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-3">
                 <span className="block text-[10px] text-neutral-500 font-bold tracking-widest uppercase mb-1">Variation</span>
-                <span className="block text-[15px] text-white font-black leading-none truncate">{ball.variation || catalogItem?.variation || "-"}</span>
+                <span className="block text-[15px] text-white font-black leading-tight pb-1 truncate">{ball.variation || catalogItem?.variation || "-"}</span>
               </div>
               <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-3">
                 <span className="block text-[10px] text-neutral-500 font-bold tracking-widest uppercase mb-1">Year</span>
-                <span className="block text-[15px] text-white font-black leading-none">{ball.year || catalogItem?.year || "-"}</span>
+                <span className="block text-[15px] text-white font-black leading-tight pb-1">{ball.year || catalogItem?.year || "-"}</span>
               </div>
             </div>
             
