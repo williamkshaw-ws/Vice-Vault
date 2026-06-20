@@ -37,8 +37,8 @@ const TradingCardRendererComponent = ({ ball, catalogItem, exportCustomImage, ex
             </div>
             
             {/* Authenticity Stamp */}
-            <div className="w-11 h-11 rounded-full border-2 border-[#cca300] flex items-center justify-center shrink-0">
-              <span className="text-[#cca300] font-black text-xl font-serif relative -top-[2px] leading-none">G</span>
+            <div className="w-11 h-11 rounded-full border-2 border-[#cca300] flex items-start justify-center shrink-0 pt-[7px]">
+              <span className="text-[#cca300] font-black text-xl font-serif leading-none">G</span>
             </div>
           </div>
 
@@ -71,19 +71,19 @@ const TradingCardRendererComponent = ({ ball, catalogItem, exportCustomImage, ex
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-3">
                 <span className="block text-[10px] text-neutral-500 font-bold tracking-widest uppercase mb-1">Color</span>
-                <span className="block text-[15px] text-white font-black leading-tight pb-1">{ball.color}</span>
+                <span className="block text-[15px] text-white font-black leading-normal">{ball.color}</span>
               </div>
               <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-3">
                 <span className="block text-[10px] text-neutral-500 font-bold tracking-widest uppercase mb-1">Condition</span>
-                <span className="block text-[15px] text-white font-black leading-tight pb-1">{ball.condition}</span>
+                <span className="block text-[15px] text-white font-black leading-normal">{ball.condition}</span>
               </div>
               <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-3">
                 <span className="block text-[10px] text-neutral-500 font-bold tracking-widest uppercase mb-1">Variation</span>
-                <span className="block text-[15px] text-white font-black leading-tight pb-1 truncate">{ball.variation || catalogItem?.variation || "-"}</span>
+                <span className="block text-[15px] text-white font-black leading-normal truncate">{ball.variation || catalogItem?.variation || "-"}</span>
               </div>
               <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-3">
                 <span className="block text-[10px] text-neutral-500 font-bold tracking-widest uppercase mb-1">Year</span>
-                <span className="block text-[15px] text-white font-black leading-tight pb-1">{ball.year || catalogItem?.year || "-"}</span>
+                <span className="block text-[15px] text-white font-black leading-normal">{ball.year || catalogItem?.year || "-"}</span>
               </div>
             </div>
             
