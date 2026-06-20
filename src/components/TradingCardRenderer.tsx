@@ -38,7 +38,7 @@ const TradingCardRendererComponent = ({ ball, catalogItem, exportCustomImage, ex
             
             {/* Authenticity Stamp */}
             <div className="w-11 h-11 rounded-full border-2 border-[#cca300] flex items-center justify-center shrink-0">
-              <span className="text-[#cca300] font-black text-xl font-serif leading-tight pb-1">G</span>
+              <span className="text-[#cca300] font-black text-xl font-serif" style={{ transform: "translateY(-2px)" }}>G</span>
             </div>
           </div>
 
@@ -59,8 +59,8 @@ const TradingCardRendererComponent = ({ ball, catalogItem, exportCustomImage, ex
           </div>
 
           {/* Player/Item Info */}
-          <div className="z-10 shrink-0 min-w-0">
-            <h1 className="text-[36px] font-black text-[#cca300] uppercase tracking-tight leading-tight pb-1 mb-1 font-sans whitespace-normal break-words line-clamp-2">
+          <div className="z-10 shrink-0 min-w-0 flex flex-col justify-end">
+            <h1 className="text-[32px] font-black text-[#cca300] uppercase tracking-tight leading-snug pb-1 mb-1 font-sans whitespace-normal break-words">
               {ball.name || catalogItem?.name || ball.color}
             </h1>
             <h3 className="text-xl font-bold text-white uppercase tracking-widest mb-5">
