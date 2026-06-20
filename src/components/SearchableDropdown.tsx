@@ -58,11 +58,19 @@ export default function SearchableDropdown({ value, options, onChange, placehold
 
   // Ensure portal root exists
   useEffect(() => {
-    if (!document.getElementById('dropdown-portal-root')) {
-      const div = document.createElement('div');
+    let div = document.getElementById('dropdown-portal-root');
+    let created = false;
+    if (!div) {
+      div = document.createElement('div');
       div.id = 'dropdown-portal-root';
       document.body.appendChild(div);
+      created = true;
     }
+    return () => {
+      if (created && div && div.parentNode) {
+        div.parentNode.removeChild(div);
+      }
+    };
   }, []);
 
   return (
@@ -70,7 +78,7 @@ export default function SearchableDropdown({ value, options, onChange, placehold
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-1.5 bg-neutral-900 border hover:text-white text-[10px] font-mono py-1.5 px-2.5 rounded-lg transition-all cursor-pointer outline-none focus:border-[#2563eb] ${value ? 'border-neutral-700 text-white shadow-sm' : 'border-neutral-800 text-neutral-400'}`}
+        className={`flex items-center gap-1.5 bg-neutral-900 border hover:text-white text-[10px] font-mono py-1.5 px-2.5 rounded-lg transition-all cursor-pointer outline-none focus:border-accent ${value ? 'border-neutral-700 text-white shadow-sm' : 'border-neutral-800 text-neutral-400'}`}
       >
         {icon && <span className="text-neutral-500 shrink-0">{icon}</span>}
         <span className="truncate max-w-[120px]">{value || placeholder}</span>
@@ -102,10 +110,10 @@ export default function SearchableDropdown({ value, options, onChange, placehold
           <div className="max-h-48 overflow-y-auto no-scrollbar flex flex-col gap-0.5">
             <button
               onClick={() => { onChange(""); setIsOpen(false); }}
-              className={`text-left px-2 py-1.5 text-[10px] rounded flex items-center justify-between group transition-colors ${value === "" ? "bg-[#2563eb]/20 text-white font-bold" : "text-neutral-400 hover:bg-neutral-900 hover:text-white"}`}
+              className={`text-left px-2 py-1.5 text-[10px] rounded flex items-center justify-between group transition-colors ${value === "" ? "bg-accent/20 text-white font-bold" : "text-neutral-400 hover:bg-neutral-900 hover:text-white"}`}
             >
               <span>{placeholder}</span>
-              {value === "" && <Check size={10} className="text-[#2563eb]" />}
+              {value === "" && <Check size={10} className="text-accent" />}
             </button>
             
             {filteredOptions.length === 0 ? (
@@ -115,10 +123,10 @@ export default function SearchableDropdown({ value, options, onChange, placehold
                 <button
                   key={opt}
                   onClick={() => { onChange(opt); setIsOpen(false); }}
-                  className={`text-left px-2 py-1.5 text-[10px] rounded flex items-center justify-between group transition-colors ${value === opt ? "bg-[#2563eb]/20 text-white font-bold" : "text-neutral-400 hover:bg-neutral-900 hover:text-white"}`}
+                  className={`text-left px-2 py-1.5 text-[10px] rounded flex items-center justify-between group transition-colors ${value === opt ? "bg-accent/20 text-white font-bold" : "text-neutral-400 hover:bg-neutral-900 hover:text-white"}`}
                 >
                   <span className="truncate">{opt}</span>
-                  {value === opt && <Check size={10} className="text-[#2563eb]" />}
+                  {value === opt && <Check size={10} className="text-accent" />}
                 </button>
               ))
             )}

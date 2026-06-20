@@ -5,14 +5,19 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { GolfBall, CatalogItem, BallModel, BallColor, BallCondition } from "./types";
+import { GolfBall, CatalogItem, BallModel, BallColor, BallCondition, UserProfile } from "./types";
 import { VICE_BALLS_SPECS, COLOR_STYLES, SCRAPED_BALLS } from "./constants";
 import CatalogItemCard from "./components/CatalogItemCard";
-import AddMissingBallForm from "./components/AddMissingBallForm";
-import * as XLSX from "xlsx";
-import XlsImporter from "./components/XlsImporter";
+import VaultManagerModal from "./components/VaultManagerModal";
+const XlsImporter = React.lazy(() => import("./components/XlsImporter"));
 import FriendsPortal from "./components/FriendsPortal";
+import MetricCards from "./components/MetricCards";
+import { useAuth } from "./hooks/useAuth";
+import { useBallLocker } from "./hooks/useBallLocker";
+import { filterLegacyBalls, safeJSONParse } from "./utils/bagUtils";
 import OwnedBallCard from "./components/OwnedBallCard";
+import SearchInput from "./components/SearchInput";
+import { ACCENT_COLORS, sanitizeId } from "./utils";
 import TrophyCase from "./components/TrophyCase";
 import ImportExportModal from "./components/ImportExportModal";
 import LeaderboardModal from "./components/LeaderboardModal";
@@ -55,7 +60,7 @@ import {
 
 import { auth, db, isFirebaseConfigured } from "./firebase";
 import AuthModal, { AvatarRenderer } from "./components/AuthModal";
-import { onAuthStateChanged, signOut, User as FirebaseUser } from "firebase/auth";
+import { User as FirebaseUser } from "firebase/auth";
 import { doc, getDoc, setDoc, query, where, collection, getDocs } from "firebase/firestore";
 
 // Premium Custom Golf-Specific SVGs designed to match the Munich technical aesthetic
@@ -152,37 +157,6 @@ function BallVaultIcon({ className = "w-4 h-4 text-neutral-400" }: { className?:
 
 // Initial owned mockup data to make the app look stunning right away
 const INITIAL_OWNED_BALLS: GolfBall[] = [];
-
-const filterLegacyBalls = (ballsList: any[]): GolfBall[] => {
-  if (!Array.isArray(ballsList)) return [];
-  return ballsList.filter((b: any) => b && b.id && !/-V\d+$/.test(b.id));
-};
-
-const safeJSONParse = (str: string | null): any => {
-  if (!str) return null;
-  try {
-    return JSON.parse(str);
-  } catch (e) {
-    console.warn("Failed to parse JSON from localStorage:", e);
-    return null;
-  }
-};
-
-
-function sanitizeId(model: string, color: string, name?: string, variation?: string, year?: string): string {
-  const clean = (s: string) => s.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "");
-  const modelPart = clean(model);
-  const colorPart = clean(color);
-  const namePart = name ? clean(name) : "";
-  const varPart = variation ? clean(variation) : "";
-  
-  let base = modelPart;
-  if (namePart) base += `-${namePart}`;
-  base += `-${colorPart}`;
-  if (varPart) base += `-${varPart}`;
-  return base;
-}
-
 
 // Helper to generate the standard default Vice catalog entries
 const generateDefaultCatalog = (): CatalogItem[] => {
@@ -293,42 +267,41 @@ export default function App() {
     }
   }, [toast]);
 
-  // Firebase Auth & Cloud Sync states
-  const [currentUser, setCurrentUser] = useState<any | null>(null);
-  const [userProfile, setUserProfile] = useState<{ uid: string; displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; shareBag?: boolean; shareToken?: string; pendingFriendRequestsCount?: number; wishlist?: string[]; optInLeaderboard?: boolean; } | null>(null);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const { 
+    currentUser, 
+    setCurrentUser, 
+    userProfile, 
+    setUserProfile, 
+    isAuthLoading, 
+    accentColor, 
+    setAccentColor, 
+    authModalOpen, 
+    setAuthModalOpen, 
+    handleSignOut 
+  } = useAuth();
+
+  const { 
+    balls, 
+    setBalls, 
+    isLoadingCloudData, 
+    isCloudDataLoaded, 
+    setIsCloudDataLoaded 
+  } = useBallLocker(currentUser);
+
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [isImportExportModalOpen, setIsImportExportModalOpen] = useState(false);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [isLoadingCloudData, setIsLoadingCloudData] = useState(false);
-  const [isCloudDataLoaded, setIsCloudDataLoaded] = useState(false);
-  const [accentColor, setAccentColor] = useState("#2563eb");
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [guestDropdownOpen, setGuestDropdownOpen] = useState(false);
   const [showClearWishlistConfirm, setShowClearWishlistConfirm] = useState(false);
   const [showTrophyCase, setShowTrophyCase] = useState(false);
 
   // Shared Locker states
-  const [sharedLockerOwner, setSharedLockerOwner] = useState<any | null>(null);
-  const [sharedLockerBalls, setSharedLockerBalls] = useState<any[]>([]);
+  const [sharedLockerOwner, setSharedLockerOwner] = useState<UserProfile | null>(null);
+  const [sharedLockerBalls, setSharedLockerBalls] = useState<GolfBall[]>([]);
   const [sharedLockerError, setSharedLockerError] = useState<string | null>(null);
   const [isSharedViewLoading, setIsSharedViewLoading] = useState(false);
 
-  // State for tracked owned balls
-  const [balls, setBalls] = useState<GolfBall[]>(() => {
-    const saved = localStorage.getItem("vice_vault_guest_v2");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          return filterLegacyBalls(parsed);
-        }
-      } catch (e) {
-        console.error("Failed to parse saved balls:", e);
-      }
-    }
-    return INITIAL_OWNED_BALLS;
-  });
+  // (balls managed by useBallLocker)
 
   const [bagFilter, setBagFilter] = useState<'ea' | 'sleeve' | 'box' | null>(null);
   const [bagSortBy, setBagSortBy] = useState<string>('added_desc');
@@ -453,7 +426,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   const [dbPanelTab, setDbPanelTab] = useState<"browse" | "admin" | "users" | "register">("browse");
 
   // User Manager States
-  const [usersList, setUsersList] = useState<any[]>([]);
+  const [usersList, setUsersList] = useState<UserProfile[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [usersError, setUsersError] = useState<string | null>(null);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
@@ -464,8 +437,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   const [isVaultProcessing, setIsVaultProcessing] = useState(false);
 
   // State for viewing/editing user bags
-  const [selectedUserForBag, setSelectedUserForBag] = useState<any | null>(null);
-  const [selectedUserBalls, setSelectedUserBalls] = useState<any[]>([]);
+  const [selectedUserForBag, setSelectedUserForBag] = useState<UserProfile | null>(null);
+  const [selectedUserBalls, setSelectedUserBalls] = useState<GolfBall[]>([]);
   const [isLoadingSelectedUserBalls, setIsLoadingSelectedUserBalls] = useState(false);
   const [bagModalErrorMessage, setBagModalErrorMessage] = useState<string | null>(null);
   const [modalSelectedModel, setModalSelectedModel] = useState("");
@@ -511,7 +484,6 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   const [showDeleteAllCatalogConfirm, setShowDeleteAllCatalogConfirm] = useState(false);
 
   // Search input filter inside Catalog Admin
-  const [adminSearchQuery, setAdminSearchQuery] = useState("");
   // Quick filter to narrow models inside Catalog Admin (Vault Manager)
   const [adminBrandFilter, setAdminBrandFilter] = useState<string>("ALL");
 
@@ -677,7 +649,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "x-user-id": currentUser.uid
+
           },
           body: JSON.stringify({
             items: newItems.map(item => ({
@@ -755,7 +727,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   };
 
   // Export catalog database items to Excel spreadsheet
-  const handleExportCatalogToExcel = () => {
+  const handleExportCatalogToExcel = async () => {
     try {
       const chunkString = (str: string | undefined, limit = 30000) => {
         if (!str) return [];
@@ -770,34 +742,30 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       let maxSleeveChunks = 0;
       let maxBoxChunks = 0;
 
-      const mapped = catalog.map(item => {
+      const dataToExport = catalog.map(item => {
         const ballChunks = chunkString(item.customImage);
         const sleeveChunks = chunkString(item.customImageSleeve);
         const boxChunks = chunkString(item.customImageBox);
-
-        if (ballChunks.length > maxBallChunks) maxBallChunks = ballChunks.length;
-        if (sleeveChunks.length > maxSleeveChunks) maxSleeveChunks = sleeveChunks.length;
-        if (boxChunks.length > maxBoxChunks) maxBoxChunks = boxChunks.length;
-
-        return { item, ballChunks, sleeveChunks, boxChunks };
-      });
-
-      const dataToExport = catalog.map((c) => {
-        const itemData = mapped.find(m => m.item.id === c.id);
-        const ballChunks = itemData?.ballChunks || [];
-        const sleeveChunks = itemData?.sleeveChunks || [];
-        const boxChunks = itemData?.boxChunks || [];
+        
+        maxBallChunks = Math.max(maxBallChunks, ballChunks.length);
+        maxSleeveChunks = Math.max(maxSleeveChunks, sleeveChunks.length);
+        maxBoxChunks = Math.max(maxBoxChunks, boxChunks.length);
 
         const row: any = {
-          Model: c.model,
-          Name: c.name || "",
-          Color: c.color,
-          Variation: c.variation || "",
-          Year: c.year || "",
-          Notes: c.notes || "",
-          "Group Color": c.groupColor ? "TRUE" : "FALSE",
-          "Group By Variation": c.groupVariation ? "TRUE" : "FALSE",
-          "Bundle Data": c.bundleItems ? JSON.stringify(c.bundleItems) : ""
+          ID: item.id,
+          Model: item.model,
+          Name: item.name || item.model,
+          Year: item.year || "",
+          Cover: item.cover || "",
+          Pieces: item.pieces || "",
+          Compression: item.compression || "",
+          TargetAudience: item.targetAudience || "",
+          Flight: item.flight || "",
+          Feel: item.feel || "",
+          Spin: item.spin || "",
+          Price: item.price || "",
+          Features: item.features ? item.features.join("; ") : "",
+          Colors: item.colors ? item.colors.join(", ") : "",
         };
 
         for (let i = 0; i < maxBallChunks; i++) {
@@ -813,6 +781,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         return row;
       });
 
+      const XLSX = await import("xlsx");
       const ws = XLSX.utils.json_to_sheet(dataToExport);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Catalog Registry");
@@ -844,7 +813,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            "x-user-id": currentUser.uid
+
           },
           body: JSON.stringify({
             model: updatedModel,
@@ -941,7 +910,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         const res = await fetch(`/api/catalog/${id}`, {
           method: "DELETE",
           headers: {
-            "x-user-id": currentUser.uid
+
           }
         });
         if (!res.ok) {
@@ -951,9 +920,6 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       }
 
       setCatalog((prev) => prev.filter((item) => item.id !== id));
-      if (editingItem?.id === id) {
-        setEditingItem(null);
-      }
     } catch (err: any) {
       console.error("Error deleting catalog item:", err);
       alert(err.message || "Failed to delete catalog item.");
@@ -977,167 +943,6 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         }
       } catch (e) {}
     }
-
-    // 1. Check for local mock user on mount
-    const savedMockUser = localStorage.getItem("vice_vault_mock_user");
-    if (savedMockUser) {
-      try {
-        const parsed = JSON.parse(savedMockUser);
-        setCurrentUser(parsed);
-        setUserProfile({
-          uid: parsed.uid || parsed.id || "",
-          displayName: parsed.displayName || "User",
-          username: parsed.username || "",
-          avatarUrl: parsed.photoURL || "initials",
-          preferredColor: parsed.preferredColor || "#2563eb",
-          role: (parsed.role && parsed.role.toLowerCase() === "admin") ? "Admin" : "User",
-          shareBag: !!parsed.shareBag,
-          shareToken: parsed.shareToken, pendingFriendRequestsCount: parsed.pendingFriendRequestsCount || 0
-        });
-        setAccentColor(parsed.preferredColor || "#2563eb");
-        setIsCloudDataLoaded(false);
-      } catch (e) {
-        console.error("Error loading mock user:", e);
-      }
-    }
-
-    if (!auth) return;
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // Clear mock user if a real Firebase user signs in
-        localStorage.removeItem("vice_vault_mock_user");
-        
-        setCurrentUser(user);
-        setIsLoadingCloudData(true);
-        try {
-          // 1. Load User Profile from the Server API (which resolves standard Firestore documents securely)
-          let userDocData: any = null;
-          let userDocId: string = "";
-          let lockerRes: Response | undefined;
-
-          if (db) {
-            try {
-              const [profileRes, lRes] = await Promise.all([
-                fetch(`/api/users/${user.uid}/profile`),
-                fetch(`/api/users/${user.uid}/locker`)
-              ]);
-              lockerRes = lRes;
-              if (profileRes.ok) {
-                const profileData = await profileRes.json();
-                userDocData = {
-                  displayName: profileData.displayName,
-                  username: profileData.username,
-                  avatarUrl: profileData.photoURL,
-                  preferredColor: profileData.preferredColor,
-                  role: profileData.role,
-                  email: profileData.email,
-                  uid: profileData.uid,
-                  shareBag: profileData.shareBag,
-                  shareToken: profileData.shareToken, pendingFriendRequestsCount: profileData.pendingFriendRequestsCount || 0,
-                  wishlist: profileData.wishlist || []
-                };
-                userDocId = profileData.uid.startsWith("u-") ? profileData.uid : `u-${profileData.username}`;
-              }
-            } catch (apiErr) {
-              console.error("Failed to fetch user profile from API:", apiErr);
-            }
-          }
-
-          if (db) {
-            if (userDocData && userDocId) {
-              // Found user profile
-              setUserProfile({
-                uid: userDocId,
-                displayName: userDocData.displayName || userDocData.name || user.displayName || "User",
-                username: userDocData.username || userDocId.replace(/^u-/, ""),
-                avatarUrl: userDocData.avatarUrl || "initials",
-                preferredColor: userDocData.preferredColor || "#2563eb", pendingFriendRequestsCount: userDocData.pendingFriendRequestsCount || 0,
-                role: (userDocData.role && userDocData.role.toLowerCase() === "admin") ? "Admin" : "User",
-                createdAt: userDocData.createdAt,
-                email: userDocData.email || user.email || "",
-                shareBag: !!userDocData.shareBag,
-                shareToken: userDocData.shareToken,
-                wishlist: userDocData.wishlist || []
-              } as any);
-              setAccentColor(userDocData.preferredColor || "#2563eb");
-            } else {
-              console.warn("User profile data not resolved from backend API. Initializing basic fallback profile.");
-              const rawUsername = user.displayName || user.email?.split("@")[0] || "user";
-              const cleanUsername = rawUsername.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
-              const fallbackDocId = `u-${cleanUsername}`;
-              
-              setUserProfile({
-                uid: fallbackDocId,
-                displayName: user.displayName || cleanUsername,
-                username: cleanUsername,
-                avatarUrl: user.photoURL || "preset-1",
-                preferredColor: "#2563eb",
-                role: cleanUsername === "admin" ? "Admin" : "User",
-                createdAt: new Date().toISOString(),
-                email: user.email || "",
-                shareBag: false,
-                wishlist: []
-              } as any);
-              setAccentColor("#2563eb");
-              userDocId = fallbackDocId;
-            }
-
-            // Load cache immediately for instant UI render
-            const cachedBag = localStorage.getItem("vice_vault_bag_" + user.uid);
-            if (cachedBag) {
-              try {
-                setBalls(filterLegacyBalls(safeJSONParse(cachedBag)));
-                setIsAuthLoading(false);
-              } catch (e) {}
-            }
-
-            // 2. Process locker documents using the server API response
-            let finalBalls = cachedBag ? filterLegacyBalls(safeJSONParse(cachedBag)) : filterLegacyBalls(balls);
-            // Re-use lockerRes from the Promise.all array above
-            if (typeof lockerRes !== 'undefined' && lockerRes.ok) {
-              const lockerData = await lockerRes.json();
-              if (lockerData && lockerData.balls !== null) {
-                finalBalls = filterLegacyBalls(lockerData.balls);
-              try {
-                localStorage.setItem("vice_vault_bag_" + user.uid, JSON.stringify(finalBalls));
-              } catch(e) { console.warn("localStorage quota exceeded"); }
-              } else {
-                // If locker doesn't exist on server, upload current client balls (migration of guest data)
-                await fetch(`/api/users/${user.uid}/locker`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    "x-user-id": user.uid
-                  },
-                  body: JSON.stringify({ balls: filterLegacyBalls(balls) })
-                });
-              }
-            }
-            setBalls(finalBalls);
-          }
-        } catch (err) {
-          console.error("Error loading user cloud data:", err);
-        } finally {
-          setIsLoadingCloudData(false);
-          setIsCloudDataLoaded(true);
-          setIsAuthLoading(false);
-        }
-      } else {
-        // Logged out / local-only fallback
-        if (!localStorage.getItem("vice_vault_mock_user")) {
-          setUserProfile(null);
-          setAccentColor("#2563eb");
-          setIsCloudDataLoaded(false);
-          setUserDropdownOpen(false);
-
-          const savedBalls = localStorage.getItem("vice_vault_guest_v2");
-          setBalls(savedBalls ? filterLegacyBalls(safeJSONParse(savedBalls)) : INITIAL_OWNED_BALLS);
-        }
-        setIsAuthLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
   }, []);
 
   // Load Global Catalog on Mount/Config Change
@@ -1182,66 +987,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     }
   }, [catalog]);
 
-  // Load mock user cloud data when mock user logs in or is loaded on mount
-  useEffect(() => {
-    if (currentUser && currentUser.isMock) {
-      // Load cache immediately for instant UI render
-      const cachedBag = localStorage.getItem("vice_vault_bag_" + currentUser.uid);
-      if (cachedBag) {
-        try {
-          setBalls(filterLegacyBalls(safeJSONParse(cachedBag)));
-          setIsLoadingCloudData(false);
-          setIsCloudDataLoaded(true);
-        } catch (e) {}
-      } else {
-        setIsLoadingCloudData(true);
-      }
-      
-      Promise.all([
-        fetch(`/api/users/${currentUser.uid}/profile`).then(async (res) => {
-          if (res.ok) {
-            const data = await res.json();
-            if (data) {
-              setUserProfile({
-                uid: data.uid || data.id,
-                displayName: data.displayName || "User",
-                username: data.username || "",
-                avatarUrl: data.photoURL || "initials",
-                preferredColor: data.preferredColor || "#2563eb",
-                role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User",
-                shareBag: !!data.shareBag,
-                shareToken: data.shareToken, 
-                pendingFriendRequestsCount: data.pendingFriendRequestsCount || 0,
-                wishlist: data.wishlist || []
-              });
-              setAccentColor(data.preferredColor || "#2563eb");
-              // Keep local storage up to date with latest server-side profile
-            try {
-              localStorage.setItem("vice_vault_mock_user", JSON.stringify(data));
-            } catch(e) {}
-            }
-          }
-        }),
-        fetch(`/api/users/${currentUser.uid}/locker`).then(async (res) => {
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.balls !== null) {
-              const parsedBalls = filterLegacyBalls(data.balls);
-              setBalls(parsedBalls);
-            try {
-              localStorage.setItem("vice_vault_bag_" + currentUser.uid, JSON.stringify(parsedBalls));
-            } catch(e) {}
-            }
-          }
-        })
-      ])
-      .catch((err) => console.error("Error loading mock user server data:", err))
-      .finally(() => {
-        setIsLoadingCloudData(false);
-        setIsCloudDataLoaded(true);
-      });
-    }
-  }, [currentUser]);
+
 
   // Redirect safety for administrative panels if role changes or user logs out
   useEffect(() => {
@@ -1259,7 +1005,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     try {
       const res = await fetch("/api/users", {
         headers: {
-          "x-user-id": currentUser.uid
+
         }
       });
       const data = await res.json();
@@ -1295,7 +1041,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "x-user-id": currentUser?.uid || ""
+
         },
         body: JSON.stringify(updatedFields)
       });
@@ -1336,7 +1082,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         const res = await fetch(`/api/users/${userId}`, {
           method: "DELETE",
           headers: {
-            "x-user-id": currentUser.uid
+
           }
         });
         const data = await res.json();
@@ -1385,7 +1131,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-user-id": currentUser?.uid || ""
+
         },
         body: JSON.stringify({ balls: selectedUserBalls })
       });
@@ -1396,7 +1142,6 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       showToast("User bag inventory updated successfully!", "success");
       setTimeout(() => {
         setSelectedUserForBag(null);
-        window.location.reload();
       }, 1200);
     } catch (err: any) {
       console.error("Error saving user bag:", err);
@@ -1416,17 +1161,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     setEditPasswordConfirm("");
   };
 
-  const ACCENT_COLORS = [
-    { name: "Royal Blue", value: "#2563eb" },
-    { name: "Neon Red", value: "#ff3366" },
-    { name: "Gold", value: "#d4af37" },
-    { name: "Cyan Blue", value: "#00e5ff" },
-    { name: "Royal Purple", value: "#9d4edf" },
-    { name: "Masters Green", value: "#17b056" },
-    { name: "Volt Orange", value: "#ff6b00" },
-    { name: "Hot Pink", value: "#ff33cc" },
-    { name: "Electric Teal", value: "#00f5d4" }
-  ];
+
 
   // Sync to localStorage, Firestore, or Express Server depending on login state
   useEffect(() => {
@@ -1436,7 +1171,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-user-id": currentUser.uid
+
         },
         body: JSON.stringify({ balls })
       }).catch(err => console.error("Error writing locker to server:", err));
@@ -1672,7 +1407,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "x-user-id": currentUser.uid
+
           },
           body: JSON.stringify({
             model: newItem.model,
@@ -1754,7 +1489,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-user-id": currentUser.uid
+
         },
         body: JSON.stringify({ catalogId, dateAdded: new Date().toLocaleDateString() })
       });
@@ -1777,7 +1512,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-user-id": currentUser.uid
+
         }
       });
       if (!res.ok) throw new Error("Failed to clear wishlist");
@@ -1834,7 +1569,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         const res = await fetch("/api/catalog/clear", {
           method: "POST",
           headers: {
-            "x-user-id": currentUser.uid
+
           }
         });
         if (!res.ok) {
@@ -1844,10 +1579,6 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       }
       
       setCatalog([]);
-      if (editingItem) {
-        setEditingItem(null);
-      }
-      setShowDeleteAllCatalogConfirm(false);
     } catch (err: any) {
       console.error("Error clearing catalog:", err);
       alert(err.message || "Failed to clear catalog.");
@@ -2036,7 +1767,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     if (currentUser && currentUser.uid && userProfile?.optInLeaderboard && isCloudDataLoaded) {
       fetch(`/api/users/${currentUser.uid}/stats`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-user-id": currentUser.uid },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ totalUniqueBalls: totalUniqueModels, totalBalls: totalOwnedCount })
       }).catch(err => console.error("Error updating leaderboard stats:", err));
     }
@@ -2070,7 +1801,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       return (
         <div className="min-h-screen bg-black flex flex-col justify-center items-center p-4">
           <div className="text-center space-y-3 font-mono text-xs text-neutral-500">
-            <RefreshCw className="animate-spin text-[#2563eb] mx-auto" size={24} />
+            <RefreshCw className="animate-spin text-accent mx-auto" size={24} />
             <span>Loading shared bag...</span>
           </div>
         </div>
@@ -2092,7 +1823,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             </div>
             <a
               href="/"
-              className="block w-full py-2.5 bg-[#2563eb] hover:bg-[#3b82f6] text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-all text-center font-mono"
+              className="block w-full py-2.5 bg-accent hover:bg-[#3b82f6] text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-all text-center font-mono"
             >
               Go to Golf Ball Vault
             </a>
@@ -2103,23 +1834,12 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
     if (sharedLockerOwner) {
       return (
-        <div className="min-h-screen transition-all duration-300 font-sans bg-black text-neutral-100 selection:bg-[#2563eb] selection:text-black flex flex-col" id="shared-locker-view">
-          <style>{`
-            :root {
-              --theme-accent-color: ${accentColor};
-              --theme-accent-color-rgb: ${hexToRgb(accentColor)};
-            }
-            .text-\\[\\#2563eb\\] { color: var(--theme-accent-color) !important; }
-            .bg-\\[\\#2563eb\\] { background-color: var(--theme-accent-color) !important; }
-            .border-\\[\\#2563eb\\] { border-color: var(--theme-accent-color) !important; }
-            .bg-\\[\\#2563eb\\]\\/10 { background-color: rgba(var(--theme-accent-color-rgb), 0.1) !important; }
-            .border-\\[\\#2563eb\\]\\/20 { border-color: rgba(var(--theme-accent-color-rgb), 0.2) !important; }
-          `}</style>
+        <div style={{ "--theme-accent-color": accentColor } as React.CSSProperties} className="min-h-screen transition-all duration-300 font-sans bg-black text-neutral-100 selection:bg-accent selection:text-black flex flex-col" id="shared-locker-view">
 
           <header className="sticky top-0 z-30 shadow-sm border-b border-neutral-850 bg-neutral-950">
             <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#2563eb]"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-accent"></span>
                 <span className="font-sans font-black text-sm text-white uppercase tracking-widest">Golf Ball Vault</span>
               </div>
               {friendBagUsername ? (
@@ -2140,15 +1860,15 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             </div>
           </header>
 
-          <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8 space-y-6">
+          <main id="main-content" className="flex-1 max-w-4xl w-full mx-auto px-4 py-8 space-y-6">
             {/* Owner Banner */}
             <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-3xl flex items-center gap-4 relative overflow-hidden shadow-xl">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#2563eb]/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
               <AvatarRenderer avatarUrl={sharedLockerOwner.avatarUrl} name={sharedLockerOwner.displayName || "User"} size="lg" color={sharedLockerOwner.preferredColor || "#2563eb"} />
               <div className="min-w-0 flex-1">
                 <h2 className="text-lg font-black text-white truncate leading-tight font-sans">{sharedLockerOwner.displayName}'s Bag</h2>
                 <p className="text-xs text-neutral-400 font-mono mt-0.5 font-bold">@{sharedLockerOwner.username}</p>
-                <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 rounded-full bg-[#2563eb]/10 border border-[#2563eb]/20 text-[9px] font-mono font-bold text-[#2563eb] uppercase tracking-wider">
+                <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-[9px] font-mono font-bold text-accent uppercase tracking-wider">
                   {friendBagUsername ? "Friend's Bag" : "Public Share View"}
                 </div>
               </div>
@@ -2164,7 +1884,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                     <span className="text-sm text-neutral-500 ml-1">/ {catalog.length}</span>
                   </span>
                 </div>
-                <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
+                <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-accent">
                   <GolfBallOutlineIcon className="w-5 h-5" />
                 </div>
               </div>
@@ -2176,7 +1896,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                     {sharedLockerBalls.reduce((sum, b) => sum + b.quantity, 0)}
                   </span>
                 </div>
-                <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
+                <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-accent">
                   <GolfBallStackIcon className="w-[22px] h-[22px]" />
                 </div>
               </div>
@@ -2190,7 +1910,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                     onClick={() => setSharedTab("owned")}
                     className={`flex items-center gap-2 cursor-pointer pb-2 -mb-2.5 transition-colors border-b-2 ${
                       sharedTab === "owned"
-                        ? "border-[#2563eb] text-white"
+                        ? "border-accent text-white"
                         : "border-transparent text-neutral-500 hover:text-neutral-300"
                     }`}
                   >
@@ -2313,36 +2033,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   }
 
   return (
-    <div className="min-h-screen transition-all duration-300 font-sans bg-black text-neutral-100 selection:bg-[#2563eb] selection:text-black" id="golf-ball-vault-app">
-      <style>{`
-        :root {
-          --theme-accent-color: ${accentColor};
-          --theme-accent-color-rgb: ${hexToRgb(accentColor)};
-        }
-        
-        /* Class overrides for dynamic theme colors */
-        .text-\\[\\#2563eb\\] { color: var(--theme-accent-color) !important; }
-        .bg-\\[\\#2563eb\\] { background-color: var(--theme-accent-color) !important; }
-        .hover\\:text-\\[\\#2563eb\\]:hover { color: var(--theme-accent-color) !important; }
-        .border-\\[\\#2563eb\\] { border-color: var(--theme-accent-color) !important; }
-        .focus\\:border-\\[\\#2563eb\\]:focus { border-color: var(--theme-accent-color) !important; }
-        .selection\\:bg-\\[\\#2563eb\\]::selection { background-color: var(--theme-accent-color) !important; }
-        .shadow-\\[\\#2563eb\\]\\/10 { box-shadow: 0 10px 15px -3px rgba(var(--theme-accent-color-rgb), 0.1), 0 4px 6px -4px rgba(var(--theme-accent-color-rgb), 0.1) !important; }
-        .border-\\[\\#2563eb\\]\\/30 { border-color: rgba(var(--theme-accent-color-rgb), 0.3) !important; }
-        .border-\\[\\#2563eb\\]\\/25 { border-color: rgba(var(--theme-accent-color-rgb), 0.25) !important; }
-        .bg-\\[\\#2563eb\\]\\/10 { background-color: rgba(var(--theme-accent-color-rgb), 0.1) !important; }
-        .bg-\\[\\#2563eb\\]\\/20 { background-color: rgba(var(--theme-accent-color-rgb), 0.2) !important; }
-        .hover\\:bg-\\[\\#2563eb\\]\\/80:hover { background-color: rgba(var(--theme-accent-color-rgb), 0.8) !important; }
-        .bg-\\[\\#2563eb\\]\\/80 { background-color: rgba(var(--theme-accent-color-rgb), 0.8) !important; }
-        .hover\\:border-\\[\\#2563eb\\]\\/50:hover { border-color: rgba(var(--theme-accent-color-rgb), 0.5) !important; }
-        .border-\\[\\#2563eb\\]\\/50 { border-color: rgba(var(--theme-accent-color-rgb), 0.5) !important; }
-        .focus\\:border-\\[\\#2563eb\\]\\/50:focus { border-color: rgba(var(--theme-accent-color-rgb), 0.5) !important; }
-        
-        /* Special elements using custom accent color styling */
-        .text-accent-dynamic { color: var(--theme-accent-color) !important; }
-        .bg-accent-dynamic { background-color: var(--theme-accent-color) !important; }
-        .border-accent-dynamic { border-color: var(--theme-accent-color) !important; }
-      `}</style>
+    <div style={{ "--theme-accent-color": accentColor } as React.CSSProperties} className="min-h-screen transition-all duration-300 font-sans bg-black text-neutral-100 selection:bg-accent selection:text-black" id="golf-ball-vault-app">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-accent focus:text-black font-bold outline-none rounded-br-lg">
+        Skip to main content
+      </a>
       
       {/* Sleek Minimal Branded Header */}
       <header className="sticky top-0 z-30 shadow-sm transition-all duration-300 border-b border-neutral-850 bg-neutral-950">
@@ -2384,11 +2078,12 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             
             {/* Leaderboard Button */}
             <button
+              aria-label="Global Leaderboard"
               onClick={async () => {
                 if (userProfile && userProfile.uid) {
                   await fetch(`/api/users/${userProfile.uid}/stats`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json", "x-user-id": userProfile.uid },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ totalUniqueBalls: totalUniqueModels, totalBalls: totalOwnedCount })
                   }).catch(e => console.error("Error:", e));
                 }
@@ -2402,15 +2097,18 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
             {/* Quick login / Sync access */}
             {isLoadingCloudData ? (
-              <div className="flex items-center gap-2 text-neutral-500 text-[11px] font-mono border border-neutral-850 px-4 py-2 rounded-xl bg-neutral-950">
-                <RefreshCw size={13} className="animate-spin text-[#2563eb]" />
+              <div className="flex items-center gap-2 text-neutral-500 text-xs font-mono border border-neutral-850 px-4 py-2 rounded-xl bg-neutral-950">
+                <RefreshCw size={13} className="animate-spin text-accent" />
                 <span>Syncing...</span>
               </div>
             ) : currentUser ? (
               <div className="relative" id="user-profile-dropdown-container">
                 <button
+                  aria-haspopup="true"
+                  aria-expanded={userDropdownOpen}
+                  aria-controls="user-profile-menu"
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="text-[11px] font-mono hover:text-[#2563eb] border transition-all cursor-pointer flex items-center gap-2 shadow-sm px-3 py-1.5 rounded-xl text-neutral-300 border border-neutral-850 hover:border-neutral-750 bg-neutral-950 hover:bg-neutral-900 relative"
+                  className="text-xs font-mono hover:text-accent border transition-all cursor-pointer flex items-center gap-2 shadow-sm px-3 py-1.5 rounded-xl text-neutral-300 border border-neutral-850 hover:border-neutral-750 bg-neutral-950 hover:bg-neutral-900 relative"
                   id="user-profile-menu-btn"
                 >
                   <div className="relative">
@@ -2421,7 +2119,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                   </div>
                   <span>{userProfile?.displayName || currentUser.displayName || "User"}</span>
                   {userProfile?.role === "Admin" && (
-                    <span className="px-1 py-0.2 rounded border border-[#2563eb]/30 text-[8px] uppercase tracking-wider font-extrabold text-[#2563eb] bg-[#2563eb]/10 leading-none">
+                    <span className="px-1 py-0.2 rounded border border-accent/30 text-[9px] uppercase tracking-wider font-extrabold text-accent bg-accent/10 leading-none">
                       Admin
                     </span>
                   )}
@@ -2433,7 +2131,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                     {/* Backdrop cover for clicking outside */}
                     <div className="fixed inset-0 z-30" onClick={() => setUserDropdownOpen(false)}></div>
                     <div
-                      className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-neutral-850 bg-neutral-950/95 backdrop-blur-md p-2 shadow-2xl z-40 flex flex-col gap-1 text-[11px] font-mono animate-in fade-in slide-in-from-top-2 duration-150"
+                      className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-neutral-850 bg-neutral-950/95 backdrop-blur-md p-2 shadow-2xl z-40 flex flex-col gap-1 text-xs font-mono animate-in fade-in slide-in-from-top-2 duration-150"
                       id="user-profile-menu"
                     >
                       <div className="px-2.5 py-2 border-b border-neutral-900 mb-1">
@@ -2448,17 +2146,17 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                             </div>
                             <div className="flex items-center gap-1.5 min-w-0 mt-0.5">
                               {userProfile?.username ? (
-                                <span className="text-[9px] text-[#2563eb] truncate font-bold">@{userProfile.username}</span>
+                                <span className="text-[9px] text-accent truncate font-bold">@{userProfile.username}</span>
                               ) : (
                                 <span className="text-[9px] text-neutral-500 truncate font-bold">@user</span>
                               )}
                               {userProfile?.role === "Admin" && (
-                                <span className="px-1 py-px rounded border border-[#2563eb]/30 text-[#2563eb] bg-[#2563eb]/10 text-[7px] uppercase tracking-wider font-extrabold shrink-0 leading-none">
+                                <span className="px-1 py-px rounded border border-accent/30 text-accent bg-accent/10 text-[9px] uppercase tracking-wider font-extrabold shrink-0 leading-none">
                                   Admin
                                 </span>
                               )}
                             </div>
-                            <span className="text-[9.5px] text-neutral-500 block truncate mt-0.5">{currentUser.email}</span>
+                            <span className="text-[9px] text-neutral-500 block truncate mt-0.5">{currentUser.email}</span>
                           </div>
                         </div>
                       </div>
@@ -2470,9 +2168,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                               setIsUserManagerOpen(true);
                               setUserDropdownOpen(false);
                             }}
-                            className="w-full text-left px-2.5 py-2 hover:bg-neutral-900 rounded-lg text-[#2563eb] hover:text-white transition-colors flex items-center gap-2 cursor-pointer border border-transparent font-bold"
+                            className="w-full text-left px-2.5 py-2 hover:bg-neutral-900 rounded-lg text-accent hover:text-white transition-colors flex items-center gap-2 cursor-pointer border border-transparent font-bold"
                           >
-                            <User size={12} className="text-[#2563eb]" />
+                            <User size={12} className="text-accent" />
                             <span>User Manager</span>
                           </button>
                           <button
@@ -2481,9 +2179,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                               setEditingItem(null);
                               setUserDropdownOpen(false);
                             }}
-                            className="w-full text-left px-2.5 py-2 hover:bg-neutral-900 rounded-lg text-[#2563eb] hover:text-white transition-colors flex items-center gap-2 cursor-pointer border border-transparent font-bold"
+                            className="w-full text-left px-2.5 py-2 hover:bg-neutral-900 rounded-lg text-accent hover:text-white transition-colors flex items-center gap-2 cursor-pointer border border-transparent font-bold"
                           >
-                            <Settings size={12} className="text-[#2563eb]" />
+                            <Settings size={12} className="text-accent" />
                             <span>Vault Manager</span>
                           </button>
                           <div className="border-b border-neutral-900 my-1"></div>
@@ -2533,7 +2231,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                         <select
                           value={theme}
                           onChange={(e) => handleSetTheme(e.target.value as 'light' | 'dark' | 'system')}
-                          className="bg-neutral-950 border border-neutral-850 rounded px-1.5 py-0.5 text-neutral-300 focus:outline-none focus:border-[#2563eb] text-[10px] cursor-pointer"
+                          className="bg-neutral-950 border border-neutral-850 rounded px-1.5 py-0.5 text-neutral-300 focus:outline-none focus:border-accent text-[10px] cursor-pointer"
                         >
                           <option value="system">System</option>
                           <option value="light">Light</option>
@@ -2556,22 +2254,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
                       <button
                         onClick={async () => {
-                          try {
-                            localStorage.removeItem("vice_vault_mock_user");
-                            if (auth) {
-                              await signOut(auth);
-                            }
-                            setCurrentUser(null);
-                            setUserProfile(null);
-                            setIsCloudDataLoaded(false);
-                            setAccentColor("#2563eb");
-                            setUserDropdownOpen(false);
-
-                            const savedBalls = localStorage.getItem("vice_vault_guest_v2");
-                            setBalls(savedBalls ? filterLegacyBalls(safeJSONParse(savedBalls)) : INITIAL_OWNED_BALLS);
-                          } catch (err) {
-                            console.error("Sign out error:", err);
-                          }
+                          await handleSignOut();
+                          setUserDropdownOpen(false);
                         }}
                         className="w-full text-left px-2.5 py-2 hover:bg-red-950/30 text-red-400 hover:text-red-300 rounded-lg transition-colors flex items-center gap-2 cursor-pointer border border-transparent hover:border-red-900/30"
                       >
@@ -2585,7 +2269,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             ) : (
               <button
                 onClick={() => setAuthModalOpen(true)}
-                className="text-[11px] font-mono hover:text-[#2563eb] border transition-all cursor-pointer flex items-center gap-2 shadow-sm px-3 py-1.5 rounded-xl text-neutral-300 border border-neutral-850 hover:border-neutral-750 bg-neutral-950 hover:bg-neutral-900 font-bold"
+                className="text-xs font-mono hover:text-accent border transition-all cursor-pointer flex items-center gap-2 shadow-sm px-3 py-1.5 rounded-xl text-neutral-300 border border-neutral-850 hover:border-neutral-750 bg-neutral-950 hover:bg-neutral-900 font-bold"
                 id="login-signup-btn"
               >
                 <User size={13} className="text-neutral-500" />
@@ -2598,7 +2282,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       </header>
 
       {/* Main Single-View Workspace */}
-      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main id="main-content" className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         
         {/* Mobile View Tab Switcher */}
         {currentUser && (
@@ -2607,7 +2291,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
               onClick={() => setMobileTab("bag")}
               className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 mobileTab === "bag"
-                  ? "bg-[#2563eb] text-black font-extrabold shadow-sm"
+                  ? "bg-accent text-black font-extrabold shadow-sm"
                   : "text-neutral-400 hover:text-white"
               }`}
             >
@@ -2618,7 +2302,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
               onClick={() => setMobileTab("catalog")}
               className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 mobileTab === "catalog"
-                  ? "bg-[#2563eb] text-black font-extrabold shadow-sm"
+                  ? "bg-accent text-black font-extrabold shadow-sm"
                   : "text-neutral-400 hover:text-white"
               }`}
             >
@@ -2640,7 +2324,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
               {/* Registry Database Header Banner (Static, removing redundant Admin Tab) */}
               <div className="flex items-center justify-between px-4 py-3.5 border-b border-neutral-850 bg-neutral-950 rounded-t-2xl">
                 <div className="flex items-center gap-2.5">
-                  <BallVaultIcon className="w-5 h-5 text-[#2563eb]" />
+                  <BallVaultIcon className="w-5 h-5 text-accent" />
                   <span className="text-xs font-black uppercase tracking-wider text-neutral-300">
                     Ball Vault ({catalog.length} Available Designs)
                   </span>
@@ -2652,7 +2336,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                       <select
                         value={catalogSortBy}
                         onChange={(e) => setCatalogSortBy(e.target.value)}
-                        className="appearance-none bg-neutral-950/40 border border-neutral-850 text-neutral-400 hover:text-white text-[10px] font-mono py-0.5 pl-2 pr-6 rounded-md transition-all cursor-pointer focus:outline-none focus:border-[#2563eb]"
+                        className="appearance-none bg-neutral-950/40 border border-neutral-850 text-neutral-400 hover:text-white text-[10px] font-mono py-0.5 pl-2 pr-6 rounded-md transition-all cursor-pointer focus:outline-none focus:border-accent"
                       >
                         <option value="model_asc">Sort: Model (A-Z)</option>
                         <option value="model_desc">Sort: Model (Z-A)</option>
@@ -2672,26 +2356,11 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
                     {/* Database Search Filter control */}
                     <div className="space-y-3">
-                      <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                          <Search className="h-4 w-4 text-neutral-500 group-focus-within:text-[#2563eb] transition-colors" />
-                        </div>
-                        <input
-                          type="text"
-                          placeholder="Search entire vault (e.g., Red, Pro, 2021...)"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-10 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#2563eb] focus:border-[#2563eb] transition-all shadow-sm"
-                        />
-                        {searchQuery && (
-                          <button 
-                            onClick={() => setSearchQuery("")}
-                            className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-neutral-500 hover:text-white transition-colors"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                          </button>
-                        )}
-                      </div>
+                      <SearchInput
+                        value={searchQuery}
+                        onChange={setSearchQuery}
+                        placeholder="Search entire vault (e.g., Red, Pro, 2021...)"
+                      />
                       
                       <div className="flex items-center gap-2 flex-wrap">
                         <VaultFilterBar items={searchedCatalog} filters={catalogFilters} showCondition={false} />
@@ -2741,7 +2410,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                               setShowXlsImporter(false);
                               setEditingItem(null);
                             }}
-                            className="mt-3 text-xs font-bold text-[#2563eb] hover:underline inline-flex items-center gap-1"
+                            className="mt-3 text-xs font-bold text-accent hover:underline inline-flex items-center gap-1"
                           >
                             Register a new one <ChevronRight className="w-3 h-3" />
                           </button>
@@ -2803,7 +2472,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                         </motion.div>
                       ) : (
                         <motion.div key="ball" initial={{ rotateY: 90, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ rotateY: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                          <GolfBallOutlineIcon className="w-5 h-5 text-[#2563eb]" />
+                          <GolfBallOutlineIcon className="w-5 h-5 text-accent" />
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -2819,7 +2488,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                       {totalOwnedCount}
                     </span>
                   </div>
-                  <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-[#2563eb]">
+                  <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-accent">
                     <GolfBallStackIcon className="w-[22px] h-[22px]" />
                   </div>
                 </div>
@@ -2833,7 +2502,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                       onClick={() => setBagTab("owned")}
                       className={`flex items-center gap-2 cursor-pointer pb-2 -mb-2.5 transition-colors border-b-2 ${
                         bagTab === "owned"
-                          ? "border-[#2563eb] text-white"
+                          ? "border-accent text-white"
                           : "border-transparent text-neutral-500 hover:text-neutral-300"
                       }`}
                     >
@@ -2865,7 +2534,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                         <select
                           value={bagSortBy}
                           onChange={(e) => setBagSortBy(e.target.value)}
-                          className="appearance-none bg-neutral-950/40 border border-neutral-850 text-neutral-400 hover:text-white text-[10px] font-mono py-0.5 pl-2 pr-6 rounded-md transition-all cursor-pointer focus:outline-none focus:border-[#2563eb]"
+                          className="appearance-none bg-neutral-950/40 border border-neutral-850 text-neutral-400 hover:text-white text-[10px] font-mono py-0.5 pl-2 pr-6 rounded-md transition-all cursor-pointer focus:outline-none focus:border-accent"
                         >
                           <option value="added_desc">Sort: Added (New)</option>
                           <option value="added_asc">Sort: Added (Old)</option>
@@ -2915,30 +2584,18 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                 <AnimatePresence mode="wait">
                 {(isAuthLoading || (isLoadingCloudData && balls.length === 0 && !localStorage.getItem("vice_vault_bag_" + userProfile?.uid))) ? (
                   <motion.div key="loading" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} transition={{ duration: 0.2 }} className="py-20 text-center rounded-3xl border border-neutral-850 bg-neutral-900/40 flex flex-col items-center justify-center shadow-inner">
-                    <RefreshCw className="w-8 h-8 text-[#2563eb] animate-spin mb-3 opacity-80" />
+                    <RefreshCw className="w-8 h-8 text-accent animate-spin mb-3 opacity-80" />
                     <h4 className="font-bold text-neutral-400 text-xs uppercase tracking-wider">Loading Vault...</h4>
                   </motion.div>
                 ) : bagTab === "wishlist" ? (
                   <motion.div key="wishlist" initial={{opacity: 0, x: 20}} animate={{opacity: 1, x: 0}} exit={{opacity: 0, x: -20}} transition={{ duration: 0.2 }} className="space-y-3">
                     {userProfile?.wishlist?.length > 0 && (
                       <div className="flex flex-col gap-3">
-                        <div className="relative group">
-                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                            <Search className="h-4 w-4 text-neutral-500 group-focus-within:text-[#2563eb] transition-colors" />
-                          </div>
-                          <input
-                            type="text"
-                            value={wishlistSearchQuery}
-                            onChange={(e) => setWishlistSearchQuery(e.target.value)}
-                            placeholder="Search wishlist (e.g., Red, Pro, 2021...)"
-                            className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-10 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#2563eb] focus:border-[#2563eb] transition-all shadow-sm"
-                          />
-                          {wishlistSearchQuery && (
-                            <button onClick={() => setWishlistSearchQuery("")} className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-neutral-500 hover:text-white transition-colors">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                            </button>
-                          )}
-                        </div>
+                        <SearchInput
+                          value={wishlistSearchQuery}
+                          onChange={setWishlistSearchQuery}
+                          placeholder="Search wishlist (e.g., Red, Pro, 2021...)"
+                        />
                         <VaultFilterBar items={catalog.filter(c => userProfile.wishlist.some(w => w === c.id || w.startsWith(`${c.id}-pkg-`)))} filters={wishlistFilters} showCondition={false}>
                           <button
                             onClick={() => setShowClearWishlistConfirm(true)}
@@ -3038,23 +2695,11 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                       <motion.div key="gridcase" initial={{ rotateY: -90, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ rotateY: 90, opacity: 0 }} transition={{ duration: 0.3 }} style={{ perspective: 1000 }}>
                     {balls.length > 0 && (
                       <div className="flex flex-col gap-3">
-                        <div className="relative group">
-                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                            <Search className="h-4 w-4 text-neutral-500 group-focus-within:text-[#2563eb] transition-colors" />
-                          </div>
-                          <input
-                            type="text"
-                            value={bagSearchQuery}
-                            onChange={(e) => setBagSearchQuery(e.target.value)}
-                            placeholder="Search bag (e.g., Red, Pro, 2021...)"
-                            className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-10 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#2563eb] focus:border-[#2563eb] transition-all shadow-sm"
-                          />
-                          {bagSearchQuery && (
-                            <button onClick={() => setBagSearchQuery("")} className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-neutral-500 hover:text-white transition-colors">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                            </button>
-                          )}
-                        </div>
+                        <SearchInput
+                          value={bagSearchQuery}
+                          onChange={setBagSearchQuery}
+                          placeholder="Search bag (e.g., Red, Pro, 2021...)"
+                        />
                         <VaultFilterBar items={balls} filters={bagFilters} showCondition={true} />
                       </div>
                     )}
@@ -3198,7 +2843,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             <div className="flex justify-between items-center p-5 border-b border-neutral-800">
               <div>
                 <h2 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#2563eb]"></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-accent"></span>
                   Bag Manager for {selectedUserForBag.displayName || selectedUserForBag.name || "User"}
                 </h2>
                 <p className="text-[10px] text-neutral-400 mt-0.5 font-mono">
@@ -3235,7 +2880,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                         setModalSelectedModel(m || "");
                         setModalSelectedColor(c || "");
                       }}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none cursor-pointer font-sans"
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-accent outline-none cursor-pointer font-sans"
                     >
                       <option value="">-- Choose a Ball Design --</option>
                       {catalog.map((item) => (
@@ -3254,7 +2899,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                         min="1"
                         value={modalQty}
                         onChange={(e) => setModalQty(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none"
+                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-accent outline-none"
                       />
                     </div>
                     <div>
@@ -3262,7 +2907,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                       <select
                         value={modalPkgType}
                         onChange={(e) => setModalPkgType(e.target.value as any)}
-                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none cursor-pointer font-sans"
+                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-accent outline-none cursor-pointer font-sans"
                       >
                         <option value="ea">Individual (ea)</option>
                         <option value="sleeve">Sleeve (3 balls)</option>
@@ -3285,11 +2930,11 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                             setModalPlayNumber(num);
                             setModalCustomNumberInput("");
                           }}
-                          className={`flex-1 text-center py-1 rounded text-[11px] font-mono font-bold border transition-all cursor-pointer ${
+                          className={`flex-1 text-center py-1 rounded text-xs font-mono font-bold border transition-all cursor-pointer ${
                             modalPkgType === 'box'
                               ? "bg-neutral-950 text-neutral-600 border-neutral-900 cursor-not-allowed opacity-55"
                               : modalPlayNumber === num && modalCustomNumberInput === ""
-                              ? "bg-[#2563eb] border-[#2563eb] text-black"
+                              ? "bg-accent border-accent text-black"
                               : "bg-neutral-950 border-neutral-850 text-neutral-300 hover:border-neutral-700"
                           }`}
                         >
@@ -3315,7 +2960,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                           modalPkgType === 'box'
                             ? "border-neutral-800 bg-neutral-950 text-neutral-600 cursor-not-allowed opacity-55"
                             : modalCustomNumberInput !== ""
-                            ? "bg-[#2563eb] text-black border-[#2563eb] font-bold"
+                            ? "bg-accent text-black border-accent font-bold"
                             : "bg-neutral-950 border-neutral-800 text-neutral-400"
                         }`}
                         title={modalPkgType === 'box' ? "Not customizable for boxes" : "Enter any 2-digit number"}
@@ -3327,7 +2972,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                     <select
                       value={modalCondition}
                       onChange={(e) => setModalCondition(e.target.value as any)}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none cursor-pointer font-sans"
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-accent outline-none cursor-pointer font-sans"
                     >
                       <option value={BallCondition.NEW}>{BallCondition.NEW}</option>
                       <option value={BallCondition.MINT}>{BallCondition.MINT}</option>
@@ -3340,7 +2985,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                     <select
                       value={modalYear}
                       onChange={(e) => setModalYear(e.target.value)}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none cursor-pointer font-sans"
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-accent outline-none cursor-pointer font-sans"
                     >
                       <option value="">Unknown</option>
                       {Array.from({ length: new Date().getFullYear() - 2012 + 1 }, (_, i) => String(2012 + i)).map((y) => (
@@ -3391,7 +3036,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                     setModalCustomNumberInput("");
                     setModalYear("");
                   }}
-                  className="w-full py-2 bg-[#2563eb] hover:bg-[#b5e000] text-black font-extrabold rounded-lg text-xs uppercase tracking-wider transition-all cursor-pointer"
+                  className="w-full py-2 bg-accent hover:bg-[#b5e000] text-black font-extrabold rounded-lg text-xs uppercase tracking-wider transition-all cursor-pointer"
                 >
                   + Add Ball to Bag
                 </button>
@@ -3402,7 +3047,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                  <h3 className="text-xs font-mono font-black uppercase text-neutral-300">Bag Inventory ({selectedUserBalls.length} Items)</h3>
                  {isLoadingSelectedUserBalls ? (
                    <div className="py-8 text-center text-xs text-neutral-500 font-mono flex items-center justify-center gap-2">
-                     <RefreshCw className="animate-spin text-[#2563eb]" size={14} />
+                     <RefreshCw className="animate-spin text-accent" size={14} />
                      <span>Loading locker data...</span>
                    </div>
                  ) : selectedUserBalls.length === 0 ? (
@@ -3452,7 +3097,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                                 >
                                   -
                                 </button>
-                                <span className="px-2 text-white font-bold text-[11px] min-w-[14px] text-center">{displayQty}</span>
+                                <span className="px-2 text-white font-bold text-xs min-w-[14px] text-center">{displayQty}</span>
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -3490,7 +3135,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                                     return b;
                                   }));
                                 }}
-                                className="bg-neutral-900 border border-neutral-800 text-neutral-300 rounded px-1.5 py-1 text-[10px] focus:outline-none focus:border-[#2563eb] cursor-pointer font-sans"
+                                className="bg-neutral-900 border border-neutral-800 text-neutral-300 rounded px-1.5 py-1 text-[10px] focus:outline-none focus:border-accent cursor-pointer font-sans"
                               >
                                 <option value="ea">Ball (ea)</option>
                                 <option value="sleeve">Sleeve (3)</option>
@@ -3504,7 +3149,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                                   const newCond = e.target.value as any;
                                   setSelectedUserBalls(prev => prev.map(b => b.id === ball.id ? { ...b, condition: newCond } : b));
                                 }}
-                                className="bg-neutral-900 border border-neutral-800 text-neutral-300 rounded px-1.5 py-1 text-[10px] focus:outline-none focus:border-[#2563eb] cursor-pointer font-sans"
+                                className="bg-neutral-900 border border-neutral-800 text-neutral-300 rounded px-1.5 py-1 text-[10px] focus:outline-none focus:border-accent cursor-pointer font-sans"
                               >
                                 <option value={BallCondition.NEW}>{BallCondition.NEW}</option>
                                 <option value={BallCondition.MINT}>{BallCondition.MINT}</option>
@@ -3544,7 +3189,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                  type="button"
                  disabled={isLoadingSelectedUserBalls}
                  onClick={handleSaveUserBag}
-                 className="px-4 py-2 bg-[#2563eb] hover:bg-[#b5e000] text-black font-extrabold rounded-xl transition-all cursor-pointer text-xs uppercase tracking-wider font-sans"
+                 className="px-4 py-2 bg-accent hover:bg-[#b5e000] text-black font-extrabold rounded-xl transition-all cursor-pointer text-xs uppercase tracking-wider font-sans"
                >
                  Save Bag Inventory
                </button>
@@ -3553,352 +3198,19 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
          </div>
        )}
 
-      {/* Vault Manager Modal */}
-      {isVaultManagerOpen && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-4xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
-            {/* Modal Header */}
-            <div className="flex justify-between items-center p-5 border-b border-neutral-800 bg-neutral-950/60">
-              <div>
-                <h2 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#2563eb]"></span>
-                  Vault Manager
-                </h2>
-                <p className="text-[10px] text-neutral-400 mt-0.5 font-mono">
-                  Prune and edit existing designs to prevent duplicate similar entries.
-                </p>
-              </div>
-              <button 
-                disabled={isVaultProcessing}
-                onClick={() => {
-                  setIsVaultManagerOpen(false);
-                  setEditingItem(null);
-                  setAdminSearchQuery("");
-                  setAdminBrandFilter("ALL");
-                }}
-                className={`p-1 rounded-lg transition-all ${
-                  isVaultProcessing
-                    ? "text-neutral-750 cursor-not-allowed"
-                    : "text-neutral-400 hover:text-white hover:bg-neutral-850 cursor-pointer"
-                }`}
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-6 overflow-y-auto flex-grow space-y-6 relative" id="register-missing-database-panel">
-              {isVaultProcessing && (
-                <div className="absolute inset-0 bg-neutral-950/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center space-y-4 animate-fade-in p-6">
-                  <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                  <div className="text-center space-y-1">
-                    <h3 className="text-white text-xs font-black uppercase tracking-wider">Syncing with the Ball Vault</h3>
-                    <p className="text-[10px] text-neutral-400 font-mono">Please keep this window open while we commit database changes...</p>
-                  </div>
-                </div>
-              )}
-              {/* Inner admin toggle buttons */}
-              <div className="flex gap-2 p-1 bg-neutral-950/60 border border-neutral-850 rounded-xl">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowXlsImporter(false);
-                    setEditingItem(null);
-                  }}
-                  className={`flex-1 py-2 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                    !showXlsImporter
-                      ? "bg-neutral-900 text-[#2563eb] border border-neutral-800"
-                      : "text-neutral-550 hover:text-neutral-350"
-                  }`}
-                >
-                  <PlusSquare className="w-3.5 h-3.5 text-[#2563eb]" />
-                  <span>Single Form</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowXlsImporter(true);
-                    setEditingItem(null);
-                  }}
-                  className={`flex-1 py-2 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                    showXlsImporter
-                      ? "bg-neutral-900 text-[#2563eb] border border-neutral-800"
-                      : "text-neutral-550 hover:text-neutral-350"
-                  }`}
-                >
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Excel / XLS Bulk</span>
-                </button>
-              </div>
-
-              {!showXlsImporter ? (
-                <AddMissingBallForm 
-                  catalog={catalog}
-                  onAddCatalogItem={handleAddCatalogItem} 
-                  onUpdateCatalogItem={handleUpdateCatalogItem}
-                  editItem={editingItem}
-                  onCancelEdit={() => setEditingItem(null)}
-                />
-              ) : (
-                <XlsImporter onImportItems={handleXlsImportCatalogItems} />
-              )}
-
-              {/* Registry Manager List Header */}
-              <div className="border-t border-neutral-800 pt-5 space-y-4">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <h4 className="font-sans font-black text-white text-xs uppercase tracking-wider text-[#2563eb] font-extrabold">
-                      Existing Catalog
-                    </h4>
-                    <p className="text-[10px] text-neutral-400">
-                      Search and manage balls that are already in the vault
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end gap-1.5 shrink-0">
-                    <span className="text-[9px] bg-neutral-950 border border-neutral-850 text-neutral-400 px-2 py-0.5 rounded font-mono">
-                      {catalog.length} BALLS
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      {catalog.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={handleExportCatalogToExcel}
-                          className="text-[9px] font-mono text-neutral-400 hover:text-emerald-450 border border-neutral-850 hover:border-emerald-950/40 bg-neutral-950/30 px-2 py-0.5 rounded transition-all cursor-pointer flex items-center gap-1"
-                        >
-                          <FileSpreadsheet className="w-3 h-3 text-emerald-450" /> Export
-                        </button>
-                      )}
-                      {catalog.length > 0 && (
-                        showDeleteAllCatalogConfirm ? (
-                          <div className="flex items-center gap-1 bg-rose-950/30 border border-rose-900/60 rounded-md p-0.5 animate-pulse">
-                            <span className="text-[8px] font-mono text-rose-300 px-1 uppercase font-bold">Wipe?</span>
-                            <button
-                              type="button"
-                              onClick={handleDeleteAllCatalog}
-                              className="px-1.5 py-0.5 bg-rose-600 hover:bg-rose-500 text-white text-[8px] font-mono rounded font-bold cursor-pointer transition-all"
-                            >
-                              Yes
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setShowDeleteAllCatalogConfirm(false)}
-                              className="px-1 text-[8px] font-mono text-neutral-400 hover:text-white rounded cursor-pointer transition-all"
-                            >
-                              No
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => setShowDeleteAllCatalogConfirm(true)}
-                            className="text-[9px] font-mono text-neutral-500 hover:text-rose-400 border border-neutral-850 hover:border-rose-950/40 bg-neutral-950/30 px-1.5 py-0.5 rounded transition-all cursor-pointer"
-                          >
-                            Delete All
-                          </button>
-                        )
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Admin filter input & Model filter */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" size={13} />
-                    <input
-                      type="text"
-                      placeholder="Search database..."
-                      value={adminSearchQuery}
-                      onChange={(e) => setAdminSearchQuery(e.target.value)}
-                      className="w-full bg-neutral-950 hover:bg-neutral-900/60 border border-neutral-850 rounded-xl px-9 py-2 text-xs text-white placeholder-neutral-550 outline-none focus:border-neutral-750 transition-all font-mono"
-                    />
-                    {adminSearchQuery && (
-                      <button
-                        onClick={() => setAdminSearchQuery("")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-neutral-550 hover:text-white"
-                      >
-                        CLEAR
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[10px] font-mono uppercase text-neutral-450 shrink-0">Filter model:</span>
-                    <div className="relative w-full sm:w-[180px]">
-                      <select
-                        value={adminBrandFilter}
-                        onChange={(e) => setAdminBrandFilter(e.target.value)}
-                        className="w-full bg-neutral-950 text-neutral-300 border border-neutral-850 hover:border-neutral-750 focus:border-[#2563eb] rounded-xl px-3 py-1.5 text-[11px] font-semibold outline-none transition-all cursor-pointer appearance-none pr-8 font-mono uppercase tracking-wider"
-                      >
-                        <option value="ALL">All Varieties</option>
-                        {registeredModels.map((m) => (
-                          <option key={m} value={m}>
-                            {m}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-550">
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Admin items list */}
-                <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1 font-sans">
-                  {catalog
-                    .filter(item => {
-                      const q = adminSearchQuery.toLowerCase();
-                      const matchesSearch = 
-                        item.model.toLowerCase().includes(q) || 
-                        item.color.toLowerCase().includes(q) ||
-                        (item.name && item.name.toLowerCase().includes(q)) ||
-                        (item.variation && item.variation.toLowerCase().includes(q)) ||
-                        (item.notes && item.notes.toLowerCase().includes(q)) ||
-                        (item.year && item.year.toLowerCase().includes(q));
-
-                      const matchesBrand = 
-                        adminBrandFilter === "ALL" || 
-                        item.model === adminBrandFilter;
-
-                      return matchesSearch && matchesBrand;
-                    })
-                    .map((item) => (
-                      <div 
-                        key={item.id}
-                        className={`flex items-center justify-between p-2.5 rounded-xl border transition-all ${
-                          editingItem?.id === item.id 
-                            ? "bg-neutral-900 border-[#2563eb]" 
-                            : "bg-neutral-950/60 hover:bg-neutral-900/80 border-neutral-850"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="w-8 h-8 rounded-full bg-black/40 border border-neutral-950 flex items-center justify-center shrink-0 overflow-hidden">
-                            <BallVisual 
-                              color={item.color} 
-                              model={item.model} 
-                              size="sm" 
-                              className="!w-8 !h-8 shadow-none border-none" 
-                              customImage={item.customImage} 
-                              customImageSleeve={item.customImageSleeve}
-                              customImageBox={item.customImageBox}
-                            />
-                          </span>
-                          <div className="truncate">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <h5 className="font-bold text-xs text-white truncate max-w-[120px] md:max-w-[160px]">
-                                {item.model}{item.name ? ` - ${item.name}` : ''}
-                              </h5>
-                              {item.year && (
-                                <span className="text-[9px] font-mono bg-neutral-900 border border-neutral-800 text-neutral-450 px-1.5 py-0.5 rounded leading-none scale-90 select-none">
-                                  {item.year}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-[10px] text-neutral-400 truncate mt-0.5 flex flex-wrap gap-x-2 items-center">
-                              <span className="font-medium text-neutral-300">{item.color}</span>
-                              {(item.variation || item.notes) && (
-                                <>
-                                  <span className="text-neutral-600 font-mono select-none">•</span>
-                                  <span className="text-neutral-400 italic text-[10px] truncate max-w-[150px] md:max-w-[280px]" title={
-                                    item.variation || item.notes
-                                  }>
-                                    {item.variation || item.notes}
-                                  </span>
-                                </>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1 shrink-0 ml-2">
-                          {deleteConfirmId === item.id ? (
-                            <div className="flex items-center gap-1 bg-rose-950/40 border border-rose-900/60 rounded-md p-0.5 animate-pulse">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  handleDeleteCatalogItem(item.id);
-                                  setDeleteConfirmId(null);
-                                }}
-                                className="py-1 px-1.5 text-[8px] font-mono font-black uppercase text-rose-400 hover:text-white rounded transition-all cursor-pointer"
-                                title="Confirm delete specification"
-                              >
-                                Delete?
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setDeleteConfirmId(null)}
-                                className="px-1 text-[9px] text-neutral-400 hover:text-white rounded transition-all cursor-pointer font-bold"
-                                title="Cancel"
-                              >
-                                ✕
-                              </button>
-                            </div>
-                          ) : (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setShowXlsImporter(false); // force switch to form
-                                  setEditingItem(item);
-                                  // Smoothly scroll to top of database panel inside the modal
-                                  const el = document.getElementById("register-missing-database-panel");
-                                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                                }}
-                                className="p-1 px-2 rounded-md bg-neutral-900 hover:bg-neutral-800 border border-neutral-850 hover:border-neutral-750 text-[#2563eb] hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black shrink-0 cursor-pointer"
-                                title="Edit Entry Specs"
-                              >
-                                <Pencil size={11} />
-                                <span>Edit</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setDeleteConfirmId(item.id)}
-                                className="p-1 rounded-md bg-neutral-900 hover:bg-rose-950/50 border border-neutral-850 hover:border-rose-900 text-neutral-555 hover:text-rose-455 transition-colors cursor-pointer"
-                                title="Delete Specification"
-                              >
-                                <Trash2 size={11} />
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-
-                  {catalog.length === 0 ? (
-                    <div className="py-8 px-4 text-center border border-dashed border-neutral-850 rounded-xl bg-neutral-950/10 text-neutral-500 text-xs">
-                      Ball Vault list is empty. Create some above or use Excel Bulk Import!
-                    </div>
-                  ) : (
-                    catalog.filter(item => {
-                      const q = adminSearchQuery.toLowerCase();
-                      const matchesSearch = 
-                        item.model.toLowerCase().includes(q) || 
-                        item.color.toLowerCase().includes(q) ||
-                        (item.name && item.name.toLowerCase().includes(q)) ||
-                        (item.variation && item.variation.toLowerCase().includes(q)) ||
-                        (item.notes && item.notes.toLowerCase().includes(q)) ||
-                        (item.year && item.year.toLowerCase().includes(q));
-
-                      const matchesBrand = 
-                        adminBrandFilter === "ALL" || 
-                        item.model === adminBrandFilter;
-
-                      return matchesSearch && matchesBrand;
-                    }).length === 0 && (
-                      <div className="py-6 text-center border border-dashed border-neutral-850 rounded-xl bg-neutral-950/10 text-neutral-500 text-xs">
-                        No balls match "{adminSearchQuery}"{adminBrandFilter !== "ALL" && ` under model "${adminBrandFilter}"`}
-                      </div>
-                    )
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <VaultManagerModal
+        isOpen={isVaultManagerOpen}
+        onClose={() => setIsVaultManagerOpen(false)}
+        isVaultProcessing={isVaultProcessing}
+        catalog={catalog}
+        registeredModels={registeredModels}
+        handleAddCatalogItem={handleAddCatalogItem}
+        handleUpdateCatalogItem={handleUpdateCatalogItem}
+        handleDeleteCatalogItem={handleDeleteCatalogItem}
+        handleXlsImportCatalogItems={handleXlsImportCatalogItems}
+        handleExportCatalogToExcel={handleExportCatalogToExcel}
+        handleDeleteAllCatalog={handleDeleteAllCatalog}
+      />
 
       {/* User Manager Modal */}
       
@@ -3934,7 +3246,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             <div className="flex justify-between items-center p-5 border-b border-neutral-800 bg-neutral-950/60">
               <div>
                 <h2 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#2563eb]"></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-accent"></span>
                   User Manager
                 </h2>
                 <p className="text-[10px] text-neutral-400 mt-0.5 font-mono">
@@ -3956,7 +3268,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             <div className="p-6 overflow-y-auto flex-grow space-y-6">
               {isLoadingUsers ? (
                 <div className="py-12 text-center text-neutral-500 font-mono text-xs flex flex-col items-center justify-center gap-2">
-                  <RefreshCw className="animate-spin text-[#2563eb] w-6 h-6" />
+                  <RefreshCw className="animate-spin text-accent w-6 h-6" />
                   <span>Querying user accounts...</span>
                 </div>
               ) : usersError ? (
@@ -3968,7 +3280,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                 <div className="space-y-4">
                   <div className="text-[10px] font-mono text-neutral-500 uppercase flex justify-between items-center">
                     <span>Registered Accounts ({usersList.length})</span>
-                    <button onClick={fetchUsers} className="text-[#2563eb] hover:underline flex items-center gap-1 cursor-pointer">
+                    <button onClick={fetchUsers} className="text-accent hover:underline flex items-center gap-1 cursor-pointer">
                       <RefreshCw size={10} /> Reload
                     </button>
                   </div>
@@ -4005,7 +3317,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
                       if (isEditing) {
                         return (
-                          <div key={userUid} className="bg-neutral-900 border border-[#2563eb] rounded-xl p-4 space-y-4 font-mono text-xs">
+                          <div key={userUid} className="bg-neutral-900 border border-accent rounded-xl p-4 space-y-4 font-mono text-xs">
                             <div className="flex items-center gap-3 border-b border-neutral-800 pb-3">
                               <AvatarRenderer avatarUrl={editAvatarUrl} name={editName} size="md" color={editColor} />
                               <div>
@@ -4021,7 +3333,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                                   type="text"
                                   value={editName}
                                   onChange={(e) => setEditName(e.target.value)}
-                                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none"
+                                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-accent outline-none"
                                   placeholder="Name"
                                 />
                               </div>
@@ -4031,7 +3343,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                                   type="text"
                                   value={editUsername}
                                   onChange={(e) => setEditUsername(e.target.value)}
-                                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none"
+                                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-accent outline-none"
                                   placeholder="username"
                                 />
                               </div>
@@ -4045,12 +3357,12 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                                   value={editRole}
                                   onChange={(e) => setEditRole(e.target.value as "Admin" | "User")}
                                   disabled={isSelf}
-                                  className="w-full bg-neutral-950 text-neutral-300 border border-neutral-800 rounded-lg p-2 text-xs focus:border-[#2563eb] outline-none cursor-pointer disabled:opacity-50"
+                                  className="w-full bg-neutral-950 text-neutral-300 border border-neutral-800 rounded-lg p-2 text-xs focus:border-accent outline-none cursor-pointer disabled:opacity-50"
                                 >
                                   <option value="User">User</option>
                                   <option value="Admin">Admin</option>
                                 </select>
-                                {isSelf && <span className="text-[8px] text-amber-500 mt-1 block font-bold">You cannot demote yourself</span>}
+                                {isSelf && <span className="text-[9px] text-amber-500 mt-1 block font-bold">You cannot demote yourself</span>}
                               </div>
                               <div>
                                 <label className="block text-[9px] uppercase text-neutral-400 mb-1">Email Address</label>
@@ -4058,7 +3370,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                                   type="email"
                                   value={editEmail}
                                   onChange={(e) => setEditEmail(e.target.value)}
-                                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-[#2563eb] outline-none"
+                                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-accent outline-none"
                                   placeholder="email@domain.com"
                                 />
                               </div>
@@ -4075,7 +3387,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                                     onChange={(e) => setEditPassword(e.target.value)}
                                     onFocus={() => setEditPasswordFocused(true)}
                                     onBlur={() => setTimeout(() => setEditPasswordFocused(false), 200)}
-                                    className={`w-full bg-neutral-950 border rounded-lg p-2 pl-2 pr-9 text-xs text-white focus:border-[#2563eb] outline-none ${editPassword && editPasswordConfirm && editPassword !== editPasswordConfirm ? "border-red-600" : "border-neutral-800"}`}
+                                    className={`w-full bg-neutral-950 border rounded-lg p-2 pl-2 pr-9 text-xs text-white focus:border-accent outline-none ${editPassword && editPasswordConfirm && editPassword !== editPasswordConfirm ? "border-red-600" : "border-neutral-800"}`}
                                     placeholder="Leave blank to keep"
                                   />
                                   <button
@@ -4087,7 +3399,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                                   </button>
                                   {editPasswordFocused && (
                                     <div className="absolute z-20 left-0 right-0 mt-1 bg-neutral-950 border border-neutral-800 rounded-xl p-3 shadow-2xl space-y-1.5 font-mono text-[9px] text-left">
-                                      <div className="text-[8px] uppercase text-neutral-500 font-bold mb-1">Password Requirements:</div>
+                                      <div className="text-[9px] uppercase text-neutral-500 font-bold mb-1">Password Requirements:</div>
                                       <div className="flex items-center gap-1.5">
                                         <span className={editPassword.length >= 8 ? "text-emerald-400 font-bold" : "text-neutral-600"}>
                                           {editPassword.length >= 8 ? "✓" : "○"}
@@ -4129,7 +3441,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                                     type={showEditConfirmPassword ? "text" : "password"}
                                     value={editPasswordConfirm}
                                     onChange={(e) => setEditPasswordConfirm(e.target.value)}
-                                    className={`w-full bg-neutral-950 border rounded-lg p-2 pl-2 pr-[60px] text-xs focus:border-[#2563eb] outline-none ${
+                                    className={`w-full bg-neutral-950 border rounded-lg p-2 pl-2 pr-[60px] text-xs focus:border-accent outline-none ${
                                       editPasswordConfirm && editPassword !== editPasswordConfirm
                                         ? "border-red-600 text-red-400"
                                         : editPasswordConfirm && editPassword === editPasswordConfirm && editPassword
@@ -4146,7 +3458,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                                     {showEditConfirmPassword ? <Eye size={12} /> : <EyeOff size={12} />}
                                   </button>
                                   {editPasswordConfirm && (
-                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] font-bold pointer-events-none">
+                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold pointer-events-none">
                                       {editPassword === editPasswordConfirm
                                         ? <span className="text-emerald-400">✓</span>
                                         : <span className="text-red-500">✗</span>
@@ -4155,7 +3467,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                                   )}
                                 </div>
                                 {editPasswordConfirm && editPassword !== editPasswordConfirm && (
-                                  <span className="text-[8px] text-red-500 mt-0.5 block">Passwords do not match</span>
+                                  <span className="text-[9px] text-red-500 mt-0.5 block">Passwords do not match</span>
                                 )}
                               </div>
                             </div>
@@ -4279,7 +3591,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                                     setEditPasswordConfirm("");
                                   }
                                 }}
-                                className="px-3 py-1.5 bg-[#2563eb] hover:bg-[#b5e000] text-black font-extrabold rounded-lg transition-all cursor-pointer text-[10px]"
+                                className="px-3 py-1.5 bg-accent hover:bg-[#b5e000] text-black font-extrabold rounded-lg transition-all cursor-pointer text-[10px]"
                               >
                                 Save Settings
                               </button>
@@ -4299,12 +3611,12 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                               <div className="flex items-center gap-2">
                                 <span className="font-bold text-white text-xs truncate max-w-[130px]">{user.displayName || user.name || "User"}</span>
                                 {isSelf && (
-                                  <span className="text-[7.5px] font-mono text-[#2563eb] px-1 bg-[#2563eb]/10 border border-[#2563eb]/25 rounded uppercase">
+                                  <span className="text-[9px] font-mono text-accent px-1 bg-accent/10 border border-accent/25 rounded uppercase">
                                     Self
                                   </span>
                                 )}
                               </div>
-                              <div className="text-[9.5px] text-neutral-500 font-mono flex flex-wrap gap-x-1.5 items-center">
+                              <div className="text-[9px] text-neutral-500 font-mono flex flex-wrap gap-x-1.5 items-center">
                                 {user.username && (
                                   <span className="text-neutral-400">@{user.username}</span>
                                 )}
@@ -4317,16 +3629,16 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                               </div>
                               <div className="flex items-center gap-1.5 mt-1">
                                 {user.role === "Admin" ? (
-                                  <span className="px-1 py-0.2 rounded border border-[#2563eb]/30 text-[#2563eb] bg-[#2563eb]/10 text-[8px] uppercase tracking-wider font-bold font-mono">
+                                  <span className="px-1 py-0.2 rounded border border-accent/30 text-accent bg-accent/10 text-[9px] uppercase tracking-wider font-bold font-mono">
                                     Admin
                                   </span>
                                 ) : (
-                                  <span className="px-1 py-0.2 rounded border border-neutral-800 text-neutral-400 bg-neutral-900/40 text-[8px] uppercase tracking-wider font-bold font-mono">
+                                  <span className="px-1 py-0.2 rounded border border-neutral-800 text-neutral-400 bg-neutral-900/40 text-[9px] uppercase tracking-wider font-bold font-mono">
                                     User
                                   </span>
                                 )}
                                 <div className="flex items-center gap-1">
-                                  <span className="text-[8px] text-neutral-600 font-mono">Accent:</span>
+                                  <span className="text-[9px] text-neutral-600 font-mono">Accent:</span>
                                   <span className="w-2.5 h-2.5 rounded-full border border-white/10" style={{ backgroundColor: user.preferredColor || "#2563eb" }}></span>
                                 </div>
                               </div>
@@ -4346,7 +3658,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                             <button
                               type="button"
                               onClick={() => startEditingUser(user)}
-                              className="p-1 px-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-750 text-[#2563eb] hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black cursor-pointer"
+                              className="p-1 px-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-750 text-accent hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black cursor-pointer"
                               title="Edit User Settings"
                             >
                               <Pencil size={10} />
@@ -4501,7 +3813,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
        {/* Toast Notification */}
        {toast && (
-         <div className={`fixed bottom-5 right-5 z-[100] px-4 py-3 rounded-xl border shadow-xl flex items-center gap-2.5 font-mono text-xs animate-fade-in ${
+         <div role="alert" aria-live="polite" className={`fixed bottom-5 right-5 z-[100] px-4 py-3 rounded-xl border shadow-xl flex items-center gap-2.5 font-mono text-xs animate-fade-in ${
            toast.type === 'success' 
              ? 'bg-neutral-900 border-emerald-900 text-emerald-400' 
              : 'bg-rose-950/80 border-rose-900 text-rose-300'

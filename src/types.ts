@@ -49,6 +49,7 @@ export interface GolfBall {
   name?: string;
   variation?: string;
   bundleItems?: BundleItem[];
+  catalogId?: string;
 }
 
 export interface CourseLog {
@@ -85,9 +86,9 @@ export interface CatalogItem {
 }
 
 export interface BallStock {
-  model: string | boolean;
+  model: string;
   name?: string;
-  color: string | boolean;
+  color: string;
   variation?: string; // Added variation to individual balls
   packageType: string;
   qty: number;

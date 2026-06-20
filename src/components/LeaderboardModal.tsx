@@ -73,7 +73,7 @@ export default function LeaderboardModal({ isOpen, onClose, currentUserUsername 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -116,7 +116,7 @@ export default function LeaderboardModal({ isOpen, onClose, currentUserUsername 
                 onClick={() => setActiveTab("total")}
                 className={`flex-1 flex justify-center items-center gap-2 py-3 text-xs font-mono uppercase tracking-wider rounded-xl transition-all cursor-pointer ${
                   activeTab === "total"
-                    ? "bg-neutral-950 text-[#2563eb] font-bold shadow-inner"
+                    ? "bg-neutral-950 text-accent font-bold shadow-inner"
                     : "text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800/50"
                 }`}
               >
@@ -147,7 +147,7 @@ export default function LeaderboardModal({ isOpen, onClose, currentUserUsername 
                         transition={{ delay: index * 0.05 }}
                         key={user.username}
                         className={`flex items-center gap-3 p-3 rounded-2xl border ${
-                          isCurrentUser ? "bg-neutral-900 border-[#2563eb]/50" : "bg-neutral-900/50 border-neutral-850"
+                          isCurrentUser ? "bg-neutral-900 border-accent/50" : "bg-neutral-900/50 border-neutral-850"
                         }`}
                       >
                         {/* Rank Badge */}
@@ -161,7 +161,7 @@ export default function LeaderboardModal({ isOpen, onClose, currentUserUsername 
                           <div className="truncate">
                             <div className="text-sm font-bold text-white truncate flex items-center gap-1.5">
                               {user.displayName}
-                              {isCurrentUser && <span className="text-[9px] bg-[#2563eb]/20 text-[#2563eb] px-1.5 py-0.5 rounded font-mono uppercase tracking-wider">You</span>}
+                              {isCurrentUser && <span className="text-[9px] bg-accent/20 text-accent px-1.5 py-0.5 rounded font-mono uppercase tracking-wider">You</span>}
                             </div>
                             <div className="text-[10px] text-neutral-500 font-mono truncate">@{user.username}</div>
                           </div>
@@ -169,7 +169,7 @@ export default function LeaderboardModal({ isOpen, onClose, currentUserUsername 
 
                         {/* Score */}
                         <div className="shrink-0 text-right">
-                          <div className={`text-lg font-black tracking-tighter ${activeTab === "unique" ? "text-[#d4af37]" : "text-[#2563eb]"}`}>
+                          <div className={`text-lg font-black tracking-tighter ${activeTab === "unique" ? "text-[#d4af37]" : "text-accent"}`}>
                             {activeTab === "unique" ? user.totalUniqueBalls : user.totalBalls}
                           </div>
                           <div className="text-[9px] uppercase font-mono text-neutral-500 tracking-wider">

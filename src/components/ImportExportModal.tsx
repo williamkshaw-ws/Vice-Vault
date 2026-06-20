@@ -53,7 +53,7 @@ export default function ImportExportModal({ isOpen, onClose, onExport, onImport,
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <motion.div 
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -65,7 +65,7 @@ export default function ImportExportModal({ isOpen, onClose, onExport, onImport,
               onClick={onClose}
               className="absolute top-4 right-4 text-neutral-500 hover:text-white transition-colors"
             >
-          <X size={20} weight="bold" />
+          <X size={20} strokeWidth={2.5} />
         </button>
 
         <h2 className="text-xl font-sans font-black uppercase tracking-wider text-white mb-2">Data Management</h2>
@@ -83,7 +83,7 @@ export default function ImportExportModal({ isOpen, onClose, onExport, onImport,
               <div className="text-xs text-neutral-500 mt-1">Download an Excel (.xlsx) file of your current bag.</div>
             </div>
             <div className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-black transition-colors shrink-0">
-              <Download size={20} weight="bold" />
+              <Download size={20} strokeWidth={2.5} />
             </div>
           </button>
 
@@ -97,7 +97,7 @@ export default function ImportExportModal({ isOpen, onClose, onExport, onImport,
               <div className="text-xs text-neutral-500 mt-1">Select a previously exported .xlsx backup.</div>
             </div>
             <div className="w-10 h-10 rounded-full bg-pink-500/10 text-pink-500 flex items-center justify-center group-hover:bg-pink-500 group-hover:text-black transition-colors shrink-0">
-              <Upload size={20} weight="bold" />
+              <Upload size={20} strokeWidth={2.5} />
             </div>
           </button>
           
@@ -130,7 +130,7 @@ export default function ImportExportModal({ isOpen, onClose, onExport, onImport,
               <div className="text-xs text-rose-500/60 mt-1">Permanently wipe all your inventory.</div>
             </div>
             <div className="w-10 h-10 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center group-hover:bg-rose-500 group-hover:text-black transition-colors shrink-0">
-              <Trash2 size={20} weight="bold" />
+              <Trash2 size={20} strokeWidth={2.5} />
             </div>
           </button>
         </div>

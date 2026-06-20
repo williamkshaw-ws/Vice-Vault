@@ -57,7 +57,7 @@ export default function TrophyCase({ uniqueBalls, username = "My" }: TrophyCaseP
           disabled={isSaving || uniqueBalls.length === 0}
           className="bg-neutral-900 hover:bg-neutral-800 text-white px-4 py-2 rounded-lg border border-neutral-800 transition-colors disabled:opacity-50 flex items-center gap-2 shadow-lg"
         >
-          {isSaving ? <Loader2 className="w-4 h-4 animate-spin text-[#2563eb]" /> : <Camera className="w-4 h-4 text-[#2563eb]" />}
+          {isSaving ? <Loader2 className="w-4 h-4 animate-spin text-accent" /> : <Camera className="w-4 h-4 text-accent" />}
           <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline">Save Poster</span>
         </button>
       </div>

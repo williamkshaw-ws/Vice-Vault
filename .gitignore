@@ -15,3 +15,12 @@ Vice_Golf_Ball_Catalog/
 backups/
 backup-*.zip
 Vice-Vault-Backup-*.zip
+
+# Data files
+data/catalog.json
+data/preserved_images.json
+scratch/
+*.py
+*.js
+*.cjs
+*.mjs

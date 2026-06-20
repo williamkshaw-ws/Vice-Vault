@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor, Copy, Eye, EyeOff, AlertTriangle } from "lucide-react";
+import { ACCENT_COLORS, isStrongPassword } from "../utils";
 import {
   auth,
   db,
@@ -29,27 +30,6 @@ interface AuthModalProps {
   theme?: 'light' | 'dark' | 'system';
   onThemeChange?: (theme: 'light' | 'dark' | 'system') => void;
   hasBagItems?: boolean;
-}
-
-export const ACCENT_COLORS = [
-  { name: "Royal Blue", value: "#2563eb" },
-  { name: "Neon Red", value: "#ff3366" },
-  { name: "Gold", value: "#d4af37" },
-  { name: "Cyan Blue", value: "#00e5ff" },
-  { name: "Royal Purple", value: "#9d4edf" },
-  { name: "Masters Green", value: "#17b056" },
-  { name: "Volt Orange", value: "#ff6b00" },
-  { name: "Hot Pink", value: "#ff33cc" },
-  { name: "Electric Teal", value: "#00f5d4" }
-];
-
-function isStrongPassword(pass: string): boolean {
-  if (pass.length < 8) return false;
-  const hasUpper = /[A-Z]/.test(pass);
-  const hasLower = /[a-z]/.test(pass);
-  const hasNumber = /[0-9]/.test(pass);
-  const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
-  return hasUpper && hasLower && hasNumber && hasSpecial;
 }
 
 export function AvatarRenderer({ 
@@ -277,7 +257,7 @@ export default function AuthModal({
         setOptInLeaderboard(false);
       }
     }
-  }, [isOpen]);
+  }, [isOpen, currentUser, userProfile]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -558,7 +538,7 @@ export default function AuthModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
           {/* Modal Container */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -572,7 +552,7 @@ export default function AuthModal({
             <div className="flex justify-between items-center p-5 border-b border-neutral-850">
           <div>
             <h2 className="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#2563eb] animate-pulse"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse"></span>
               {tab === "signin" && "Golf Ball Vault Login"}
               {tab === "signup" && "Create Vault Account"}
               {tab === "settings" && "Profile Settings"}
@@ -597,7 +577,7 @@ export default function AuthModal({
               onClick={() => setTab("signin")}
               className={`flex-1 py-2 text-xs font-mono uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
                 tab === "signin" 
-                  ? "bg-neutral-900 text-[#2563eb] font-bold" 
+                  ? "bg-neutral-900 text-accent font-bold" 
                   : "text-neutral-400 hover:text-neutral-200"
               }`}
             >
@@ -607,7 +587,7 @@ export default function AuthModal({
               onClick={() => setTab("signup")}
               className={`flex-1 py-2 text-xs font-mono uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
                 tab === "signup" 
-                  ? "bg-neutral-900 text-[#2563eb] font-bold" 
+                  ? "bg-neutral-900 text-accent font-bold" 
                   : "text-neutral-400 hover:text-neutral-200"
               }`}
             >
@@ -645,7 +625,7 @@ export default function AuthModal({
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white placeholder-neutral-550 focus:outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] transition-all font-mono"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white placeholder-neutral-550 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all font-mono"
                     placeholder="name@domain.com or username"
                   />
                 </div>
@@ -660,7 +640,7 @@ export default function AuthModal({
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2.5 pl-10 pr-10 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] transition-all font-mono"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2.5 pl-10 pr-10 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all font-mono"
                     placeholder="••••••••"
                   />
                   <button
@@ -676,7 +656,7 @@ export default function AuthModal({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 bg-[#2563eb] text-white font-extrabold rounded-xl text-xs uppercase tracking-wider hover:bg-[#3b82f6] active:scale-98 transition-all cursor-pointer flex justify-center items-center gap-2 mt-6 shadow-lg shadow-[#2563eb]/10"
+                className="w-full py-3 bg-accent text-white font-extrabold rounded-xl text-xs uppercase tracking-wider hover:bg-[#3b82f6] active:scale-98 transition-all cursor-pointer flex justify-center items-center gap-2 mt-6 shadow-lg shadow-accent/10"
               >
                 {isLoading ? (
                   <>
@@ -689,7 +669,7 @@ export default function AuthModal({
               </button>
 
               <p className="text-[10px] text-neutral-500 text-center mt-4 font-mono">
-                No account? <button type="button" onClick={() => setTab("signup")} className="text-[#2563eb] underline hover:text-white cursor-pointer bg-transparent border-0 p-0">Create one now</button>
+                No account? <button type="button" onClick={() => setTab("signup")} className="text-accent underline hover:text-white cursor-pointer bg-transparent border-0 p-0">Create one now</button>
               </p>
             </form>
           )}
@@ -705,7 +685,7 @@ export default function AuthModal({
                   <span className="text-neutral-550 text-[10px] font-mono block truncate">
                     @{username ? username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "") : "username"}
                   </span>
-                  <span className="text-[9px] text-[#2563eb] uppercase font-mono tracking-wider mt-0.5 block">Live Preview</span>
+                  <span className="text-[9px] text-accent uppercase font-mono tracking-wider mt-0.5 block">Live Preview</span>
                 </div>
               </div>
 
@@ -719,7 +699,7 @@ export default function AuthModal({
                       required
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
-                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#2563eb] transition-all font-mono"
+                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
                       placeholder="John Doe"
                     />
                   </div>
@@ -734,7 +714,7 @@ export default function AuthModal({
                       required
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-8 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#2563eb] transition-all font-mono"
+                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-8 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
                       placeholder="johndoe"
                     />
                   </div>
@@ -750,7 +730,7 @@ export default function AuthModal({
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#2563eb] transition-all font-mono"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
                     placeholder="name@domain.com"
                   />
                 </div>
@@ -767,7 +747,7 @@ export default function AuthModal({
                     onChange={(e) => setPassword(e.target.value)}
                     onFocus={() => setPasswordFocused(true)}
                     onBlur={() => setTimeout(() => setPasswordFocused(false), 200)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-9 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#2563eb] transition-all font-mono"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-9 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
                     placeholder="Enter password"
                   />
                   <button
@@ -824,7 +804,7 @@ export default function AuthModal({
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-9 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#2563eb] transition-all font-mono"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-9 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
                     placeholder="Verify password"
                   />
                   <button
@@ -920,7 +900,7 @@ export default function AuthModal({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 bg-[#2563eb] text-white font-extrabold rounded-xl text-xs uppercase tracking-wider hover:bg-[#3b82f6] active:scale-98 transition-all cursor-pointer flex justify-center items-center gap-2 mt-6 shadow-lg shadow-[#2563eb]/10"
+                className="w-full py-3 bg-accent text-white font-extrabold rounded-xl text-xs uppercase tracking-wider hover:bg-[#3b82f6] active:scale-98 transition-all cursor-pointer flex justify-center items-center gap-2 mt-6 shadow-lg shadow-accent/10"
               >
                 {isLoading ? (
                   <>
@@ -933,7 +913,7 @@ export default function AuthModal({
               </button>
 
               <p className="text-[10px] text-neutral-500 text-center mt-4 font-mono">
-                Already registered? <button type="button" onClick={() => setTab("signin")} className="text-[#2563eb] underline hover:text-white cursor-pointer bg-transparent border-0 p-0">Access your vault account</button>
+                Already registered? <button type="button" onClick={() => setTab("signin")} className="text-accent underline hover:text-white cursor-pointer bg-transparent border-0 p-0">Access your vault account</button>
               </p>
             </form>
           )}
@@ -949,7 +929,7 @@ export default function AuthModal({
                   <span className="text-neutral-550 text-[10px] font-mono block truncate">
                     @{username ? username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "") : "username"}
                   </span>
-                  <span className="text-[9px] text-[#2563eb] uppercase font-mono tracking-wider mt-0.5 block">Live Preview</span>
+                  <span className="text-[9px] text-accent uppercase font-mono tracking-wider mt-0.5 block">Live Preview</span>
                 </div>
               </div>
 
@@ -963,7 +943,7 @@ export default function AuthModal({
                       required
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
-                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#2563eb] transition-all font-mono"
+                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
                       placeholder="John Doe"
                     />
                   </div>
@@ -978,7 +958,7 @@ export default function AuthModal({
                       required
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-8 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#2563eb] transition-all font-mono"
+                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-8 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
                       placeholder="johndoe"
                     />
                   </div>
@@ -1008,7 +988,7 @@ export default function AuthModal({
                     onChange={(e) => setNewPassword(e.target.value)}
                     onFocus={() => setNewPasswordFocused(true)}
                     onBlur={() => setTimeout(() => setNewPasswordFocused(false), 200)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-9 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-[#2563eb] transition-all font-mono"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-9 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
                     placeholder="Enter new password"
                   />
                   <button
@@ -1065,7 +1045,7 @@ export default function AuthModal({
                     type={showConfirmPassword ? "text" : "password"}
                     value={newPasswordConfirm}
                     onChange={(e) => setNewPasswordConfirm(e.target.value)}
-                    className={`w-full bg-neutral-950 border rounded-xl py-2 pl-9 pr-[60px] text-xs focus:outline-none focus:border-[#2563eb] transition-all font-mono ${
+                    className={`w-full bg-neutral-950 border rounded-xl py-2 pl-9 pr-[60px] text-xs focus:outline-none focus:border-accent transition-all font-mono ${
                       newPasswordConfirm && newPassword && newPassword !== newPasswordConfirm
                         ? "border-red-600 text-red-400"
                         : newPasswordConfirm && newPassword && newPassword === newPasswordConfirm
@@ -1082,7 +1062,7 @@ export default function AuthModal({
                     {showConfirmPassword ? <Eye size={12} /> : <EyeOff size={12} />}
                   </button>
                   {newPasswordConfirm && newPassword && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-bold">
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold">
                       {newPassword === newPasswordConfirm
                         ? <span className="text-emerald-400">✓</span>
                         : <span className="text-red-500">✗</span>
@@ -1139,7 +1119,7 @@ export default function AuthModal({
                       onChange={(e) => setShareBag(e.target.checked)} 
                       className="sr-only peer"
                     />
-                    <div className="w-9 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-neutral-400 peer-checked:after:bg-black after:border-neutral-800 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-neutral-600 peer-checked:bg-[#2563eb]"></div>
+                    <div className="w-9 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-neutral-400 peer-checked:after:bg-black after:border-neutral-800 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-neutral-600 peer-checked:bg-accent"></div>
                   </label>
                 </div>
 
@@ -1147,8 +1127,8 @@ export default function AuthModal({
                   <div className="space-y-2 pt-1 border-t border-neutral-900/60">
                     <span className="text-[10px] text-neutral-400 uppercase tracking-wider block">Your Public Share Link</span>
                     <div className="flex gap-2">
-                      <div className="flex-1 bg-neutral-950 border border-neutral-850 rounded-lg p-2 text-[10.5px] text-neutral-300 truncate select-all flex items-center gap-1.5 font-mono">
-                        <LinkIcon size={12} className="text-[#2563eb] shrink-0" />
+                      <div className="flex-1 bg-neutral-950 border border-neutral-850 rounded-lg p-2 text-[10px] text-neutral-300 truncate select-all flex items-center gap-1.5 font-mono">
+                        <LinkIcon size={12} className="text-accent shrink-0" />
                         <span>{window.location.origin}/?share={userProfile?.shareToken || currentUser?.shareToken || ""}</span>
                       </div>
                       <button
@@ -1166,7 +1146,7 @@ export default function AuthModal({
                         className={`p-2 border rounded-lg transition-all cursor-pointer flex items-center justify-center shrink-0 ${
                           copied
                             ? "bg-emerald-950/30 border-emerald-900/50 text-emerald-400"
-                            : "bg-neutral-900 hover:bg-[#2563eb] hover:text-black border-neutral-850 hover:border-transparent text-neutral-400"
+                            : "bg-neutral-900 hover:bg-accent hover:text-black border-neutral-850 hover:border-transparent text-neutral-400"
                         }`}
                         title={copied ? "Copied!" : "Copy Share Link"}
                       >
@@ -1197,7 +1177,7 @@ export default function AuthModal({
                       onChange={(e) => setOptInLeaderboard(e.target.checked)} 
                       className="sr-only peer"
                     />
-                    <div className="w-9 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-neutral-400 peer-checked:after:bg-black after:border-neutral-800 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-neutral-600 peer-checked:bg-[#2563eb]"></div>
+                    <div className="w-9 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-neutral-400 peer-checked:after:bg-black after:border-neutral-800 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-neutral-600 peer-checked:bg-accent"></div>
                   </label>
                 </div>
               </div>
@@ -1258,7 +1238,7 @@ export default function AuthModal({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 bg-[#2563eb] text-white font-extrabold rounded-xl text-xs uppercase tracking-wider hover:bg-[#3b82f6] active:scale-98 transition-all cursor-pointer flex justify-center items-center gap-2 mt-6 shadow-lg shadow-[#2563eb]/10"
+                className="w-full py-3 bg-accent text-white font-extrabold rounded-xl text-xs uppercase tracking-wider hover:bg-[#3b82f6] active:scale-98 transition-all cursor-pointer flex justify-center items-center gap-2 mt-6 shadow-lg shadow-accent/10"
               >
                 {isLoading ? (
                   <>

@@ -171,14 +171,13 @@
   },
   {
     "id": "PRO-ADIDAS_TREFOIL_STAN_SMITH-GREEN",
-    "model": "PRO",
-    "name": "Adidas Trefoil/Stan Smith",
     "color": "Green",
-    "year": "2022",
-    "groupColor": false,
     "groupVariation": false,
-    "customImage": "https://i.ibb.co/xKL4gzhq/Screenshot-2026-06-18-at-2-28-Background-Removed-15-PM.png",
-    "bundleItems": []
+    "name": "Adidas Trefoil/Stan Smith",
+    "model": "PRO",
+    "groupColor": false,
+    "bundleItems": [],
+    "customImage": "https://i.ibb.co/xKL4gzhq/Screenshot-2026-06-18-at-2-28-Background-Removed-15-PM.png"
   },
   {
     "id": "PRO-ADIDAS_TREFOIL_STAN_SMITH-RED",
@@ -1442,16 +1441,15 @@
   },
   {
     "id": "PRO_PLUS-LEGEND_LEGACY-WHITE-LEGEND",
-    "model": "PRO PLUS",
-    "name": "Legend & Legacy",
-    "color": "White",
-    "variation": "Legend",
-    "notes": "Legend",
-    "year": "2022",
     "groupColor": false,
+    "color": "White",
+    "name": "Legend & Legacy",
+    "model": "PRO PLUS",
+    "variation": "Legend",
     "groupVariation": true,
-    "customImage": "https://i.ibb.co/zTv57W1Y/1f041150c58a.png",
-    "bundleItems": []
+    "bundleItems": [],
+    "notes": "Legend",
+    "customImage": "https://i.ibb.co/zTv57W1Y/1f041150c58a.png"
   },
   {
     "id": "PRO_PLUS-LETTERS_TO_TROON-WHITE-FOX",

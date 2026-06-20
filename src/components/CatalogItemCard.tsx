@@ -29,7 +29,8 @@ interface CatalogItemCardProps {
     customImageBox?: string,
     name?: string,
     variation?: string,
-    bundleItems?: { catalogId: string; qty: number }[]
+    bundleItems?: { catalogId: string; qty: number }[],
+    catalogId?: string
   ) => void;
   wishlistItems?: string[];
   wishlistDates?: Record<string, string>;
@@ -214,7 +215,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
       transition={{ duration: 0.3, delay: index * 0.04, ease: [0.23, 1, 0.32, 1] }}
       className={`relative rounded-xl border p-4 transition-all duration-300 ${
         isOpen 
-          ? "bg-neutral-900 border-[#2563eb]/50 shadow-md shadow-[#2563eb]/10" 
+          ? "bg-neutral-900 border-accent/50 shadow-md shadow-accent/10" 
           : "bg-neutral-900/60 hover:bg-neutral-900 border-neutral-800 hover:border-neutral-700 hover:shadow-sm"
       } ${showWishlistPrompt ? "z-[60]" : ""}`}
       id={`catalog-item-card-${item.id}`}
@@ -242,10 +243,10 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
                 {variant === "wishlist" ? (
                   <>
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-[9px] font-mono tracking-widest text-[#2563eb] uppercase font-black">
+                      <span className="text-[9px] font-mono tracking-widest text-accent uppercase font-black">
                         {activeItem.model}
                       </span>
-                      <span className={`text-[8px] px-1 py-0.2 rounded font-mono font-bold uppercase border tracking-wider scale-95 ${
+                      <span className={`text-[9px] px-1 py-0.2 rounded font-mono font-bold uppercase border tracking-wider scale-95 ${
                         isBundle
                           ? "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/60 text-amber-700 dark:text-amber-400"
                           : pkgType === 'box'
@@ -276,7 +277,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
 
                 {variant !== "wishlist" && (
                   <>
-                    <p className="text-xs text-[#2563eb] font-mono font-medium truncate mt-0.5">
+                    <p className="text-xs text-accent font-mono font-medium truncate mt-0.5">
                       {item.groupColor && (!isOpen || pkgType === 'box') ? "Mixed" : activeItem.color}
                     </p>
                     {!(item.groupVariation && subItems.length > 1) && (activeItem.variation || activeItem.notes) && (
@@ -413,7 +414,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
                     <button
                       type="button"
                       onClick={startAdding}
-                      className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-[#2563eb] hover:bg-[#2563eb]/80 text-black transition-colors cursor-pointer"
+                      className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-accent hover:bg-accent/80 text-black transition-colors cursor-pointer"
                       id={`btn-open-add-${item.id}`}
                       title="Add to Bag"
                     >
@@ -441,7 +442,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
       {/* Expandable Add Container */}
       {isOpen && (
         <form onSubmit={handleAddSubmit} className="mt-4 pt-4 border-t border-neutral-800 space-y-4">
-          <div className="text-xs font-bold text-[#2563eb] uppercase tracking-widest flex items-center justify-between">
+          <div className="text-xs font-bold text-accent uppercase tracking-widest flex items-center justify-between">
             <span>Add to My Bag</span>
           </div>
 
@@ -461,11 +462,11 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
                       setPlayNumber(num);
                       setCustomNumberInput("");
                     }}
-                    className={`flex-1 text-center py-1 rounded text-[11px] font-mono font-bold border transition-all cursor-pointer ${
+                    className={`flex-1 text-center py-1 rounded text-xs font-mono font-bold border transition-all cursor-pointer ${
                       pkgType === 'box'
                         ? "bg-neutral-950 text-neutral-600 border-neutral-900 cursor-not-allowed opacity-50"
                         : playNumber === num && customNumberInput === ""
-                        ? "bg-[#2563eb] border-[#2563eb] text-black"
+                        ? "bg-accent border-accent text-black"
                         : "bg-neutral-950 border-neutral-850 text-neutral-300 hover:border-neutral-700"
                     }`}
                   >
@@ -493,7 +494,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
                     pkgType === 'box'
                       ? "border-neutral-900 bg-neutral-950 text-neutral-600 cursor-not-allowed opacity-55"
                       : customNumberInput !== ""
-                      ? "bg-[#2563eb] text-black border-[#2563eb] font-bold"
+                      ? "bg-accent text-black border-accent font-bold"
                       : "bg-neutral-950 border-neutral-850 text-neutral-400"
                   }`}
                   title={pkgType === 'box' ? "Not customizable for boxes" : "Enter any 2-digit number"}
@@ -622,7 +623,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
                         }}
                         className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
                           pkgType === 'ea'
-                            ? "bg-[#2563eb] border-[#2563eb] text-neutral-950 font-bold"
+                            ? "bg-accent border-accent text-neutral-950 font-bold"
                             : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
                         }`}
                       >
@@ -636,7 +637,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
                         }}
                         className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
                           pkgType === 'sleeve'
-                            ? "bg-[#2563eb] border-[#2563eb] text-neutral-950 font-bold"
+                            ? "bg-accent border-accent text-neutral-950 font-bold"
                             : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
                         }`}
                       >
@@ -652,7 +653,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
                     }}
                     className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
                       pkgType === 'box'
-                        ? "bg-[#2563eb] border-[#2563eb] text-neutral-950 font-bold"
+                        ? "bg-accent border-accent text-neutral-950 font-bold"
                         : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
                     }`}
                   >
@@ -684,7 +685,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
             className={`w-full py-2.5 rounded-lg font-bold text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
               justAdded
                 ? "bg-emerald-500 text-neutral-950 shadow-md shadow-emerald-950/20"
-                : "bg-[#2563eb] hover:bg-[#2563eb]/80 text-black active:scale-[0.99] shadow-sm cursor-pointer"
+                : "bg-accent hover:bg-accent/80 text-black active:scale-[0.99] shadow-sm cursor-pointer"
             }`}
           >
             {justAdded ? (

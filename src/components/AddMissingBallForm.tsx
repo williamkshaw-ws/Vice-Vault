@@ -171,7 +171,6 @@ export default function AddMissingBallForm({
         setColor("");
         setVariation("");
         setYear("");
-      setYear("");
         setGroupColor(false);
         setGroupVariation(false);
         setCustomImage(undefined);
@@ -196,8 +195,8 @@ export default function AddMissingBallForm({
 
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-[#2563eb]" />
-          <h3 className="font-sans font-black text-white text-base uppercase tracking-wider text-[#2563eb] font-extrabold">
+          <Sparkles className="w-5 h-5 text-accent" />
+          <h3 className="font-sans font-black text-white text-base uppercase tracking-wider text-accent font-extrabold">
             {editItem ? "Edit Existing Design" : "Add Ball to Vault"}
           </h3>
         </div>
@@ -210,8 +209,8 @@ export default function AddMissingBallForm({
       </p>
 
       {success ? (
-        <div className="py-12 flex flex-col items-center justify-center text-center space-y-3 bg-neutral-950/40 rounded-xl border border-[#2563eb]/30">
-          <CheckCircle2 className="w-12 h-12 text-[#2563eb] animate-bounce" />
+        <div className="py-12 flex flex-col items-center justify-center text-center space-y-3 bg-neutral-950/40 rounded-xl border border-accent/30">
+          <CheckCircle2 className="w-12 h-12 text-accent animate-bounce" />
           <h4 className="text-white font-bold text-sm uppercase tracking-wider">
             {editItem ? "Updated Successfully!" : "Added to Ball Vault!"}
           </h4>
@@ -229,7 +228,7 @@ export default function AddMissingBallForm({
              {/* Model Name */}
              <div>
                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold whitespace-nowrap">
-                 Model (Pro, Tour, Soft) <span className="text-[#2563eb]">*</span>
+                 Model (Pro, Tour, Soft) <span className="text-accent">*</span>
                </label>
                <input
                  type="text"
@@ -238,7 +237,7 @@ export default function AddMissingBallForm({
                  placeholder="e.g. PRO, TOUR, PRO SOFT"
                  value={model}
                  onChange={(e) => setModel(e.target.value)}
-                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
+                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-accent/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
                  id="missing-model-input"
                />
              </div>
@@ -247,7 +246,7 @@ export default function AddMissingBallForm({
              {/* Name */}
              <div>
                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold whitespace-nowrap">
-                 Name (Beastin', Nicklaus) <span className="text-[#2563eb]">*</span>
+                 Name (Beastin', Nicklaus) <span className="text-accent">*</span>
                </label>
                <input
                  type="text"
@@ -256,7 +255,7 @@ export default function AddMissingBallForm({
                  placeholder="e.g. Beastin', Nicklaus, Standard"
                  value={name}
                  onChange={(e) => setName(e.target.value)}
-                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
+                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-accent/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
                  id="missing-name-input"
                />
              </div>
@@ -267,7 +266,7 @@ export default function AddMissingBallForm({
              {/* Color */}
              <div>
                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold whitespace-nowrap">
-                 Color <span className="text-[#2563eb]">*</span>
+                 Color <span className="text-accent">*</span>
                </label>
                <input
                  type="text"
@@ -276,7 +275,7 @@ export default function AddMissingBallForm({
                  placeholder="e.g. Red, Drip"
                  value={color}
                  onChange={(e) => setColor(e.target.value)}
-                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
+                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-accent/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
                  id="missing-color-input"
                />
              </div>
@@ -290,7 +289,7 @@ export default function AddMissingBallForm({
                  type="checkbox"
                  checked={groupColor}
                  onChange={() => {}} // handled by parent div onClick
-                 className="w-3.5 h-3.5 rounded text-[#2563eb] bg-neutral-900 border-neutral-850 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                 className="w-3.5 h-3.5 rounded text-accent bg-neutral-900 border-neutral-850 focus:ring-0 focus:ring-offset-0 cursor-pointer"
                />
                <span className="text-[9px] uppercase font-mono tracking-wider text-neutral-300 font-bold whitespace-nowrap">
                  Group By Color
@@ -308,7 +307,7 @@ export default function AddMissingBallForm({
                  placeholder="e.g. matte finish"
                  value={variation}
                  onChange={(e) => setVariation(e.target.value)}
-                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
+                 className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-accent/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all"
                  id="missing-variation-input"
                />
              </div>
@@ -322,7 +321,7 @@ export default function AddMissingBallForm({
                  type="checkbox"
                  checked={groupVariation}
                  onChange={() => {}} // handled by parent div onClick
-                 className="w-3.5 h-3.5 rounded text-[#2563eb] bg-neutral-900 border-neutral-850 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                 className="w-3.5 h-3.5 rounded text-accent bg-neutral-900 border-neutral-850 focus:ring-0 focus:ring-offset-0 cursor-pointer"
                />
                <span className="text-[9px] uppercase font-mono tracking-wider text-neutral-300 font-bold whitespace-nowrap">
                  Group By Var.
@@ -336,7 +335,7 @@ export default function AddMissingBallForm({
                <select
                  value={year}
                  onChange={(e) => setYear(e.target.value)}
-                 className="w-full h-[34px] bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-[#2563eb]/50 rounded-lg py-1 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all cursor-pointer appearance-none"
+                 className="w-full h-[34px] bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 focus:border-accent/50 rounded-lg py-1 px-3 text-xs text-white placeholder-neutral-600 outline-none transition-all cursor-pointer appearance-none"
                  style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2371717a%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem top 50%', backgroundSize: '0.65rem auto' }}
                >
                  <option value="">Unknown</option>
@@ -353,9 +352,9 @@ export default function AddMissingBallForm({
                type="checkbox"
                checked={isBundle}
                onChange={() => {}}
-               className="w-4 h-4 rounded text-[#2563eb] bg-neutral-900 border-neutral-850 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+               className="w-4 h-4 rounded text-accent bg-neutral-900 border-neutral-850 focus:ring-0 focus:ring-offset-0 cursor-pointer"
              />
-             <span className="text-[11px] uppercase font-mono tracking-wider text-[#2563eb] font-black whitespace-nowrap flex items-center gap-1.5">
+             <span className="text-xs uppercase font-mono tracking-wider text-accent font-black whitespace-nowrap flex items-center gap-1.5">
                <Box className="w-3.5 h-3.5" /> Is Bundle / Variety Pack?
              </span>
            </div>
@@ -374,7 +373,7 @@ export default function AddMissingBallForm({
                          <select 
                            value={bundleModelFilter}
                            onChange={e => setBundleModelFilter(e.target.value)}
-                           className="w-1/3 bg-neutral-900 border border-neutral-700 text-neutral-300 rounded-md px-2 py-1.5 text-xs focus:border-[#2563eb] outline-none"
+                           className="w-1/3 bg-neutral-900 border border-neutral-700 text-neutral-300 rounded-md px-2 py-1.5 text-xs focus:border-accent outline-none"
                          >
                            <option value="All Models">All Models</option>
                            {availableModels.map(m => (
@@ -386,7 +385,7 @@ export default function AddMissingBallForm({
                            placeholder="Search by keyword..." 
                            value={bundleSearch}
                            onChange={e => setBundleSearch(e.target.value)}
-                           className="w-2/3 bg-neutral-900 border border-neutral-700 text-neutral-300 rounded-md px-2 py-1.5 text-xs focus:border-[#2563eb] outline-none"
+                           className="w-2/3 bg-neutral-900 border border-neutral-700 text-neutral-300 rounded-md px-2 py-1.5 text-xs focus:border-accent outline-none"
                          />
                        </div>
                        <select 
@@ -417,7 +416,7 @@ export default function AddMissingBallForm({
                     type="button"
                     onClick={addBundleItem}
                     disabled={!selectedBundleItem}
-                    className="bg-[#2563eb] text-white p-1.5 rounded-lg disabled:opacity-50"
+                    className="bg-accent text-white p-1.5 rounded-lg disabled:opacity-50"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -430,7 +429,7 @@ export default function AddMissingBallForm({
                       const catalogItem = catalog.find(c => c.id === item.catalogId);
                       return (
                         <div key={item.catalogId} className="flex items-center justify-between bg-neutral-900 p-2 rounded-lg border border-neutral-800">
-                          <div className="text-[11px] text-white flex-1 overflow-hidden text-ellipsis whitespace-nowrap pr-2">
+                          <div className="text-xs text-white flex-1 overflow-hidden text-ellipsis whitespace-nowrap pr-2">
                             <span className="font-bold text-neutral-500 mr-2">{item.qty}x</span>
                             {catalogItem ? `${catalogItem.model} ${catalogItem.name ? `"${catalogItem.name}"` : ""} - ${catalogItem.color}` : item.catalogId}
                           </div>
@@ -596,9 +595,10 @@ export default function AddMissingBallForm({
                   setName("");
                   setColor("");
                   setVariation("");
-        setYear("");
-      setYear("");
+                  setYear("");
                   setCustomImage(null);
+                  setCustomImageSleeve(null);
+                  setCustomImageBox(null);
                   setIsBundle(false);
                   setBundleItems([]);
                 }
@@ -609,7 +609,7 @@ export default function AddMissingBallForm({
             </button>
             <button
               type="submit"
-              className="px-3 py-1.5 bg-[#2563eb] hover:bg-[#3b82f6] text-black font-extrabold rounded-lg transition-all cursor-pointer text-[10px]"
+              className="px-3 py-1.5 bg-accent hover:bg-[#3b82f6] text-black font-extrabold rounded-lg transition-all cursor-pointer text-[10px]"
             >
               <span>{editItem ? "Save Changes" : "Save Ball"}</span>
             </button>

@@ -36,7 +36,7 @@ export default function ChartsPanel({ balls }: ChartsPanelProps) {
     // Assign custom color accent for theme bars
     let themeColor = "bg-neutral-600";
     if (model === BallModel.PRO_PLUS) themeColor = "bg-rose-500 shadow-sm";
-    else if (model === BallModel.PRO) themeColor = "bg-[#2563eb] text-white shadow-sm";
+    else if (model === BallModel.PRO) themeColor = "bg-accent text-white shadow-sm";
     else if (model === BallModel.PRO_SOFT) themeColor = "bg-[#ffd700] text-neutral-900";
     else if (model === BallModel.TOUR) themeColor = "bg-sky-400";
     else if (model === BallModel.DRIVE) themeColor = "bg-slate-400";
@@ -118,7 +118,7 @@ export default function ChartsPanel({ balls }: ChartsPanelProps) {
       {/* Colors Breakdown */}
       <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 shadow-lg">
         <h3 className="font-sans font-bold text-sm text-neutral-300 tracking-wider uppercase mb-4 flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-lime-400" />
+          <span className="w-2.5 h-2.5 rounded-full bg-primary-400" />
           Colors Breakdown
         </h3>
 
@@ -205,9 +205,9 @@ export default function ChartsPanel({ balls }: ChartsPanelProps) {
               const circumference = 2 * Math.PI * radius;
               const strokeDashoffset = circumference - (item.percentage / 100) * circumference;
 
-              let ringColor = "text-lime-600 dark:text-lime-400";
+              let ringColor = "text-primary-600 dark:text-primary-400";
               let labelStyle = "text-white";
-              if (item.condition === BallCondition.NEW) ringColor = "text-lime-600 dark:text-lime-400";
+              if (item.condition === BallCondition.NEW) ringColor = "text-primary-600 dark:text-primary-400";
               if (item.condition === BallCondition.MINT) ringColor = "text-sky-600 dark:text-sky-400";
               if (item.condition === BallCondition.PLAYED) ringColor = "text-amber-600 dark:text-amber-400";
               if (item.condition === BallCondition.SHAG) ringColor = "text-rose-600 dark:text-rose-500";
@@ -243,7 +243,7 @@ export default function ChartsPanel({ balls }: ChartsPanelProps) {
                         fill="transparent"
                       />
                     </svg>
-                    <span className="absolute text-[11px] font-bold font-mono text-white">
+                    <span className="absolute text-xs font-bold font-mono text-white">
                       {Math.round(item.percentage)}%
                     </span>
                   </div>

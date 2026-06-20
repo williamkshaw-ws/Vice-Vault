@@ -61,7 +61,7 @@ export default function ActivityLogView({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h3 className="font-sans font-black tracking-tight text-lg text-white flex items-center gap-2">
-            <Compass className="text-lime-400" size={20} />
+            <Compass className="text-primary-400" size={20} />
             COURSE LOGGER & BALL JOURNAL
           </h3>
           <p className="text-xs text-neutral-400">
@@ -79,7 +79,7 @@ export default function ActivityLogView({
                 setLogType("found");
               }
             }}
-            className="bg-lime-400 hover:bg-lime-300 text-black text-xs font-bold py-2 px-3.5 rounded-lg flex items-center gap-1 transition"
+            className="bg-primary-400 hover:bg-primary-300 text-black text-xs font-bold py-2 px-3.5 rounded-lg flex items-center gap-1 transition"
           >
             <Plus size={14} />
             <span>{showManualForm ? "Collapse Logger" : "Quick Course Event"}</span>
@@ -124,7 +124,7 @@ export default function ActivityLogView({
       {showManualForm && (
         <form onSubmit={handleFormSubmit} className="bg-neutral-950 border border-neutral-850 p-5 rounded-xl mb-6 space-y-4 animate-fadeIn" id="manual-log-form">
           <h4 className="text-sm font-black text-white uppercase tracking-wide flex items-center gap-1.5 border-b border-neutral-900 pb-2 mb-2">
-            <Clipboard size={14} className="text-lime-400" />
+            <Clipboard size={14} className="text-primary-400" />
             File Course Occurrence
           </h4>
 
@@ -160,7 +160,13 @@ export default function ActivityLogView({
               <label className="text-[10px] uppercase font-mono text-neutral-400 block mb-1">Ball Model</label>
               <select
                 value={model}
-                onChange={(e) => setModel(e.target.value as BallModel)}
+                onChange={(e) => {
+                  const newModel = e.target.value as BallModel;
+                  setModel(newModel);
+                  if (!VICE_BALLS_SPECS[newModel].availableColors.includes(color as any)) {
+                    setColor(VICE_BALLS_SPECS[newModel].availableColors[0] as BallColor);
+                  }
+                }}
                 className="w-full bg-neutral-900 border border-neutral-800 text-xs py-2 px-3 rounded-lg text-neutral-200"
               >
                 {Object.values(BallModel).map(m => (
@@ -255,7 +261,7 @@ export default function ActivityLogView({
             <button
               type="submit"
               id="submit-logger-btn"
-              className="px-4 py-2 rounded-lg bg-lime-400 hover:bg-lime-300 text-black text-xs font-extrabold"
+              className="px-4 py-2 rounded-lg bg-primary-400 hover:bg-primary-300 text-black text-xs font-extrabold"
             >
               Log to Timeline
             </button>
@@ -310,7 +316,7 @@ export default function ActivityLogView({
                       ⛳️ {log.courseName} {log.holeNumber ? `• Hole ${log.holeNumber}` : ""}
                     </p>
                     
-                    <p className="text-[11px] text-neutral-400 italic mt-0.5">
+                    <p className="text-xs text-neutral-400 italic mt-0.5">
                       &quot;{log.notes}&quot;
                     </p>
                   </div>

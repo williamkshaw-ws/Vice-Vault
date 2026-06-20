@@ -21,13 +21,6 @@ interface OwnedBallCardProps {
   readOnly?: boolean;
 }
 
-let currentlyEditingCard: {
-  id: string;
-  isDirty: () => boolean;
-  promptAndSwitch: (onProceed: () => void) => void;
-  discardAndClose: () => void;
-} | null = null;
-
 export default function OwnedBallCard({
   ball,
   catalog,
@@ -210,45 +203,8 @@ export default function OwnedBallCard({
   const [editCustomImage, setEditCustomImage] = useState(ball.customImage || "");
   const [editYear, setEditYear] = useState<string>(ball.year || "2012");
 
-  React.useEffect(() => {
-    if (isEditing) {
-      currentlyEditingCard = {
-        id: ball.id,
-        isDirty: () => {
-          return editQty !== ball.quantity ||
-            editPkgType !== (ball.packageType || 'ea') ||
-            (editPkgType !== 'box' && editPlayNumber !== (ball.customNumber || 1)) ||
-            editCondition !== ball.condition ||
-            editNotes.trim() !== currentNotes ||
-            editCustomImageBox !== (ball.customImageBox || ball.customImage || "") ||
-            editYear !== (ball.year || "2012");
-        },
-        promptAndSwitch: (onProceed: () => void) => {
-          setShowUnsavedPrompt(true);
-          setPendingProceed(() => onProceed);
-        },
-        discardAndClose: () => {
-          setIsEditing(false);
-          currentlyEditingCard = null;
-        }
-      };
-    } else if (currentlyEditingCard?.id === ball.id) {
-      currentlyEditingCard = null;
-    }
-  }, [isEditing, editQty, editPkgType, editPlayNumber, editCondition, editNotes, editCustomImageBox, editYear, ball]);
-
   const startEditing = () => {
     if (readOnly) return;
-    if (currentlyEditingCard && currentlyEditingCard.id !== ball.id) {
-      if (currentlyEditingCard.isDirty()) {
-        currentlyEditingCard.promptAndSwitch(() => {
-          openThisCard();
-        });
-        return;
-      } else {
-        currentlyEditingCard.discardAndClose();
-      }
-    }
     openThisCard();
   };
 
@@ -274,7 +230,6 @@ export default function OwnedBallCard({
 
   const handlePromptDiscard = () => {
     setIsEditing(false);
-    if (currentlyEditingCard?.id === ball.id) currentlyEditingCard = null;
     setShowUnsavedPrompt(false);
     if (pendingProceed) pendingProceed();
     setPendingProceed(null);
@@ -286,12 +241,20 @@ export default function OwnedBallCard({
   };
 
   const handleCloseEdit = () => {
-    if (currentlyEditingCard?.id === ball.id && currentlyEditingCard.isDirty()) {
+    const isDirty = editQty !== ball.quantity ||
+      editPkgType !== (ball.packageType || 'ea') ||
+      (editPkgType !== 'box' && editPlayNumber !== (ball.customNumber || 1)) ||
+      editCondition !== (ball.condition || 'new') ||
+      editNotes !== (ball.notes || '') ||
+      editCustomImage !== (ball.customImage || "") ||
+      editYear !== (ball.year || "2012") ||
+      editCustomImageBox !== (ball.customImageBox || "");
+
+    if (isDirty) {
       setShowUnsavedPrompt(true);
       setPendingProceed(() => () => {}); // No extra action needed on proceed
     } else {
       setIsEditing(false);
-      if (currentlyEditingCard?.id === ball.id) currentlyEditingCard = null;
     }
   };
 
@@ -310,9 +273,6 @@ export default function OwnedBallCard({
       });
     }
     setIsEditing(false);
-    if (currentlyEditingCard?.id === ball.id) {
-      currentlyEditingCard = null;
-    }
   };
 
   const incrementEditQty = () => {

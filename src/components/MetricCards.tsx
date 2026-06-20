@@ -22,7 +22,7 @@ export default function MetricCards({ balls, courseLogs, onTriggerQuickAction }:
 
   // 2. Unique brands and custom designs counter
   const uniqueModelsCount = new Set(
-    balls.map(b => `${b.model.trim().toLowerCase()}|${b.color.trim().toLowerCase()}|${b.notes.trim().toLowerCase()}`)
+    balls.map(b => `${b.model?.trim().toLowerCase()}|${b.color?.trim().toLowerCase()}|${b.notes?.trim().toLowerCase()}`)
   ).size;
   const standardModels = Object.values(BallModel) as string[];
   const customBallsCount = balls
@@ -49,7 +49,7 @@ export default function MetricCards({ balls, courseLogs, onTriggerQuickAction }:
       {/* Total Balls Card */}
       <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 flex flex-col justify-between shadow-md relative overflow-hidden group">
         <div className="absolute right-3 top-3 opacity-10 group-hover:scale-110 transition-transform">
-          <Trophy size={48} className="text-lime-400" />
+          <Trophy size={48} className="text-primary-400" />
         </div>
         <div>
           <span className="text-xs font-mono text-neutral-400">BAG INVENTORY</span>
@@ -57,13 +57,13 @@ export default function MetricCards({ balls, courseLogs, onTriggerQuickAction }:
             <span className="text-3xl font-black text-white">{totalBalls}</span>
             <span className="text-neutral-300 text-xs font-medium">ball{totalBalls !== 1 ? 's' : ''}</span>
           </div>
-          <p className="text-[11px] text-neutral-400 mt-1">
+          <p className="text-xs text-neutral-400 mt-1">
             {totalSleevesCount} sleeve{totalSleevesCount !== 1 ? 's' : ''} + {looseBallsCount} loose ball{looseBallsCount !== 1 ? 's' : ''}
           </p>
         </div>
         <div className="mt-4 pt-3 border-t border-neutral-800/60 flex items-center justify-between">
           <span className="text-[10px] uppercase font-mono text-neutral-500">Pristine State</span>
-          <span className="text-xs font-bold text-lime-400">{pristinePct}%</span>
+          <span className="text-xs font-bold text-primary-400">{pristinePct}%</span>
         </div>
       </div>
 
@@ -78,7 +78,7 @@ export default function MetricCards({ balls, courseLogs, onTriggerQuickAction }:
             <span className="text-3xl font-black text-white">{uniqueModelsCount}</span>
             <span className="text-neutral-300 text-xs font-medium">unique model{uniqueModelsCount !== 1 ? 's' : ''}</span>
           </div>
-          <p className="text-[11px] text-neutral-400 mt-1">
+          <p className="text-xs text-neutral-400 mt-1">
             Tracking {customBallsCount} registered design{customBallsCount !== 1 ? 's' : ''}
           </p>
         </div>
@@ -114,7 +114,7 @@ export default function MetricCards({ balls, courseLogs, onTriggerQuickAction }:
             ⚠️ Log a Ball Lost in Hazards
           </button>
         </div>
-        <div className="mt-2 pt-3 border-t border-neutral-800/60 flex items-center justify-between text-[11px]">
+        <div className="mt-2 pt-3 border-t border-neutral-800/60 flex items-center justify-between text-xs">
           <span className="text-[10px] uppercase font-mono text-neutral-500">Woods/Water Toll</span>
           <span className="text-red-300 font-bold">
             {donationRate > 0 ? `+${donationRate} Net Lost` : donationRate < 0 ? `${donationRate} Net Found` : "Perfectly Balanced"}
@@ -146,7 +146,7 @@ export default function MetricCards({ balls, courseLogs, onTriggerQuickAction }:
             🌲 Log a Ball Found on Course
           </button>
         </div>
-        <div className="mt-2 pt-3 border-t border-neutral-800/60 flex items-center justify-between text-[11px]">
+        <div className="mt-2 pt-3 border-t border-neutral-800/60 flex items-center justify-between text-xs">
           <span className="text-[10px] uppercase font-mono text-neutral-500">Salvage Ratio</span>
           <span className="text-emerald-400 font-bold">
             {totalLostCount > 0 ? `${Math.round((totalFoundCount / totalLostCount) * 100)}% recovery` : "100% clean"}

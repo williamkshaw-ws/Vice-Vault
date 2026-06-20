@@ -39,8 +39,8 @@ export default function BallVisual({
   };
 
   const textSizes = {
-    sm: { brand: "text-[9px] tracking-widest", num: "text-[8px]" },
-    md: { brand: "text-[14px] font-extrabold tracking-widest leading-none", num: "text-[11px]" },
+    sm: { brand: "text-[9px] tracking-widest", num: "text-[9px]" },
+    md: { brand: "text-[14px] font-extrabold tracking-widest leading-none", num: "text-xs" },
     lg: { brand: "text-[20px] font-black tracking-widest leading-none", num: "text-[15px]" },
     xl: { brand: "text-[30px] font-black tracking-[0.2em] leading-none mb-1", num: "text-[22px]" }
   };
@@ -121,7 +121,7 @@ export default function BallVisual({
         return {
           bg: "radial-gradient(circle at 35% 35%, #e1ff00 0%, #a6d200 65%, #7da200 100%)",
           text: "text-black",
-          border: "border-lime-500",
+          border: "border-primary-500",
           lineColor: "#000",
           hasDrips: true,
           dripColors: ["#000000", "#ff007f", "#000000"]
@@ -130,7 +130,7 @@ export default function BallVisual({
       return {
         bg: "radial-gradient(circle at 35% 35%, #e1ff00 0%, #a6d200 60%, #7da200 100%)",
         text: "text-black",
-        border: "border-lime-400",
+        border: "border-primary-400",
         lineColor: "#000"
       };
     }
@@ -475,16 +475,16 @@ export default function BallVisual({
     if (!model || model.trim().toUpperCase() === "LOGO") return null;
     let lineText = `-${brandLabel.toUpperCase()}-`;
     if (model === BallModel.PRO_PLUS) lineText = "-PRO PLUS-";
-    if (model === BallModel.PRO) lineText = "-PRO-";
-    if (model === BallModel.PRO_SOFT) lineText = "-PRO SOFT-";
-    if (model === BallModel.TOUR) lineText = "-TOUR-";
-    if (model === BallModel.DRIVE) lineText = "-DRIVE-";
+    else if (model === BallModel.PRO) lineText = "-PRO-";
+    else if (model === BallModel.PRO_SOFT) lineText = "-PRO SOFT-";
+    else if (model === BallModel.TOUR) lineText = "-TOUR-";
+    else if (model === BallModel.DRIVE) lineText = "-DRIVE-";
     else if (isCustomModel) lineText = `-${typeof model === 'string' ? model.toUpperCase().substring(0, 12) : "CUSTOM"}-`;
 
     const textStyle = {
       sm: "text-[3.5px] tracking-[0.05em]",
       md: "text-[5.5px] tracking-[0.08em] font-medium",
-      lg: "text-[8px] tracking-[0.1em] font-semibold",
+      lg: "text-[9px] tracking-[0.1em] font-semibold",
       xl: "text-[12px] tracking-[0.12em] font-bold"
     };
 

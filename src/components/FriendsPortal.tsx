@@ -49,7 +49,7 @@ export default function FriendsPortal({ currentUserUid, onClose, onViewBag }: Fr
     setTimeout(() => setMessage(null), 4000);
   };
 
-  const handleSendRequest = async (e: React.FormEvent) => {
+  const handleSendRequest = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!searchUsername.trim()) return;
     try {
@@ -116,12 +116,12 @@ export default function FriendsPortal({ currentUserUid, onClose, onViewBag }: Fr
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+    <div role="dialog" aria-modal="true" className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
       <div className="bg-neutral-950 border border-neutral-850 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-neutral-900 bg-neutral-900/50">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#2563eb]/20 rounded-lg text-[#2563eb]">
+            <div className="p-2 bg-accent/20 rounded-lg text-accent">
               <Users size={20} />
             </div>
             <div>
@@ -163,13 +163,13 @@ export default function FriendsPortal({ currentUserUid, onClose, onViewBag }: Fr
                   autoCapitalize="none"
                   spellCheck="false"
                   data-1p-ignore="true"
-                  className="w-full bg-neutral-900 border border-neutral-800 rounded-lg py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-[#2563eb]"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded-lg py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-accent"
                 />
               </div>
               <button 
                 onClick={handleSendRequest}
                 disabled={!searchUsername.trim()}
-                className="bg-[#2563eb] hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2.5 px-5 rounded-lg text-sm transition-colors cursor-pointer"
+                className="bg-accent hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2.5 px-5 rounded-lg text-sm transition-colors cursor-pointer"
               >
                 Send Request
               </button>
@@ -226,7 +226,7 @@ export default function FriendsPortal({ currentUserUid, onClose, onViewBag }: Fr
           {/* Friends List */}
           <section>
             <h3 className="text-sm font-bold text-neutral-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <Users size={16} className="text-[#2563eb]" />
+              <Users size={16} className="text-accent" />
               My Friends ({friends.length})
             </h3>
             
@@ -259,7 +259,7 @@ export default function FriendsPortal({ currentUserUid, onClose, onViewBag }: Fr
                           onViewBag(friend.username);
                           onClose();
                         }}
-                        className="flex items-center justify-center gap-1.5 py-2 bg-[#2563eb]/10 hover:bg-[#2563eb]/20 text-[#2563eb] text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                        className="flex items-center justify-center gap-1.5 py-2 bg-accent/10 hover:bg-accent/20 text-accent text-xs font-bold rounded-lg transition-colors cursor-pointer"
                       >
                         <GolfBagIcon className="w-3.5 h-3.5" />
                         View Bag

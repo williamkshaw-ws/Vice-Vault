@@ -97,7 +97,7 @@ export default function VaultFilterBar({ items, filters, showCondition = true, c
     <div className="flex flex-col gap-3 font-mono">
       <div className="flex flex-wrap items-center gap-2 pb-2 w-full">
         <div className="flex items-center justify-center shrink-0 pr-1 pl-1">
-          <Filter className={`w-4 h-4 ${hasActiveFilters ? "text-[#2563eb]" : "text-neutral-500"}`} />
+          <Filter className={`w-4 h-4 ${hasActiveFilters ? "text-accent" : "text-neutral-500"}`} />
         </div>
         
         {uniqueModels.length > 0 && (

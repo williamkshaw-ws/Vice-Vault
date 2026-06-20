@@ -36,18 +36,39 @@ interface UserProfile {
   friendRequestsIn?: string[];
   friendRequestsOut?: string[];
   wishlist?: string[];
+  wishlistDates?: Record<string, string>;
   optInLeaderboard?: boolean;
   totalUniqueBalls?: number;
   totalBalls?: number;
 }
 
-const SECRET_KEY = process.env.SHARE_SECRET || "ViceVaultSecretObfuscationKey_2026";
+const SECRET_KEY = process.env.SHARE_SECRET || (() => {
+  const generated = crypto.randomBytes(32).toString("hex");
+  console.warn("==========================================================");
+  console.warn("WARNING: No SHARE_SECRET set in environment variables!");
+  console.warn("A random secret key has been generated for share links.");
+  console.warn(`Generated SHARE_SECRET: ${generated}`);
+  console.warn("Please save this in your .env file to ensure share links persist across server restarts.");
+  console.warn("==========================================================");
+  return generated;
+})();
 const AES_KEY = crypto.createHash('sha256').update(SECRET_KEY).digest();
+
+const INITIAL_ADMIN_PASSWORD = process.env.INITIAL_ADMIN_PASSWORD || (() => {
+  const generated = crypto.randomBytes(12).toString("hex");
+  console.warn("==========================================================");
+  console.warn("WARNING: No INITIAL_ADMIN_PASSWORD set in environment variables!");
+  console.warn("A random password has been generated for default users.");
+  console.warn(`Generated Password: ${generated}`);
+  console.warn("Please save this or set INITIAL_ADMIN_PASSWORD in your .env file.");
+  console.warn("==========================================================");
+  return generated;
+})();
 
 function encryptUsername(username: string): string {
   if (!username) return "";
-  // Use deterministic IV so share links remain static
-  const iv = crypto.createHash('md5').update(username + SECRET_KEY).digest();
+  // Use a secure random IV per encryption to prevent deterministic ciphertexts
+  const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv('aes-256-cbc', AES_KEY, iv);
   let encrypted = cipher.update(username, 'utf8', 'base64url');
   encrypted += cipher.final('base64url');
@@ -64,6 +85,26 @@ function decryptUsername(token: string): string | null {
     let decrypted = decipher.update(encryptedText, 'base64url', 'utf8');
     decrypted += decipher.final('utf8');
     return decrypted;
+  } catch (err) {
+    return null;
+  }
+}
+
+function generateMockToken(uid: string): string {
+  const payload = Buffer.from(JSON.stringify({ uid, exp: Date.now() + 86400000 })).toString('base64url');
+  const signature = crypto.createHmac('sha256', SECRET_KEY).update(payload).digest('base64url');
+  return `mock.${payload}.${signature}`;
+}
+
+function verifyMockToken(token: string): string | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3 || parts[0] !== 'mock') return null;
+    const expectedSignature = crypto.createHmac('sha256', SECRET_KEY).update(parts[1]).digest('base64url');
+    if (expectedSignature !== parts[2]) return null;
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+    if (payload.exp < Date.now()) return null;
+    return payload.uid;
   } catch (err) {
     return null;
   }
@@ -96,19 +137,32 @@ function isStrongPassword(password: string): boolean {
 
 function hashPassword(password: string): string {
   const salt = crypto.randomBytes(16).toString("hex");
-  const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex");
-  return `${salt}:${hash}`;
+  const iterations = 600000;
+  const hash = crypto.pbkdf2Sync(password, salt, iterations, 64, "sha512").toString("hex");
+  return `${iterations}:${salt}:${hash}`;
 }
 
 function verifyPassword(password: string, storedHash: string): boolean {
-  if (!storedHash) return false;
-  if (!storedHash.includes(":")) {
-    return password === storedHash;
+  if (!storedHash || !storedHash.includes(":")) return false;
+  
+  const parts = storedHash.split(":");
+  if (parts.length === 2) {
+    // Legacy 1000 iteration hash
+    const [salt, hash] = parts;
+    const checkHash = crypto.pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex");
+    return hash === checkHash;
+  } else if (parts.length === 3) {
+    // New format with embedded iterations
+    const iterations = parseInt(parts[0], 10);
+    const salt = parts[1];
+    const hash = parts[2];
+    const checkHash = crypto.pbkdf2Sync(password, salt, iterations, 64, "sha512").toString("hex");
+    return hash === checkHash;
   }
-  const [salt, hash] = storedHash.split(":");
-  const checkHash = crypto.pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex");
-  return hash === checkHash;
+  
+  return false;
 }
+
 
 function cleanUsernameString(username: string): string {
   let u = username.trim().toLowerCase();
@@ -125,6 +179,28 @@ app.set('trust proxy', 1);
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 app.use(express.json({ limit: "15mb" }));
+
+app.use("/api", async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return next();
+  }
+  const token = authHeader.split(" ")[1];
+  if (token.startsWith("mock.")) {
+    const uid = verifyMockToken(token);
+    if (uid) {
+      (req as any).user = { uid };
+    }
+  } else if (isFirebaseAdminInitialized) {
+    try {
+      const decodedToken = await admin.auth().verifyIdToken(token);
+      (req as any).user = { uid: decodedToken.uid };
+    } catch (err) {
+      // Invalid Firebase token
+    }
+  }
+  next();
+});
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -159,7 +235,7 @@ const DEFAULT_USERS: UserProfile[] = [
     role: "Admin",
     preferredColor: "#2563eb",
     avatarUrl: "preset-1",
-    password: hashPassword("AdminPass123!"),
+    password: hashPassword(INITIAL_ADMIN_PASSWORD),
     shareBag: true,
     createdAt: new Date().toISOString()
   },
@@ -171,7 +247,7 @@ const DEFAULT_USERS: UserProfile[] = [
     role: "User",
     preferredColor: "#2563eb",
     avatarUrl: "preset-1",
-    password: hashPassword("AdminPass123!"),
+    password: hashPassword(INITIAL_ADMIN_PASSWORD),
     shareBag: false,
     createdAt: new Date().toISOString()
   }
@@ -205,20 +281,25 @@ const DEFAULT_IMAGES: Record<string, string> = SCRAPED_BALLS.reduce((acc, ball) 
 // Initial Standard Catalog templates
 const DEFAULT_CATALOG: CatalogItem[] = SCRAPED_BALLS;
 
+let _cachedUsers: UserProfile[] | null = null;
 function loadUsers(): UserProfile[] {
+  if (_cachedUsers) return _cachedUsers;
   try {
     if (fs.existsSync(USERS_FILE)) {
       const raw = fs.readFileSync(USERS_FILE, "utf-8");
-      return JSON.parse(raw);
+      _cachedUsers = JSON.parse(raw);
+      return _cachedUsers as UserProfile[];
     }
   } catch (error) {
     console.error("Error loading users file, fallback to defaults.", error);
   }
-  saveUsers(DEFAULT_USERS);
-  return DEFAULT_USERS;
+  _cachedUsers = [...DEFAULT_USERS];
+  saveUsers(_cachedUsers);
+  return _cachedUsers;
 }
 
 function saveUsers(users: UserProfile[]) {
+  _cachedUsers = users;
   try {
     fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
   } catch (error) {
@@ -226,21 +307,26 @@ function saveUsers(users: UserProfile[]) {
   }
 }
 
+let _cachedCatalog: CatalogItem[] | null = null;
 // Global Catalog File Load/Save (Fallback Mode)
 function loadCatalog(): CatalogItem[] {
+  if (_cachedCatalog) return _cachedCatalog;
   try {
     if (fs.existsSync(CATALOG_FILE)) {
       const raw = fs.readFileSync(CATALOG_FILE, "utf-8");
-      return JSON.parse(raw);
+      _cachedCatalog = JSON.parse(raw);
+      return _cachedCatalog as CatalogItem[];
     }
   } catch (error) {
     console.error("Error loading catalog file, fallback to defaults.", error);
   }
-  saveCatalog(DEFAULT_CATALOG);
-  return DEFAULT_CATALOG;
+  _cachedCatalog = [...DEFAULT_CATALOG];
+  saveCatalog(_cachedCatalog);
+  return _cachedCatalog;
 }
 
 function saveCatalog(catalog: CatalogItem[]) {
+  _cachedCatalog = catalog;
   try {
     fs.writeFileSync(CATALOG_FILE, JSON.stringify(catalog, null, 2), "utf-8");
   } catch (error) {
@@ -254,19 +340,24 @@ interface PreservedImages {
   customImageBox?: string;
 }
 
+let _cachedImages: Record<string, PreservedImages> | null = null;
 function loadPreservedImagesLocal(): Record<string, PreservedImages> {
+  if (_cachedImages) return _cachedImages;
   try {
     if (fs.existsSync(PRESERVED_IMAGES_FILE)) {
       const raw = fs.readFileSync(PRESERVED_IMAGES_FILE, "utf-8");
-      return JSON.parse(raw);
+      _cachedImages = JSON.parse(raw);
+      return _cachedImages as Record<string, PreservedImages>;
     }
   } catch (error) {
     console.error("Error loading preserved images file", error);
   }
-  return {};
+  _cachedImages = {};
+  return _cachedImages;
 }
 
 function savePreservedImagesLocal(data: Record<string, PreservedImages>) {
+  _cachedImages = data;
   try {
     fs.writeFileSync(PRESERVED_IMAGES_FILE, JSON.stringify(data, null, 2), "utf-8");
   } catch (error) {
@@ -796,7 +887,7 @@ if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
                   const authUser = await admin.auth().createUser({
                     uid: user.uid,
                     email: user.email,
-                    password: "AdminPass123!",
+                    password: INITIAL_ADMIN_PASSWORD,
                     displayName: user.displayName
                   });
                   await dbAdmin!.collection("users").doc(user.uid).set({
@@ -1018,6 +1109,7 @@ async function saveUserToDb(user: UserProfile): Promise<void> {
         uid: user.authUid || user.uid, // Keep the Firebase Auth UID inside the 'uid' field for client lookup
         authUid: user.authUid || user.uid // Ensure authUid is populated
       };
+      delete dataToSave.password;
       await dbAdmin.collection("users").doc(docId).set(dataToSave, { merge: true });
       return;
     } catch (error) {
@@ -1298,8 +1390,8 @@ app.post("/api/auth/signin", authLimiter, async (req, res) => {
     return res.status(400).json({ error: "Invalid email/username or password." });
   }
 
-  // Auto-upgrade plain text passwords to hashed/salted format
-  if (!user.password.includes(":")) {
+    // Auto-upgrade legacy hashes to the new 600,000 iterations format
+  if (user.password.split(":").length === 2) {
     user.password = hashPassword(password);
     await saveUserToDb(user);
   }
@@ -1328,6 +1420,10 @@ app.post("/api/auth/signin", authLimiter, async (req, res) => {
 app.get("/api/friends/:id", async (req, res) => {
   const { id } = req.params;
   const resolvedId = await resolveUserDocId(id);
+  const actingUserId = (req as any).user?.uid as string | undefined;
+  if (!actingUserId || (actingUserId !== id && actingUserId !== resolvedId && !(await verifyAdmin(actingUserId)))) {
+    return res.status(403).json({ error: "Access Denied." });
+  }
   const users = await getUsersList();
   const user = users.find(u => u.uid === resolvedId);
   if (!user) return res.status(404).json({ error: "User not found." });
@@ -1361,6 +1457,10 @@ app.post("/api/friends/:id/request", async (req, res) => {
   if (targetUsername.startsWith("@")) targetUsername = targetUsername.substring(1);
 
   const resolvedId = await resolveUserDocId(id);
+  const actingUserId = (req as any).user?.uid as string | undefined;
+  if (!actingUserId || (actingUserId !== id && actingUserId !== resolvedId && !(await verifyAdmin(actingUserId)))) {
+    return res.status(403).json({ error: "Access Denied." });
+  }
   const users = await getUsersList();
   const user = users.find(u => u.uid === resolvedId);
   if (!user) return res.status(404).json({ error: "Sender profile could not be resolved." });
@@ -1406,6 +1506,10 @@ app.post("/api/friends/:id/accept", async (req, res) => {
   const { targetUsername } = req.body;
   
   const resolvedId = await resolveUserDocId(id);
+  const actingUserId = (req as any).user?.uid as string | undefined;
+  if (!actingUserId || (actingUserId !== id && actingUserId !== resolvedId && !(await verifyAdmin(actingUserId)))) {
+    return res.status(403).json({ error: "Access Denied." });
+  }
   const users = await getUsersList();
   const user = users.find(u => u.uid === resolvedId);
   const targetUser = users.find(u => u.username?.toLowerCase() === targetUsername.toLowerCase());
@@ -1440,6 +1544,10 @@ app.post("/api/friends/:id/decline", async (req, res) => {
   const { targetUsername } = req.body;
   
   const resolvedId = await resolveUserDocId(id);
+  const actingUserId = (req as any).user?.uid as string | undefined;
+  if (!actingUserId || (actingUserId !== id && actingUserId !== resolvedId && !(await verifyAdmin(actingUserId)))) {
+    return res.status(403).json({ error: "Access Denied." });
+  }
   const users = await getUsersList();
   const user = users.find(u => u.uid === resolvedId);
   const targetUser = users.find(u => u.username?.toLowerCase() === targetUsername.toLowerCase());
@@ -1463,6 +1571,10 @@ app.post("/api/friends/:id/remove", async (req, res) => {
   const { targetUsername } = req.body;
   
   const resolvedId = await resolveUserDocId(id);
+  const actingUserId = (req as any).user?.uid as string | undefined;
+  if (!actingUserId || (actingUserId !== id && actingUserId !== resolvedId && !(await verifyAdmin(actingUserId)))) {
+    return res.status(403).json({ error: "Access Denied." });
+  }
   const users = await getUsersList();
   const user = users.find(u => u.uid === resolvedId);
   const targetUser = users.find(u => u.username?.toLowerCase() === targetUsername.toLowerCase());
@@ -1485,6 +1597,11 @@ app.get("/api/friends/:id/bag/:friendUsername", async (req, res) => {
   const { id, friendUsername } = req.params;
   
   const resolvedId = await resolveUserDocId(id);
+  const actingUserId = (req as any).user?.uid as string | undefined;
+  if (!actingUserId || (actingUserId !== id && actingUserId !== resolvedId && !(await verifyAdmin(actingUserId)))) {
+    return res.status(403).json({ error: "Access Denied." });
+  }
+
   const users = await getUsersList();
   const user = users.find(u => u.uid === resolvedId);
   const friend = users.find(u => u.username?.toLowerCase() === friendUsername.toLowerCase());
@@ -1517,7 +1634,7 @@ app.get("/api/friends/:id/bag/:friendUsername", async (req, res) => {
 // User specific Locker APIs
 app.get("/api/users/:uid/locker", async (req, res) => {
   const { uid } = req.params;
-  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  const actingUserId = (req as any).user?.uid as string | undefined;
   
   if (!actingUserId || (actingUserId !== uid && !(await verifyAdmin(actingUserId)))) {
     return res.status(403).json({ error: "Access Denied." });
@@ -1568,7 +1685,7 @@ app.get("/api/share/:token", async (req, res) => {
 
 app.post("/api/users/:uid/locker", async (req, res) => {
   const { uid } = req.params;
-  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  const actingUserId = (req as any).user?.uid as string | undefined;
   
   if (!actingUserId || (actingUserId !== uid && !(await verifyAdmin(actingUserId)))) {
     return res.status(403).json({ error: "Access Denied." });
@@ -1601,6 +1718,10 @@ app.post("/api/users/:uid/locker", async (req, res) => {
 // Toggle a catalog item in the user's wishlist
 app.post("/api/users/:uid/wishlist", async (req, res) => {
   const { uid } = req.params;
+  const actingUserId = (req as any).user?.uid as string | undefined;
+  if (!actingUserId || (actingUserId !== uid && !(await verifyAdmin(actingUserId)))) {
+    return res.status(403).json({ error: "Access Denied." });
+  }
   const { catalogId } = req.body;
   if (!catalogId) {
     return res.status(400).json({ error: "catalogId is required." });
@@ -1654,6 +1775,10 @@ app.post("/api/users/:uid/wishlist", async (req, res) => {
 // Clear the user's wishlist
 app.post("/api/users/:uid/wishlist/clear", async (req, res) => {
   const { uid } = req.params;
+  const actingUserId = (req as any).user?.uid as string | undefined;
+  if (!actingUserId || (actingUserId !== uid && !(await verifyAdmin(actingUserId)))) {
+    return res.status(403).json({ error: "Access Denied." });
+  }
 
   const resolvedId = await resolveUserDocId(uid);
   
@@ -1688,7 +1813,7 @@ app.post("/api/users/:uid/wishlist/clear", async (req, res) => {
 app.get("/api/users/:id/profile", async (req, res) => {
   const { id } = req.params;
   const resolvedId = await resolveUserDocId(id);
-  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  const actingUserId = (req as any).user?.uid as string | undefined;
   
   const isOwnerOrAdmin = actingUserId === resolvedId || (await verifyAdmin(actingUserId));
   
@@ -1940,6 +2065,10 @@ app.patch("/api/users/:id/profile", async (req, res) => {
 // Update user stats directly from the client when saving locker
 app.post("/api/users/:uid/stats", async (req, res) => {
   const { uid } = req.params;
+  const actingUserId = (req as any).user?.uid as string | undefined;
+  if (!actingUserId || (actingUserId !== uid && !(await verifyAdmin(actingUserId)))) {
+    return res.status(403).json({ error: "Access Denied." });
+  }
   const { totalUniqueBalls, totalBalls } = req.body;
   
   const resolvedId = await resolveUserDocId(uid);
@@ -1977,7 +2106,7 @@ app.get("/api/leaderboard", async (req, res) => {
 
 // Fetch all registered profile users
 app.get("/api/users", async (req, res) => {
-  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  const actingUserId = (req as any).user?.uid as string | undefined;
   if (!(await verifyAdmin(actingUserId))) {
     return res.status(403).json({ error: "Access Denied. Only Admin users can view user accounts." });
   }
@@ -2050,7 +2179,7 @@ app.post("/api/users", async (req, res) => {
 app.patch("/api/users/:id/role", async (req, res) => {
   const { id } = req.params;
   const { role } = req.body;
-  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  const actingUserId = (req as any).user?.uid as string | undefined;
 
   const normalizedRole = role && role.toLowerCase() === "admin" ? "Admin" : role && role.toLowerCase() === "user" ? "User" : null;
   if (!normalizedRole) {
@@ -2078,7 +2207,7 @@ app.patch("/api/users/:id/role", async (req, res) => {
 app.patch("/api/users/:id", async (req, res) => {
   const { id } = req.params;
   const { displayName, username, role, preferredColor, avatarUrl, email, password } = req.body;
-  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  const actingUserId = (req as any).user?.uid as string | undefined;
 
   if (!(await verifyAdmin(actingUserId))) {
     return res.status(403).json({ error: "Access Denied. Only Admin users can update user details." });
@@ -2248,7 +2377,7 @@ app.patch("/api/users/:id", async (req, res) => {
 // Delete user (Admin only)
 app.delete("/api/users/:id", async (req, res) => {
   const { id } = req.params;
-  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  const actingUserId = (req as any).user?.uid as string | undefined;
 
   if (!(await verifyAdmin(actingUserId))) {
     return res.status(403).json({ error: "Access Denied. Only Admin users can delete user accounts." });
@@ -2312,7 +2441,7 @@ app.get("/api/catalog", async (req, res) => {
                   const authUser = await admin.auth().createUser({
                     uid: user.uid,
                     email: user.email,
-                    password: "AdminPass123!",
+                    password: INITIAL_ADMIN_PASSWORD,
                     displayName: user.displayName
                   });
                   await dbAdmin!.collection("users").doc(user.uid).set({
@@ -2334,7 +2463,7 @@ app.get("/api/catalog", async (req, res) => {
 
 // POST: Add new design to catalog (Admin only)
 app.post("/api/catalog", async (req, res) => {
-  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  const actingUserId = (req as any).user?.uid as string | undefined;
   if (!(await verifyAdmin(actingUserId))) {
     return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
   }
@@ -2385,7 +2514,7 @@ app.post("/api/catalog", async (req, res) => {
 
 // POST: Bulk add catalog items (Admin only)
 app.post("/api/catalog/bulk", async (req, res) => {
-  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  const actingUserId = (req as any).user?.uid as string | undefined;
   if (!(await verifyAdmin(actingUserId))) {
     return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
   }
@@ -2562,7 +2691,7 @@ app.post("/api/catalog/bulk", async (req, res) => {
 
 // POST: Clear all catalog items (Admin only)
 app.post("/api/catalog/clear", async (req, res) => {
-  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  const actingUserId = (req as any).user?.uid as string | undefined;
   if (!(await verifyAdmin(actingUserId))) {
     return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
   }
@@ -2601,7 +2730,7 @@ app.post("/api/catalog/clear", async (req, res) => {
 
 // PUT: Save changes to existing catalog design (Admin only)
 app.put("/api/catalog/:id", async (req, res) => {
-  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  const actingUserId = (req as any).user?.uid as string | undefined;
   if (!(await verifyAdmin(actingUserId))) {
     return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
   }
@@ -2667,7 +2796,7 @@ app.put("/api/catalog/:id", async (req, res) => {
 
 // DELETE: Remove design from catalog (Admin only)
 app.delete("/api/catalog/:id", async (req, res) => {
-  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  const actingUserId = (req as any).user?.uid as string | undefined;
   if (!(await verifyAdmin(actingUserId))) {
     return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
   }
@@ -2695,7 +2824,7 @@ app.delete("/api/catalog/:id", async (req, res) => {
 // --- VITE DEV SERVICE MIDDLEWARE INTEGRATION ---
 // MIGRATION: Convert base64 to Firebase Storage
 app.post("/api/admin/migrate-images", async (req, res) => {
-  const actingUserId = req.headers["x-user-id"] as string | undefined;
+  const actingUserId = (req as any).user?.uid as string | undefined;
   if (!(await verifyAdmin(actingUserId))) {
     return res.status(403).json({ error: "Access Denied. Only Admin users can run migrations." });
   }

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { getFittingRecommendation } from "../constants";
 import { BallModel, BallColor } from "../types";
 import BallVisual from "./BallVisual";
@@ -25,7 +25,10 @@ export default function FittingQuiz({ onAddBall }: FittingQuizProps) {
     setFinish("any");
   };
 
-  const recommendation = getFittingRecommendation(distance, priority, finish);
+  const recommendation = useMemo(() => {
+    if (step < 4) return null;
+    return getFittingRecommendation(distance, priority, finish);
+  }, [step, distance, priority, finish]);
 
   // Suggest a default color for the recommended ball
   const getDefaultColorForModel = (model: BallModel): BallColor => {
@@ -60,7 +63,7 @@ export default function FittingQuiz({ onAddBall }: FittingQuizProps) {
       <div>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-lime-400 animate-pulse" />
+            <span className="w-2.5 h-2.5 rounded-full bg-primary-400 animate-pulse" />
             <h3 className="font-sans font-extrabold tracking-tight text-lg text-white">
               VICE BALL FITTING LAB
             </h3>
@@ -73,7 +76,7 @@ export default function FittingQuiz({ onAddBall }: FittingQuizProps) {
         {/* Progress Bar */}
         <div className="w-full bg-neutral-800 h-1 rounded-full overflow-hidden mb-6">
           <div 
-            className="bg-lime-400 h-1 transition-all duration-300"
+            className="bg-primary-400 h-1 transition-all duration-300"
             style={{ 
               width: step === 1 ? "33%" : step === 2 ? "66%" : step === 3 ? "90%" : "100%" 
             }}
@@ -92,7 +95,7 @@ export default function FittingQuiz({ onAddBall }: FittingQuizProps) {
                 onClick={() => { setDistance("short"); setStep(2); }}
                 className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all ${
                   distance === "short" 
-                    ? "border-lime-400 bg-lime-950/20 text-white" 
+                    ? "border-primary-400 bg-primary-950/20 text-white" 
                     : "border-neutral-800 hover:border-neutral-700 bg-neutral-950 text-neutral-300"
                 }`}
               >
@@ -105,7 +108,7 @@ export default function FittingQuiz({ onAddBall }: FittingQuizProps) {
                 onClick={() => { setDistance("medium"); setStep(2); }}
                 className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all ${
                   distance === "medium" 
-                    ? "border-lime-400 bg-lime-950/20 text-white" 
+                    ? "border-primary-400 bg-primary-950/20 text-white" 
                     : "border-neutral-800 hover:border-neutral-700 bg-neutral-950 text-neutral-300"
                 }`}
               >
@@ -118,7 +121,7 @@ export default function FittingQuiz({ onAddBall }: FittingQuizProps) {
                 onClick={() => { setDistance("long"); setStep(2); }}
                 className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all ${
                   distance === "long" 
-                    ? "border-lime-400 bg-lime-950/20 text-white" 
+                    ? "border-primary-400 bg-primary-950/20 text-white" 
                     : "border-neutral-800 hover:border-neutral-700 bg-neutral-950 text-neutral-300"
                 }`}
               >
@@ -141,7 +144,7 @@ export default function FittingQuiz({ onAddBall }: FittingQuizProps) {
                 onClick={() => { setPriority("spin"); setStep(3); }}
                 className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all ${
                   priority === "spin" 
-                    ? "border-lime-400 bg-lime-950/20 text-white" 
+                    ? "border-primary-400 bg-primary-950/20 text-white" 
                     : "border-neutral-800 hover:border-border text-neutral-300 bg-neutral-950"
                 }`}
               >
@@ -154,7 +157,7 @@ export default function FittingQuiz({ onAddBall }: FittingQuizProps) {
                 onClick={() => { setPriority("feel"); setStep(3); }}
                 className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all ${
                   priority === "feel" 
-                    ? "border-lime-400 bg-lime-950/20 text-white" 
+                    ? "border-primary-400 bg-primary-950/20 text-white" 
                     : "border-neutral-800 hover:border-neutral-700 bg-neutral-950 text-neutral-300"
                 }`}
               >
@@ -167,7 +170,7 @@ export default function FittingQuiz({ onAddBall }: FittingQuizProps) {
                 onClick={() => { setPriority("distance"); setStep(3); }}
                 className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all ${
                   priority === "distance" 
-                    ? "border-lime-400 bg-lime-950/20 text-white" 
+                    ? "border-primary-400 bg-primary-950/20 text-white" 
                     : "border-neutral-800 hover:border-neutral-700 bg-neutral-950 text-neutral-300"
                 }`}
               >
@@ -214,7 +217,7 @@ export default function FittingQuiz({ onAddBall }: FittingQuizProps) {
               <button
                 id="finish-drip"
                 onClick={() => { setFinish("drip"); setStep("result"); }}
-                className="p-3 text-center rounded-xl border text-xs font-bold transition-all col-span-2 bg-gradient-to-r from-teal-900/30 to-red-950/30 border-neutral-800 hover:border-lime-400 text-lime-300"
+                className="p-3 text-center rounded-xl border text-xs font-bold transition-all col-span-2 bg-gradient-to-r from-teal-900/30 to-red-950/30 border-neutral-800 hover:border-primary-400 text-primary-300"
               >
                 🎨 Famous VICE Drip (Splatters)
               </button>
@@ -231,7 +234,7 @@ export default function FittingQuiz({ onAddBall }: FittingQuizProps) {
               <button
                 id="skip-finish"
                 onClick={() => { setFinish("any"); setStep("result"); }}
-                className="text-xs text-lime-400 hover:underline px-3 py-1.5"
+                className="text-xs text-primary-400 hover:underline px-3 py-1.5"
               >
                 I don't care, find best performance →
               </button>
@@ -251,12 +254,12 @@ export default function FittingQuiz({ onAddBall }: FittingQuizProps) {
                   size="lg" 
                   className="mb-2"
                 />
-                <span className="text-[10px] font-mono font-bold text-lime-400 tracking-wider">
+                <span className="text-[10px] font-mono font-bold text-primary-400 tracking-wider">
                   MATCH DECLARED
                 </span>
               </div>
               <div className="flex-1 text-center md:text-left">
-                <span className="text-[10px] font-mono bg-lime-400 text-black px-2 py-0.5 rounded font-bold uppercase">
+                <span className="text-[10px] font-mono bg-primary-400 text-black px-2 py-0.5 rounded font-bold uppercase">
                   {recommendation.specs.cover}
                 </span>
                 <h4 className="text-lg font-black tracking-tight text-white mt-1 leading-tight">
@@ -269,7 +272,7 @@ export default function FittingQuiz({ onAddBall }: FittingQuizProps) {
             </div>
 
             {/* Performance Spec-Card */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 bg-neutral-950 p-3 rounded-lg border border-neutral-800 text-[11px]">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 bg-neutral-950 p-3 rounded-lg border border-neutral-800 text-xs">
               <div>
                 <span className="text-neutral-500 block">Feel</span>
                 <span className="text-white font-semibold">{recommendation.specs.feel}</span>
@@ -290,7 +293,7 @@ export default function FittingQuiz({ onAddBall }: FittingQuizProps) {
 
             {/* Add directly controls */}
             <div className="pt-2 space-y-2">
-              <span className="text-[11px] font-mono text-neutral-400 block text-center">Add fitted balls directly to bag:</span>
+              <span className="text-xs font-mono text-neutral-400 block text-center">Add fitted balls directly to bag:</span>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   id="add-sleeve"
@@ -302,7 +305,7 @@ export default function FittingQuiz({ onAddBall }: FittingQuizProps) {
                 <button
                   id="add-dozen"
                   onClick={() => handleAddRecommended(12)}
-                  className="bg-lime-400 hover:bg-lime-300 text-black font-black p-2.5 rounded-xl text-xs transition"
+                  className="bg-primary-400 hover:bg-primary-300 text-black font-black p-2.5 rounded-xl text-xs transition"
                 >
                   📦 Add Dozen (12 Balls)
                 </button>

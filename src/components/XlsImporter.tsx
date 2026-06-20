@@ -382,7 +382,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
   return (
     <div className="bg-neutral-900 border border-neutral-850 p-5 rounded-2xl relative overflow-hidden space-y-4">
       {/* Decorative gradient border */}
-      <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 via-lime-500 to-teal-500" />
+      <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 via-primary-500 to-teal-500" />
 
       <div className="flex items-center gap-2">
         <FileSpreadsheet className="w-5 h-5 text-emerald-400" />
@@ -392,12 +392,12 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
       </div>
 
       <p className="text-xs text-neutral-400 leading-relaxed">
-        Batch register your custom catalog designs instantly using an Excel <code className="text-lime-400 font-mono text-[11px]">.xlsx</code>, <code className="text-lime-400 font-mono text-[11px]">.xls</code>, or <code className="text-lime-400 font-mono text-[11px]">.csv</code> list. Upload files directly to populate registry search index matches.
+        Batch register your custom catalog designs instantly using an Excel <code className="text-primary-400 font-mono text-xs">.xlsx</code>, <code className="text-primary-400 font-mono text-xs">.xls</code>, or <code className="text-primary-400 font-mono text-xs">.csv</code> list. Upload files directly to populate registry search index matches.
       </p>
 
       {/* Excel Structure Tip Info Box */}
-      <div className="p-3 bg-neutral-950 border border-neutral-850 rounded-xl flex gap-2.5 items-start text-[11px] text-neutral-400">
-        <Info className="w-4 h-4 text-lime-400 shrink-0 mt-0.5" />
+      <div className="p-3 bg-neutral-950 border border-neutral-850 rounded-xl flex gap-2.5 items-start text-xs text-neutral-400">
+        <Info className="w-4 h-4 text-primary-400 shrink-0 mt-0.5" />
         <div>
           <span className="font-bold text-neutral-200 block mb-0.5">Expected Column Headers:</span>
           Ideally, include columns like <strong className="text-white font-mono">Model</strong> (e.g. Pro Plus), and <strong className="text-white font-mono">Color</strong> (e.g. Neon Lime Splatter). If named differently, you can map columns manually.
