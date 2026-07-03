@@ -756,16 +756,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           Model: item.model,
           Name: item.name || item.model,
           Year: item.year || "",
-          Cover: item.cover || "",
-          Pieces: item.pieces || "",
-          Compression: item.compression || "",
-          TargetAudience: item.targetAudience || "",
-          Flight: item.flight || "",
-          Feel: item.feel || "",
-          Spin: item.spin || "",
-          Price: item.price || "",
-          Features: item.features ? item.features.join("; ") : "",
-          Colors: item.colors ? item.colors.join(", ") : "",
+          Color: item.color || "",
+          Variation: item.variation || "",
+          Notes: item.notes || ""
         };
 
         for (let i = 0; i < maxBallChunks; i++) {
