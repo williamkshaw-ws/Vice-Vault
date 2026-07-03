@@ -59,6 +59,11 @@ export default defineConfig(() => {
         output: {
           manualChunks(id) {
             if (id.includes('node_modules')) {
+              if (id.includes('xlsx')) return 'xlsx';
+              if (id.includes('html2canvas')) return 'html2canvas';
+              if (id.includes('firebase')) return 'firebase';
+              if (id.includes('lucide-react')) return 'lucide';
+              if (id.includes('react') || id.includes('react-dom')) return 'react-core';
               return 'vendor';
             }
           }
