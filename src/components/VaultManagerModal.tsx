@@ -41,8 +41,6 @@ export default function VaultManagerModal({
   const [showDeleteAllCatalogConfirm, setShowDeleteAllCatalogConfirm] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  if (!isOpen) return null;
-
   const handleClose = () => {
     setEditingItem(null);
     setAdminSearchQuery("");
@@ -69,6 +67,8 @@ export default function VaultManagerModal({
       return matchesSearch && matchesBrand;
     });
   }, [catalog, adminSearchQuery, adminBrandFilter]);
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
