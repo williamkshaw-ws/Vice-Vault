@@ -2131,7 +2131,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                     {/* Backdrop cover for clicking outside */}
                     <div className="fixed inset-0 z-30" onClick={() => setUserDropdownOpen(false)}></div>
                     <div
-                      className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-neutral-850 bg-neutral-950/95 backdrop-blur-md p-2 shadow-2xl z-40 flex flex-col gap-1 text-xs font-mono animate-in fade-in slide-in-from-top-2 duration-150"
+                      className="absolute right-0 left-auto top-full mt-2 w-56 rounded-xl border border-neutral-850 bg-neutral-950/95 backdrop-blur-md p-2 shadow-2xl z-40 flex flex-col gap-1 text-xs font-mono animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right"
                       id="user-profile-menu"
                     >
                       <div className="px-2.5 py-2 border-b border-neutral-900 mb-1">
