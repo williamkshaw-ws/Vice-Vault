@@ -39,7 +39,9 @@ export default function OwnedBallCard({
   const [exportCustomImageSleeve, setExportCustomImageSleeve] = useState<string | undefined>(undefined);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const catalogItem = catalog.find(c => c.id === ball.id);
+  const catalogItem = catalog.find(c => c.id === (ball.catalogId || ball.id));
+  const rarity = catalogItem?.rarity || 'common';
+  const totalMade = catalogItem?.totalMade;
 
   const downscaleImageToDataUrl = async (url: string | undefined): Promise<string | undefined> => {
     if (!url) return undefined;
@@ -322,10 +324,14 @@ export default function OwnedBallCard({
     }
   };
 
+  let editBorderClass = "border-[#2563eb]/50 shadow-[#2563eb]/5";
+  if (rarity === 'limited') editBorderClass = "border-red-500/70 shadow-red-500/10";
+  if (rarity === 'rare') editBorderClass = "border-purple-500/70 shadow-purple-500/10";
+
   if (isEditing) {
     return (
       <div 
-        className="bg-neutral-900 border border-[#2563eb]/50 rounded-2xl p-4 transition-all duration-300 shadow-md shadow-[#2563eb]/5 relative overflow-hidden"
+        className={`bg-neutral-900 border rounded-2xl p-4 transition-all duration-300 shadow-md relative overflow-hidden ${editBorderClass}`}
         id={`owned-card-edit-${ball.id}`}
       >
         {showUnsavedPrompt && (
@@ -627,9 +633,13 @@ export default function OwnedBallCard({
     );
   }
 
+  let displayBorderClass = "border-neutral-800";
+  if (rarity === 'limited') displayBorderClass = "border-red-500/70 shadow-red-500/10";
+  if (rarity === 'rare') displayBorderClass = "border-purple-500/70 shadow-purple-500/10";
+
   return (
     <div 
-      className="bg-neutral-900 hover:bg-neutral-900/90 border border-neutral-800 rounded-2xl p-4 transition-all duration-300 shadow-sm relative group overflow-hidden"
+      className={`bg-neutral-900 hover:bg-neutral-900/90 border rounded-2xl p-4 transition-all duration-300 shadow-sm relative group overflow-hidden ${displayBorderClass}`}
       id={`owned-card-${ball.id}`}
     >
       {showDeleteConfirm && (
@@ -693,7 +703,7 @@ export default function OwnedBallCard({
                   <span className="text-[9px] font-mono tracking-widest text-[#2563eb] uppercase font-black">
                     {ball.model}
                   </span>
-                  <span className={`text-[8px] px-1 py-0.2 rounded font-mono font-bold uppercase border tracking-wider scale-95 ${
+                  <span className={`text-[10px] font-mono border px-2 py-0.5 rounded leading-none shrink-0 select-none ${
                     ball.bundleItems && ball.bundleItems.length > 0
                       ? "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/60 text-amber-700 dark:text-amber-400"
                       : ball.packageType === 'box'
@@ -704,6 +714,21 @@ export default function OwnedBallCard({
                   }`}>
                     {ball.bundleItems && ball.bundleItems.length > 0 ? 'Bundle' : ball.packageType === 'box' ? 'Box' : ball.packageType === 'sleeve' ? 'Sleeve' : 'Ball'}
                   </span>
+                  {ball.year && (
+                    <span className="text-[10px] font-mono bg-neutral-900 border border-neutral-800 text-neutral-450 px-2 py-0.5 rounded leading-none shrink-0 select-none">
+                      {ball.year}
+                    </span>
+                  )}
+                  {rarity === 'rare' && totalMade && (
+                    <span className="text-[10px] font-mono bg-fuchsia-50 dark:bg-fuchsia-950/40 border border-fuchsia-200 dark:border-fuchsia-900/60 text-fuchsia-700 dark:text-fuchsia-400 px-2 py-0.5 rounded leading-none shrink-0 select-none whitespace-nowrap">
+                      {ball.quantity || 1} / {totalMade} Found
+                    </span>
+                  )}
+                  {rarity === 'limited' && (
+                    <span className="text-[10px] font-mono bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-400 px-2 py-0.5 rounded leading-none shrink-0 select-none whitespace-nowrap">
+                      Limited
+                    </span>
+                  )}
                 </div>
                 <h4 className="font-sans font-black text-white text-base leading-tight truncate mt-0.5" title={ball.name || "Standard Edition"}>
                   {ball.name || "Standard Edition"}

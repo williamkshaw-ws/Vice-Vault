@@ -48,6 +48,8 @@ export interface GolfBall {
   customImageBox?: string; // Custom uploaded box image
   name?: string;
   variation?: string;
+  rarity?: 'common' | 'limited' | 'rare';
+  totalMade?: number;
   bundleItems?: BundleItem[];
   catalogId?: string;
 }
@@ -82,6 +84,8 @@ export interface CatalogItem {
   customImage?: string; // Custom Base64 image
   customImageSleeve?: string; // Custom Base64 image for sleeve
   customImageBox?: string; // Custom Base64 image for box
+  rarity?: 'common' | 'limited' | 'rare';
+  totalMade?: number;
   bundleItems?: BundleItem[]; // Sub-items contained within this item
 }
 
@@ -98,6 +102,8 @@ export interface BallStock {
   customImage?: string; // User's personal image of the ball
   customImageSleeve?: string; // Custom Base64 image for sleeve
   customImageBox?: string; // Custom Base64 image for box
+  rarity?: 'common' | 'limited' | 'rare';
+  totalMade?: number;
   bundleItems?: BundleItem[]; // Sub-items contained within this item if logged as a bundle
 }
 

@@ -35,6 +35,7 @@ export default function VaultManagerModal({
   handleDeleteAllCatalog
 }: VaultManagerModalProps) {
   const [editingItem, setEditingItem] = useState<CatalogItem | null>(null);
+  const [duplicateItem, setDuplicateItem] = useState<CatalogItem | null>(null);
   const [adminSearchQuery, setAdminSearchQuery] = useState("");
   const [adminBrandFilter, setAdminBrandFilter] = useState("ALL");
   const [showXlsImporter, setShowXlsImporter] = useState(false);
@@ -43,6 +44,7 @@ export default function VaultManagerModal({
 
   const handleClose = () => {
     setEditingItem(null);
+    setDuplicateItem(null);
     setAdminSearchQuery("");
     setAdminBrandFilter("ALL");
     setShowXlsImporter(false);
@@ -115,6 +117,7 @@ export default function VaultManagerModal({
               onClick={() => {
                 setShowXlsImporter(false);
                 setEditingItem(null);
+                setDuplicateItem(null);
               }}
               className={`flex-1 py-2 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 !showXlsImporter
@@ -152,12 +155,13 @@ export default function VaultManagerModal({
               }}
               editItem={editingItem}
               onCancelEdit={() => setEditingItem(null)}
+              duplicateItem={duplicateItem}
+              onCancelDuplicate={() => setDuplicateItem(null)}
             />
           ) : (
           <React.Suspense fallback={<div className="p-8 text-center text-neutral-500 font-mono text-xs">Loading importer...</div>}>
             <XlsImporter onImportItems={(items) => {
               handleXlsImportCatalogItems(items);
-              setShowXlsImporter(false); // Return to form after import
             }} />
           </React.Suspense>
           )}
@@ -291,6 +295,16 @@ export default function VaultManagerModal({
                               {item.year}
                             </span>
                           )}
+                          {item.rarity === 'rare' && item.totalMade && (
+                            <span className="text-[9px] font-mono bg-fuchsia-50 dark:bg-fuchsia-950/40 border border-fuchsia-200 dark:border-fuchsia-900/60 text-fuchsia-700 dark:text-fuchsia-400 px-1.5 py-0.5 rounded leading-none scale-90 select-none whitespace-nowrap">
+                              Rare (1 of {item.totalMade})
+                            </span>
+                          )}
+                          {item.rarity === 'limited' && (
+                            <span className="text-[9px] font-mono bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-400 px-1.5 py-0.5 rounded leading-none scale-90 select-none whitespace-nowrap">
+                              Limited
+                            </span>
+                          )}
                         </div>
                         <p className="text-[10px] text-neutral-400 truncate mt-0.5 flex flex-wrap gap-x-2 items-center">
                           <span className="font-medium text-neutral-300">{item.color}</span>
@@ -337,6 +351,7 @@ export default function VaultManagerModal({
                             type="button"
                             onClick={() => {
                               setShowXlsImporter(false); // force switch to form
+                              setDuplicateItem(null);
                               setEditingItem(item);
                               // Smoothly scroll to top of database panel inside the modal
                               const el = document.getElementById("register-missing-database-panel");
@@ -347,6 +362,21 @@ export default function VaultManagerModal({
                           >
                             <Pencil size={11} />
                             <span>Edit</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowXlsImporter(false);
+                              setEditingItem(null);
+                              setDuplicateItem(item);
+                              const el = document.getElementById("register-missing-database-panel");
+                              if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                            }}
+                            className="p-1 px-2 rounded-md bg-neutral-900 hover:bg-neutral-800 border border-neutral-850 hover:border-neutral-750 text-neutral-400 hover:text-emerald-400 transition-colors flex items-center gap-1 text-[10px] font-mono font-black shrink-0 cursor-pointer"
+                            title="Duplicate Entry Specs"
+                          >
+                            <svg className="w-[11px] h-[11px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            <span>Duplicate</span>
                           </button>
                           <button
                             type="button"

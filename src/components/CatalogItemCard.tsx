@@ -36,6 +36,7 @@ interface CatalogItemCardProps {
   wishlistDates?: Record<string, string>;
   onToggleWishlist?: (id: string) => void;
   variant?: string;
+  globalOwned?: number;
 }
 
 let currentlyAddingCard: {
@@ -43,7 +44,7 @@ let currentlyAddingCard: {
   discardAndClose: () => void;
 } | null = null;
 
-export default function CatalogItemCard({ item, subItems = [], onAddToLocker, isReadOnly = false, wishlistItems = [], wishlistDates = {}, onToggleWishlist, variant, index = 0 }: CatalogItemCardProps) {
+export default function CatalogItemCard({ item, subItems = [], onAddToLocker, isReadOnly = false, wishlistItems = [], wishlistDates = {}, onToggleWishlist, variant, index = 0, globalOwned }: CatalogItemCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const isBundle = item.bundleItems && item.bundleItems.length > 0;
   
@@ -207,6 +208,13 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
     }
   };
 
+  let borderClass = isOpen ? "border-accent/50 shadow-md shadow-accent/10" : "border-neutral-800 hover:border-neutral-700 hover:shadow-sm";
+  if (item.rarity === 'limited') {
+    borderClass = "border-red-500/70 shadow-sm shadow-red-500/10";
+  } else if (item.rarity === 'rare') {
+    borderClass = "border-purple-500/70 shadow-sm shadow-purple-500/10";
+  }
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 15 }}
@@ -214,10 +222,8 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3, delay: index * 0.04, ease: [0.23, 1, 0.32, 1] }}
       className={`relative rounded-xl border p-4 transition-all duration-300 ${
-        isOpen 
-          ? "bg-neutral-900 border-accent/50 shadow-md shadow-accent/10" 
-          : "bg-neutral-900/60 hover:bg-neutral-900 border-neutral-800 hover:border-neutral-700 hover:shadow-sm"
-      } ${showWishlistPrompt ? "z-[60]" : ""}`}
+        isOpen ? "bg-neutral-900" : "bg-neutral-900/60 hover:bg-neutral-900"
+      } ${borderClass} ${showWishlistPrompt ? "z-[60]" : ""}`}
       id={`catalog-item-card-${item.id}`}
     >
 
@@ -246,7 +252,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
                       <span className="text-[9px] font-mono tracking-widest text-accent uppercase font-black">
                         {activeItem.model}
                       </span>
-                      <span className={`text-[9px] px-1 py-0.2 rounded font-mono font-bold uppercase border tracking-wider scale-95 ${
+                      <span className={`text-[10px] font-mono border px-2 py-0.5 rounded leading-none shrink-0 select-none ${
                         isBundle
                           ? "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/60 text-amber-700 dark:text-amber-400"
                           : pkgType === 'box'
@@ -263,15 +269,27 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
                     </h4>
                   </>
                 ) : (
-                  <div className="flex items-center gap-1.5">
-                    <h4 className="font-sans font-black text-white text-base leading-tight truncate" title={activeItem.model}>
-                      {activeItem.model}{activeItem.name ? ` - ${activeItem.name}` : ''}
-                    </h4>
-                    {activeItem.year && (
-                      <span className="text-[9px] font-mono bg-neutral-900 border border-neutral-800 text-neutral-450 px-1.5 py-0.5 rounded leading-none shrink-0 select-none">
-                        {activeItem.year}
-                      </span>
-                    )}
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <h4 className="font-sans font-black text-white text-base leading-tight truncate" title={activeItem.model}>
+                        {activeItem.model}{activeItem.name ? ` - ${activeItem.name}` : ''}
+                      </h4>
+                      {item.year && (
+                        <span className="text-[10px] font-mono bg-neutral-900 border border-neutral-800 text-neutral-450 px-2 py-0.5 rounded leading-none shrink-0 select-none">
+                          {item.year}
+                        </span>
+                      )}
+                      {item.rarity === 'rare' && item.totalMade && (
+                        <span className="text-[10px] font-mono bg-fuchsia-50 dark:bg-fuchsia-950/40 border border-fuchsia-200 dark:border-fuchsia-900/60 text-fuchsia-700 dark:text-fuchsia-400 px-2 py-0.5 rounded leading-none shrink-0 select-none whitespace-nowrap">
+                          {globalOwned || 0} / {item.totalMade} Found
+                        </span>
+                      )}
+                      {item.rarity === 'limited' && (
+                        <span className="text-[10px] font-mono bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-400 px-2 py-0.5 rounded leading-none shrink-0 select-none whitespace-nowrap">
+                          Limited
+                        </span>
+                      )}
+                    </div>
                   </div>
                 )}
 

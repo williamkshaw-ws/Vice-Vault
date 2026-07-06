@@ -16,8 +16,10 @@ interface TempImportRow {
   model: string;
   name: string;
   color: string;
-  variation: string;
+  variation?: string;
   year?: string;
+  rarity?: 'common' | 'limited' | 'rare';
+  totalMade?: string;
   groupColor?: boolean;
   groupVariation?: boolean;
   customImage?: string;
@@ -36,12 +38,16 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
     color: string;
     variation: string;
     year: string;
+    rarity: string;
+    totalMade: string;
   }>({
     model: "",
     name: "",
     color: "",
     variation: "",
     year: "",
+    rarity: "",
+    totalMade: "",
   });
   const [isDragActive, setIsDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +58,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
     setFile(null);
     setParsedRows([]);
     setHeaders([]);
-    setColumnMapping({ model: "", name: "", color: "", variation: "", year: "" });
+    setColumnMapping({ model: "", name: "", color: "", variation: "", year: "", rarity: "", totalMade: "" });
     setError(null);
     setSuccessCount(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -104,28 +110,34 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
         let detectedColorCol = "";
         let detectedVariationCol = "";
         let detectedYearCol = "";
+        let detectedRarityCol = "";
+        let detectedTotalMadeCol = "";
 
-        detectedHeaders.forEach((h) => {
-          const lh = h.toLowerCase();
-          if (lh === "model" || lh.includes("brand") || lh === "ball" || lh === "title") {
+        // Attempt smart-matching headers based on simple substrings
+        detectedHeaders.forEach(h => {
+          const lh = h.toLowerCase().trim();
+          if (lh === "model" || lh.includes("model")) {
             if (!detectedModelCol) detectedModelCol = h;
-          }
-          if (lh === "name" || lh.includes("label") || lh.includes("design name")) {
+          } else if (lh === "name" || lh === "title" || lh.includes("name")) {
             if (!detectedNameCol) detectedNameCol = h;
-          }
-          if (lh.includes("color") || lh.includes("finish") || lh.includes("shade") || lh.includes("style")) {
+          } else if (lh === "color" || lh.includes("colour")) {
             if (!detectedColorCol) detectedColorCol = h;
-          }
-          if (lh.includes("variation") || lh.includes("type") || lh.includes("subcolor")) {
+          } else if (lh === "variation" || lh.includes("var")) {
             if (!detectedVariationCol) detectedVariationCol = h;
-          }
-          if (lh === "year" || lh.includes("release year")) {
+          } else if (lh === "year" || lh.includes("release year")) {
             if (!detectedYearCol) detectedYearCol = h;
+          } else if (lh === "rarity" || lh === "tier") {
+            if (!detectedRarityCol) detectedRarityCol = h;
+          } else if (lh === "total made" || lh.includes("total") || lh === "quantity made") {
+            if (!detectedTotalMadeCol) detectedTotalMadeCol = h;
           }
         });
 
-        // Fallbacks if no match discovered
-        if (!detectedModelCol && detectedHeaders.length > 0) detectedModelCol = detectedHeaders[0];
+        // Fallbacks for missing smart matches (case insensitive exact matches)
+        if (!detectedModelCol) {
+          const found = detectedHeaders.find(h => h.toLowerCase() === "model");
+          detectedModelCol = found || "";
+        }
         if (!detectedNameCol) {
           const found = detectedHeaders.find(h => h.toLowerCase() === "name");
           detectedNameCol = found || "";
@@ -142,6 +154,14 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
           const found = detectedHeaders.find(h => h.toLowerCase() === "year");
           detectedYearCol = found || "";
         }
+        if (!detectedRarityCol) {
+          const found = detectedHeaders.find(h => h.toLowerCase() === "rarity");
+          detectedRarityCol = found || "";
+        }
+        if (!detectedTotalMadeCol) {
+          const found = detectedHeaders.find(h => h.toLowerCase() === "total made");
+          detectedTotalMadeCol = found || "";
+        }
 
         setColumnMapping({
           model: detectedModelCol,
@@ -149,17 +169,19 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
           color: detectedColorCol,
           variation: detectedVariationCol,
           year: detectedYearCol,
+          rarity: detectedRarityCol,
+          totalMade: detectedTotalMadeCol,
         });
 
-        // Store rows for previewing
-        processRows(
-          rawJson,
-          detectedModelCol,
-          detectedNameCol,
-          detectedColorCol,
-          detectedVariationCol,
-          detectedYearCol
-        );
+        parseRowsWithMapping(rawJson, {
+          modelCol: detectedModelCol,
+          nameCol: detectedNameCol,
+          colorCol: detectedColorCol,
+          variationCol: detectedVariationCol,
+          yearCol: detectedYearCol,
+          rarityCol: detectedRarityCol,
+          totalMadeCol: detectedTotalMadeCol,
+        });
 
       } catch (err: any) {
         setError(`Failed to read spreadsheet file: ${err.message || err}`);
@@ -169,21 +191,33 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
     reader.readAsArrayBuffer(uploadedFile);
   };
 
-  const processRows = (
-    rawJson: Record<string, any>[],
-    modelCol: string,
-    nameCol: string,
-    colorCol: string,
-    variationCol: string,
-    yearCol: string
+  const parseRowsWithMapping = (
+    rawData: Record<string, any>[],
+    mapping: {
+      modelCol: string;
+      nameCol: string;
+      colorCol: string;
+      variationCol: string;
+      yearCol: string;
+      rarityCol: string;
+      totalMadeCol: string;
+    }
   ) => {
-    const formatted: TempImportRow[] = rawJson
+    const { modelCol, nameCol, colorCol, variationCol, yearCol, rarityCol, totalMadeCol } = mapping;
+    
+    const formatted: TempImportRow[] = rawData
       .map((row) => {
-        const mVal = row[modelCol] !== undefined && row[modelCol] !== null ? String(row[modelCol]).trim() : "";
+        const mVal = modelCol && row[modelCol] !== undefined && row[modelCol] !== null ? String(row[modelCol]).trim() : "";
         const nameVal = nameCol && row[nameCol] !== undefined && row[nameCol] !== null ? String(row[nameCol]).trim() : "";
-        const cVal = row[colorCol] !== undefined && row[colorCol] !== null ? String(row[colorCol]).trim() : "";
+        const cVal = colorCol && row[colorCol] !== undefined && row[colorCol] !== null ? String(row[colorCol]).trim() : "";
         const varVal = variationCol && row[variationCol] !== undefined && row[variationCol] !== null ? String(row[variationCol]).trim() : "";
         const yearVal = yearCol && row[yearCol] !== undefined && row[yearCol] !== null ? String(row[yearCol]).trim() : "";
+        
+        const r = rarityCol && row[rarityCol] !== undefined && row[rarityCol] !== null ? String(row[rarityCol]).trim().toLowerCase() : "common";
+        let rarityVal: 'common'|'limited'|'rare' = 'common';
+        if (r === 'limited' || r === 'rare') rarityVal = r;
+
+        const totalMadeVal = totalMadeCol && row[totalMadeCol] !== undefined && row[totalMadeCol] !== null ? String(row[totalMadeCol]).trim() : "";
 
         // Reconstruct ball image chunks
         let customImage = "";
@@ -262,8 +296,10 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
           model: mVal,
           name: nameVal,
           color: cVal,
-          variation: varVal,
+          variation: varVal || undefined,
           year: yearVal || undefined,
+          rarity: rarityVal,
+          totalMade: totalMadeVal || undefined,
           groupColor,
           groupVariation,
           customImage: customImage || undefined,
@@ -278,30 +314,31 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
   };
 
   const handleMappingChange = (
-    key: "model" | "name" | "color" | "variation" | "year",
-    selectedHeader: string
+    key: "model" | "name" | "color" | "variation" | "year" | "rarity" | "totalMade",
+    headerName: string
   ) => {
-    const nextMapping = { ...columnMapping, [key]: selectedHeader };
+    const nextMapping = { ...columnMapping, [key]: headerName };
     setColumnMapping(nextMapping);
 
+    // Reparse the original raw worksheet json using the updated mappings
     if (file) {
-      // Reparse raw excel details with updated user columns mapping
       const reader = new FileReader();
       reader.onload = (e) => {
-        try {
-          const data = new Uint8Array(e.target?.result as ArrayBuffer);
-          const workbook = XLSX.read(data, { type: "array" });
-          const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-          const rawJson = XLSX.utils.sheet_to_json<Record<string, any>>(worksheet);
-          processRows(
-            rawJson,
-            nextMapping.model,
-            nextMapping.name,
-            nextMapping.color,
-            nextMapping.variation,
-            nextMapping.year
-          );
-        } catch (err) {}
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: "array" });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const rawJson = XLSX.utils.sheet_to_json<Record<string, any>>(worksheet);
+        
+        parseRowsWithMapping(rawJson, {
+            modelCol: nextMapping.model,
+            nameCol: nextMapping.name,
+            colorCol: nextMapping.color,
+            variationCol: nextMapping.variation,
+            yearCol: nextMapping.year,
+            rarityCol: nextMapping.rarity,
+            totalMadeCol: nextMapping.totalMade,
+        });
       };
       reader.readAsArrayBuffer(file);
     }
@@ -360,8 +397,10 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
         model: row.model.trim().toUpperCase(),
         name: row.name.trim() || undefined,
         color: row.color.trim(),
-        variation: row.variation.trim() || undefined,
+        variation: row.variation,
         year: row.year,
+        rarity: row.rarity,
+        totalMade: row.totalMade ? Number(row.totalMade) : undefined,
         groupColor: row.groupColor,
         groupVariation: row.groupVariation,
         customImage: row.customImage,
@@ -485,7 +524,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
               Identify Spreadsheet Columns
             </span>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <div>
                 <label className="block text-[10px] font-mono text-neutral-400 uppercase mb-1">
                   Model Name Column:
@@ -559,23 +598,52 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
               </div>
 
               <div>
-                <label className="block text-[10px] font-mono text-neutral-400 uppercase mb-1">
+                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
                   Release Year Column:
                 </label>
                 <select
                   value={columnMapping.year}
                   onChange={(e) => handleMappingChange("year", e.target.value)}
-                  className="w-full bg-neutral-900 border border-neutral-800 py-1.5 px-2 rounded-md text-xs text-white outline-none cursor-pointer focus:border-emerald-500"
+                  className="w-full bg-neutral-900 border border-neutral-800 focus:border-emerald-500 rounded py-1.5 px-3 text-xs text-white outline-none cursor-pointer"
                 >
-                  <option value="">-- Ignore / Skip --</option>
+                  <option value="">(Ignore/None)</option>
                   {headers.map((h) => (
-                    <option key={h} value={h}>
-                      {h}
-                    </option>
+                    <option key={h} value={h}>{h}</option>
                   ))}
                 </select>
               </div>
-
+              
+              <div>
+                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
+                  Rarity Column:
+                </label>
+                <select
+                  value={columnMapping.rarity}
+                  onChange={(e) => handleMappingChange("rarity", e.target.value)}
+                  className="w-full bg-neutral-900 border border-neutral-800 focus:border-emerald-500 rounded py-1.5 px-3 text-xs text-white outline-none cursor-pointer"
+                >
+                  <option value="">(Ignore/None)</option>
+                  {headers.map((h) => (
+                    <option key={h} value={h}>{h}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-[10px] uppercase font-mono tracking-wider text-neutral-400 mb-1.5 font-bold">
+                  Total Made Column:
+                </label>
+                <select
+                  value={columnMapping.totalMade}
+                  onChange={(e) => handleMappingChange("totalMade", e.target.value)}
+                  className="w-full bg-neutral-900 border border-neutral-800 focus:border-emerald-500 rounded py-1.5 px-3 text-xs text-white outline-none cursor-pointer"
+                >
+                  <option value="">(Ignore/None)</option>
+                  {headers.map((h) => (
+                    <option key={h} value={h}>{h}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 
@@ -589,7 +657,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
             <div className="max-h-[250px] overflow-y-auto border border-neutral-850 rounded-xl bg-neutral-950/60 divide-y divide-neutral-850 pr-1">
               {parsedRows.map((row, idx) => (
                 <div key={idx} className="flex items-center justify-between p-2 gap-2 text-xs">
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 flex-1">
+                  <div className="grid grid-cols-2 sm:grid-cols-7 gap-2 flex-1">
                     <input
                       type="text"
                       value={row.model}
@@ -624,6 +692,25 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
                       onChange={(e) => handleRowChange(idx, "year", e.target.value)}
                       placeholder="Year"
                       className="bg-transparent border-0 font-bold text-white focus:bg-neutral-900 focus:ring-1 focus:ring-emerald-500 rounded py-0.5 px-1 truncate placeholder-neutral-600 outline-none w-full text-xs"
+                    />
+                    <select
+                      value={row.rarity || 'common'}
+                      onChange={(e) => handleRowChange(idx, "rarity", e.target.value)}
+                      className="bg-transparent border-0 font-bold text-white focus:bg-neutral-900 focus:ring-1 focus:ring-emerald-500 rounded py-0.5 px-1 placeholder-neutral-600 outline-none w-full text-xs appearance-none"
+                      title="Rarity"
+                    >
+                      <option value="common">Common</option>
+                      <option value="limited">Limited</option>
+                      <option value="rare">Rare</option>
+                    </select>
+                    <input
+                      type="number"
+                      value={row.totalMade || ""}
+                      onChange={(e) => handleRowChange(idx, "totalMade", e.target.value)}
+                      placeholder="Qty"
+                      className="bg-transparent border-0 font-bold text-white focus:bg-neutral-900 focus:ring-1 focus:ring-emerald-500 rounded py-0.5 px-1 truncate placeholder-neutral-600 outline-none w-full text-xs disabled:opacity-30"
+                      disabled={row.rarity !== 'rare'}
+                      title="Total Made"
                     />
                   </div>
 

@@ -300,6 +300,7 @@ export default function App() {
   const [sharedLockerBalls, setSharedLockerBalls] = useState<GolfBall[]>([]);
   const [sharedLockerError, setSharedLockerError] = useState<string | null>(null);
   const [isSharedViewLoading, setIsSharedViewLoading] = useState(false);
+  const [globalCatalogStats, setGlobalCatalogStats] = useState<Record<string, number>>({});
 
   // (balls managed by useBallLocker)
 
@@ -662,7 +663,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
               groupVariation: item.groupVariation,
               customImage: item.customImage,
               customImageSleeve: item.customImageSleeve,
-              customImageBox: item.customImageBox
+              customImageBox: item.customImageBox,
+              rarity: item.rarity,
+              totalMade: item.totalMade
             }))
           })
         });
@@ -694,7 +697,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
               groupVariation: !!item.groupVariation,
               customImage: item.customImage || (existingInCatalog ? existingInCatalog.customImage : undefined),
               customImageSleeve: item.customImageSleeve || (existingInCatalog ? existingInCatalog.customImageSleeve : undefined),
-              customImageBox: item.customImageBox || (existingInCatalog ? existingInCatalog.customImageBox : undefined)
+              customImageBox: item.customImageBox || (existingInCatalog ? existingInCatalog.customImageBox : undefined),
+              rarity: item.rarity || (existingInCatalog ? existingInCatalog.rarity : 'common'),
+              totalMade: item.totalMade !== undefined ? Number(item.totalMade) : (existingInCatalog ? existingInCatalog.totalMade : undefined)
             };
           } else {
             const existing = groupedLocal[id];
@@ -758,6 +763,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           Year: item.year || "",
           Color: item.color || "",
           Variation: item.variation || "",
+          Rarity: item.rarity || "common",
+          "Total Made": item.totalMade || "",
           Notes: item.notes || ""
         };
 
@@ -820,7 +827,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             customImage: updatedFields.customImage !== undefined ? updatedFields.customImage : originalItem.customImage,
             customImageSleeve: updatedFields.customImageSleeve !== undefined ? updatedFields.customImageSleeve : originalItem.customImageSleeve,
             customImageBox: updatedFields.customImageBox !== undefined ? updatedFields.customImageBox : originalItem.customImageBox,
-            bundleItems: updatedFields.bundleItems
+            bundleItems: updatedFields.bundleItems,
+            rarity: updatedFields.rarity !== undefined ? updatedFields.rarity : originalItem.rarity,
+            totalMade: updatedFields.totalMade !== undefined ? updatedFields.totalMade : originalItem.totalMade
           })
         });
         if (!res.ok) {
@@ -843,7 +852,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           customImage: updatedFields.customImage !== undefined ? updatedFields.customImage : originalItem.customImage,
           customImageSleeve: updatedFields.customImageSleeve !== undefined ? updatedFields.customImageSleeve : originalItem.customImageSleeve,
           customImageBox: updatedFields.customImageBox !== undefined ? updatedFields.customImageBox : originalItem.customImageBox,
-          bundleItems: updatedFields.bundleItems !== undefined ? updatedFields.bundleItems : originalItem.bundleItems
+          bundleItems: updatedFields.bundleItems !== undefined ? updatedFields.bundleItems : originalItem.bundleItems,
+          rarity: updatedFields.rarity !== undefined ? updatedFields.rarity : originalItem.rarity,
+          totalMade: updatedFields.totalMade !== undefined ? updatedFields.totalMade : originalItem.totalMade
         };
         return prev.map((item) => (item.id === id ? newItem : item));
       });
@@ -962,8 +973,17 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             }
           }
         }
+        
+        // Always fetch global stats via API for simplicity
+        const statsRes = await fetch("/api/catalog/stats");
+        if (statsRes.ok) {
+           const statsData = await statsRes.json();
+           if (active && statsData) {
+              setGlobalCatalogStats(statsData);
+           }
+        }
       } catch (err) {
-        console.error("Error loading global catalog:", err);
+        console.error("Error loading global catalog or stats:", err);
       }
     };
 
@@ -1414,7 +1434,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             customImage: newItem.customImage,
             customImageSleeve: newItem.customImageSleeve,
             customImageBox: newItem.customImageBox,
-            bundleItems: newItem.bundleItems
+            bundleItems: newItem.bundleItems,
+            rarity: newItem.rarity,
+            totalMade: newItem.totalMade
           })
         });
         if (!res.ok) {
@@ -1438,7 +1460,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           customImage: newItem.customImage || (existing ? existing.customImage : undefined),
           customImageSleeve: newItem.customImageSleeve || (existing ? existing.customImageSleeve : undefined),
           customImageBox: newItem.customImageBox || (existing ? existing.customImageBox : undefined),
-          bundleItems: newItem.bundleItems || (existing ? existing.bundleItems : undefined)
+          bundleItems: newItem.bundleItems || (existing ? existing.bundleItems : undefined),
+          rarity: newItem.rarity || (existing ? existing.rarity : 'common'),
+          totalMade: newItem.totalMade || (existing ? existing.totalMade : undefined)
         };
       }
       setCatalog((prev) => {
@@ -1967,6 +1991,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                             wishlistDates={sharedLockerOwner.wishlistDates || {}}
                             variant="wishlist"
                             onAddToLocker={() => {}}
+                            globalOwned={globalCatalogStats[item.id] || 0}
                           />
                         );
                       })}
@@ -2423,6 +2448,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                             wishlistItems={userProfile?.wishlist || []}
                             wishlistDates={userProfile?.wishlistDates || {}}
                             onToggleWishlist={handleToggleWishlist}
+                            globalOwned={globalCatalogStats[group.primary.id] || 0}
                           />
                         ))}
                       </div>
@@ -2662,7 +2688,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                             return (
                             <CatalogItemCard
                               index={index}
-                              key={item.id}
+                              key={`${item.id}-wishlist`}
                               item={item}
                               isReadOnly={!currentUser}
                               onAddToLocker={handleAddBallFromCatalog}

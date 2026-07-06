@@ -123,6 +123,8 @@ interface CatalogItem {
   notes?: string;
   groupColor?: boolean;
   groupVariation?: boolean;
+  rarity?: 'common' | 'limited' | 'rare';
+  totalMade?: number;
   bundleItems?: { catalogId: string; qty: number }[];
 }
 
@@ -2085,6 +2087,27 @@ app.post("/api/users/:uid/stats", async (req, res) => {
   res.json({ success: true });
 });
 
+app.get("/api/catalog/stats", async (req, res) => {
+  try {
+    const users = await getUsersList();
+    const stats: Record<string, number> = {};
+    for (const u of users) {
+      const locker = await getUserLocker(u.uid);
+      if (Array.isArray(locker)) {
+        for (const ball of locker) {
+          if (ball.catalogId) {
+            stats[ball.catalogId] = (stats[ball.catalogId] || 0) + (ball.quantity || 1);
+          }
+        }
+      }
+    }
+    res.json(stats);
+  } catch (err) {
+    console.error("Stats error", err);
+    res.status(500).json({ error: "Failed to fetch stats" });
+  }
+});
+
 // Get global leaderboard
 app.get("/api/leaderboard", async (req, res) => {
   const users = await getUsersList();
@@ -2468,7 +2491,7 @@ app.post("/api/catalog", async (req, res) => {
     return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
   }
 
-  const { model, name, color, variation, notes, year, groupColor, groupVariation, customImage, customImageSleeve, customImageBox, bundleItems } = req.body;
+  const { model, name, color, variation, notes, year, groupColor, groupVariation, customImage, customImageSleeve, customImageBox, rarity, totalMade, bundleItems } = req.body;
   if (!model || !name || !color) {
     return res.status(400).json({ error: "Model, Name, and Color specifications are required." });
   }
@@ -2502,6 +2525,8 @@ app.post("/api/catalog", async (req, res) => {
     year: year ? year.trim() : undefined,
     groupColor: groupColor !== undefined ? !!groupColor : undefined,
     groupVariation: groupVariation !== undefined ? !!groupVariation : undefined,
+    rarity: rarity || 'common',
+    totalMade: totalMade ? Number(totalMade) : undefined,
     customImage: await uploadBase64ToStorage(resolvedImage !== undefined ? resolvedImage : (existingItem ? existingItem.customImage : undefined), "catalog"),
     customImageSleeve: await uploadBase64ToStorage(resolvedImageSleeve !== undefined ? resolvedImageSleeve : (existingItem ? existingItem.customImageSleeve : undefined), "catalog"),
     customImageBox: await uploadBase64ToStorage(resolvedImageBox !== undefined ? resolvedImageBox : (existingItem ? existingItem.customImageBox : undefined), "catalog"),
@@ -2530,7 +2555,7 @@ app.post("/api/catalog/bulk", async (req, res) => {
   const groupedItems: Record<string, CatalogItem> = {};
 
   for (const item of items) {
-    const { model, name, color, variation, year, groupColor, groupVariation, customImage, customImageSleeve, customImageBox, bundleItems } = item;
+    const { model, name, color, variation, year, groupColor, groupVariation, customImage, customImageSleeve, customImageBox, bundleItems, rarity, totalMade } = item;
     if (!model || !name || !color) continue;
 
     const newId = sanitizeId(model, color, name, variation);
@@ -2549,7 +2574,9 @@ app.post("/api/catalog/bulk", async (req, res) => {
         customImage: customImage || (existing ? existing.customImage : undefined),
         customImageSleeve: customImageSleeve || (existing ? existing.customImageSleeve : undefined),
         customImageBox: customImageBox || (existing ? existing.customImageBox : undefined),
-        bundleItems: bundleItems || (existing ? existing.bundleItems : undefined)
+        bundleItems: bundleItems || (existing ? existing.bundleItems : undefined),
+        rarity: rarity || (existing ? existing.rarity : 'common'),
+        totalMade: totalMade !== undefined ? Number(totalMade) : (existing ? existing.totalMade : undefined)
       };
     }
   }
@@ -2736,7 +2763,7 @@ app.put("/api/catalog/:id", async (req, res) => {
   }
 
   const { id } = req.params;
-  const { model, name, color, variation, notes, year, groupColor, groupVariation, customImage, customImageSleeve, customImageBox, bundleItems } = req.body;
+  const { model, name, color, variation, notes, year, groupColor, groupVariation, customImage, customImageSleeve, customImageBox, rarity, totalMade, bundleItems } = req.body;
 
   const catalog = await getGlobalCatalog();
   let currentItem = catalog.find(item => item.id === id);
@@ -2784,6 +2811,8 @@ app.put("/api/catalog/:id", async (req, res) => {
     customImage: await uploadBase64ToStorage(resolvedImage, "catalog"),
     customImageSleeve: await uploadBase64ToStorage(resolvedImageSleeve, "catalog"),
     customImageBox: await uploadBase64ToStorage(resolvedImageBox, "catalog"),
+    rarity: rarity !== undefined ? rarity : (currentItem.rarity || 'common'),
+    totalMade: totalMade !== undefined ? (totalMade ? Number(totalMade) : undefined) : currentItem.totalMade,
     bundleItems: bundleItems !== undefined ? bundleItems : currentItem.bundleItems
   };
 

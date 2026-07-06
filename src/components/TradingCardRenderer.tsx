@@ -19,11 +19,18 @@ const TradingCardRendererComponent = ({ ball, catalogItem, exportCustomImage, ex
       setMounted(true);
     }, []);
 
+    const rarity = catalogItem?.rarity || 'common';
+    const totalMade = catalogItem?.totalMade;
+    
+    let cardBorder = "";
+    if (rarity === 'limited') cardBorder = "border-[6px] border-[rgba(239,68,68,0.7)] shadow-[rgba(239,68,68,0.1)]";
+    else if (rarity === 'rare') cardBorder = "border-[6px] border-[rgba(168,85,247,0.7)] shadow-[rgba(168,85,247,0.1)]";
+
     const content = (
       <div className={`${isDarkTheme ? "dark" : ""} fixed top-0 left-0 opacity-0 pointer-events-none z-[-9999]`}>
         <div 
           ref={ref}
-          className="w-[500px] h-[700px] bg-neutral-950 p-8 flex flex-col relative overflow-hidden rounded-3xl"
+          className={`w-[500px] h-[700px] bg-neutral-950 p-8 flex flex-col relative overflow-hidden rounded-3xl ${cardBorder}`}
         >
           {/* Header Section */}
           <div className="flex justify-between items-start mb-6 z-10 shrink-0">
@@ -90,7 +97,9 @@ const TradingCardRendererComponent = ({ ball, catalogItem, exportCustomImage, ex
             {/* Footer */}
             <div className="mt-5 pt-4 border-t border-neutral-800 flex justify-between items-center opacity-75">
               <span className="text-[10px] font-mono text-neutral-500 whitespace-nowrap">GOLF BALL VAULT</span>
-              <span className="text-[10px] font-mono text-neutral-500 whitespace-nowrap">1 OF 1 MINT</span>
+              <span className={`text-[10px] font-mono font-bold whitespace-nowrap ${rarity === 'rare' ? 'text-[#c084fc]' : rarity === 'limited' ? 'text-[#f87171]' : 'text-neutral-500'}`}>
+                {rarity === 'rare' && totalMade ? `${ball.quantity || 1} OF ${totalMade} FOUND` : rarity === 'limited' ? 'LIMITED EDITION' : 'STANDARD ISSUE'}
+              </span>
             </div>
           </div>
         </div>
