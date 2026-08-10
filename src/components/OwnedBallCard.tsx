@@ -196,9 +196,9 @@ export default function OwnedBallCard({
   // Edit fields state
   const [editQty, setEditQty] = useState(ball.quantity);
   const [editPkgType, setEditPkgType] = useState<'ea' | 'sleeve' | 'box'>(ball.packageType || 'ea');
-  const [editPlayNumber, setEditPlayNumber] = useState<number>(ball.customNumber || 1);
+  const [editPlayNumber, setEditPlayNumber] = useState<number>(ball.customNumber !== undefined ? ball.customNumber : 1);
   const [editCustomNumberInput, setEditCustomNumberInput] = useState<string>(
-    [1, 2, 3, 4].includes(ball.customNumber) ? "" : String(ball.customNumber || "")
+    [0, 1, 2, 3, 4].includes(ball.customNumber) ? "" : String(ball.customNumber !== undefined ? ball.customNumber : "")
   );
   const [editCondition, setEditCondition] = useState<BallCondition>(ball.condition);
   const [editNotes, setEditNotes] = useState<string>(currentNotes);
@@ -215,8 +215,8 @@ export default function OwnedBallCard({
     const notes = currentNotes;
     setEditQty(ball.quantity);
     setEditPkgType(ball.packageType || 'ea');
-    setEditPlayNumber(ball.customNumber || 1);
-    setEditCustomNumberInput([1, 2, 3, 4].includes(ball.customNumber) ? "" : String(ball.customNumber || ""));
+    setEditPlayNumber(ball.customNumber !== undefined ? ball.customNumber : 1);
+    setEditCustomNumberInput([0, 1, 2, 3, 4].includes(ball.customNumber) ? "" : String(ball.customNumber !== undefined ? ball.customNumber : ""));
     setEditCondition(ball.condition);
     setEditNotes(notes);
     setEditCustomImageBox(ball.customImageBox || ball.customImage || "");
@@ -246,7 +246,7 @@ export default function OwnedBallCard({
   const handleCloseEdit = () => {
     const isDirty = editQty !== ball.quantity ||
       editPkgType !== (ball.packageType || 'ea') ||
-      (editPkgType !== 'box' && editPlayNumber !== (ball.customNumber || 1)) ||
+      (editPkgType !== 'box' && editPlayNumber !== (ball.customNumber !== undefined ? ball.customNumber : 1)) ||
       editCondition !== (ball.condition || 'new') ||
       editNotes !== (ball.notes || '') ||
       editCustomImage !== (ball.customImage || "") ||
@@ -392,7 +392,7 @@ export default function OwnedBallCard({
               Ball Play-Number
             </label>
             <div className="flex gap-1">
-              {[1, 2, 3, 4].map((num) => (
+              {[0, 1, 2, 3, 4].map((num) => (
                 <button
                   key={num}
                   type="button"
@@ -401,7 +401,9 @@ export default function OwnedBallCard({
                     setEditPlayNumber(num);
                     setEditCustomNumberInput("");
                   }}
-                  className={`flex-1 text-center py-1 rounded text-[11px] font-mono font-bold border transition-all cursor-pointer ${
+                  className={`text-center py-1 rounded text-[11px] font-mono font-bold border transition-all cursor-pointer ${
+                    num === 0 ? "px-1 flex-[1.2]" : "flex-1"
+                  } ${
                     editPkgType === 'box'
                       ? "bg-neutral-950 text-neutral-600 border-neutral-900 cursor-not-allowed opacity-50"
                       : editPlayNumber === num && editCustomNumberInput === ""
@@ -409,7 +411,7 @@ export default function OwnedBallCard({
                       : "bg-neutral-950 border-neutral-850 text-neutral-300 hover:border-neutral-700"
                   }`}
                 >
-                  {num}
+                  {num === 0 ? "None" : num}
                 </button>
               ))}
               
@@ -689,7 +691,7 @@ export default function OwnedBallCard({
           />
           {ball.packageType !== 'box' && (
             <div className="absolute -bottom-1 text-[8px] font-mono uppercase bg-neutral-950 border border-neutral-800 text-neutral-400 px-1.5 py-0.5 rounded leading-none scale-90">
-              #{ball.customNumber}
+              {ball.customNumber && ball.customNumber > 0 ? `#${ball.customNumber}` : "No #"}
             </div>
           )}
         </div>

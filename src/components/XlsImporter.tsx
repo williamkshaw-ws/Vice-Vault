@@ -346,7 +346,7 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
 
   const handleRowChange = (
     index: number,
-    key: "model" | "name" | "color" | "variation" | "year",
+    key: "model" | "name" | "color" | "variation" | "year" | "rarity" | "totalMade",
     value: string
   ) => {
     setParsedRows((prev) =>

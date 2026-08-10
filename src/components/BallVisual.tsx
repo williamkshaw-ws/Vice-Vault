@@ -588,7 +588,7 @@ export default function BallVisual({
         <span className={`${isCustomModel ? 'font-sans font-black uppercase tracking-wider' : 'font-serif font-black lowercase italic tracking-wide'} ${textSizes[size].brand}`}>
           {brandLabel}
         </span>
-        {number !== undefined && number !== null && (
+        {number !== undefined && number !== null && number > 0 && (
           <span className={`font-mono font-medium -mt-1 ${textSizes[size].num}`}>
             {number}
           </span>
