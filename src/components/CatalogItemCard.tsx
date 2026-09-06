@@ -237,7 +237,7 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
             customImage={activeItem.customImage}
             customImageSleeve={activeItem.customImageSleeve}
             customImageBox={activeItem.customImageBox}
-            packageType={pkgType}
+            packageType="ea"
           />
         </div>
 
