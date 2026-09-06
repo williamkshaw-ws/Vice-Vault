@@ -1229,90 +1229,84 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   }, [balls, currentUser]);
 
 
-  // Modern synchronization: Ensure bag items stay perfectly synced with catalog changes (e.g. Name, Year)
+  // Modern synchronization: Ensure bag items stay perfectly synced with catalog changes (e.g. Name, Year).
+  // Uses functional setBalls updater to avoid including `balls` in the dependency array,
+  // which would risk an infinite re-render loop if the normalization logic ever oscillated.
   useEffect(() => {
-    if (catalog.length === 0 || balls.length === 0) return;
+    if (catalog.length === 0) return;
 
-    let changed = false;
-    const updatedBalls = balls.map(b => {
-      // STRICT MATCH ONLY: We no longer do legacy fuzzy matching. 
-      // Bag items must have the correct model, color (or name-as-color fallback), and variation to sync.
-      const normalize = (s?: string) => (s || "").replace(/[^a-z0-9]/gi, "").toLowerCase();
-      
-      let match;
-      if (b.catalogId) {
-        match = catalog.find(c => c.id === b.catalogId);
-      } else {
-        match = catalog.find(c => {
-          const modelMatch = normalize(c.model) === normalize(b.model);
-          if (!modelMatch) return false;
+    setBalls(prevBalls => {
+      if (prevBalls.length === 0) return prevBalls;
 
-          const colorMatch = normalize(c.color) === normalize(b.color);
-          const nameAsColorMatch = normalize(c.name) === normalize(b.color) && normalize(c.name) !== "";
-          const isGroupColorMatch = c.groupColor && normalize(b.color) === normalize("Mixed");
-          const finalColorMatch = colorMatch || nameAsColorMatch || isGroupColorMatch;
-          
-          const nameMatch = normalize(c.name) === normalize(b.name);
-          
-          const varMatch = normalize(c.variation) === normalize(b.variation);
-          const isGroupVarMatch = c.groupVariation && normalize(b.variation) === normalize("Mixed");
-          const finalVarMatch = varMatch || isGroupVarMatch;
-
-          // Name MUST match if it is provided, unless we are matching the specific edge-case where name == color (Cosmic).
-          const isNameValid = nameMatch || !b.name || nameAsColorMatch;
-
-          return finalColorMatch && finalVarMatch && isNameValid;
-        });
-      }
-
-      if (match) {
-        let updatedB = { ...b };
-        let localChanged = false;
+      let changed = false;
+      const updatedBalls = prevBalls.map(b => {
+        const normalize = (s?: string) => (s || "").replace(/[^a-z0-9]/gi, "").toLowerCase();
         
-        // Heal broken catalogIds
-        if (b.catalogId !== match.id) {
-          updatedB.catalogId = match.id;
-          localChanged = true;
+        let match;
+        if (b.catalogId) {
+          match = catalog.find(c => c.id === b.catalogId);
+        } else {
+          match = catalog.find(c => {
+            const modelMatch = normalize(c.model) === normalize(b.model);
+            if (!modelMatch) return false;
+
+            const colorMatch = normalize(c.color) === normalize(b.color);
+            const nameAsColorMatch = normalize(c.name) === normalize(b.color) && normalize(c.name) !== "";
+            const isGroupColorMatch = c.groupColor && normalize(b.color) === normalize("Mixed");
+            const finalColorMatch = colorMatch || nameAsColorMatch || isGroupColorMatch;
+            
+            const nameMatch = normalize(c.name) === normalize(b.name);
+            
+            const varMatch = normalize(c.variation) === normalize(b.variation);
+            const isGroupVarMatch = c.groupVariation && normalize(b.variation) === normalize("Mixed");
+            const finalVarMatch = varMatch || isGroupVarMatch;
+
+            const isNameValid = nameMatch || !b.name || nameAsColorMatch;
+
+            return finalColorMatch && finalVarMatch && isNameValid;
+          });
         }
 
-        // Sync Name
-        if (b.name !== match.name) {
-          updatedB.name = match.name;
-          localChanged = true;
-        }
+        if (match) {
+          let updatedB = { ...b };
+          let localChanged = false;
+          
+          if (b.catalogId !== match.id) {
+            updatedB.catalogId = match.id;
+            localChanged = true;
+          }
+          if (b.name !== match.name) {
+            updatedB.name = match.name;
+            localChanged = true;
+          }
+          if (!b.year && match.year) {
+            updatedB.year = match.year;
+            localChanged = true;
+          }
 
-        // Sync Year ONLY if missing
-        if (!b.year && match.year) {
-          updatedB.year = match.year;
-          localChanged = true;
-        }
+          const correctColor = (b.packageType === 'box' && match.groupColor) ? "Mixed" : match.color;
+          if (b.color !== correctColor) {
+            updatedB.color = correctColor;
+            localChanged = true;
+          }
 
-        // Sync Color (preserving Mixed for grouped boxes)
-        const correctColor = (b.packageType === 'box' && match.groupColor) ? "Mixed" : match.color;
-        if (b.color !== correctColor) {
-          updatedB.color = correctColor;
-          localChanged = true;
+          const correctVar = (b.packageType === 'box' && match.groupVariation) ? "Mixed" : (match.variation || undefined);
+          if (b.variation !== correctVar) {
+            updatedB.variation = correctVar;
+            localChanged = true;
+          }
+          
+          if (localChanged) {
+            changed = true;
+            return updatedB;
+          }
         }
+        return b;
+      });
 
-        // Sync Variation (preserving Mixed for grouped boxes)
-        const correctVar = (b.packageType === 'box' && match.groupVariation) ? "Mixed" : (match.variation || undefined);
-        if (b.variation !== correctVar) {
-          updatedB.variation = correctVar;
-          localChanged = true;
-        }
-        
-        if (localChanged) {
-          changed = true;
-          return updatedB;
-        }
-      }
-      return b;
+      return changed ? updatedBalls : prevBalls;
     });
-
-    if (changed) {
-      setBalls(updatedBalls);
-    }
-  }, [catalog, balls]);
+  }, [catalog]);
 
 
   // Handle theme switching and OS preference changes

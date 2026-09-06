@@ -5,7 +5,12 @@
 
 import { initializeApp, getApp, getApps } from "firebase/app";
 import { getAuth, Auth } from "firebase/auth";
-import { initializeFirestore, Firestore } from "firebase/firestore";
+import { 
+  initializeFirestore, 
+  Firestore, 
+  persistentLocalCache, 
+  persistentMultipleTabManager 
+} from "firebase/firestore";
 
 export interface FirebaseConfig {
   apiKey: string;
@@ -77,7 +82,17 @@ if (isConfigured) {
       app = getApp();
     }
     auth = getAuth(app);
-    db = initializeFirestore(app, { ignoreUndefinedProperties: true });
+    try {
+      db = initializeFirestore(app, {
+        ignoreUndefinedProperties: true,
+        localCache: persistentLocalCache({
+          tabManager: persistentMultipleTabManager()
+        })
+      });
+    } catch (cacheErr) {
+      console.warn("Could not enable multi-tab persistent cache, using fallback Firestore:", cacheErr);
+      db = initializeFirestore(app, { ignoreUndefinedProperties: true });
+    }
   } catch (error) {
     console.error("Error initializing Firebase:", error);
   }

@@ -3,12 +3,19 @@ import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import { auth } from './firebase';
+import { registerSW } from 'virtual:pwa-register';
+
+// Register service worker for offline capability and asset precaching
+registerSW({ immediate: true });
 
 const originalFetch = window.fetch;
 window.fetch = async (...args) => {
   const [resource, config] = args;
   
-  if (typeof resource === 'string' && resource.startsWith('/api/')) {
+  // Handle both string URLs and Request objects
+  const url = typeof resource === 'string' ? resource : resource instanceof Request ? resource.url : '';
+  
+  if (url.startsWith('/api/')) {
     const newConfig: RequestInit = config ? { ...config } : {};
     newConfig.headers = { ...newConfig.headers } as Record<string, string>;
     

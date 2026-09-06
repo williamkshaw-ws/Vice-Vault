@@ -117,7 +117,7 @@ export default function MetricCards({ balls, courseLogs, onTriggerQuickAction }:
         <div className="mt-2 pt-3 border-t border-neutral-800/60 flex items-center justify-between text-xs">
           <span className="text-[10px] uppercase font-mono text-neutral-500">Woods/Water Toll</span>
           <span className="text-red-300 font-bold">
-            {donationRate > 0 ? `+${donationRate} Net Lost` : donationRate < 0 ? `${donationRate} Net Found` : "Perfectly Balanced"}
+            {donationRate > 0 ? `+${donationRate} Net Lost` : donationRate < 0 ? `${Math.abs(donationRate)} Net Found` : "Perfectly Balanced"}
           </span>
         </div>
       </div>

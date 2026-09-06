@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw, Trophy, Heart, X } from 'lucide-react';
-import { GolfBall, CatalogItem, UserProfile } from '../types';
+import { GolfBall, CatalogItem, UserProfile, BallCondition } from '../types';
 import OwnedBallCard from '../components/OwnedBallCard';
 import TrophyCase from '../components/TrophyCase';
 import VaultFilterBar from '../components/VaultFilterBar';
@@ -85,7 +85,23 @@ interface MyVaultViewProps {
   setShowClearWishlistConfirm: (val: boolean) => void;
   bagFilters: any;
   uniqueTrophyBalls: CatalogItem[];
-  handleAddBallFromCatalog: (item: CatalogItem, qty: number, pkgType: "ea" | "sleeve" | "box") => void;
+  handleAddBallFromCatalog: (
+    model: string,
+    color: string,
+    qty: number,
+    customNum: number,
+    notes: string,
+    condition: BallCondition,
+    customImage?: string,
+    packageType?: 'ea' | 'sleeve' | 'box',
+    year?: string,
+    customImageSleeve?: string,
+    customImageBox?: string,
+    name?: string,
+    variation?: string,
+    bundleItems?: { catalogId: string; qty: number }[],
+    catalogId?: string
+  ) => void;
   handleToggleWishlist: (item: CatalogItem) => void;
   handleUpdateBall: (id: string, updates: Partial<GolfBall>) => void;
   handleDeleteBall: (id: string) => void;

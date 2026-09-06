@@ -66,7 +66,8 @@ export function useBallLocker(currentUser: any) {
       if (!localStorage.getItem("vice_vault_mock_user")) {
         setIsCloudDataLoaded(false);
         const savedBalls = localStorage.getItem("vice_vault_guest_v2");
-        setBalls(savedBalls ? filterLegacyBalls(safeJSONParse(savedBalls)) : INITIAL_OWNED_BALLS);
+        const parsedBalls = safeJSONParse(savedBalls);
+        setBalls(Array.isArray(parsedBalls) ? filterLegacyBalls(parsedBalls) : INITIAL_OWNED_BALLS);
       }
     }
   }, [currentUser]);

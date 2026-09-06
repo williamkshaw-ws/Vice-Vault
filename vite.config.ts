@@ -14,7 +14,14 @@ export default defineConfig(() => {
         devOptions: {
           enabled: false // disable in dev to prevent caching confusion
         },
-        includeAssets: ['vault-icon.png', 'vault-logo.png'],
+        includeAssets: [
+          'vault-icon.png',
+          'vault-logo.png',
+          'vault-name-desktop.png',
+          'vault-name-mobile.png',
+          'wood-bg.png',
+          'apple-touch-icon.png'
+        ],
         manifest: {
           name: 'Golf Ball Vault',
           short_name: 'Golf Ball Vault',
@@ -34,6 +41,53 @@ export default defineConfig(() => {
               sizes: '512x512',
               type: 'image/png',
               purpose: 'any maskable'
+            }
+          ]
+        },
+        workbox: {
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+          runtimeCaching: [
+            {
+              urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts',
+                expiration: {
+                  maxEntries: 20,
+                  maxAgeSeconds: 60 * 60 * 24 * 365
+                },
+                cacheableResponse: {
+                  statuses: [0, 200]
+                }
+              }
+            },
+            {
+              urlPattern: /^https:\/\/(?:firebasestorage\.googleapis\.com|.*\.firebasestorage\.app)\/.*/i,
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'firebase-storage-images',
+                expiration: {
+                  maxEntries: 300,
+                  maxAgeSeconds: 60 * 60 * 24 * 60
+                },
+                cacheableResponse: {
+                  statuses: [0, 200]
+                }
+              }
+            },
+            {
+              urlPattern: /^https:\/\/i\.ibb\.co\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'imgbb-images',
+                expiration: {
+                  maxEntries: 300,
+                  maxAgeSeconds: 60 * 60 * 24 * 60
+                },
+                cacheableResponse: {
+                  statuses: [0, 200]
+                }
+              }
             }
           ]
         }

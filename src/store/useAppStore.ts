@@ -27,6 +27,9 @@ type AppState = {
   
   dbPanelTab: 'browse' | 'admin' | 'users' | 'register';
   setDbPanelTab: (tab: 'browse' | 'admin' | 'users' | 'register') => void;
+
+  activeAddingCardId: string | null;
+  setActiveAddingCardId: (id: string | null) => void;
 };
 
 export const useAppStore = create<AppState>((set) => ({
@@ -59,4 +62,7 @@ export const useAppStore = create<AppState>((set) => ({
   
   dbPanelTab: 'browse',
   setDbPanelTab: (dbPanelTab) => set({ dbPanelTab }),
+
+  activeAddingCardId: null,
+  setActiveAddingCardId: (activeAddingCardId) => set({ activeAddingCardId }),
 }));

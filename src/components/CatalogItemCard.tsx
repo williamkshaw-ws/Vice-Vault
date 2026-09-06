@@ -8,6 +8,7 @@ import { CatalogItem, BallCondition } from "../types";
 import BallVisual from "./BallVisual";
 import { Plus, Check, ChevronDown, ChevronUp, Layers, HelpCircle, Package, MessageSquare, X, AlertTriangle, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAppStore } from "../store/useAppStore";
 
 interface CatalogItemCardProps {
   key?: string | number;
@@ -39,13 +40,9 @@ interface CatalogItemCardProps {
   globalOwned?: number;
 }
 
-let currentlyAddingCard: {
-  id: string;
-  discardAndClose: () => void;
-} | null = null;
-
 export default function CatalogItemCard({ item, subItems = [], onAddToLocker, isReadOnly = false, wishlistItems = [], wishlistDates = {}, onToggleWishlist, variant, index = 0, globalOwned }: CatalogItemCardProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const { activeAddingCardId, setActiveAddingCardId } = useAppStore();
+  const isOpen = activeAddingCardId === item.id;
   const isBundle = item.bundleItems && item.bundleItems.length > 0;
   
   // If the item is wishlisted specifically as an individual item (no -pkg-box suffix), default to 'ea'
@@ -95,20 +92,6 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
     setSelectedItemId(item.id);
   }, [item.id]);
 
-  React.useEffect(() => {
-    if (isOpen && !justAdded) {
-      currentlyAddingCard = {
-        id: item.id,
-        discardAndClose: () => {
-          setIsOpen(false);
-          currentlyAddingCard = null;
-        }
-      };
-    } else if (currentlyAddingCard?.id === item.id) {
-      currentlyAddingCard = null;
-    }
-  }, [isOpen, justAdded, item.id]);
-
   const activeItem = subItems.find(si => si.id === selectedItemId) || item;
 
   React.useEffect(() => {
@@ -118,9 +101,6 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
   }, [isOpen, activeItem.year, item.year]);
 
   const startAdding = () => {
-    if (currentlyAddingCard && currentlyAddingCard.id !== item.id) {
-      currentlyAddingCard.discardAndClose();
-    }
     openThisCard();
   };
 
@@ -131,12 +111,13 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
     setCustomNumberInput("");
     setCondition(BallCondition.NEW);
     setNotes("");
-    setIsOpen(true);
+    setActiveAddingCardId(item.id);
   };
 
   const handleCloseAdd = () => {
-    setIsOpen(false);
-    if (currentlyAddingCard?.id === item.id) currentlyAddingCard = null;
+    if (activeAddingCardId === item.id) {
+      setActiveAddingCardId(null);
+    }
   };
 
   const submitAdd = () => {
@@ -170,11 +151,12 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
     );
 
     setJustAdded(true);
-    if (currentlyAddingCard?.id === item.id) currentlyAddingCard = null;
 
     setTimeout(() => {
       setJustAdded(false);
-      setIsOpen(false);
+      if (activeAddingCardId === item.id) {
+        setActiveAddingCardId(null);
+      }
       setNotes("");
       setPlayNumber(1);
       setCustomNumberInput("");

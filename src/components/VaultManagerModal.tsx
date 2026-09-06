@@ -55,8 +55,8 @@ export default function VaultManagerModal({
     return catalog.filter(item => {
       const q = adminSearchQuery.toLowerCase();
       const matchesSearch = 
-        item.model.toLowerCase().includes(q) || 
-        item.color.toLowerCase().includes(q) ||
+        item.model?.toLowerCase().includes(q) || 
+        item.color?.toLowerCase().includes(q) ||
         (item.name && item.name.toLowerCase().includes(q)) ||
         (item.variation && item.variation.toLowerCase().includes(q)) ||
         (item.notes && item.notes.toLowerCase().includes(q)) ||

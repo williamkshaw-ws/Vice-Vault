@@ -1,6 +1,6 @@
 import React from 'react';
 import { Database, ChevronRight, ChevronDown, Heart } from 'lucide-react';
-import { CatalogItem, UserProfile } from '../types';
+import { CatalogItem, UserProfile, BallCondition } from '../types';
 import CatalogItemCard from '../components/CatalogItemCard';
 import VaultFilterBar from '../components/VaultFilterBar';
 import SearchInput from '../components/SearchInput';
@@ -41,7 +41,23 @@ interface CatalogViewProps {
   setIsVaultManagerOpen: (val: boolean) => void;
   setShowXlsImporter: (val: boolean) => void;
   setEditingItem: (val: any) => void;
-  handleAddBallFromCatalog: (item: CatalogItem, qty: number, pkgType: "ea" | "sleeve" | "box") => void;
+  handleAddBallFromCatalog: (
+    model: string,
+    color: string,
+    qty: number,
+    customNum: number,
+    notes: string,
+    condition: BallCondition,
+    customImage?: string,
+    packageType?: 'ea' | 'sleeve' | 'box',
+    year?: string,
+    customImageSleeve?: string,
+    customImageBox?: string,
+    name?: string,
+    variation?: string,
+    bundleItems?: { catalogId: string; qty: number }[],
+    catalogId?: string
+  ) => void;
   handleToggleWishlist: (item: CatalogItem) => void;
   globalCatalogStats: Record<string, number>;
 }

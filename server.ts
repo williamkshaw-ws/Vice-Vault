@@ -1970,15 +1970,7 @@ app.patch("/api/users/:id/profile", async (req, res) => {
   const oldDocId = resolvedId;
   let newDocId = resolvedId;
   if (username !== undefined) {
-    const cleanUsername = cleanUsernameString(username);
-    if (!cleanUsername) {
-      return res.status(400).json({ error: "Username must contain letters, numbers, or underscores." });
-    }
-    // Check if username is already taken by someone else
-    const usernameExists = users.some(u => u.uid !== resolvedId && u.username?.toLowerCase() === cleanUsername);
-    if (usernameExists) {
-      return res.status(400).json({ error: "This username is already taken by another account." });
-    }
+    // cleanUsername and uniqueness were already validated above — use them directly
     newDocId = `u-${cleanUsername}`;
     user.username = cleanUsername;
   }
