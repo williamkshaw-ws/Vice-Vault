@@ -2,12 +2,13 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper function to check if the current user is an Admin
+    // Helper function to check if the current user is an Admin.
+    // Dynamically checks the 'role' field on the requesting user's own document,
+    // so any user promoted to Admin via the server gains Firestore write access too.
     function isAdmin() {
-      // Since the admin doc is u-admin, we check if the doc u-admin has uid matching request.auth.uid
       return request.auth != null && 
-        exists(/databases/$(database)/documents/users/u-admin) &&
-        get(/databases/$(database)/documents/users/u-admin).data.uid == request.auth.uid;
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "Admin";
     }
 
     // Rules for the golf ball catalog collection
