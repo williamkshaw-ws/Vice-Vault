@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useDeferredValue } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GolfBall, CatalogItem, BallModel, BallColor, BallCondition, UserProfile } from "./types";
 import { VICE_BALLS_SPECS, COLOR_STYLES, SCRAPED_BALLS } from "./constants";
@@ -1696,10 +1696,13 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     setShowResetConfirm(false);
   };
 
+  // Non-blocking deferred search query for high-frequency typing
+  const deferredSearchQuery = useDeferredValue(searchQuery);
+
   // FILTERED CATALOG items based on search word and model filter tag
   const searchedCatalog = useMemo(() => {
-    if (!searchQuery) return catalog;
-    const query = searchQuery.toLowerCase();
+    if (!deferredSearchQuery) return catalog;
+    const query = deferredSearchQuery.toLowerCase();
     return catalog.filter(item => 
       item.model.toLowerCase().includes(query) ||
       (item.name && item.name.toLowerCase().includes(query)) ||
@@ -1708,7 +1711,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       (item.notes && item.notes.toLowerCase().includes(query)) ||
       (item.year && item.year.toLowerCase().includes(query))
     );
-  }, [catalog, searchQuery]);
+  }, [catalog, deferredSearchQuery]);
 
   const filteredCatalog = useMemo(() => {
     return searchedCatalog.filter((item) => {
@@ -1732,7 +1735,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
       return matchesBrand && matchesWishlist && matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName;
     });
-  }, [catalog, searchQuery, selectedBrandFilter, showWishlistOnly, userProfile, dbPanelTab, cFilterModel, cFilterColor, cFilterVariation, cFilterYear, cFilterName]);
+  }, [searchedCatalog, selectedBrandFilter, showWishlistOnly, userProfile, dbPanelTab, cFilterModel, cFilterColor, cFilterVariation, cFilterYear, cFilterName]);
 
   // Unique models actually present in the registry catalog for the Filter Model buttons
   const registeredModels = useMemo(() => {

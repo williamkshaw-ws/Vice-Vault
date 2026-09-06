@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useDeferredValue } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw, Trophy, Heart, X } from 'lucide-react';
 import { GolfBall, CatalogItem, UserProfile, BallCondition } from '../types';
@@ -165,6 +165,97 @@ export default function MyVaultView({
     wishlistSearchQuery,
     setWishlistSearchQuery
   } = useAppStore();
+
+  const deferredBagSearchQuery = useDeferredValue(bagSearchQuery);
+  const deferredWishlistSearchQuery = useDeferredValue(wishlistSearchQuery);
+
+  const filteredWishlistItems = useMemo(() => {
+    if (!userProfile?.wishlist?.length) return [];
+    return Array.from(new Set(userProfile.wishlist.map(id => id.replace(/-pkg-(box|ea)$/, ""))))
+      .map(baseId => catalog.find(c => c.id === baseId))
+      .filter((item): item is CatalogItem => {
+        if (!item) return false;
+        
+        if (deferredWishlistSearchQuery) {
+          const q = deferredWishlistSearchQuery.toLowerCase();
+          const matchesSearch = 
+            item.model.toLowerCase().includes(q) || 
+            item.color.toLowerCase().includes(q) ||
+            (item.name && item.name.toLowerCase().includes(q)) ||
+            (item.variation && item.variation.toLowerCase().includes(q)) ||
+            (item.notes && item.notes.toLowerCase().includes(q)) ||
+            (item.year && item.year.toLowerCase().includes(q));
+          if (!matchesSearch) return false;
+        }
+
+        const matchesAdvancedModel = !wFilterModel || item.model === wFilterModel;
+        const matchesAdvancedColor = !wFilterColor || item.color === wFilterColor;
+        const matchesAdvancedVariation = !wFilterVariation || item.variation === wFilterVariation;
+        const matchesAdvancedYear = !wFilterYear || item.year === wFilterYear;
+        const matchesAdvancedName = !wFilterName || item.name === wFilterName;
+        return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName;
+      })
+      .sort((a, b) => {
+        if (!a || !b) return 0;
+        switch (bagSortBy) {
+          case 'added_desc': {
+            const dA = new Date(userProfile?.wishlistDates?.[a.id] || userProfile?.wishlistDates?.[`${a.id}-pkg-box`] || userProfile?.wishlistDates?.[`${a.id}-pkg-ea`] || 0).getTime();
+            const dB = new Date(userProfile?.wishlistDates?.[b.id] || userProfile?.wishlistDates?.[`${b.id}-pkg-box`] || userProfile?.wishlistDates?.[`${b.id}-pkg-ea`] || 0).getTime();
+            return dB - dA;
+          }
+          case 'added_asc': {
+            const dA = new Date(userProfile?.wishlistDates?.[a.id] || userProfile?.wishlistDates?.[`${a.id}-pkg-box`] || userProfile?.wishlistDates?.[`${a.id}-pkg-ea`] || 0).getTime();
+            const dB = new Date(userProfile?.wishlistDates?.[b.id] || userProfile?.wishlistDates?.[`${b.id}-pkg-box`] || userProfile?.wishlistDates?.[`${b.id}-pkg-ea`] || 0).getTime();
+            return dA - dB;
+          }
+          case 'model_asc': return a.model.localeCompare(b.model) || (a.name || "").localeCompare(b.name || "");
+          case 'model_desc': return b.model.localeCompare(a.model) || (b.name || "").localeCompare(a.name || "");
+          case 'year_desc': return (b.year || "").localeCompare(a.year || "");
+          case 'year_asc': return (a.year || "").localeCompare(b.year || "");
+          default: return 0;
+        }
+      });
+  }, [userProfile?.wishlist, userProfile?.wishlistDates, catalog, deferredWishlistSearchQuery, wFilterModel, wFilterColor, wFilterVariation, wFilterYear, wFilterName, bagSortBy]);
+
+  const filteredOwnedBalls = useMemo(() => {
+    return balls
+      .map((ball, index) => ({ ball, index }))
+      .filter(({ ball }) => !bagFilter || ball.packageType === bagFilter || (!ball.packageType && bagFilter === 'ea'))
+      .filter(({ ball }) => {
+        if (deferredBagSearchQuery) {
+          const q = deferredBagSearchQuery.toLowerCase();
+          const matchesSearch = 
+            ball.model.toLowerCase().includes(q) || 
+            ball.color.toLowerCase().includes(q) ||
+            (ball.name && ball.name.toLowerCase().includes(q)) ||
+            (ball.variation && ball.variation.toLowerCase().includes(q)) ||
+            (ball.notes && ball.notes.toLowerCase().includes(q)) ||
+            (ball.year && ball.year.toLowerCase().includes(q));
+          if (!matchesSearch) return false;
+        }
+
+        const matchesAdvancedModel = !bFilterModel || ball.model === bFilterModel;
+        const matchesAdvancedColor = !bFilterColor || ball.color === bFilterColor;
+        const matchesAdvancedVariation = !bFilterVariation || ball.variation === bFilterVariation;
+        const matchesAdvancedYear = !bFilterYear || ball.year === bFilterYear;
+        const matchesAdvancedName = !bFilterName || ball.name === bFilterName;
+        const matchesAdvancedCondition = !bFilterCondition || ball.condition === bFilterCondition;
+        return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName && matchesAdvancedCondition;
+      })
+      .sort((a, b) => {
+        switch (bagSortBy) {
+          case 'added_desc': return a.index - b.index;
+          case 'added_asc': return b.index - a.index;
+          case 'model_asc': return a.ball.model.localeCompare(b.ball.model) || (a.ball.name || "").localeCompare(b.ball.name || "");
+          case 'model_desc': return b.ball.model.localeCompare(a.ball.model) || (b.ball.name || "").localeCompare(a.ball.name || "");
+          case 'qty_desc': return b.ball.quantity - a.ball.quantity;
+          case 'qty_asc': return a.ball.quantity - b.ball.quantity;
+          case 'year_desc': return (b.ball.year || "").localeCompare(a.ball.year || "");
+          case 'year_asc': return (a.ball.year || "").localeCompare(b.ball.year || "");
+          default: return a.index - b.index;
+        }
+      });
+  }, [balls, bagFilter, deferredBagSearchQuery, bFilterModel, bFilterColor, bFilterVariation, bFilterYear, bFilterName, bFilterCondition, bagSortBy]);
 
   if (!currentUser) return null;
 
@@ -340,66 +431,19 @@ export default function MyVaultView({
               </div>
             ) : (
               <div className="space-y-3">
-                {Array.from(new Set(userProfile.wishlist.map(id => id.replace(/-pkg-(box|ea)$/, ""))))
-                  .map(baseId => catalog.find(c => c.id === baseId))
-                  .filter(item => {
-                    if (!item) return false;
-                    
-                    if (wishlistSearchQuery) {
-                      const q = wishlistSearchQuery.toLowerCase();
-                      const matchesSearch = 
-                        item.model.toLowerCase().includes(q) || 
-                        item.color.toLowerCase().includes(q) ||
-                        (item.name && item.name.toLowerCase().includes(q)) ||
-                        (item.variation && item.variation.toLowerCase().includes(q)) ||
-                        (item.notes && item.notes.toLowerCase().includes(q)) ||
-                        (item.year && item.year.toLowerCase().includes(q));
-                      if (!matchesSearch) return false;
-                    }
-
-                    const matchesAdvancedModel = !wFilterModel || item.model === wFilterModel;
-                    const matchesAdvancedColor = !wFilterColor || item.color === wFilterColor;
-                    const matchesAdvancedVariation = !wFilterVariation || item.variation === wFilterVariation;
-                    const matchesAdvancedYear = !wFilterYear || item.year === wFilterYear;
-                    const matchesAdvancedName = !wFilterName || item.name === wFilterName;
-                    return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName;
-                  })
-                  .sort((a, b) => {
-                    if (!a || !b) return 0;
-                    switch (bagSortBy) {
-                      case 'added_desc': {
-                        const dA = new Date(userProfile?.wishlistDates?.[a.id] || userProfile?.wishlistDates?.[`${a.id}-pkg-box`] || userProfile?.wishlistDates?.[`${a.id}-pkg-ea`] || 0).getTime();
-                        const dB = new Date(userProfile?.wishlistDates?.[b.id] || userProfile?.wishlistDates?.[`${b.id}-pkg-box`] || userProfile?.wishlistDates?.[`${b.id}-pkg-ea`] || 0).getTime();
-                        return dB - dA;
-                      }
-                      case 'added_asc': {
-                        const dA = new Date(userProfile?.wishlistDates?.[a.id] || userProfile?.wishlistDates?.[`${a.id}-pkg-box`] || userProfile?.wishlistDates?.[`${a.id}-pkg-ea`] || 0).getTime();
-                        const dB = new Date(userProfile?.wishlistDates?.[b.id] || userProfile?.wishlistDates?.[`${b.id}-pkg-box`] || userProfile?.wishlistDates?.[`${b.id}-pkg-ea`] || 0).getTime();
-                        return dA - dB;
-                      }
-                      case 'model_asc': return a.model.localeCompare(b.model) || (a.name || "").localeCompare(b.name || "");
-                      case 'model_desc': return b.model.localeCompare(a.model) || (b.name || "").localeCompare(a.name || "");
-                      case 'year_desc': return (b.year || "").localeCompare(a.year || "");
-                      case 'year_asc': return (a.year || "").localeCompare(b.year || "");
-                      default: return 0;
-                    }
-                  })
-                  .map((item, index) => {
-                    if (!item) return null;
-                    return (
-                    <CatalogItemCard
-                      index={index}
-                      key={`${item.id}-wishlist`}
-                      item={item}
-                      isReadOnly={!currentUser}
-                      onAddToLocker={handleAddBallFromCatalog}
-                      wishlistItems={userProfile.wishlist}
-                      wishlistDates={userProfile.wishlistDates || {}}
-                      onToggleWishlist={handleToggleWishlist}
-                      variant="wishlist"
-                    />
-                  );
-                })}
+                {filteredWishlistItems.map((item, index) => (
+                  <CatalogItemCard
+                    index={index}
+                    key={`${item.id}-wishlist`}
+                    item={item}
+                    isReadOnly={!currentUser}
+                    onAddToLocker={handleAddBallFromCatalog}
+                    wishlistItems={userProfile.wishlist}
+                    wishlistDates={userProfile.wishlistDates || {}}
+                    onToggleWishlist={handleToggleWishlist}
+                    variant="wishlist"
+                  />
+                ))}
               </div>
             )}
           </motion.div>
@@ -433,57 +477,28 @@ export default function MyVaultView({
                   You don't have any balls recorded in your inventory. Explore the database on the left to locate and log your balls!
                 </p>
               </div>
+            ) : filteredOwnedBalls.length === 0 ? (
+              <div className="py-20 text-center rounded-3xl border-2 border-dashed border-neutral-850 bg-neutral-950/10 text-neutral-400">
+                <GolfBagIcon className="w-12 h-12 text-neutral-700 mx-auto mb-3" />
+                <h4 className="font-bold text-neutral-350 text-sm">No matching balls found</h4>
+                <p className="text-xs text-neutral-500 max-w-sm mx-auto mt-1 leading-relaxed">
+                  No balls in your bag match "{bagSearchQuery}".
+                </p>
+              </div>
             ) : (
               <div className="grid grid-cols-1 gap-4" id="owned-list-container">
-                {balls
-                  .map((ball, index) => ({ ball, index }))
-                  .filter(({ ball }) => !bagFilter || ball.packageType === bagFilter || (!ball.packageType && bagFilter === 'ea'))
-                  .filter(({ ball }) => {
-                    if (bagSearchQuery) {
-                      const q = bagSearchQuery.toLowerCase();
-                      const matchesSearch = 
-                        ball.model.toLowerCase().includes(q) || 
-                        ball.color.toLowerCase().includes(q) ||
-                        (ball.name && ball.name.toLowerCase().includes(q)) ||
-                        (ball.variation && ball.variation.toLowerCase().includes(q)) ||
-                        (ball.notes && ball.notes.toLowerCase().includes(q)) ||
-                        (ball.year && ball.year.toLowerCase().includes(q));
-                      if (!matchesSearch) return false;
-                    }
-
-                    const matchesAdvancedModel = !bFilterModel || ball.model === bFilterModel;
-                    const matchesAdvancedColor = !bFilterColor || ball.color === bFilterColor;
-                    const matchesAdvancedVariation = !bFilterVariation || ball.variation === bFilterVariation;
-                    const matchesAdvancedYear = !bFilterYear || ball.year === bFilterYear;
-                    const matchesAdvancedName = !bFilterName || ball.name === bFilterName;
-                    const matchesAdvancedCondition = !bFilterCondition || ball.condition === bFilterCondition;
-                    return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName && matchesAdvancedCondition;
-                  })
-                  .sort((a, b) => {
-                    switch (bagSortBy) {
-                      case 'added_desc': return a.index - b.index;
-                      case 'added_asc': return b.index - a.index;
-                  case 'model_asc': return a.ball.model.localeCompare(b.ball.model) || (a.ball.name || "").localeCompare(b.ball.name || "");
-                  case 'model_desc': return b.ball.model.localeCompare(a.ball.model) || (b.ball.name || "").localeCompare(a.ball.name || "");
-                  case 'qty_desc': return b.ball.quantity - a.ball.quantity;
-                  case 'qty_asc': return a.ball.quantity - b.ball.quantity;
-                  case 'year_desc': return (b.ball.year || "").localeCompare(a.ball.year || "");
-                  case 'year_asc': return (a.ball.year || "").localeCompare(b.ball.year || "");
-                  default: return a.index - b.index;
-                }
-              })
-              .map(({ ball }, index) => (
-              <OwnedBallCard
-                index={index}
-                key={ball.id}
-                ball={ball}
-                catalog={catalog}
-                onUpdateBall={handleUpdateBall}
-                onDelete={handleDeleteBall}
-              />
-            ))}
-          </div>
-        )}
+                {filteredOwnedBalls.map(({ ball }, index) => (
+                  <OwnedBallCard
+                    index={index}
+                    key={ball.id}
+                    ball={ball}
+                    catalog={catalog}
+                    onUpdateBall={handleUpdateBall}
+                    onDelete={handleDeleteBall}
+                  />
+                ))}
+              </div>
+            )}
               </motion.div>
             )}
             </AnimatePresence>
