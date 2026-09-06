@@ -23,6 +23,9 @@ import ImportExportModal from "./components/ImportExportModal";
 import LeaderboardModal from "./components/LeaderboardModal";
 import VaultFilterBar from "./components/VaultFilterBar";
 import BallVisual from "./components/BallVisual";
+import CatalogView from "./views/CatalogView";
+import MyVaultView from "./views/MyVaultView";
+import { useAppStore } from "./store/useAppStore";
 import { 
   Search, 
   Sparkles, 
@@ -73,13 +76,7 @@ function GolfBagIcon({ className = "w-5 h-5 text-neutral-400" }: { className?: s
       <path d="M14 8L15.5 4M15.5 4C16.5 4 17 5 16 5" />
       {/* Main Bag Body */}
       <path d="M8 8 L9.5 21 C9.7 22 14.3 22 14.5 21 L16 8 Z" fill="#000" />
-## 5. Production Bug Fixes
-
-During the live deployment of the migration, several production issues were identified and resolved:
-1. **Firebase Storage Bucket Alignment**: Updated the default bucket URL in the backend server from `.appspot.com` to the newer `.firebasestorage.app` domain which aligned with the newly provisioned Firebase Spark plan storage bucket.
-2. **Firestore Payload Limits Bypass**: The initial API-based migration endpoint crashed the Render server due to the 11.5MB Base64 payload exceeding Firestore's 10MB batch limit. We bypassed the server and executed a secure, direct local script using the Firebase Admin SDK to seamlessly migrate all items.
-3. **App Crash Resilience**: Pushed a critical frontend fix to `App.tsx` utilizing a `safeJSONParse` helper to gracefully handle corrupted or empty strings in `localStorage` which were causing fatal React rendering crashes on boot.
-4. **Firebase Security Configuration**: Instructed the configuration of Firebase Storage security rules to allow public read access, resolving HTTP 403 Forbidden errors when fetching catalog images. Also registered the `golf-ball-vault.onrender.com` domain in Firebase Auth to ensure OAuth login options remain fully functional.      {/* Side Pocket */}
+      {/* Side Pocket */}
       <path d="M8.5 11.5 C6.5 11.5 6.5 17 9.1 17.5" fill="#070707" />
       {/* Shoulder Strap */}
       <path d="M15.5 10 C18 11 18 16.5 14.5 18" />
@@ -246,10 +243,7 @@ const getUniqueCatalogItems = (balls: GolfBall[], catalog: CatalogItem[]): Catal
 };
 
 export default function App() {
-  // Theme state: 'light' | 'dark' | 'system'
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>(() => {
-    return (localStorage.getItem("vice_vault_theme") as 'light' | 'dark' | 'system') || "system";
-  });
+  const { theme, setTheme } = useAppStore();
 
   // Toast state for beautiful UI notifications matching site theme
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -305,9 +299,7 @@ export default function App() {
   // (balls managed by useBallLocker)
 
   const [bagFilter, setBagFilter] = useState<'ea' | 'sleeve' | 'box' | null>(null);
-  const [bagSortBy, setBagSortBy] = useState<string>('added_desc');
-  const [catalogSortBy, setCatalogSortBy] = useState<string>('model_asc');
-  const [bagTab, setBagTab] = useState<"owned" | "wishlist">("owned");
+  const { bagSortBy, setBagSortBy, catalogSortBy, setCatalogSortBy, bagTab, setBagTab } = useAppStore();
 
   useEffect(() => {
     if (bagTab === "wishlist") {
@@ -330,10 +322,7 @@ export default function App() {
     return generateDefaultCatalog();
   });
 
-  // Active search query
-  const [searchQuery, setSearchQuery] = useState("");
-  const [bagSearchQuery, setBagSearchQuery] = useState("");
-  const [wishlistSearchQuery, setWishlistSearchQuery] = useState("");
+  const { searchQuery, setSearchQuery, bagSearchQuery, setBagSearchQuery, wishlistSearchQuery, setWishlistSearchQuery } = useAppStore();
   // Quick filter to narrow core brand models
   const [selectedBrandFilter, setSelectedBrandFilter] = useState<string>("ALL");
   // Catalog Filters
@@ -423,8 +412,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
   const uniqueTrophyBalls = useMemo(() => getUniqueCatalogItems(balls, catalog), [balls, catalog]);
 
-  // Secondary panel state: "browse" or "admin" inside database panel
-  const [dbPanelTab, setDbPanelTab] = useState<"browse" | "admin" | "users" | "register">("browse");
+  const { dbPanelTab, setDbPanelTab } = useAppStore();
 
   // User Manager States
   const [usersList, setUsersList] = useState<UserProfile[]>([]);
@@ -466,8 +454,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   const [showEditPassword, setShowEditPassword] = useState(false);
   const [showEditConfirmPassword, setShowEditConfirmPassword] = useState(false);
 
-  // Mobile layout active workspace tab: "bag" or "catalog"
-  const [mobileTab, setMobileTab] = useState<"bag" | "catalog">("bag");
+  const { mobileTab, setMobileTab } = useAppStore();
 
   // Active Catalog Item for modification
   const [editingItem, setEditingItem] = useState<CatalogItem | null>(null);
@@ -2336,465 +2323,61 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* LEFT 5 COLUMNS: DISCOVERY CATALOG DATABASE & NEW REGISTRATION */}
-          <section className={`${currentUser ? "lg:col-span-6" : "lg:col-span-12 max-w-4xl mx-auto w-full"} space-y-6 ${!currentUser || mobileTab === "catalog" ? "block" : "hidden lg:block"}`}>
-            
-            {/* Database Panel Box */}
-            <div className="bg-neutral-950/40 border border-neutral-850 rounded-2xl shadow-md">
-              
-              {/* Registry Database Header Banner (Static, removing redundant Admin Tab) */}
-              <div className="flex items-center justify-between px-4 py-3.5 border-b border-neutral-850 bg-neutral-950 rounded-t-2xl">
-                <div className="flex items-center gap-2.5">
-                  <BallVaultIcon className="w-5 h-5 text-accent" />
-                  <span className="text-xs font-black uppercase tracking-wider text-neutral-300">
-                    Ball Vault ({catalog.length} Available Designs)
-                  </span>
-                </div>
-                
-                <div className="flex items-center gap-2 shrink-0">
-                  {catalog.length > 0 && (
-                    <div className="relative">
-                      <select
-                        value={catalogSortBy}
-                        onChange={(e) => setCatalogSortBy(e.target.value)}
-                        className="appearance-none bg-neutral-950/40 border border-neutral-850 text-neutral-400 hover:text-white text-[10px] font-mono py-0.5 pl-2 pr-6 rounded-md transition-all cursor-pointer focus:outline-none focus:border-accent"
-                      >
-                        <option value="model_asc">Sort: Model (A-Z)</option>
-                        <option value="model_desc">Sort: Model (Z-A)</option>
-                        <option value="year_desc">Sort: Year (New)</option>
-                        <option value="year_asc">Sort: Year (Old)</option>
-                      </select>
-                      <ChevronDown className="w-3 h-3 text-neutral-500 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Panel tab content rendering */}
-              <div className="p-4">
-                <div className="space-y-4">
-
-
-                    {/* Database Search Filter control */}
-                    <div className="space-y-3">
-                      <SearchInput
-                        value={searchQuery}
-                        onChange={setSearchQuery}
-                        placeholder="Search entire vault (e.g., Red, Pro, 2021...)"
-                      />
-                      
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <VaultFilterBar items={searchedCatalog} filters={catalogFilters} showCondition={false} />
-                      </div>
-
-                    </div>
-
-                    {/* Catalog results count label */}
-                    <div className="flex items-center justify-between text-[10px] font-mono text-neutral-500 uppercase border-b border-neutral-850 pb-2">
-                      <span>Showing {sortedCatalog.length} Matching Models</span>
-                      <div className="flex items-center gap-3">
-                        <span className="hidden sm:inline">{currentUser ? "Click + to add any to your Bag" : "Login to add balls to your bag"}</span>
-                        
-                        {currentUser && (
-                          <label className="flex items-center gap-1.5 cursor-pointer group bg-neutral-900 border border-neutral-800 hover:border-neutral-700 px-2.5 py-1 rounded-md transition-colors shadow-sm">
-                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-400 group-hover:text-neutral-300 transition-colors">
-                              Wishlist
-                            </span>
-                            <div className="relative flex items-center justify-center">
-                              <input
-                                type="checkbox"
-                                checked={showWishlistOnly}
-                                onChange={(e) => setShowWishlistOnly(e.target.checked)}
-                                className="appearance-none w-3.5 h-3.5 rounded-sm border border-neutral-700 bg-neutral-950 checked:bg-rose-500 checked:border-rose-500 focus:outline-none transition-all cursor-pointer"
-                              />
-                              <Heart size={9} className={`absolute pointer-events-none transition-opacity ${showWishlistOnly ? 'opacity-100 text-white' : 'opacity-0'}`} weight="fill" />
-                            </div>
-                          </label>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Catalog item list */}
-                    {sortedCatalog.length === 0 ? (
-                      <div className="py-12 text-center rounded-xl border border-dashed border-neutral-850 bg-neutral-950/20">
-                        <Database className="w-8 h-8 text-neutral-700 mx-auto mb-2" />
-                        <h4 className="font-bold text-neutral-400 text-sm">No balls found in the vault</h4>
-                        <p className="text-xs text-neutral-500 max-w-xs mx-auto mt-1">
-                          {currentUser 
-                            ? `We didn't find any designs fitting "${searchQuery}".`
-                            : `We didn't find any designs fitting "${searchQuery}".`}
-                        </p>
-                        {userProfile?.role === "Admin" && (
-                          <button
-                            onClick={() => {
-                              setIsVaultManagerOpen(true);
-                              setShowXlsImporter(false);
-                              setEditingItem(null);
-                            }}
-                            className="mt-3 text-xs font-bold text-accent hover:underline inline-flex items-center gap-1"
-                          >
-                            Register a new one <ChevronRight className="w-3 h-3" />
-                          </button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {groupedCatalog.map((group) => (
-                          <CatalogItemCard 
-                            key={group.primary.id} 
-                            item={group.primary} 
-                            subItems={group.subItems}
-                            isReadOnly={!currentUser}
-                            onAddToLocker={handleAddBallFromCatalog}
-                            wishlistItems={userProfile?.wishlist || []}
-                            wishlistDates={userProfile?.wishlistDates || {}}
-                            onToggleWishlist={handleToggleWishlist}
-                            globalOwned={globalCatalogStats[group.primary.id] || 0}
-                          />
-                        ))}
-                      </div>
-                    )}
-
-                  </div>
-              </div>
-
-            </div>
-          </section>
+          <CatalogView
+            currentUser={currentUser}
+            userProfile={userProfile}
+            catalogLength={catalog.length}
+            searchedCatalog={searchedCatalog}
+            sortedCatalog={sortedCatalog}
+            groupedCatalog={groupedCatalog}
+            catalogFilters={catalogFilters}
+            showWishlistOnly={showWishlistOnly}
+            setShowWishlistOnly={setShowWishlistOnly}
+            setIsVaultManagerOpen={setIsVaultManagerOpen}
+            setShowXlsImporter={setShowXlsImporter}
+            setEditingItem={setEditingItem}
+            handleAddBallFromCatalog={handleAddBallFromCatalog}
+            handleToggleWishlist={handleToggleWishlist}
+            globalCatalogStats={globalCatalogStats}
+          />
 
             {/* RIGHT 7 COLUMNS: LOCKER INVENTORY (BALLS YOU OWN) */}
-            {currentUser && (
-            <section className={`lg:col-span-6 space-y-6 ${mobileTab === "bag" ? "block" : "hidden lg:block"}`}>
-              
-              {/* Quick Metrics display */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-mono text-neutral-500 uppercase block tracking-wider">
-                      Unique Balls
-                    </span>
-                    <span className="font-sans font-black text-2xl text-white tracking-tight">
-                      {totalUniqueModels}
-                      <span className="text-sm text-neutral-500 ml-1">/ {catalog.length}</span>
-                    </span>
-                  </div>
-                  <button 
-                    onClick={() => {
-                      if (bagTab !== "wishlist") {
-                        setShowTrophyCase(!showTrophyCase);
-                      }
-                    }}
-                    className={`w-10 h-10 rounded-full border border-neutral-800 flex items-center justify-center transition-colors bg-neutral-950 ${bagTab === "wishlist" ? "cursor-default" : "hover:bg-neutral-900 cursor-pointer"}`}
-                    title={bagTab === "wishlist" ? "" : "Toggle Trophy Case"}
-                    disabled={bagTab === "wishlist"}
-                  >
-                    <AnimatePresence mode="wait">
-                      {showTrophyCase ? (
-                        <motion.div key="trophy" initial={{ rotateY: 90, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ rotateY: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                          <Trophy className="w-5 h-5 text-yellow-500" />
-                        </motion.div>
-                      ) : (
-                        <motion.div key="ball" initial={{ rotateY: 90, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ rotateY: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                          <GolfBallOutlineIcon className="w-5 h-5 text-accent" />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </button>
-                </div>
-
-                <div className="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-mono text-neutral-500 uppercase block tracking-wider">
-                      Total Owned Balls
-                    </span>
-                    <span className="font-sans font-black text-2xl text-white tracking-tight">
-                      {totalOwnedCount}
-                    </span>
-                  </div>
-                  <div className="w-10 h-10 rounded-full border border-neutral-800 bg-neutral-950 flex items-center justify-center text-accent">
-                    <GolfBallStackIcon className="w-[22px] h-[22px]" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Owned Locker Container */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-neutral-850 pb-2 gap-2">
-                  <div className="flex items-center gap-6">
-                    <button
-                      onClick={() => setBagTab("owned")}
-                      className={`flex items-center gap-2 cursor-pointer pb-2 -mb-2.5 transition-colors border-b-2 ${
-                        bagTab === "owned"
-                          ? "border-accent text-white"
-                          : "border-transparent text-neutral-500 hover:text-neutral-300"
-                      }`}
-                    >
-                      <GolfBagIcon className={`w-5 h-5 ${bagTab === "owned" ? "text-neutral-400" : ""}`} />
-                      <h2 className="font-sans font-black text-sm sm:text-base uppercase tracking-wider whitespace-nowrap">
-                        My Bag
-                      </h2>
-                    </button>
-                    
-                    {userProfile && (
-                      <button
-                        onClick={() => setBagTab("wishlist")}
-                        className={`flex items-center gap-2 cursor-pointer pb-2 -mb-2.5 transition-colors border-b-2 ${
-                          bagTab === "wishlist"
-                            ? "border-white text-white"
-                            : "border-transparent text-neutral-500 hover:text-neutral-300"
-                        }`}
-                      >
-                        <Heart className={`w-4 h-4 ${bagTab === "wishlist" ? "fill-current" : ""}`} />
-                        <h2 className="font-sans font-black text-base uppercase tracking-wider whitespace-nowrap">
-                          Wishlist
-                        </h2>
-                      </button>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {balls.length > 0 && (
-                      <div className="relative">
-                        <select
-                          value={bagSortBy}
-                          onChange={(e) => setBagSortBy(e.target.value)}
-                          className="appearance-none bg-neutral-950/40 border border-neutral-850 text-neutral-400 hover:text-white text-[10px] font-mono py-0.5 pl-2 pr-6 rounded-md transition-all cursor-pointer focus:outline-none focus:border-accent"
-                        >
-                          <option value="added_desc">Sort: Added (New)</option>
-                          <option value="added_asc">Sort: Added (Old)</option>
-                          <option value="model_asc">Sort: Model (A-Z)</option>
-                          <option value="model_desc">Sort: Model (Z-A)</option>
-                          {bagTab !== "wishlist" && <option value="qty_desc">Sort: Qty (High-Low)</option>}
-                          {bagTab !== "wishlist" && <option value="qty_asc">Sort: Qty (Low-High)</option>}
-                          <option value="year_desc">Sort: Year (New)</option>
-                          <option value="year_asc">Sort: Year (Old)</option>
-                        </select>
-                        <ChevronDown className="w-3 h-3 text-neutral-500 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Package Type Counts Status Bar */}
-                {balls.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2 bg-neutral-950 p-2 rounded-xl border border-neutral-850/70 text-center text-xs font-mono">
-                    <button 
-                      type="button"
-                      onClick={() => setBagFilter(bagFilter === 'ea' ? null : 'ea')}
-                      className={`flex flex-col p-1.5 rounded-lg transition-all cursor-pointer border ${bagFilter === 'ea' ? 'bg-neutral-900 border-neutral-350 shadow-md' : 'bg-neutral-900/50 hover:bg-neutral-800/50 border-transparent'}`}
-                    >
-                      <span className={`text-[9px] uppercase tracking-wider transition-colors ${bagFilter === 'ea' ? 'text-neutral-400 font-bold' : 'text-neutral-500'}`}>Balls</span>
-                      <span className="text-white font-black text-sm mt-0.5">{eaCount}</span>
-                    </button>
-                    <button 
-                      type="button"
-                      onClick={() => setBagFilter(bagFilter === 'sleeve' ? null : 'sleeve')}
-                      className={`flex flex-col p-1.5 rounded-lg transition-all cursor-pointer border ${bagFilter === 'sleeve' ? 'bg-neutral-900 border-neutral-350 shadow-md' : 'bg-neutral-900/50 hover:bg-neutral-800/50 border-transparent'}`}
-                    >
-                      <span className={`text-[9px] uppercase tracking-wider transition-colors ${bagFilter === 'sleeve' ? 'text-neutral-400 font-bold' : 'text-neutral-500'}`}>Sleeves</span>
-                      <span className="text-white font-black text-sm mt-0.5">{sleeveCount}</span>
-                    </button>
-                    <button 
-                      type="button"
-                      onClick={() => setBagFilter(bagFilter === 'box' ? null : 'box')}
-                      className={`flex flex-col p-1.5 rounded-lg transition-all cursor-pointer border ${bagFilter === 'box' ? 'bg-neutral-900 border-neutral-350 shadow-md' : 'bg-neutral-900/50 hover:bg-neutral-800/50 border-transparent'}`}
-                    >
-                      <span className={`text-[9px] uppercase tracking-wider transition-colors ${bagFilter === 'box' ? 'text-neutral-400 font-bold' : 'text-neutral-500'}`}>Boxes/Bundles</span>
-                      <span className="text-white font-black text-sm mt-0.5">{boxCount}</span>
-                    </button>
-                  </div>
-                )}
-
-                <AnimatePresence mode="wait">
-                {(isAuthLoading || (isLoadingCloudData && balls.length === 0 && !localStorage.getItem("vice_vault_bag_" + userProfile?.uid))) ? (
-                  <motion.div key="loading" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} transition={{ duration: 0.2 }} className="py-20 text-center rounded-3xl border border-neutral-850 bg-neutral-900/40 flex flex-col items-center justify-center shadow-inner">
-                    <RefreshCw className="w-8 h-8 text-accent animate-spin mb-3 opacity-80" />
-                    <h4 className="font-bold text-neutral-400 text-xs uppercase tracking-wider">Loading Vault...</h4>
-                  </motion.div>
-                ) : bagTab === "wishlist" ? (
-                  <motion.div key="wishlist" initial={{opacity: 0, x: 20}} animate={{opacity: 1, x: 0}} exit={{opacity: 0, x: -20}} transition={{ duration: 0.2 }} className="space-y-3">
-                    {userProfile?.wishlist?.length > 0 && (
-                      <div className="flex flex-col gap-3">
-                        <SearchInput
-                          value={wishlistSearchQuery}
-                          onChange={setWishlistSearchQuery}
-                          placeholder="Search wishlist (e.g., Red, Pro, 2021...)"
-                        />
-                        <VaultFilterBar items={catalog.filter(c => userProfile.wishlist.some(w => w === c.id || w.startsWith(`${c.id}-pkg-`)))} filters={wishlistFilters} showCondition={false}>
-                          <button
-                            onClick={() => setShowClearWishlistConfirm(true)}
-                            className="shrink-0 text-[10px] uppercase font-bold text-rose-500 hover:text-rose-400 transition-colors cursor-pointer inline-flex items-center gap-1 bg-rose-500/10 hover:bg-rose-500/20 px-3 py-1.5 rounded-lg border border-rose-500/20 whitespace-nowrap"
-                          >
-                            <X className="w-3 h-3" /> Clear Wishlist
-                          </button>
-                        </VaultFilterBar>
-                      </div>
-                    )}
-                    {!userProfile?.wishlist?.length ? (
-                      <div className="py-20 text-center rounded-3xl border-2 border-dashed border-neutral-850 bg-neutral-950/10 text-neutral-400">
-                        <Heart className="w-12 h-12 text-neutral-700 mx-auto mb-3" />
-                        <h4 className="font-bold text-neutral-350 text-sm">Your wishlist is empty</h4>
-                        <p className="text-xs text-neutral-500 max-w-sm mx-auto mt-1 leading-relaxed">
-                          Click the heart icon on any catalog item to add it to your wishlist.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {Array.from(new Set(userProfile.wishlist.map(id => id.replace(/-pkg-(box|ea)$/, ""))))
-                          .map(baseId => catalog.find(c => c.id === baseId))
-                          .filter(item => {
-                            if (!item) return false;
-                            
-                            // Apply Search
-                            if (wishlistSearchQuery) {
-                              const q = wishlistSearchQuery.toLowerCase();
-                              const matchesSearch = 
-                                item.model.toLowerCase().includes(q) || 
-                                item.color.toLowerCase().includes(q) ||
-                                (item.name && item.name.toLowerCase().includes(q)) ||
-                                (item.variation && item.variation.toLowerCase().includes(q)) ||
-                                (item.notes && item.notes.toLowerCase().includes(q)) ||
-                                (item.year && item.year.toLowerCase().includes(q));
-                              if (!matchesSearch) return false;
-                            }
-
-                            // Apply Advanced Filters
-                            const matchesAdvancedModel = !wFilterModel || item.model === wFilterModel;
-                            const matchesAdvancedColor = !wFilterColor || item.color === wFilterColor;
-                            const matchesAdvancedVariation = !wFilterVariation || item.variation === wFilterVariation;
-                            const matchesAdvancedYear = !wFilterYear || item.year === wFilterYear;
-                            const matchesAdvancedName = !wFilterName || item.name === wFilterName;
-                            return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName;
-                          })
-                          .sort((a, b) => {
-                            if (!a || !b) return 0;
-                            switch (bagSortBy) {
-                              case 'added_desc': {
-                                const dA = new Date(userProfile?.wishlistDates?.[a.id] || userProfile?.wishlistDates?.[`${a.id}-pkg-box`] || userProfile?.wishlistDates?.[`${a.id}-pkg-ea`] || 0).getTime();
-                                const dB = new Date(userProfile?.wishlistDates?.[b.id] || userProfile?.wishlistDates?.[`${b.id}-pkg-box`] || userProfile?.wishlistDates?.[`${b.id}-pkg-ea`] || 0).getTime();
-                                return dB - dA;
-                              }
-                              case 'added_asc': {
-                                const dA = new Date(userProfile?.wishlistDates?.[a.id] || userProfile?.wishlistDates?.[`${a.id}-pkg-box`] || userProfile?.wishlistDates?.[`${a.id}-pkg-ea`] || 0).getTime();
-                                const dB = new Date(userProfile?.wishlistDates?.[b.id] || userProfile?.wishlistDates?.[`${b.id}-pkg-box`] || userProfile?.wishlistDates?.[`${b.id}-pkg-ea`] || 0).getTime();
-                                return dA - dB;
-                              }
-                              case 'model_asc': return a.model.localeCompare(b.model) || (a.name || "").localeCompare(b.name || "");
-                              case 'model_desc': return b.model.localeCompare(a.model) || (b.name || "").localeCompare(a.name || "");
-                              case 'year_desc': return (b.year || "").localeCompare(a.year || "");
-                              case 'year_asc': return (a.year || "").localeCompare(b.year || "");
-                              default: return 0;
-                            }
-                          })
-                          .map((item, index) => {
-                            if (!item) return null;
-                            return (
-                            <CatalogItemCard
-                              index={index}
-                              key={`${item.id}-wishlist`}
-                              item={item}
-                              isReadOnly={!currentUser}
-                              onAddToLocker={handleAddBallFromCatalog}
-                              wishlistItems={userProfile.wishlist}
-                              wishlistDates={userProfile.wishlistDates || {}}
-                              onToggleWishlist={handleToggleWishlist}
-                              variant="wishlist"
-                            />
-                          );
-                        })}
-                      </div>
-                    )}
-                  </motion.div>
-                ) : (
-                  <motion.div key="bag" initial={{opacity: 0, x: -20}} animate={{opacity: 1, x: 0}} exit={{opacity: 0, x: 20}} transition={{ duration: 0.2 }} className="space-y-4">
-                    <AnimatePresence mode="wait" initial={false}>
-                    {showTrophyCase ? (
-                      <motion.div key="trophycase" initial={{ rotateY: 90, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ rotateY: -90, opacity: 0 }} transition={{ duration: 0.3 }} style={{ perspective: 1000 }}>
-                        <TrophyCase 
-                          uniqueBalls={uniqueTrophyBalls}
-                          username={userProfile?.username || "GOLFER"}
-                        />
-                      </motion.div>
-                    ) : (
-                      <motion.div key="gridcase" initial={{ rotateY: -90, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ rotateY: 90, opacity: 0 }} transition={{ duration: 0.3 }} style={{ perspective: 1000 }}>
-                    {balls.length > 0 && (
-                      <div className="flex flex-col gap-3">
-                        <SearchInput
-                          value={bagSearchQuery}
-                          onChange={setBagSearchQuery}
-                          placeholder="Search bag (e.g., Red, Pro, 2021...)"
-                        />
-                        <VaultFilterBar items={balls} filters={bagFilters} showCondition={true} />
-                      </div>
-                    )}
-                    {balls.length === 0 ? (
-                      <div className="py-20 text-center rounded-3xl border-2 border-dashed border-neutral-850 bg-neutral-950/10 text-neutral-400">
-                        <GolfBagIcon className="w-12 h-12 text-neutral-700 mx-auto mb-3" />
-                        <h4 className="font-bold text-neutral-350 text-sm">Your bag is currently empty</h4>
-                        <p className="text-xs text-neutral-500 max-w-sm mx-auto mt-1 leading-relaxed">
-                          You don't have any balls recorded in your inventory. Explore the database on the left to locate and log your balls!
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 gap-4" id="owned-list-container">
-                        {balls
-                          .map((ball, index) => ({ ball, index }))
-                          .filter(({ ball }) => !bagFilter || ball.packageType === bagFilter || (!ball.packageType && bagFilter === 'ea'))
-                          .filter(({ ball }) => {
-                            // Apply Search
-                            if (bagSearchQuery) {
-                              const q = bagSearchQuery.toLowerCase();
-                              const matchesSearch = 
-                                ball.model.toLowerCase().includes(q) || 
-                                ball.color.toLowerCase().includes(q) ||
-                                (ball.name && ball.name.toLowerCase().includes(q)) ||
-                                (ball.variation && ball.variation.toLowerCase().includes(q)) ||
-                                (ball.notes && ball.notes.toLowerCase().includes(q)) ||
-                                (ball.year && ball.year.toLowerCase().includes(q));
-                              if (!matchesSearch) return false;
-                            }
-
-                            // Apply Advanced Filters
-                            const matchesAdvancedModel = !bFilterModel || ball.model === bFilterModel;
-                            const matchesAdvancedColor = !bFilterColor || ball.color === bFilterColor;
-                            const matchesAdvancedVariation = !bFilterVariation || ball.variation === bFilterVariation;
-                            const matchesAdvancedYear = !bFilterYear || ball.year === bFilterYear;
-                            const matchesAdvancedName = !bFilterName || ball.name === bFilterName;
-                            const matchesAdvancedCondition = !bFilterCondition || ball.condition === bFilterCondition;
-                            return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName && matchesAdvancedCondition;
-                          })
-                          .sort((a, b) => {
-                            switch (bagSortBy) {
-                              case 'added_desc': return a.index - b.index;
-                              case 'added_asc': return b.index - a.index;
-                          case 'model_asc': return a.ball.model.localeCompare(b.ball.model) || (a.ball.name || "").localeCompare(b.ball.name || "");
-                          case 'model_desc': return b.ball.model.localeCompare(a.ball.model) || (b.ball.name || "").localeCompare(a.ball.name || "");
-                          case 'qty_desc': return b.ball.quantity - a.ball.quantity;
-                          case 'qty_asc': return a.ball.quantity - b.ball.quantity;
-                          case 'year_desc': return (b.ball.year || "").localeCompare(a.ball.year || "");
-                          case 'year_asc': return (a.ball.year || "").localeCompare(b.ball.year || "");
-                          default: return a.index - b.index;
-                        }
-                      })
-                      .map(({ ball }, index) => (
-                      <OwnedBallCard
-                        index={index}
-                        key={ball.id}
-                        ball={ball}
-                        catalog={catalog}
-                        onUpdateBall={handleUpdateBall}
-                        onDelete={handleDeleteBall}
-                      />
-                    ))}
-                  </div>
-                )}
-                      </motion.div>
-                    )}
-                    </AnimatePresence>
-                  </motion.div>
-                )}
-                </AnimatePresence>
-              </div>
-
-            </section>
-          )}
+            <MyVaultView
+              currentUser={currentUser}
+              userProfile={userProfile}
+              catalog={catalog}
+              totalUniqueModels={totalUniqueModels}
+              totalOwnedCount={totalOwnedCount}
+              showTrophyCase={showTrophyCase}
+              setShowTrophyCase={setShowTrophyCase}
+              balls={balls}
+              bagFilter={bagFilter}
+              setBagFilter={setBagFilter}
+              eaCount={eaCount}
+              sleeveCount={sleeveCount}
+              boxCount={boxCount}
+              isAuthLoading={isAuthLoading}
+              isLoadingCloudData={isLoadingCloudData}
+              wishlistFilters={wishlistFilters}
+              setShowClearWishlistConfirm={setShowClearWishlistConfirm}
+              bagFilters={bagFilters}
+              uniqueTrophyBalls={uniqueTrophyBalls}
+              handleAddBallFromCatalog={handleAddBallFromCatalog}
+              handleToggleWishlist={handleToggleWishlist}
+              handleUpdateBall={handleUpdateBall}
+              handleDeleteBall={handleDeleteBall}
+              bFilterModel={bFilterModel}
+              bFilterColor={bFilterColor}
+              bFilterVariation={bFilterVariation}
+              bFilterYear={bFilterYear}
+              bFilterName={bFilterName}
+              bFilterCondition={bFilterCondition}
+              wFilterModel={wFilterModel}
+              wFilterColor={wFilterColor}
+              wFilterVariation={wFilterVariation}
+              wFilterYear={wFilterYear}
+              wFilterName={wFilterName}
+            />
         </div>
 
       </main>
