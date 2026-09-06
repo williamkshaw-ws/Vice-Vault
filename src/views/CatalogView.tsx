@@ -87,6 +87,13 @@ export default function CatalogView({
     setSearchQuery
   } = useAppStore();
 
+  // Progressive rendering: render 30 items initially for lightning-fast search performance
+  const [displayLimit, setDisplayLimit] = React.useState(30);
+
+  React.useEffect(() => {
+    setDisplayLimit(30);
+  }, [searchQuery, catalogFilters, sortedCatalog.length]);
+
   return (
     <section className={`${currentUser ? "lg:col-span-6" : "lg:col-span-12 max-w-4xl mx-auto w-full"} space-y-6 ${!currentUser || mobileTab === "catalog" ? "block" : "hidden lg:block"}`}>
       <div className="bg-neutral-950/40 border border-neutral-850 rounded-2xl shadow-md">
@@ -174,7 +181,7 @@ export default function CatalogView({
               </div>
             ) : (
               <div className="space-y-3">
-                {groupedCatalog.map((group) => (
+                {groupedCatalog.slice(0, displayLimit).map((group) => (
                   <CatalogItemCard 
                     key={group.primary.id} 
                     item={group.primary} 
@@ -187,6 +194,17 @@ export default function CatalogView({
                     globalOwned={globalCatalogStats[group.primary.id] || 0}
                   />
                 ))}
+
+                {groupedCatalog.length > displayLimit && (
+                  <button
+                    type="button"
+                    onClick={() => setDisplayLimit(prev => prev + 30)}
+                    className="w-full py-3 mt-2 text-xs font-mono font-bold text-accent bg-neutral-900/80 hover:bg-neutral-900 border border-neutral-800 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    <span>Show More Models ({groupedCatalog.length - displayLimit} more)</span>
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             )}
           </div>

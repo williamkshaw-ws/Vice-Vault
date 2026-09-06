@@ -1700,17 +1700,14 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
   // FILTERED CATALOG items based on search word and model filter tag
+  // Uses tokenized multi-word matching so "Pro Air" or "Air Lime" matches all keywords instantly
   const searchedCatalog = useMemo(() => {
-    if (!deferredSearchQuery) return catalog;
-    const query = deferredSearchQuery.toLowerCase();
-    return catalog.filter(item => 
-      item.model.toLowerCase().includes(query) ||
-      (item.name && item.name.toLowerCase().includes(query)) ||
-      item.color.toLowerCase().includes(query) ||
-      (item.variation && item.variation.toLowerCase().includes(query)) ||
-      (item.notes && item.notes.toLowerCase().includes(query)) ||
-      (item.year && item.year.toLowerCase().includes(query))
-    );
+    if (!deferredSearchQuery.trim()) return catalog;
+    const tokens = deferredSearchQuery.toLowerCase().trim().split(/\s+/);
+    return catalog.filter(item => {
+      const searchBlob = `${item.model} ${item.name || ''} ${item.color} ${item.variation || ''} ${item.notes || ''} ${item.year || ''}`.toLowerCase();
+      return tokens.every(token => searchBlob.includes(token));
+    });
   }, [catalog, deferredSearchQuery]);
 
   const filteredCatalog = useMemo(() => {

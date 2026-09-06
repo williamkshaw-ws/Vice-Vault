@@ -16,7 +16,7 @@ export default function SearchInput({
   placeholder = "Search...", 
   className = "",
   autoFocus = false,
-  debounceMs = 150
+  debounceMs = 60
 }: SearchInputProps) {
   const [localValue, setLocalValue] = useState(value);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);

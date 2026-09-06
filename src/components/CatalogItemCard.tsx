@@ -40,7 +40,7 @@ interface CatalogItemCardProps {
   globalOwned?: number;
 }
 
-export default function CatalogItemCard({ item, subItems = [], onAddToLocker, isReadOnly = false, wishlistItems = [], wishlistDates = {}, onToggleWishlist, variant, index = 0, globalOwned }: CatalogItemCardProps) {
+function CatalogItemCardComponent({ item, subItems = [], onAddToLocker, isReadOnly = false, wishlistItems = [], wishlistDates = {}, onToggleWishlist, variant, index = 0, globalOwned }: CatalogItemCardProps) {
   const { activeAddingCardId, setActiveAddingCardId } = useAppStore();
   const isOpen = activeAddingCardId === item.id;
   const isBundle = item.bundleItems && item.bundleItems.length > 0;
@@ -198,12 +198,8 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
   }
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.3, delay: index * 0.04, ease: [0.23, 1, 0.32, 1] }}
-      className={`relative rounded-xl border p-4 transition-all duration-300 ${
+    <div 
+      className={`relative rounded-xl border p-4 transition-colors duration-150 ${
         isOpen ? "bg-neutral-900" : "bg-neutral-900/60 hover:bg-neutral-900"
       } ${borderClass} ${showWishlistPrompt ? "z-[60]" : ""}`}
       id={`catalog-item-card-${item.id}`}
@@ -702,6 +698,8 @@ export default function CatalogItemCard({ item, subItems = [], onAddToLocker, is
           </button>
         </form>
       )}
-    </motion.div>
+    </div>
   );
 }
+
+export default React.memo(CatalogItemCardComponent);
