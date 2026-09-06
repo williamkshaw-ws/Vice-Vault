@@ -58,7 +58,9 @@ import {
   FileText,
   Users,
   Heart,
-  Trophy
+  Trophy,
+  WifiOff,
+  Wifi
 } from "lucide-react";
 
 import { auth, db, isFirebaseConfigured } from "./firebase";
@@ -247,6 +249,9 @@ export default function App() {
 
   // Toast state for beautiful UI notifications matching site theme
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+  // Network connectivity state for offline resilience
+  const [isOnline, setIsOnline] = useState<boolean>(() => typeof navigator !== "undefined" ? navigator.onLine : true);
 
   const showToast = (message: string, type: "success" | "error" = "success") => {
     setToast({ message, type });
@@ -1178,6 +1183,36 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     }
   }, [balls, currentUser, isCloudDataLoaded]);
 
+  // Online / Offline connectivity listener & auto-reconnect sync
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      showToast("Back online — syncing data...", "success");
+      if (currentUser && balls.length > 0) {
+        fetch(`/api/users/${currentUser.uid}/locker`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ balls })
+        }).catch(err => console.warn("Locker sync on reconnect failed:", err));
+      }
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      showToast("Offline mode — changes saved locally", "success");
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [currentUser, balls]);
+
   // Synchronize balls changes to localStorage for instant UI caching on refresh
   useEffect(() => {
     if (balls.length > 0) {
@@ -1700,36 +1735,41 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     });
   }, [filteredCatalog, catalogSortBy]);
 
-  // Group catalog items dynamically based on groupColor and groupVariation flags
+  // Group catalog items dynamically based on groupColor and groupVariation flags.
+  // Uses a single O(N) pass via a Map to avoid the previous O(N²) repeated catalog.filter() calls.
   const groupedCatalog = useMemo(() => {
     const groups: { primary: CatalogItem; subItems: CatalogItem[] }[] = [];
     const visited = new Set<string>();
+
+    // Pre-build a Map of groupKey -> items from the full catalog for O(1) lookups
+    const groupMap = new Map<string, CatalogItem[]>();
+    for (const item of catalog) {
+      if (!item.name || (!item.groupColor && !item.groupVariation)) continue;
+      const key = `${item.model.trim().toLowerCase()}||${(item.name || "").trim().toLowerCase()}`;
+      if (!groupMap.has(key)) groupMap.set(key, []);
+      groupMap.get(key)!.push(item);
+    }
 
     for (const item of sortedCatalog) {
       if (visited.has(item.id)) continue;
 
       const shouldGroup = (item.groupColor || item.groupVariation) && dbPanelTab !== "wishlist";
       if (shouldGroup && item.name) {
-        const matching = catalog.filter(i => {
-          const sameModelName = i.model.trim().toLowerCase() === item.model.trim().toLowerCase() &&
-                                (i.name || "").trim().toLowerCase() === (item.name || "").trim().toLowerCase();
-          
-          if (!sameModelName) return false;
+        const key = `${item.model.trim().toLowerCase()}||${(item.name || "").trim().toLowerCase()}`;
+        const candidates = groupMap.get(key) || [];
+
+        const matching = candidates.filter(i => {
           if (item.groupVariation && !i.groupVariation) return false;
           if (item.groupColor && !i.groupColor) return false;
 
           if (item.groupVariation) {
-            // If grouping by variation, they must share the SAME color
             return i.color.trim().toLowerCase() === item.color.trim().toLowerCase();
           }
-          
           if (item.groupColor) {
-            // If grouping by color, they must share the SAME variation
             const itemVar = (item.variation || item.notes || "").trim().toLowerCase();
             const iVar = (i.variation || i.notes || "").trim().toLowerCase();
             return itemVar === iVar;
           }
-
           return false;
         });
 
@@ -1741,21 +1781,15 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           if (!primary.customImageBox && m.customImageBox) primary.customImageBox = m.customImageBox;
         });
 
-        groups.push({
-          primary,
-          subItems: matching
-        });
+        groups.push({ primary, subItems: matching });
       } else {
         visited.add(item.id);
-        groups.push({
-          primary: item,
-          subItems: [item]
-        });
+        groups.push({ primary: item, subItems: [item] });
       }
     }
 
     return groups;
-  }, [sortedCatalog, catalog]);
+  }, [sortedCatalog, catalog, dbPanelTab]);
 
   // Calculate high level statistics for Locker
   const totalOwnedCount = useMemo(() => {
@@ -2088,6 +2122,17 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             >
               <Trophy size={18} />
             </button>
+
+            {/* Offline Mode Indicator */}
+            {!isOnline && (
+              <div 
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400 select-none"
+                title="Working offline — changes are saved locally and will sync when reconnected"
+              >
+                <WifiOff size={12} className="text-amber-400 shrink-0" />
+                <span className="hidden sm:inline">Offline</span>
+              </div>
+            )}
 
             {/* Quick login / Sync access */}
             {isLoadingCloudData ? (

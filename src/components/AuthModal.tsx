@@ -484,7 +484,16 @@ export default function AuthModal({
           photoURL: finalAvatar
         });
         if (newPassword) {
-          await updatePassword(auth.currentUser, newPassword);
+          try {
+            await updatePassword(auth.currentUser, newPassword);
+          } catch (pwErr: any) {
+            if (pwErr.code === "auth/requires-recent-login") {
+              setError("For security, please sign out and sign back in before changing your password.");
+              setIsLoading(false);
+              return;
+            }
+            throw pwErr; // Re-throw other errors to be handled by the outer catch
+          }
         }
       }
 

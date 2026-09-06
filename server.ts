@@ -842,7 +842,9 @@ async function uploadBase64ToStorage(base64Str: string | null | undefined, folde
     }
   } catch (error) {
     console.error("Failed to upload base64 image to ImgBB:", error);
-    return base64Str; // Fallback to base64 on failure
+    // Do NOT fall back to storing the raw Base64 string — it can be up to 15MB and will
+    // bloat Firestore significantly. Instead, surface the error so the caller can handle it.
+    return undefined;
   }
 }
 

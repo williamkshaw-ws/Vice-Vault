@@ -145,6 +145,14 @@ export default function OwnedBallCard({
         });
       };
 
+      // Preload all HTTP images in parallel so they are fully decoded before html2canvas
+      // captures the DOM. Without this, externally-hosted images (e.g. ImgBB) may appear blank.
+      await Promise.all(
+        [targetBox, targetSleeve, targetEa]
+          .filter(Boolean)
+          .map(src => preloadImage(src!))
+      );
+
       // Process all images through the downscaler, which will convert them to safe local Base64 strings.
       // This completely insulates html-to-image from EVER needing to make a network request or deal with CORS.
       if (targetBox) {
