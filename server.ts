@@ -1929,6 +1929,13 @@ app.patch("/api/users/:id/profile", async (req, res) => {
   const { id } = req.params;
   const { displayName, username, avatarUrl, preferredColor, password, shareBag, optInLeaderboard } = req.body;
 
+  // Authorization: only the account owner or an Admin can update this profile
+  const actingUserId = (req as any).user?.uid as string | undefined;
+  const resolvedId = await resolveUserDocId(id);
+  if (!actingUserId || (actingUserId !== id && actingUserId !== resolvedId && !(await verifyAdmin(actingUserId)))) {
+    return res.status(403).json({ error: "Access Denied. You are not authorized to update this profile." });
+  }
+
   if (!displayName || !displayName.trim()) {
     return res.status(400).json({ error: "Display name is required." });
   }
@@ -1941,7 +1948,6 @@ app.patch("/api/users/:id/profile", async (req, res) => {
     return res.status(400).json({ error: "Username must contain letters, numbers, or underscores." });
   }
 
-  const resolvedId = await resolveUserDocId(id);
   const users = await getUsersList();
   
   // Find target user
