@@ -1411,8 +1411,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       handleToggleWishlist(catalogId);
     }
     
+    const resolvedPkgType = packageType || (qty >= 12 ? 'box' : qty >= 3 ? 'sleeve' : 'ea');
+
     setBalls((prev) => {
-      const resolvedPkgType = packageType || (qty >= 12 ? 'box' : qty >= 3 ? 'sleeve' : 'ea');
       // Check if matching ball stack exists to merge (model, color, packageType, year, condition, name, variation, and design notes matching)
       const existingIdx = prev.findIndex(b => 
         b.model.trim().toLowerCase() === model.trim().toLowerCase() &&
