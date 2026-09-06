@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, Search, Check } from 'lucide-react';
 
@@ -15,12 +15,39 @@ export default function SearchableDropdown({ value, options, onChange, placehold
   const [search, setSearch] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0, openUpwards: false });
+  const [coords, setCoords] = useState<{ top: number; left: number; width: number; openUpwards: boolean } | null>(null);
+
+  const updateCoords = () => {
+    if (!dropdownRef.current) return null;
+    const rect = dropdownRef.current.getBoundingClientRect();
+    const popupHeight = 260; // Estimated max height of popup
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    
+    const openUpwards = spaceBelow < popupHeight && spaceAbove > spaceBelow;
+    
+    const newCoords = {
+      top: openUpwards ? rect.top + window.scrollY : rect.bottom + window.scrollY,
+      left: rect.left + window.scrollX,
+      width: 192, // Fixed w-48 width
+      openUpwards
+    };
+    setCoords(newCoords);
+    return newCoords;
+  };
+
+  const handleToggle = () => {
+    if (!isOpen) {
+      updateCoords();
+      setIsOpen(true);
+    } else {
+      setIsOpen(false);
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        // Also check if they clicked inside the portal
         const portal = document.getElementById('dropdown-portal-root');
         if (portal && portal.contains(event.target as Node)) return;
         setIsOpen(false);
@@ -30,28 +57,29 @@ export default function SearchableDropdown({ value, options, onChange, placehold
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    if (isOpen && dropdownRef.current) {
-      const rect = dropdownRef.current.getBoundingClientRect();
-      const popupHeight = 260; // Estimated max height of popup
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const spaceAbove = rect.top;
-      
-      const openUpwards = spaceBelow < popupHeight && spaceAbove > spaceBelow;
-      
-      setCoords({
-        top: openUpwards ? rect.top + window.scrollY : rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX,
-        width: 192, // Fixed w-48 width
-        openUpwards
-      });
-      // Focus after render
-      setTimeout(() => {
+  useLayoutEffect(() => {
+    if (isOpen) {
+      updateCoords();
+      const timer = setTimeout(() => {
         if (inputRef.current) inputRef.current.focus();
       }, 0);
+      return () => clearTimeout(timer);
     } else {
       setSearch("");
     }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleScrollOrResize = () => {
+      updateCoords();
+    };
+    window.addEventListener("scroll", handleScrollOrResize, { passive: true });
+    window.addEventListener("resize", handleScrollOrResize);
+    return () => {
+      window.removeEventListener("scroll", handleScrollOrResize);
+      window.removeEventListener("resize", handleScrollOrResize);
+    };
   }, [isOpen]);
 
   const filteredOptions = options.filter(opt => opt.toLowerCase().includes(search.toLowerCase()));
@@ -77,7 +105,7 @@ export default function SearchableDropdown({ value, options, onChange, placehold
     <div className="relative inline-block text-left shrink-0" ref={dropdownRef}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleToggle}
         className={`flex items-center gap-1.5 bg-neutral-900 border hover:text-white text-[10px] font-mono py-1.5 px-2.5 rounded-lg transition-all cursor-pointer outline-none focus:border-accent ${value ? 'border-neutral-700 text-white shadow-sm' : 'border-neutral-800 text-neutral-400'}`}
       >
         {icon && <span className="text-neutral-500 shrink-0">{icon}</span>}
@@ -85,7 +113,7 @@ export default function SearchableDropdown({ value, options, onChange, placehold
         <ChevronDown size={12} className={`shrink-0 transition-transform ${isOpen ? 'rotate-180 text-white' : 'text-neutral-500'}`} />
       </button>
 
-      {isOpen && createPortal(
+      {isOpen && coords && createPortal(
         <div 
           className={`absolute z-50 rounded-xl border border-neutral-800 bg-neutral-950 shadow-2xl p-1 animate-in fade-in duration-150 flex flex-col gap-0 ${coords.openUpwards ? 'slide-in-from-bottom-2' : 'mt-1 slide-in-from-top-2'}`}
           style={{ 
