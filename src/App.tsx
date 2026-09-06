@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GolfBall, CatalogItem, BallModel, BallColor, BallCondition, UserProfile } from "./types";
 import { VICE_BALLS_SPECS, COLOR_STYLES, SCRAPED_BALLS } from "./constants";
@@ -247,21 +247,34 @@ const getUniqueCatalogItems = (balls: GolfBall[], catalog: CatalogItem[]): Catal
 export default function App() {
   const { theme, setTheme } = useAppStore();
 
-  // Toast state for beautiful UI notifications matching site theme
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  // Toast state for beautiful UI notifications matching site theme with optional action button (e.g. Undo)
+  const [toast, setToast] = useState<{ 
+    message: string; 
+    type: "success" | "error"; 
+    action?: { label: string; onClick: () => void } 
+  } | null>(null);
+
+  // Background sync status indicator: "synced" | "saving" | "offline"
+  const [syncStatus, setSyncStatus] = useState<"synced" | "saving" | "offline">("synced");
+  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Network connectivity state for offline resilience
   const [isOnline, setIsOnline] = useState<boolean>(() => typeof navigator !== "undefined" ? navigator.onLine : true);
 
-  const showToast = (message: string, type: "success" | "error" = "success") => {
-    setToast({ message, type });
+  const showToast = (
+    message: string, 
+    type: "success" | "error" = "success",
+    action?: { label: string; onClick: () => void }
+  ) => {
+    setToast({ message, type, action });
   };
 
   useEffect(() => {
     if (toast) {
+      const duration = toast.action ? 5000 : 3000;
       const timer = setTimeout(() => {
         setToast(null);
-      }, 3000);
+      }, duration);
       return () => clearTimeout(timer);
     }
   }, [toast]);
@@ -1168,20 +1181,48 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
 
 
-  // Sync to localStorage, Firestore, or Express Server depending on login state
+  // Optimistic & Debounced Background Sync:
+  // Saves to localStorage immediately for instant offline persistence and zero UI delay,
+  // and debounces the network sync by 500ms to consolidate rapid changes and prevent race conditions.
   useEffect(() => {
-    if (currentUser && isCloudDataLoaded) {
-      // Sync locker via the backend server API for both mock and real Firebase users
-      fetch(`/api/users/${currentUser.uid}/locker`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    if (!currentUser || !isCloudDataLoaded) return;
 
-        },
-        body: JSON.stringify({ balls })
-      }).catch(err => console.error("Error writing locker to server:", err));
+    if (!isOnline) {
+      setSyncStatus("offline");
+      return;
     }
-  }, [balls, currentUser, isCloudDataLoaded]);
+
+    setSyncStatus("saving");
+    if (syncTimeoutRef.current) {
+      clearTimeout(syncTimeoutRef.current);
+    }
+
+    syncTimeoutRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/users/${currentUser.uid}/locker`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ balls })
+        });
+        if (res.ok) {
+          setSyncStatus("synced");
+        } else {
+          setSyncStatus("offline");
+        }
+      } catch (err) {
+        console.warn("Background sync failed:", err);
+        setSyncStatus("offline");
+      }
+    }, 500);
+
+    return () => {
+      if (syncTimeoutRef.current) {
+        clearTimeout(syncTimeoutRef.current);
+      }
+    };
+  }, [balls, currentUser, isCloudDataLoaded, isOnline]);
 
   // Online / Offline connectivity listener & auto-reconnect sync
   useEffect(() => {
@@ -1423,6 +1464,14 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         return [newBall, ...prev];
       }
     });
+
+    const ballTitle = name || `${color} ${model}`;
+    const qtyText = resolvedPkgType === 'box' 
+      ? `${Math.max(1, Math.round(qty / 12))} box (${qty} balls)` 
+      : resolvedPkgType === 'sleeve' 
+      ? `${Math.max(1, Math.round(qty / 3))} sleeve (${qty} balls)` 
+      : `${qty} ball${qty > 1 ? 's' : ''}`;
+    showToast(`Added ${qtyText} of ${ballTitle} to your bag!`, "success");
   };
 
   // Add missing ball to Catalog Database
@@ -1576,16 +1625,29 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     );
   };
 
-  // General update handler for locker balls
+  // General update handler for locker balls with instant UI update
   const handleUpdateBall = (id: string, updatedFields: Partial<GolfBall>) => {
     setBalls((prev) =>
       prev.map(b => b.id === id ? { ...b, ...updatedFields } : b)
     );
+    showToast("Ball updated", "success");
   };
 
-  // Delete/wipe from owned bag locker
+  // Delete from owned bag locker with optimistic instant removal and Undo capability
   const handleDeleteBall = (id: string) => {
+    const ballToDelete = balls.find(b => b.id === id);
+    if (!ballToDelete) return;
+
     setBalls((prev) => prev.filter(b => b.id !== id));
+
+    const ballName = ballToDelete.name || `${ballToDelete.color} ${ballToDelete.model}`;
+    showToast(`Removed "${ballName}" from your bag`, "success", {
+      label: "Undo",
+      onClick: () => {
+        setBalls((prev) => [ballToDelete, ...prev]);
+        showToast(`Restored "${ballName}" to your bag`, "success");
+      }
+    });
   };
 
   // Wipe entire owned Bag Locker
@@ -2125,6 +2187,17 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
               >
                 <WifiOff size={12} className="text-amber-400 shrink-0" />
                 <span className="hidden sm:inline">Offline</span>
+              </div>
+            )}
+
+            {/* Background Sync Indicator */}
+            {syncStatus === "saving" && !isLoadingCloudData && isOnline && (
+              <div 
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-mono text-neutral-400 bg-neutral-900 border border-neutral-800"
+                title="Saving changes to cloud in background..."
+              >
+                <RefreshCw size={11} className="animate-spin text-accent" />
+                <span>Saving...</span>
               </div>
             )}
 
@@ -3456,15 +3529,35 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       )}
       </AnimatePresence>
 
-       {/* Toast Notification */}
+       {/* Toast Notification with Optimistic Action (Undo) */}
        {toast && (
-         <div role="alert" aria-live="polite" className={`fixed bottom-5 right-5 z-[100] px-4 py-3 rounded-xl border shadow-xl flex items-center gap-2.5 font-mono text-xs animate-fade-in ${
+         <div role="alert" aria-live="polite" className={`fixed bottom-5 right-5 z-[100] px-4 py-3 rounded-2xl border shadow-2xl flex items-center gap-3 font-mono text-xs animate-fade-in backdrop-blur-md ${
            toast.type === 'success' 
-             ? 'bg-neutral-900 border-emerald-900 text-emerald-400' 
-             : 'bg-rose-950/80 border-rose-900 text-rose-300'
+             ? 'bg-neutral-900/95 border-emerald-500/40 text-emerald-300 shadow-emerald-950/30' 
+             : 'bg-rose-950/95 border-rose-500/40 text-rose-200 shadow-rose-950/30'
          }`}>
-           <div className={`w-2 h-2 rounded-full ${toast.type === 'success' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500 animate-pulse'}`} />
-           <span>{toast.message}</span>
+           <div className={`w-2 h-2 rounded-full shrink-0 ${toast.type === 'success' ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400 animate-pulse'}`} />
+           <span className="font-sans font-medium text-xs text-white">{toast.message}</span>
+           {toast.action && (
+             <button
+               type="button"
+               onClick={() => {
+                 toast.action?.onClick();
+                 setToast(null);
+               }}
+               className="ml-2 px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 hover:text-white font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer border border-emerald-500/40"
+             >
+               {toast.action.label}
+             </button>
+           )}
+           <button
+             type="button"
+             onClick={() => setToast(null)}
+             className="text-neutral-500 hover:text-neutral-300 transition-colors ml-1 p-0.5 cursor-pointer"
+             aria-label="Close notification"
+           >
+             <X size={13} />
+           </button>
          </div>
        )}
 
