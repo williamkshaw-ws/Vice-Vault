@@ -5,9 +5,10 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor, Copy, Eye, EyeOff, AlertTriangle, Share2 } from "lucide-react";
+import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor, Copy, Eye, EyeOff, AlertTriangle, Share2, Trash2 } from "lucide-react";
 import { ACCENT_COLORS, isStrongPassword } from "../utils";
 import { nativeHaptics, nativeShare } from "../utils/native";
+import { getAuthHeaders } from "../utils/authHeaders";
 import {
   auth,
   db,
@@ -28,6 +29,7 @@ interface AuthModalProps {
   currentUser?: any;
   userProfile?: { displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; createdAt?: string; email?: string; shareBag?: boolean; shareToken?: string; optInLeaderboard?: boolean; } | null;
   onProfileUpdate?: (updatedUser: any) => void;
+  onSignOut?: () => void;
   theme?: 'light' | 'dark' | 'system';
   onThemeChange?: (theme: 'light' | 'dark' | 'system') => void;
   hasBagItems?: boolean;
@@ -184,6 +186,7 @@ export default function AuthModal({
   currentUser,
   userProfile,
   onProfileUpdate,
+  onSignOut,
   theme = "system",
   onThemeChange,
   hasBagItems
@@ -211,6 +214,11 @@ export default function AuthModal({
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  // Account Deletion State (Apple Guideline 5.1.1v)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmationInput, setDeleteConfirmationInput] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [newPasswordFocused, setNewPasswordFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -225,6 +233,9 @@ export default function AuthModal({
       setConfirmPassword("");
       setNewPassword("");
       setNewPasswordConfirm("");
+      setShowDeleteConfirm(false);
+      setDeleteConfirmationInput("");
+      setIsDeleting(false);
       
       if (currentUser) {
         setTab("settings");
@@ -562,6 +573,59 @@ export default function AuthModal({
       console.error("Profile update error:", err);
       setError(err.message || "Failed to update profile settings.");
       setIsLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmationInput.trim().toUpperCase() !== "DELETE") {
+      setError("Please type DELETE to confirm permanent account deletion.");
+      return;
+    }
+
+    const targetUid = userProfile?.uid || currentUser?.uid;
+    if (!targetUid) return;
+
+    setIsDeleting(true);
+    setError(null);
+    nativeHaptics.impactMedium();
+
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch(`/api/users/${targetUid}`, {
+        method: "DELETE",
+        headers
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to delete account");
+      }
+
+      // If signed in with Firebase on client, also attempt user deletion
+      if (auth && auth.currentUser) {
+        try {
+          await auth.currentUser.delete();
+        } catch (fbErr: any) {
+          console.warn("Client Firebase auth deletion skipped:", fbErr);
+        }
+      }
+
+      localStorage.removeItem("vice_vault_mock_user");
+      nativeHaptics.notificationSuccess();
+      setShowDeleteConfirm(false);
+      setDeleteConfirmationInput("");
+      onClose();
+
+      if (onSignOut) {
+        onSignOut();
+      } else {
+        window.location.reload();
+      }
+    } catch (err: any) {
+      console.error("Account deletion failed:", err);
+      setError(err.message || "Failed to delete account. Please try again.");
+      nativeHaptics.notificationWarning();
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -1328,6 +1392,96 @@ export default function AuthModal({
                   "Save Settings"
                 )}
               </button>
+
+              {/* Danger Zone: In-App Account Deletion per Apple Guideline 5.1.1(v) */}
+              <div className="mt-8 pt-6 border-t border-red-950/40">
+                <div className="bg-red-950/20 border border-red-900/30 rounded-xl p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-red-900/30 rounded-lg text-red-400 shrink-0 mt-0.5">
+                      <Trash2 size={16} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-xs font-bold text-red-200 uppercase tracking-wider font-mono">Delete Account</h4>
+                      <p className="text-[11px] text-neutral-400 mt-1 leading-relaxed">
+                        Permanently delete your account and all associated data, including your golf ball collection, wishlist, and profile. This action cannot be undone.
+                      </p>
+                    </div>
+                  </div>
+
+                  {(userProfile?.username?.toLowerCase() === "admin" || currentUser?.username?.toLowerCase() === "admin") ? (
+                    <div className="p-2.5 bg-neutral-950 border border-neutral-850 rounded-lg text-[10px] text-neutral-400 font-mono text-center">
+                      The default system administrator account cannot be deleted.
+                    </div>
+                  ) : !showDeleteConfirm ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        nativeHaptics.notificationWarning();
+                        setShowDeleteConfirm(true);
+                      }}
+                      className="w-full py-2.5 bg-red-950/40 hover:bg-red-900/60 border border-red-800/50 text-red-200 font-bold rounded-xl text-[11px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-98"
+                    >
+                      <Trash2 size={13} />
+                      <span>Permanently Delete Account</span>
+                    </button>
+                  ) : (
+                    <div className="bg-neutral-950 border border-red-900/50 rounded-xl p-3.5 space-y-3">
+                      <div className="flex items-center gap-1.5 text-red-400 text-xs font-bold">
+                        <AlertTriangle size={14} />
+                        <span>Confirm Account Deletion</span>
+                      </div>
+                      <p className="text-[10px] text-neutral-400 font-mono">
+                        Type <span className="text-white font-bold bg-neutral-900 px-1 py-0.5 rounded border border-neutral-800">DELETE</span> below to confirm permanent deletion:
+                      </p>
+                      <input
+                        type="text"
+                        value={deleteConfirmationInput}
+                        onChange={(e) => setDeleteConfirmationInput(e.target.value)}
+                        placeholder="Type DELETE"
+                        autoCapitalize="characters"
+                        autoCorrect="off"
+                        spellCheck={false}
+                        className="w-full bg-neutral-900 border border-red-900/50 rounded-lg py-2 px-3 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-red-500 font-mono tracking-wider"
+                      />
+                      <div className="flex gap-2 pt-1">
+                        <button
+                          type="button"
+                          disabled={isDeleting}
+                          onClick={() => {
+                            setShowDeleteConfirm(false);
+                            setDeleteConfirmationInput("");
+                          }}
+                          className="flex-1 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 text-[10px] font-mono uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          disabled={deleteConfirmationInput.trim().toUpperCase() !== "DELETE" || isDeleting}
+                          onClick={handleDeleteAccount}
+                          className={`flex-1 py-2 text-[10px] font-mono uppercase tracking-wider rounded-lg font-bold transition-all flex items-center justify-center gap-1.5 ${
+                            deleteConfirmationInput.trim().toUpperCase() === "DELETE" && !isDeleting
+                              ? "bg-red-600 hover:bg-red-500 text-white cursor-pointer shadow-lg shadow-red-900/40 active:scale-98"
+                              : "bg-red-950/30 text-neutral-600 border border-red-950 cursor-not-allowed"
+                          }`}
+                        >
+                          {isDeleting ? (
+                            <>
+                              <RefreshCw size={11} className="animate-spin" />
+                              <span>Deleting...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Trash2 size={11} />
+                              <span>Confirm Delete</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </form>
           )}
         </div>

@@ -2468,27 +2468,33 @@ app.patch("/api/users/:id", async (req, res) => {
   res.json(updatedUser);
 });
 
-// Delete user (Admin only)
+// Delete user (Admin or Account Owner self-deletion per Apple App Store Guideline 5.1.1(v))
 app.delete("/api/users/:id", async (req, res) => {
   const { id } = req.params;
   const actingUserId = (req as any).user?.uid as string | undefined;
 
-  if (!(await verifyAdmin(actingUserId))) {
-    return res.status(403).json({ error: "Access Denied. Only Admin users can delete user accounts." });
+  if (!actingUserId) {
+    return res.status(401).json({ error: "Authentication required to delete an account." });
   }
 
   const resolvedId = await resolveUserDocId(id);
   const resolvedActingId = await resolveUserDocId(actingUserId);
+  const isAdmin = await verifyAdmin(actingUserId);
+  const isSelf = resolvedId && resolvedActingId && resolvedId === resolvedActingId;
 
-  // Self-deletion check
-  if (resolvedId === resolvedActingId) {
-    return res.status(400).json({ error: "Self-protection safeguard: You cannot delete your own admin account." });
+  if (!isAdmin && !isSelf) {
+    return res.status(403).json({ error: "Access Denied. You do not have permission to delete this account." });
   }
 
   const users = await getUsersList();
   const targetUser = users.find(u => u.uid === resolvedId);
   if (!targetUser) {
     return res.status(404).json({ error: "User not found" });
+  }
+
+  // Self-protection safeguard: The default system admin account cannot be deleted
+  if (targetUser.username?.toLowerCase() === "admin" || targetUser.email?.toLowerCase() === "admin@vice-vault.internal") {
+    return res.status(400).json({ error: "The default system admin account cannot be deleted." });
   }
 
   // Delete from Firebase Auth if isFirebaseAdminInitialized and it's a real Firebase user

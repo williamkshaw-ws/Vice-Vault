@@ -2557,6 +2557,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         userProfile={userProfile}
         theme={theme}
         onThemeChange={handleSetTheme}
+        onSignOut={handleSignOut}
         onProfileUpdate={(updatedUser) => {
           setCurrentUser(updatedUser);
           setUserProfile({
