@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor, Copy, Eye, EyeOff, AlertTriangle, Share2, Trash2 } from "lucide-react";
+import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor, Copy, Eye, EyeOff, AlertTriangle, Share2, Trash2, ArrowLeft, CheckCircle2, ShieldCheck } from "lucide-react";
 import { ACCENT_COLORS, isStrongPassword } from "../utils";
 import { nativeHaptics, nativeShare } from "../utils/native";
 import { getAuthHeaders } from "../utils/authHeaders";
@@ -18,7 +18,9 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
-  updatePassword
+  updatePassword,
+  sendPasswordResetEmail,
+  sendEmailVerification
 } from "firebase/auth";
 import { doc, setDoc, getDoc, deleteDoc } from "firebase/firestore";
 
@@ -27,13 +29,35 @@ interface AuthModalProps {
   onClose: () => void;
   onMockLogin?: (user: any) => void;
   currentUser?: any;
-  userProfile?: { displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; createdAt?: string; email?: string; shareBag?: boolean; shareToken?: string; optInLeaderboard?: boolean; } | null;
+  userProfile?: { displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; createdAt?: string; email?: string; emailVerified?: boolean; shareBag?: boolean; shareToken?: string; optInLeaderboard?: boolean; } | null;
   onProfileUpdate?: (updatedUser: any) => void;
   onSignOut?: () => void;
   theme?: 'light' | 'dark' | 'system';
   onThemeChange?: (theme: 'light' | 'dark' | 'system') => void;
   hasBagItems?: boolean;
 }
+
+const DISPOSABLE_EMAIL_DOMAINS = new Set([
+  "mailinator.com",
+  "tempmail.com",
+  "temp-mail.org",
+  "guerrillamail.com",
+  "guerrillamailblock.com",
+  "sharklasers.com",
+  "10minutemail.com",
+  "10minutemail.net",
+  "throwawaymail.com",
+  "trashmail.com",
+  "trashmail.net",
+  "yopmail.com",
+  "dispostable.com",
+  "getairmail.com",
+  "mytemp.email",
+  "fakemailgenerator.com",
+  "mohmal.com",
+  "emailondeck.com",
+  "nada.ltd"
+]);
 
 export function AvatarRenderer({ 
   avatarUrl, 
@@ -191,7 +215,7 @@ export default function AuthModal({
   onThemeChange,
   hasBagItems
 }: AuthModalProps) {
-  const [tab, setTab] = useState<"signin" | "signup" | "settings">("signin");
+  const [tab, setTab] = useState<"signin" | "signup" | "settings" | "forgot">("signin");
   
   // Auth Form State
   const [email, setEmail] = useState("");
@@ -213,6 +237,15 @@ export default function AuthModal({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  // Forgot Password State
+  const [forgotIdentifier, setForgotIdentifier] = useState("");
+  const [isSendingReset, setIsSendingReset] = useState(false);
+  const [resetSuccessMessage, setResetSuccessMessage] = useState<string | null>(null);
+
+  // Email Verification State
+  const [isSendingVerification, setIsSendingVerification] = useState(false);
+  const [verificationSuccessMessage, setVerificationSuccessMessage] = useState<string | null>(null);
 
   // Account Deletion State (Apple Guideline 5.1.1v)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -236,6 +269,11 @@ export default function AuthModal({
       setShowDeleteConfirm(false);
       setDeleteConfirmationInput("");
       setIsDeleting(false);
+      setForgotIdentifier("");
+      setIsSendingReset(false);
+      setResetSuccessMessage(null);
+      setIsSendingVerification(false);
+      setVerificationSuccessMessage(null);
       
       if (currentUser) {
         setTab("settings");
@@ -360,6 +398,73 @@ export default function AuthModal({
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanId = forgotIdentifier.trim();
+    if (!cleanId) {
+      setError("Please enter your registered email address or username.");
+      return;
+    }
+
+    setIsSendingReset(true);
+    setError(null);
+    setResetSuccessMessage(null);
+    nativeHaptics.impactLight();
+
+    try {
+      let targetEmail = cleanId;
+
+      // If user entered a username (no @), resolve via backend endpoint
+      if (!cleanId.includes("@")) {
+        const res = await fetch("/api/auth/forgot-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ identifier: cleanId })
+        });
+        const data = await res.json();
+        if (data.email) {
+          targetEmail = data.email;
+        } else {
+          // Standard safe notification if username not found
+          setResetSuccessMessage("If an account matches that info, instructions have been sent.");
+          nativeHaptics.notificationSuccess();
+          setIsSendingReset(false);
+          return;
+        }
+      }
+
+      // If Firebase Auth is configured on client, send password reset email directly
+      if (isFirebaseConfigured && auth) {
+        await sendPasswordResetEmail(auth, targetEmail);
+      } else {
+        // Fallback: call backend forgot-password
+        await fetch("/api/auth/forgot-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ identifier: targetEmail })
+        });
+      }
+
+      nativeHaptics.notificationSuccess();
+      const masked = targetEmail.includes("@")
+        ? targetEmail.replace(/^(.)(.*)(@.*)$/, (_, a, b, c) => `${a}***${c}`)
+        : targetEmail;
+      setResetSuccessMessage(`Password reset link sent to ${masked}! Please check your inbox and spam folder.`);
+    } catch (err: any) {
+      console.error("Forgot password error:", err);
+      if (err.code === "auth/user-not-found") {
+        setResetSuccessMessage("If an account exists with that email, instructions have been sent.");
+      } else if (err.code === "auth/invalid-email") {
+        setError("Please enter a valid email address.");
+      } else {
+        setError(err.message || "Failed to send reset email. Please try again.");
+      }
+      nativeHaptics.notificationWarning();
+    } finally {
+      setIsSendingReset(false);
+    }
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!displayName.trim()) {
@@ -375,6 +480,18 @@ export default function AuthModal({
       setError("Username must contain letters, numbers, or underscores.");
       return;
     }
+
+    const emailTrim = email.trim();
+    if (!emailTrim || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrim)) {
+      setError("Please enter a valid email address (e.g. name@domain.com).");
+      return;
+    }
+    const emailDomain = emailTrim.toLowerCase().split("@")[1];
+    if (emailDomain && DISPOSABLE_EMAIL_DOMAINS.has(emailDomain)) {
+      setError("Temporary or disposable email addresses are not permitted. Please use a permanent email address (e.g. Gmail, Apple, Outlook) so you can recover your account if needed.");
+      return;
+    }
+
     if (!isStrongPassword(password)) {
       setError("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
       return;
@@ -576,6 +693,35 @@ export default function AuthModal({
     }
   };
 
+  const handleSendEmailVerification = async () => {
+    if (!auth || !auth.currentUser) {
+      setError("Email verification is only available for online accounts.");
+      return;
+    }
+
+    setIsSendingVerification(true);
+    setError(null);
+    setVerificationSuccessMessage(null);
+    nativeHaptics.impactLight();
+
+    try {
+      await sendEmailVerification(auth.currentUser);
+      nativeHaptics.notificationSuccess();
+      setVerificationSuccessMessage(`Verification email sent to ${auth.currentUser.email}! Please click the link in your email to verify.`);
+      setTimeout(() => setVerificationSuccessMessage(null), 6000);
+    } catch (err: any) {
+      console.error("Verification email failed:", err);
+      if (err.code === "auth/too-many-requests") {
+        setError("Too many verification emails sent recently. Please wait a moment before trying again.");
+      } else {
+        setError(err.message || "Failed to send verification email.");
+      }
+      nativeHaptics.notificationWarning();
+    } finally {
+      setIsSendingVerification(false);
+    }
+  };
+
   const handleDeleteAccount = async () => {
     if (deleteConfirmationInput.trim().toUpperCase() !== "DELETE") {
       setError("Please type DELETE to confirm permanent account deletion.");
@@ -630,6 +776,17 @@ export default function AuthModal({
   };
 
   const activeAvatarUrl = selectedPreset;
+  const isEmailVerified = Boolean(
+    (auth?.currentUser && auth.currentUser.emailVerified) ||
+    currentUser?.emailVerified ||
+    userProfile?.emailVerified
+  );
+
+  useEffect(() => {
+    if (tab === "settings" && auth?.currentUser) {
+      auth.currentUser.reload().catch(() => {});
+    }
+  }, [tab, isOpen]);
 
   return (
     <AnimatePresence>
@@ -652,9 +809,14 @@ export default function AuthModal({
               {tab === "signin" && "Golf Ball Vault Login"}
               {tab === "signup" && "Create Vault Account"}
               {tab === "settings" && "Profile Settings"}
+              {tab === "forgot" && "Reset Password"}
             </h2>
             <p className="text-xs text-neutral-400 mt-0.5 font-mono">
-              {tab === "settings" ? "Manage your profile details" : "Synchronize your golf bag across devices"}
+              {tab === "settings" 
+                ? "Manage your profile details" 
+                : tab === "forgot"
+                ? "Recover your account access via email"
+                : "Synchronize your golf bag across devices"}
             </p>
           </div>
           <button 
@@ -666,11 +828,16 @@ export default function AuthModal({
           </button>
         </div>
 
-        {/* Tab Selector - Only show if not logged in */}
-        {!currentUser && (
+        {/* Tab Selector - Only show if not logged in and not in forgot-password */}
+        {!currentUser && tab !== "forgot" && (
           <div className="flex bg-neutral-950 p-1 border-b border-neutral-850">
             <button
-              onClick={() => setTab("signin")}
+              onClick={() => {
+                setError(null);
+                setSuccessMsg(null);
+                setTab("signin");
+                nativeHaptics.selectionChanged();
+              }}
               className={`flex-1 py-2 text-xs font-mono uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
                 tab === "signin" 
                   ? "bg-neutral-900 text-accent font-bold" 
@@ -680,7 +847,12 @@ export default function AuthModal({
               Sign In
             </button>
             <button
-              onClick={() => setTab("signup")}
+              onClick={() => {
+                setError(null);
+                setSuccessMsg(null);
+                setTab("signup");
+                nativeHaptics.selectionChanged();
+              }}
               className={`flex-1 py-2 text-xs font-mono uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
                 tab === "signup" 
                   ? "bg-neutral-900 text-accent font-bold" 
@@ -732,7 +904,23 @@ export default function AuthModal({
               </div>
 
               <div>
-                <label className="block text-[10px] font-mono uppercase text-neutral-400 mb-1.5">Password</label>
+                <div className="flex justify-between items-center mb-1.5">
+                  <label className="block text-[10px] font-mono uppercase text-neutral-400">Password</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setError(null);
+                      setSuccessMsg(null);
+                      setResetSuccessMessage(null);
+                      setForgotIdentifier(email || "");
+                      setTab("forgot");
+                      nativeHaptics.selectionChanged();
+                    }}
+                    className="text-[10px] font-mono text-accent hover:underline cursor-pointer bg-transparent border-0 p-0"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" size={14} />
                   <input
@@ -775,6 +963,82 @@ export default function AuthModal({
               <p className="text-[10px] text-neutral-500 text-center mt-4 font-mono">
                 No account? <button type="button" onClick={() => setTab("signup")} className="text-accent underline hover:text-white cursor-pointer bg-transparent border-0 p-0">Create one now</button>
               </p>
+            </form>
+          )}
+
+          {/* FORGOT PASSWORD TAB */}
+          {tab === "forgot" && !currentUser && (
+            <form onSubmit={handleForgotPassword} className="space-y-4" id="forgot-password-form">
+              <div className="p-3 bg-neutral-950/60 border border-neutral-800 rounded-xl text-neutral-300 text-xs font-mono space-y-1">
+                <p className="font-bold text-white text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                  <Lock size={13} className="text-accent" />
+                  Account Recovery
+                </p>
+                <p className="text-[11px] text-neutral-400">
+                  Enter your email address or username. We'll send an official password reset link directly to your inbox.
+                </p>
+              </div>
+
+              {resetSuccessMessage && (
+                <div className="p-3 bg-emerald-950/30 border border-emerald-900/50 rounded-xl text-emerald-200 text-xs flex items-start gap-2.5 font-mono">
+                  <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold uppercase text-[10px] block">Instructions Sent</span>
+                    <span className="text-[11px] leading-relaxed">{resetSuccessMessage}</span>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[10px] font-mono uppercase text-neutral-400 mb-1.5">Email or Username</label>
+                <div className="relative">
+                  <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" size={14} />
+                  <input
+                    type="text"
+                    required
+                    value={forgotIdentifier}
+                    onChange={(e) => setForgotIdentifier(e.target.value)}
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    autoComplete="off"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2.5 pl-10 pr-4 text-sm sm:text-xs text-white placeholder-neutral-550 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all font-mono"
+                    placeholder="name@domain.com or username"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSendingReset}
+                className="w-full py-3 bg-accent text-white font-extrabold rounded-xl text-xs uppercase tracking-wider hover:bg-[#3b82f6] active:scale-98 transition-all cursor-pointer flex justify-center items-center gap-2 mt-4 shadow-lg shadow-accent/10"
+              >
+                {isSendingReset ? (
+                  <>
+                    <RefreshCw className="animate-spin text-black" size={14} />
+                    Sending Reset Link...
+                  </>
+                ) : (
+                  "Send Password Reset Link"
+                )}
+              </button>
+
+              <div className="pt-2 text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setError(null);
+                    setSuccessMsg(null);
+                    setResetSuccessMessage(null);
+                    setTab("signin");
+                    nativeHaptics.selectionChanged();
+                  }}
+                  className="text-xs font-mono text-neutral-400 hover:text-white inline-flex items-center gap-1.5 cursor-pointer bg-transparent border-0"
+                >
+                  <ArrowLeft size={13} />
+                  Back to Sign In
+                </button>
+              </div>
             </form>
           )}
 
@@ -1090,7 +1354,39 @@ export default function AuthModal({
               </div>
 
               <div>
-                <label className="block text-[10px] font-mono uppercase text-neutral-500 mb-1.5">Email Address (Uneditable)</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[10px] font-mono uppercase text-neutral-400">Email Address</label>
+                  {isEmailVerified ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                      <ShieldCheck size={11} className="text-emerald-400" />
+                      Verified
+                    </span>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                        <AlertTriangle size={10} className="text-amber-400" />
+                        Unverified
+                      </span>
+                      {currentUser?.email && !currentUser?.isMock && (
+                        <button
+                          type="button"
+                          onClick={handleSendEmailVerification}
+                          disabled={isSendingVerification}
+                          className="text-[10px] font-mono text-accent hover:underline cursor-pointer bg-transparent border-0 p-0 flex items-center gap-1 font-bold"
+                        >
+                          {isSendingVerification ? (
+                            <>
+                              <RefreshCw size={10} className="animate-spin" />
+                              Sending...
+                            </>
+                          ) : (
+                            "Verify Email"
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-600" size={12} />
                   <input
@@ -1100,6 +1396,12 @@ export default function AuthModal({
                     className="w-full bg-neutral-950/50 border border-neutral-900 rounded-xl py-2 pl-9 pr-3 text-xs text-neutral-500 cursor-not-allowed font-mono opacity-60"
                   />
                 </div>
+                {verificationSuccessMessage && (
+                  <div className="mt-2 p-2.5 bg-emerald-950/40 border border-emerald-900/50 rounded-xl text-emerald-300 text-[11px] font-mono flex items-center gap-2">
+                    <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
+                    <span>{verificationSuccessMessage}</span>
+                  </div>
+                )}
               </div>
 
               <div>

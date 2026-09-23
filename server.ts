@@ -178,6 +178,46 @@ function cleanUsernameString(username: string): string {
   return u.replace(/[^a-z0-9_]/g, "");
 }
 
+const DISPOSABLE_EMAIL_DOMAINS = new Set([
+  "mailinator.com",
+  "tempmail.com",
+  "temp-mail.org",
+  "guerrillamail.com",
+  "guerrillamailblock.com",
+  "sharklasers.com",
+  "10minutemail.com",
+  "10minutemail.net",
+  "throwawaymail.com",
+  "trashmail.com",
+  "trashmail.net",
+  "yopmail.com",
+  "dispostable.com",
+  "getairmail.com",
+  "mytemp.email",
+  "fakemailgenerator.com",
+  "mohmal.com",
+  "emailondeck.com",
+  "nada.ltd",
+  "crazymailing.com",
+  "burnermail.io",
+  "guerrillamail.biz",
+  "guerrillamail.org"
+]);
+
+function isValidEmailFormat(email: string): boolean {
+  if (!email || typeof email !== "string") return false;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email.trim());
+}
+
+function isDisposableEmail(email: string): boolean {
+  if (!email || typeof email !== "string") return false;
+  const parts = email.trim().toLowerCase().split("@");
+  if (parts.length !== 2) return false;
+  const domain = parts[1];
+  return DISPOSABLE_EMAIL_DOMAINS.has(domain);
+}
+
 const app = express();
 app.set('trust proxy', 1);
 
@@ -1307,6 +1347,16 @@ app.post("/api/auth/signup", authLimiter, async (req, res) => {
     return res.status(400).json({ error: "Missing required registration fields" });
   }
 
+  if (!isValidEmailFormat(email)) {
+    return res.status(400).json({ error: "Please enter a valid email address (e.g. name@domain.com)." });
+  }
+
+  if (isDisposableEmail(email)) {
+    return res.status(400).json({
+      error: "Temporary or disposable email addresses are not permitted. Please use a permanent email address (e.g. Gmail, Apple, Outlook) so you can recover your account if needed."
+    });
+  }
+
   if (!isStrongPassword(password)) {
     return res.status(400).json({
       error: "Password is too weak. It must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character."
@@ -1425,6 +1475,53 @@ app.get("/api/auth/resolve-email", authLimiter, async (req, res) => {
   }
 
   return res.status(404).json({ error: "Username not found." });
+});
+
+// Request password reset instructions
+app.post("/api/auth/forgot-password", authLimiter, async (req, res) => {
+  const { identifier } = req.body;
+  if (!identifier || typeof identifier !== "string") {
+    return res.status(400).json({ error: "Email or username is required." });
+  }
+
+  const clean = identifier.trim().toLowerCase().replace(/^@/, "");
+  const isEmail = clean.includes("@");
+
+  const users = await getUsersList();
+  let user = isEmail
+    ? users.find(u => u.email?.toLowerCase() === clean)
+    : users.find(u => u.username?.toLowerCase() === clean);
+
+  // If not found in memory list, check Firestore
+  if (!user && isFirebaseAdminInitialized && dbAdmin) {
+    try {
+      const usersRef = dbAdmin.collection("users");
+      const queryField = isEmail ? "email" : "username";
+      const snap = await usersRef.where(queryField, "==", clean).get();
+      if (!snap.empty) {
+        user = snap.docs[0].data() as any;
+      }
+    } catch (e) {
+      console.error("Firestore forgot-password lookup failed:", e);
+    }
+  }
+
+  if (!user || !user.email) {
+    // Return standard message to prevent account enumeration
+    return res.json({ 
+      success: true, 
+      message: "If an account matches that email or username, password reset instructions have been sent.",
+      emailFound: false 
+    });
+  }
+
+  return res.json({
+    success: true,
+    message: "Password reset instructions dispatched.",
+    emailFound: true,
+    email: user.email,
+    maskedEmail: maskEmail(user.email)
+  });
 });
 
 // Auth SignIn

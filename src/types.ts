@@ -128,6 +128,7 @@ export interface UserProfile {
   displayName?: string;
   username?: string;
   email?: string;
+  emailVerified?: boolean;
   role: "Admin" | "User";
   preferredColor: string;
   avatarUrl?: string;

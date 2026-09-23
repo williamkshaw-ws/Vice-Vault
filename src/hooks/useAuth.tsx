@@ -28,7 +28,9 @@ export function useAuth() {
           shareBag: !!parsed.shareBag,
           shareToken: parsed.shareToken,
           pendingFriendRequestsCount: parsed.pendingFriendRequestsCount || 0,
-          wishlist: parsed.wishlist || []
+          wishlist: parsed.wishlist || [],
+          email: parsed.email || "",
+          emailVerified: !!parsed.emailVerified
         });
         setAccentColor(parsed.preferredColor || "#2563eb");
         setIsAuthLoading(false);
@@ -75,7 +77,8 @@ export function useAuth() {
                 email: profileData.email || user.email || "",
                 shareBag: !!profileData.shareBag,
                 shareToken: profileData.shareToken,
-                wishlist: profileData.wishlist || []
+                wishlist: profileData.wishlist || [],
+                emailVerified: Boolean(user.emailVerified || profileData.emailVerified)
               });
               setAccentColor(profileData.preferredColor || "#2563eb");
             } else {
@@ -93,6 +96,7 @@ export function useAuth() {
                 role: cleanUsername === "admin" ? "Admin" : "User",
                 createdAt: new Date().toISOString(),
                 email: user.email || "",
+                emailVerified: Boolean(user.emailVerified),
                 shareBag: false,
                 wishlist: [],
                 pendingFriendRequestsCount: 0
@@ -140,7 +144,9 @@ export function useAuth() {
                 shareBag: !!data.shareBag,
                 shareToken: data.shareToken, 
                 pendingFriendRequestsCount: data.pendingFriendRequestsCount || 0,
-                wishlist: data.wishlist || []
+                wishlist: data.wishlist || [],
+                email: data.email || "",
+                emailVerified: !!data.emailVerified
               });
               setAccentColor(data.preferredColor || "#2563eb");
               try {
