@@ -8,6 +8,7 @@ import VaultFilterBar from '../components/VaultFilterBar';
 import SearchInput from '../components/SearchInput';
 import CatalogItemCard from '../components/CatalogItemCard';
 import { useAppStore } from '../store/useAppStore';
+import { nativeHaptics } from '../utils/native';
 
 function GolfBagIcon({ className = "w-5 h-5 text-neutral-400" }: { className?: string }) {
   return (
@@ -315,7 +316,10 @@ export default function MyVaultView({
         <div className="flex items-center justify-between border-b border-neutral-850 pb-2 gap-2">
           <div className="flex items-center gap-6">
             <button
-              onClick={() => setBagTab("owned")}
+              onClick={() => {
+                nativeHaptics.selectionChanged();
+                setBagTab("owned");
+              }}
               className={`flex items-center gap-2 cursor-pointer pb-2 -mb-2.5 transition-colors border-b-2 ${
                 bagTab === "owned"
                   ? "border-accent text-white"
@@ -330,7 +334,10 @@ export default function MyVaultView({
             
             {userProfile && (
               <button
-                onClick={() => setBagTab("wishlist")}
+                onClick={() => {
+                  nativeHaptics.selectionChanged();
+                  setBagTab("wishlist");
+                }}
                 className={`flex items-center gap-2 cursor-pointer pb-2 -mb-2.5 transition-colors border-b-2 ${
                   bagTab === "wishlist"
                     ? "border-white text-white"

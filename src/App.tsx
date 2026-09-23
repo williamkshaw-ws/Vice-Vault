@@ -17,6 +17,7 @@ import { filterLegacyBalls, safeJSONParse } from "./utils/bagUtils";
 import { idbGet, idbSet, idbDelete, migrateLocalStorageToIdb } from "./utils/storage";
 import { initNativeApp } from "./utils/nativeBridge";
 import { getAuthHeaders } from "./utils/authHeaders";
+import { nativeHaptics } from "./utils/native";
 import OwnedBallCard from "./components/OwnedBallCard";
 import SearchInput from "./components/SearchInput";
 import { ACCENT_COLORS, sanitizeId } from "./utils";
@@ -1422,6 +1423,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     catalogId?: string
   ) => {
     const today = new Date().toLocaleDateString();
+    nativeHaptics.notificationSuccess();
     
     // Auto-remove from wishlist if present
     if (catalogId && userProfile?.wishlist?.includes(catalogId)) {
@@ -1652,12 +1654,14 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     const ballToDelete = balls.find(b => b.id === id);
     if (!ballToDelete) return;
 
+    nativeHaptics.impactMedium();
     setBalls((prev) => prev.filter(b => b.id !== id));
 
     const ballName = ballToDelete.name || `${ballToDelete.color} ${ballToDelete.model}`;
     showToast(`Removed "${ballName}" from your bag`, "success", {
       label: "Undo",
       onClick: () => {
+        nativeHaptics.notificationSuccess();
         setBalls((prev) => [ballToDelete, ...prev]);
         showToast(`Restored "${ballName}" to your bag`, "success");
       }
@@ -2426,7 +2430,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         {currentUser && (
           <div className="lg:hidden flex p-1.5 bg-neutral-950 border border-neutral-850 rounded-2xl mb-6 shadow-md">
             <button
-              onClick={() => setMobileTab("bag")}
+              onClick={() => {
+                nativeHaptics.selectionChanged();
+                setMobileTab("bag");
+              }}
               className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 mobileTab === "bag"
                   ? "bg-accent text-black font-extrabold shadow-sm"
@@ -2437,7 +2444,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
               <span>My Bag</span>
             </button>
             <button
-              onClick={() => setMobileTab("catalog")}
+              onClick={() => {
+                nativeHaptics.selectionChanged();
+                setMobileTab("catalog");
+              }}
               className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 mobileTab === "catalog"
                   ? "bg-accent text-black font-extrabold shadow-sm"

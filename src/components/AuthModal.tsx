@@ -5,8 +5,9 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor, Copy, Eye, EyeOff, AlertTriangle } from "lucide-react";
+import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor, Copy, Eye, EyeOff, AlertTriangle, Share2 } from "lucide-react";
 import { ACCENT_COLORS, isStrongPassword } from "../utils";
+import { nativeHaptics, nativeShare } from "../utils/native";
 import {
   auth,
   db,
@@ -296,6 +297,7 @@ export default function AuthModal({
           }
         }
 
+        nativeHaptics.notificationSuccess();
         setTimeout(() => {
           onMockLogin?.(data);
           onClose();
@@ -539,6 +541,7 @@ export default function AuthModal({
       }
 
       setSuccessMsg("Settings updated successfully!");
+      nativeHaptics.notificationSuccess();
       setTimeout(() => {
         onProfileUpdate?.({
           uid: data.uid,
@@ -1192,9 +1195,28 @@ export default function AuthModal({
                         type="button"
                         onClick={async () => {
                           const link = `${window.location.origin}/?share=${userProfile?.shareToken || currentUser?.shareToken || ""}`;
+                          nativeHaptics.impactMedium();
+                          await nativeShare.shareLink({
+                            url: link,
+                            title: `${userProfile?.displayName || "Golfer"}'s Golf Ball Vault`,
+                            text: `Check out my golf ball collection on Vice Vault!`
+                          });
+                        }}
+                        className="px-2.5 py-2 bg-accent text-black font-bold text-[10px] uppercase tracking-wider rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1 shrink-0 hover:brightness-110 shadow-sm"
+                        title="Share via iOS Share Sheet"
+                      >
+                        <Share2 size={13} />
+                        <span>Share</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const link = `${window.location.origin}/?share=${userProfile?.shareToken || currentUser?.shareToken || ""}`;
                           try {
+                            nativeHaptics.impactLight();
                             await navigator.clipboard.writeText(link);
                             setCopied(true);
+                            nativeHaptics.notificationSuccess();
                             setTimeout(() => setCopied(false), 2000);
                           } catch (err) {
                             console.error("Failed to copy link:", err);

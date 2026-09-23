@@ -9,6 +9,7 @@ import { GolfBall, BallCondition, CatalogItem } from "../types";
 import BallVisual from "./BallVisual";
 import { Trash2, Calendar, FileText, ChevronDown, ChevronUp, Check, Save, Edit2, X, Package, MessageSquare, AlertTriangle, Box, Share2, Loader2 } from "lucide-react";
 import { TradingCardRenderer } from "./TradingCardRenderer";
+import { nativeHaptics } from "../utils/native";
 
 interface OwnedBallCardProps {
   key?: string | number;
@@ -177,15 +178,41 @@ export default function OwnedBallCard({
         useCORS: true,
         allowTaint: false
       });
-      const dataUrl = canvas.toDataURL("image/png");
-      
       const filenameIdentifier = ball.name ? ball.name.replace(/\s+/g, '-').toLowerCase() : ball.color.replace(/\s+/g, '-').toLowerCase();
       const modelSafe = typeof ball.model === 'string' ? ball.model.replace(/\s+/g, '-').toLowerCase() : 'custom';
-      
-      const link = document.createElement("a");
-      link.download = `golf-ball-vault-${modelSafe}-${filenameIdentifier}.png`;
-      link.href = dataUrl;
-      link.click();
+      const filename = `golf-ball-vault-${modelSafe}-${filenameIdentifier}.png`;
+      let sharedNatively = false;
+
+      // Try native Web Share with file on iOS/modern mobile
+      if (typeof navigator !== 'undefined' && navigator.canShare && canvas.toBlob) {
+        try {
+          const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, "image/png"));
+          if (blob) {
+            const file = new File([blob], filename, { type: "image/png" });
+            if (navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                files: [file],
+                title: `${ball.model} ${ball.name || ball.color} Trading Card`
+              });
+              sharedNatively = true;
+            }
+          }
+        } catch (shareErr: any) {
+          if (shareErr.name === 'AbortError') {
+            sharedNatively = true; // User dismissed share sheet normally
+          }
+        }
+      }
+
+      if (!sharedNatively) {
+        const dataUrl = canvas.toDataURL("image/png");
+        const link = document.createElement("a");
+        link.download = filename;
+        link.href = dataUrl;
+        link.click();
+      }
+
+      nativeHaptics.notificationSuccess();
     } catch (err: any) {
       console.error("Failed to generate trading card", err);
       alert(`Failed to generate trading card: ${err.message || String(err)}`);
@@ -282,11 +309,13 @@ export default function OwnedBallCard({
         customImage: editCustomImage,
         year: editYear,
       });
+      nativeHaptics.notificationSuccess();
     }
     setIsEditing(false);
   };
 
   const incrementEditQty = () => {
+    nativeHaptics.impactLight();
     if (editPkgType === 'box') {
       setEditQty((q) => q + 12);
     } else if (editPkgType === 'sleeve') {
@@ -297,6 +326,7 @@ export default function OwnedBallCard({
   };
 
   const decrementEditQty = () => {
+    nativeHaptics.impactLight();
     if (editPkgType === 'box') {
       setEditQty((q) => (q > 12 ? q - 12 : 12));
     } else if (editPkgType === 'sleeve') {
@@ -307,6 +337,7 @@ export default function OwnedBallCard({
   };
 
   const handlePkgTypeChange = (type: 'ea' | 'sleeve' | 'box') => {
+    nativeHaptics.impactLight();
     setEditPkgType(type);
     if (type === 'box') {
       setEditQty(12);
@@ -672,6 +703,7 @@ export default function OwnedBallCard({
             <button
               type="button"
               onClick={() => {
+                nativeHaptics.impactMedium();
                 if (onDelete) onDelete(ball.id);
                 setShowDeleteConfirm(false);
               }}
@@ -767,7 +799,10 @@ export default function OwnedBallCard({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowDeleteConfirm(true)}
+                    onClick={() => {
+                      nativeHaptics.notificationWarning();
+                      setShowDeleteConfirm(true);
+                    }}
                     className="p-1 hover:bg-rose-500/20 text-neutral-500 hover:text-rose-400 rounded transition-colors cursor-pointer"
                     title="Remove from bag"
                   >

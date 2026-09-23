@@ -9,6 +9,7 @@ import BallVisual from "./BallVisual";
 import { Plus, Check, ChevronDown, ChevronUp, Layers, HelpCircle, Package, MessageSquare, X, AlertTriangle, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppStore } from "../store/useAppStore";
+import { nativeHaptics } from "../utils/native";
 
 interface CatalogItemCardProps {
   key?: string | number;
@@ -151,6 +152,7 @@ function CatalogItemCardComponent({ item, subItems = [], onAddToLocker, isReadOn
     );
 
     setJustAdded(true);
+    nativeHaptics.notificationSuccess();
 
     setTimeout(() => {
       setJustAdded(false);
@@ -168,9 +170,8 @@ function CatalogItemCardComponent({ item, subItems = [], onAddToLocker, isReadOn
     submitAdd();
   };
 
-
-
   const incrementQty = () => {
+    nativeHaptics.impactLight();
     if (isBundle || pkgType === 'box') {
       setQuantity((q) => q + bundleTotal);
     } else if (pkgType === 'sleeve') {
@@ -181,6 +182,7 @@ function CatalogItemCardComponent({ item, subItems = [], onAddToLocker, isReadOn
   };
 
   const decrementQty = () => {
+    nativeHaptics.impactLight();
     if (isBundle || pkgType === 'box') {
       setQuantity((q) => Math.max(bundleTotal, q - bundleTotal));
     } else if (pkgType === 'sleeve') {
