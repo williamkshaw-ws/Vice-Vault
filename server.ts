@@ -193,6 +193,54 @@ function getBrandedPasswordResetHtml(email: string, resetUrl: string): string {
 </html>`;
 }
 
+async function sendBrandedPasswordResetEmail(targetEmail: string, resetUrl: string): Promise<boolean> {
+  // 1. Resend API (HTTP REST API, no SMTP ports needed)
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.RESEND_API_KEY}`
+        },
+        body: JSON.stringify({
+          from: process.env.MAIL_FROM || "Golf Ball Vault <noreply@golfballvault.app>",
+          to: [targetEmail],
+          subject: "Reset your Golf Ball Vault password",
+          html: getBrandedPasswordResetHtml(targetEmail, resetUrl)
+        })
+      });
+      if (res.ok) {
+        console.log(`Sent branded password reset email via Resend to ${targetEmail}`);
+        return true;
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        console.error("Resend API error:", errData);
+      }
+    } catch (e) {
+      console.error("Failed sending email via Resend:", e);
+    }
+  }
+
+  // 2. Standard SMTP Transporter (Nodemailer)
+  if (mailTransporter) {
+    try {
+      await mailTransporter.sendMail({
+        from: process.env.MAIL_FROM || '"Golf Ball Vault" <noreply@golfballvault.app>',
+        to: targetEmail,
+        subject: "Reset your Golf Ball Vault password",
+        html: getBrandedPasswordResetHtml(targetEmail, resetUrl)
+      });
+      console.log(`Sent branded password reset email via SMTP to ${targetEmail}`);
+      return true;
+    } catch (e) {
+      console.error("Failed sending email via SMTP:", e);
+    }
+  }
+
+  return false;
+}
+
 interface CatalogItem {
   id: string;
   model: string;
@@ -1597,8 +1645,8 @@ app.post("/api/auth/forgot-password", authLimiter, async (req, res) => {
 
   let emailSentDirectly = false;
 
-  // If SMTP is configured and Firebase Admin is initialized, generate reset link and send branded email directly
-  if (mailTransporter && isFirebaseAdminInitialized && user.email) {
+  // If Resend API or SMTP is configured and Firebase Admin is initialized, generate reset link and send branded email directly
+  if ((process.env.RESEND_API_KEY || mailTransporter) && isFirebaseAdminInitialized && user.email) {
     try {
       const rawLink = await admin.auth().generatePasswordResetLink(user.email, {
         url: "https://golfballvault.app/reset-password",
@@ -1608,16 +1656,9 @@ app.post("/api/auth/forgot-password", authLimiter, async (req, res) => {
       const oobCode = parsedUrl.searchParams.get("oobCode") || "";
       const resetUrl = `https://golfballvault.app/reset-password?oobCode=${encodeURIComponent(oobCode)}`;
 
-      await mailTransporter.sendMail({
-        from: process.env.MAIL_FROM || '"Golf Ball Vault" <noreply@golfballvault.app>',
-        to: user.email,
-        subject: "Reset your Golf Ball Vault password",
-        html: getBrandedPasswordResetHtml(user.email, resetUrl)
-      });
-      emailSentDirectly = true;
-      console.log(`Sent branded password reset email with button to ${user.email}`);
+      emailSentDirectly = await sendBrandedPasswordResetEmail(user.email, resetUrl);
     } catch (mailErr) {
-      console.error("Failed to send branded password reset email directly via SMTP:", mailErr);
+      console.error("Failed to generate or send branded password reset email:", mailErr);
     }
   }
 
