@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { GolfBagIcon } from "./GolfBagIcon";
 import { Users, UserPlus, UserCheck, UserX, Trash2, Search, ChevronRight, X } from "lucide-react";
+import { getAuthHeaders } from "../utils/authHeaders";
 
 interface ProfileItem {
   username: string;
@@ -26,7 +27,8 @@ export default function FriendsPortal({ currentUserUid, onClose, onViewBag }: Fr
   const fetchFriendsData = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/friends/${currentUserUid}`);
+      const headers = await getAuthHeaders();
+      const res = await fetch(`/api/friends/${currentUserUid}`, { headers });
       if (res.ok) {
         const data = await res.json();
         setFriends(data.friends || []);
@@ -53,9 +55,10 @@ export default function FriendsPortal({ currentUserUid, onClose, onViewBag }: Fr
     e.preventDefault();
     if (!searchUsername.trim()) return;
     try {
+      const headers = await getAuthHeaders({ "Content-Type": "application/json" });
       const res = await fetch(`/api/friends/${currentUserUid}/request`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ targetUsername: searchUsername.trim() })
       });
       const data = await res.json();
@@ -70,9 +73,10 @@ export default function FriendsPortal({ currentUserUid, onClose, onViewBag }: Fr
 
   const handleAccept = async (targetUsername: string) => {
     try {
+      const headers = await getAuthHeaders({ "Content-Type": "application/json" });
       const res = await fetch(`/api/friends/${currentUserUid}/accept`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ targetUsername })
       });
       if (res.ok) {
@@ -86,9 +90,10 @@ export default function FriendsPortal({ currentUserUid, onClose, onViewBag }: Fr
 
   const handleDecline = async (targetUsername: string) => {
     try {
+      const headers = await getAuthHeaders({ "Content-Type": "application/json" });
       const res = await fetch(`/api/friends/${currentUserUid}/decline`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ targetUsername })
       });
       if (res.ok) {
@@ -102,9 +107,10 @@ export default function FriendsPortal({ currentUserUid, onClose, onViewBag }: Fr
   const handleRemove = async (targetUsername: string) => {
     if (!window.confirm(`Are you sure you want to remove ${targetUsername} from your friends?`)) return;
     try {
+      const headers = await getAuthHeaders({ "Content-Type": "application/json" });
       const res = await fetch(`/api/friends/${currentUserUid}/remove`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ targetUsername })
       });
       if (res.ok) {

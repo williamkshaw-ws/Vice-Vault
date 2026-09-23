@@ -397,7 +397,7 @@ export default function MyVaultView({
         )}
 
         <AnimatePresence mode="wait">
-        {(isAuthLoading || (isLoadingCloudData && balls.length === 0 && !localStorage.getItem("vice_vault_bag_" + userProfile?.uid))) ? (
+        {(isAuthLoading || (isLoadingCloudData && balls.length === 0 && !localStorage.getItem("vice_vault_bag_" + (userProfile?.uid || currentUser?.uid)))) ? (
           <motion.div key="loading" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} transition={{ duration: 0.2 }} className="py-20 text-center rounded-3xl border border-neutral-850 bg-neutral-900/40 flex flex-col items-center justify-center shadow-inner">
             <RefreshCw className="w-8 h-8 text-accent animate-spin mb-3 opacity-80" />
             <h4 className="font-bold text-neutral-400 text-xs uppercase tracking-wider">Loading Vault...</h4>

@@ -1,2516 +1,1619 @@
 [
   {
     "id": "DRIVE-LIV_GOLF-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "LIV Golf",
     "model": "DRIVE",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/wrBL9X1B/catalog-1781112751272-bd43-7ada-24a4.png",
-    "rarity": "limited"
+    "name": "LIV Golf",
+    "color": "White",
+    "customImage": "https://i.ibb.co/wrBL9X1B/catalog-1781112751272-bd43-7ada-24a4.png"
   },
   {
     "id": "DRIVE-PSYCHO_BUNNY-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Psycho Bunny",
     "model": "DRIVE",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/yc13FyYr/catalog-1781112612736-2d66-08f7-4eea.png",
-    "rarity": "limited"
+    "name": "Psycho Bunny",
+    "color": "White",
+    "customImage": "https://i.ibb.co/yc13FyYr/catalog-1781112612736-2d66-08f7-4eea.png"
   },
   {
     "id": "DRIVE-STANDARD-BLUE",
-    "groupColor": false,
-    "color": "Blue",
-    "groupVariation": false,
-    "name": "Standard",
     "model": "DRIVE",
+    "name": "Standard",
+    "color": "Blue",
     "customImage": "https://i.ibb.co/ksMQ4y86/catalog-1780357996470-cb4e-422e-f880.jpg",
     "customImageSleeve": "https://i.ibb.co/fdFTHV09/342ac9edb922.jpg",
-    "customImageBox": "https://i.ibb.co/GDPgWC2/7b5bf90743c1.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/GDPgWC2/7b5bf90743c1.jpg"
   },
   {
     "id": "DRIVE-STANDARD-PINK",
-    "groupColor": false,
-    "color": "Pink",
-    "groupVariation": false,
-    "name": "Standard",
     "model": "DRIVE",
+    "name": "Standard",
+    "color": "Pink",
     "customImage": "https://i.ibb.co/ynWSkvzJ/catalog-1780357997981-310a-8621-049a.jpg",
     "customImageSleeve": "https://i.ibb.co/cKP8p4Ds/7985cad30aad.jpg",
-    "customImageBox": "https://i.ibb.co/bgW4cqhq/f91556c60a0e.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/bgW4cqhq/f91556c60a0e.jpg"
   },
   {
     "id": "DRIVE-STANDARD-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Standard",
     "model": "DRIVE",
+    "name": "Standard",
+    "color": "White",
     "customImage": "https://i.ibb.co/gM0rwHp1/catalog-1780357998697-a9c3-b2d4-9a7d.jpg",
     "customImageSleeve": "https://i.ibb.co/FG2SqNz/c0e6e158bca4.jpg",
-    "customImageBox": "https://i.ibb.co/cch4WsWH/83c0e6565cee.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/cch4WsWH/83c0e6565cee.jpg"
   },
   {
     "id": "DRIVE-STANDARD-YELLOW",
-    "groupColor": false,
-    "color": "Yellow",
-    "groupVariation": false,
-    "name": "Standard",
     "model": "DRIVE",
+    "name": "Standard",
+    "color": "Yellow",
     "customImage": "https://i.ibb.co/Kx1ssjjB/catalog-1780357999386-6e7a-9b6a-d64c.jpg",
     "customImageSleeve": "https://i.ibb.co/3YfQrJYN/6ea77528b0c5.jpg",
-    "customImageBox": "https://i.ibb.co/gbZjk0jL/b3d43b56725e.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/gbZjk0jL/b3d43b56725e.jpg"
   },
   {
     "id": "MULTIPLE-SELECTED_VARIETY-WHITE",
-    "bundleItems": [
-      {
-        "catalogId": "PRO_PLUS-STANDARD-WHITE",
-        "qty": 2
-      },
-      {
-        "catalogId": "PRO-STANDARD-WHITE",
-        "qty": 2
-      },
-      {
-        "catalogId": "PRO_SOFT-STANDARD-WHITE",
-        "qty": 2
-      },
-      {
-        "catalogId": "TOUR-STANDARD-WHITE",
-        "qty": 2
-      },
-      {
-        "catalogId": "DRIVE-STANDARD-WHITE",
-        "qty": 2
-      }
-    ],
-    "color": "White",
-    "name": "Selected Variety",
     "model": "MULTIPLE",
-    "groupColor": false,
-    "groupVariation": false,
+    "name": "Selected Variety",
+    "color": "White",
     "customImage": "https://i.ibb.co/xTnPVFx/catalog-1780411756033-40e3-5fec-0320.jpg",
-    "customImageBox": "https://i.ibb.co/wq7NQ9h/76c0edcc1baa.png",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/wq7NQ9h/76c0edcc1baa.png"
   },
   {
     "id": "MULTIPLE-VARIETY_PACK-MULTI_COLORED",
-    "groupColor": false,
-    "color": "Multi-colored",
-    "groupVariation": false,
-    "name": "Variety Pack",
     "model": "MULTIPLE",
-    "bundleItems": [
-      {
-        "catalogId": "PRO-TRACER-FIREBALL",
-        "qty": 3
-      },
-      {
-        "catalogId": "PRO-NEON_DRIP-WATERMELON_BUBBLEGUM",
-        "qty": 3
-      },
-      {
-        "catalogId": "PRO-DRIP_SHADE-ROYAL_GOLD",
-        "qty": 3
-      },
-      {
-        "catalogId": "PRO_AIR-DRIP_SHADE-COTTON_CANDY",
-        "qty": 3
-      },
-      {
-        "catalogId": "PRO-TRACER-WHITE",
-        "qty": 3
-      },
-      {
-        "catalogId": "TOUR-ALL_OVER_PRINT-ZAP",
-        "qty": 3
-      },
-      {
-        "catalogId": "PRO_PLUS-STANDARD-WHITE",
-        "qty": 3
-      },
-      {
-        "catalogId": "DRIVE-STANDARD-YELLOW",
-        "qty": 3
-      }
-    ],
+    "name": "Variety Pack",
+    "color": "Multi-colored",
     "customImage": "https://i.ibb.co/MxxyDqTG/catalog-1780360045269-4890-503b-df13.jpg",
-    "customImageBox": "https://i.ibb.co/DfQPqPCc/5ca444b1e905.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/DfQPqPCc/5ca444b1e905.jpg"
   },
   {
     "id": "PRO-101-NEON_LIME",
-    "groupColor": false,
-    "bundleItems": [],
-    "color": "Neon Lime",
-    "groupVariation": false,
-    "name": "101",
     "model": "PRO",
-    "customImage": "https://i.ibb.co/Df5nsvzt/Adobe-Express-file-2.png",
-    "totalMade": 999,
-    "rarity": "rare"
+    "name": "101",
+    "color": "Neon Lime",
+    "customImage": "https://i.ibb.co/Df5nsvzt/Adobe-Express-file-2.png"
   },
   {
     "id": "PRO-ADIDAS-LIME_BLACK_DRIP",
-    "groupColor": false,
-    "color": "Lime/Black Drip",
-    "groupVariation": false,
-    "name": "Adidas",
     "model": "PRO",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/Lhhw0xGW/Adobe-Express-file-4.png",
-    "rarity": "limited"
+    "name": "Adidas",
+    "color": "Lime/Black Drip",
+    "customImage": "https://i.ibb.co/Lhhw0xGW/Adobe-Express-file-4.png"
   },
   {
     "id": "PRO-ADIDAS_THREE_STRIPE-GREEN",
-    "groupColor": false,
-    "color": "Green",
-    "groupVariation": false,
-    "name": "Adidas Three Stripe",
     "model": "PRO",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/xKL4gzhq/Screenshot-2026-06-18-at-2-28-Background-Removed-15-PM.png",
-    "rarity": "limited"
+    "name": "Adidas Three Stripe",
+    "color": "Green",
+    "customImage": "https://i.ibb.co/xKL4gzhq/Screenshot-2026-06-18-at-2-28-Background-Removed-15-PM.png"
   },
   {
     "id": "PRO-ADIDAS_TREFOIL_STAN_SMITH-GREEN",
-    "color": "Green",
-    "groupVariation": false,
-    "name": "Adidas Trefoil/Stan Smith",
     "model": "PRO",
-    "groupColor": false,
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/xKL4gzhq/Screenshot-2026-06-18-at-2-28-Background-Removed-15-PM.png",
-    "rarity": "limited"
+    "name": "Adidas Trefoil/Stan Smith",
+    "color": "Green",
+    "customImage": "https://i.ibb.co/xKL4gzhq/Screenshot-2026-06-18-at-2-28-Background-Removed-15-PM.png"
   },
   {
     "id": "PRO-ADIDAS_TREFOIL_STAN_SMITH-RED",
-    "color": "Red",
-    "groupVariation": false,
-    "name": "Adidas Trefoil/Stan Smith",
     "model": "PRO",
-    "groupColor": false,
-    "rarity": "limited"
+    "name": "Adidas Trefoil/Stan Smith",
+    "color": "Red"
   },
   {
     "id": "PRO-ADIDAS_TREFOIL_STAN_SMITH-WHITE",
-    "color": "White",
-    "groupVariation": false,
-    "name": "Adidas Trefoil/Stan Smith",
     "model": "PRO",
-    "groupColor": false,
-    "rarity": "limited"
+    "name": "Adidas Trefoil/Stan Smith",
+    "color": "White"
   },
   {
     "id": "PRO-AMEN-YELLOW_GREEN_DRIP",
-    "groupColor": false,
-    "color": "Yellow/Green Drip",
-    "groupVariation": false,
-    "name": "Amen",
     "model": "PRO",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/d08vxHZ2/Screenshot-2026-06-18-at-2-33-Background-Removed-50-PM.png",
-    "rarity": "limited"
+    "name": "Amen",
+    "color": "Yellow/Green Drip",
+    "customImage": "https://i.ibb.co/d08vxHZ2/Screenshot-2026-06-18-at-2-33-Background-Removed-50-PM.png"
   },
   {
     "id": "PRO-ARCHIVE-YELLOW_WHITE_SHADE",
-    "groupColor": false,
-    "color": "Yellow/White Shade",
-    "groupVariation": false,
-    "name": "Archive",
     "model": "PRO",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/XZFHgtD3/20260617-191205-Background-Removed.png",
-    "rarity": "limited"
+    "name": "Archive",
+    "color": "Yellow/White Shade",
+    "customImage": "https://i.ibb.co/XZFHgtD3/20260617-191205-Background-Removed.png"
   },
   {
     "id": "PRO-BEAR-GOLD",
-    "color": "Gold",
-    "groupVariation": false,
-    "name": "Bear",
     "model": "PRO",
-    "bundleItems": [],
+    "name": "Bear",
+    "color": "Gold",
     "customImage": "https://i.ibb.co/5WpyF2M0/catalog-1780358000068-e28e-0e69-b9e2.jpg",
-    "customImageBox": "https://i.ibb.co/hGJBzNW/752b3ce3eabf.webp",
-    "rarity": "common",
-    "groupColor": false
+    "customImageBox": "https://i.ibb.co/hGJBzNW/752b3ce3eabf.webp"
   },
   {
     "id": "PRO-BEAR-WHITE",
-    "color": "White",
-    "groupVariation": false,
-    "name": "Bear",
     "model": "PRO",
-    "bundleItems": [],
+    "name": "Bear",
+    "color": "White",
     "customImage": "https://i.ibb.co/Y7r5vDFQ/catalog-1780358000483-7b44-aecf-b26b.webp",
-    "customImageBox": "https://i.ibb.co/hGJBzNW/752b3ce3eabf.webp",
-    "rarity": "common",
-    "groupColor": false
+    "customImageBox": "https://i.ibb.co/hGJBzNW/752b3ce3eabf.webp"
   },
   {
     "id": "PRO-BEASTIN-FROST_BLUE",
-    "color": "Frost Blue",
-    "groupVariation": false,
-    "name": "Beastin'",
     "model": "PRO",
-    "bundleItems": [],
+    "name": "Beastin'",
+    "color": "Frost Blue",
     "customImage": "https://i.ibb.co/GQyXpXD1/Screenshot-2026-06-18-at-4-33-Background-Removed-03-PM.png",
-    "customImageBox": "https://i.ibb.co/dJXywpQs/37705eccdb6b.webp",
-    "groupColor": false,
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/dJXywpQs/37705eccdb6b.webp"
   },
   {
     "id": "PRO-BEASTIN-GLACIER",
-    "groupColor": false,
-    "color": "Glacier",
-    "groupVariation": false,
-    "name": "Beastin'",
     "model": "PRO",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/gLkZFwSB/0931533d-6e4d-451e-a5fe-9fa4c69930d2-copied-media-2-Background-Removed.png",
-    "rarity": "limited"
+    "name": "Beastin'",
+    "color": "Glacier",
+    "customImage": "https://i.ibb.co/gLkZFwSB/0931533d-6e4d-451e-a5fe-9fa4c69930d2-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO-BEASTIN-LIMEADE",
-    "color": "Limeade",
-    "groupVariation": false,
-    "name": "Beastin'",
     "model": "PRO",
-    "bundleItems": [],
+    "name": "Beastin'",
+    "color": "Limeade",
     "customImage": "https://i.ibb.co/B2bCLB8k/59b8b873-5555-437d-99b8-94984e64c08b-copied-media-2-Background-Removed.png",
-    "customImageBox": "https://i.ibb.co/dJXywpQs/37705eccdb6b.webp",
-    "groupColor": false,
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/dJXywpQs/37705eccdb6b.webp"
   },
   {
     "id": "PRO-BEASTIN-ORANGE_BLAST",
-    "color": "Orange Blast",
-    "groupVariation": false,
-    "name": "Beastin'",
     "model": "PRO",
-    "bundleItems": [],
+    "name": "Beastin'",
+    "color": "Orange Blast",
     "customImage": "https://i.ibb.co/4Z6jvH9X/97fac682-b513-4737-90b9-f9c77e4bc552-copied-media-2-Background-Removed.png",
-    "customImageBox": "https://i.ibb.co/dJXywpQs/37705eccdb6b.webp",
-    "groupColor": false,
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/dJXywpQs/37705eccdb6b.webp"
   },
   {
     "id": "PRO-BEASTIN-WATERMELON_PUNCH",
-    "color": "Watermelon Punch",
-    "groupVariation": false,
-    "name": "Beastin'",
     "model": "PRO",
-    "bundleItems": [],
+    "name": "Beastin'",
+    "color": "Watermelon Punch",
     "customImage": "https://i.ibb.co/b5XpN8Mj/f12c50a5-875e-467b-b4ca-845c4f264fea-copied-media-2-Background-Removed.png",
-    "customImageBox": "https://i.ibb.co/dJXywpQs/37705eccdb6b.webp",
-    "groupColor": false,
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/dJXywpQs/37705eccdb6b.webp"
   },
   {
     "id": "PRO-BOUNTY-BLACK",
-    "groupColor": false,
-    "color": "Black",
-    "groupVariation": false,
-    "name": "Bounty",
     "model": "PRO",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/NdbBg0Hy/20260617-192337-Background-Removed.png",
-    "rarity": "limited"
+    "name": "Bounty",
+    "color": "Black",
+    "customImage": "https://i.ibb.co/NdbBg0Hy/20260617-192337-Background-Removed.png"
   },
   {
     "id": "PRO-BREAKFAST_BALLS-YELLOW",
-    "groupColor": false,
-    "color": "Yellow",
-    "groupVariation": false,
-    "name": "Breakfast Balls",
     "model": "PRO",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/vyT36vB/20260617-192404-Background-Removed.png",
-    "rarity": "limited"
+    "name": "Breakfast Balls",
+    "color": "Yellow",
+    "customImage": "https://i.ibb.co/vyT36vB/20260617-192404-Background-Removed.png"
   },
   {
     "id": "PRO-COSMIC_COLLECTION-AURORA_FIELDS",
-    "bundleItems": [],
-    "color": "Aurora Fields",
-    "groupVariation": false,
-    "name": "Cosmic Collection",
     "model": "PRO",
+    "name": "Cosmic Collection",
+    "color": "Aurora Fields",
     "customImage": "https://i.ibb.co/mMcjKcc/catalog-1780783716987-81c0-9282-1675.png",
-    "customImageBox": "https://i.ibb.co/VYyVNgR4/809e0b0e7df5.webp",
-    "groupColor": false,
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/VYyVNgR4/809e0b0e7df5.webp"
   },
   {
     "id": "PRO-COSMIC_COLLECTION-BLUE_SUPERCLUSTER",
-    "bundleItems": [],
-    "color": "Blue Supercluster",
-    "groupVariation": false,
-    "name": "Cosmic Collection",
     "model": "PRO",
+    "name": "Cosmic Collection",
+    "color": "Blue Supercluster",
     "customImage": "https://i.ibb.co/VcSwVZjD/catalog-1780783696360-aad4-10a0-bb92.png",
-    "customImageBox": "https://i.ibb.co/VYyVNgR4/809e0b0e7df5.webp",
-    "groupColor": false,
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/VYyVNgR4/809e0b0e7df5.webp"
   },
   {
     "id": "PRO-COSMIC_COLLECTION-NEBULA_MIST",
-    "bundleItems": [],
-    "color": "Nebula Mist",
-    "groupVariation": false,
-    "name": "Cosmic Collection",
     "model": "PRO",
+    "name": "Cosmic Collection",
+    "color": "Nebula Mist",
     "customImage": "https://i.ibb.co/SDTjyz74/catalog-1780783754578-4ddb-c72d-42e3.png",
-    "customImageBox": "https://i.ibb.co/VYyVNgR4/809e0b0e7df5.webp",
-    "groupColor": false,
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/VYyVNgR4/809e0b0e7df5.webp"
   },
   {
     "id": "PRO-COSMIC_COLLECTION-STELLAR_EMBER",
-    "bundleItems": [],
-    "color": "Stellar Ember",
-    "groupVariation": false,
-    "name": "Cosmic Collection",
     "model": "PRO",
+    "name": "Cosmic Collection",
+    "color": "Stellar Ember",
     "customImage": "https://i.ibb.co/x8XH9P8J/catalog-1780783736308-8b15-0206-a21d.png",
-    "customImageBox": "https://i.ibb.co/VYyVNgR4/809e0b0e7df5.webp",
-    "groupColor": false,
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/VYyVNgR4/809e0b0e7df5.webp"
   },
   {
     "id": "PRO-DRIP-LIME_BLACK",
-    "groupColor": false,
-    "color": "Lime/Black",
-    "groupVariation": false,
-    "name": "Drip",
     "model": "PRO",
+    "name": "Drip",
+    "color": "Lime/Black",
     "customImage": "https://i.ibb.co/qMzYdG0Z/catalog-1780358003148-665f-28b7-6584.jpg",
     "customImageSleeve": "https://i.ibb.co/nsBVMh31/d0999edb3da8.jpg",
-    "customImageBox": "https://i.ibb.co/hFFdMRQv/c9176fb4ae39.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/hFFdMRQv/c9176fb4ae39.jpg"
   },
   {
     "id": "PRO-DRIP-RED_BLUE",
-    "groupColor": false,
-    "color": "Red/Blue",
-    "groupVariation": false,
-    "name": "Drip",
     "model": "PRO",
+    "name": "Drip",
+    "color": "Red/Blue",
     "customImage": "https://i.ibb.co/SD9whnH8/catalog-1780358003851-ab04-e7b6-629e.jpg",
     "customImageSleeve": "https://i.ibb.co/24jsS5v/22708ea8f649.jpg",
-    "customImageBox": "https://i.ibb.co/gZxRCkgZ/8224bed06a57.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/gZxRCkgZ/8224bed06a57.jpg"
   },
   {
     "id": "PRO-DRIP-YELLOW_GREEN",
-    "groupColor": false,
-    "color": "Yellow/Green",
-    "groupVariation": false,
-    "name": "Drip",
     "model": "PRO",
+    "name": "Drip",
+    "color": "Yellow/Green",
     "customImage": "https://i.ibb.co/99cqH9Ws/catalog-1780358004531-1c9c-5d72-76ad.jpg",
-    "customImageBox": "https://i.ibb.co/B5k8J4d9/ecaf7799e22d.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/B5k8J4d9/ecaf7799e22d.jpg"
   },
   {
     "id": "PRO-DRIP_SHADE-GALAXY",
-    "groupColor": false,
-    "color": "Galaxy",
-    "groupVariation": false,
-    "name": "Drip Shade",
     "model": "PRO",
+    "name": "Drip Shade",
+    "color": "Galaxy",
     "customImage": "https://i.ibb.co/ycJDxVZn/catalog-1780358004949-d598-9173-07db.jpg",
-    "customImageBox": "https://i.ibb.co/5xTm7f4c/bb497c1fb264.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/5xTm7f4c/bb497c1fb264.jpg"
   },
   {
     "id": "PRO-DRIP_SHADE-NEON_SUNSET",
-    "groupColor": false,
-    "color": "Neon Sunset",
-    "groupVariation": false,
-    "name": "Drip Shade",
     "model": "PRO",
-    "bundleItems": [],
+    "name": "Drip Shade",
+    "color": "Neon Sunset",
     "customImage": "https://i.ibb.co/WvF8yBNs/catalog-1781096901198-3efa-b461-93db.png",
-    "customImageBox": "https://i.ibb.co/HDyDL48y/3bf33fab6737.png",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/HDyDL48y/3bf33fab6737.png"
   },
   {
     "id": "PRO-DRIP_SHADE-ROYAL_GOLD",
-    "groupColor": false,
-    "color": "Royal Gold",
-    "groupVariation": false,
-    "name": "Drip Shade",
     "model": "PRO",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/HLDQT6vQ/catalog-1781096955198-87e4-783e-265b.png",
-    "rarity": "common"
+    "name": "Drip Shade",
+    "color": "Royal Gold",
+    "customImage": "https://i.ibb.co/HLDQT6vQ/catalog-1781096955198-87e4-783e-265b.png"
   },
   {
     "id": "PRO-FLAMINGO-PINK",
-    "groupColor": false,
-    "color": "Pink",
-    "groupVariation": false,
-    "name": "Flamingo",
     "model": "PRO",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/pjZvnDbb/20260617-190507-0-Background-Removed.png",
-    "rarity": "limited"
+    "name": "Flamingo",
+    "color": "Pink",
+    "customImage": "https://i.ibb.co/pjZvnDbb/20260617-190507-0-Background-Removed.png"
   },
   {
     "id": "PRO-GOOD_SUNDAYS-WHITE-EAT_THIS",
-    "groupColor": false,
-    "color": "White",
-    "name": "Good Sundays",
     "model": "PRO",
+    "name": "Good Sundays",
+    "color": "White",
     "variation": "Eat This",
-    "bundleItems": [],
-    "notes": "Eat This",
-    "customImage": "https://i.ibb.co/PR7Xnjd/Screenshot-2026-06-18-at-2-22-Background-Removed-08-PM.png",
-    "groupVariation": false,
-    "totalMade": 199,
-    "rarity": "rare"
+    "customImage": "https://i.ibb.co/PR7Xnjd/Screenshot-2026-06-18-at-2-22-Background-Removed-08-PM.png"
   },
   {
     "id": "PRO-GOOD_SUNDAYS-WHITE-I_HEART_HOLES",
-    "groupColor": false,
-    "color": "White",
-    "name": "Good Sundays",
     "model": "PRO",
+    "name": "Good Sundays",
+    "color": "White",
     "variation": "I Heart Holes",
-    "bundleItems": [],
-    "notes": "I Heart Holes",
-    "customImage": "https://i.ibb.co/k6mdGwxx/Screenshot-2026-06-18-at-2-22-Background-Removed-00-PM.png",
-    "groupVariation": false,
-    "totalMade": 199,
-    "rarity": "rare"
+    "customImage": "https://i.ibb.co/k6mdGwxx/Screenshot-2026-06-18-at-2-22-Background-Removed-00-PM.png"
   },
   {
     "id": "PRO-GOOD_SUNDAYS-WHITE-SLAP_ON_ME",
-    "groupColor": false,
-    "color": "White",
-    "name": "Good Sundays",
     "model": "PRO",
+    "name": "Good Sundays",
+    "color": "White",
     "variation": "Slap On Me",
-    "bundleItems": [],
-    "notes": "Slap On Me",
-    "customImage": "https://i.ibb.co/jvX7FntP/Screenshot-2026-06-18-at-2-21-Background-Removed-52-PM.png",
-    "groupVariation": false,
-    "totalMade": 199,
-    "rarity": "rare"
+    "customImage": "https://i.ibb.co/jvX7FntP/Screenshot-2026-06-18-at-2-21-Background-Removed-52-PM.png"
   },
   {
     "id": "PRO-GOOD_SUNDAYS-WHITE-YES_U_CAN",
-    "groupColor": false,
-    "color": "White",
-    "name": "Good Sundays",
     "model": "PRO",
+    "name": "Good Sundays",
+    "color": "White",
     "variation": "Yes U Can",
-    "bundleItems": [],
-    "notes": "Yes U Can",
-    "customImage": "https://i.ibb.co/2L0Sq26/Screenshot-2026-06-18-at-2-21-Background-Removed-41-PM.png",
-    "groupVariation": false,
-    "totalMade": 199,
-    "rarity": "rare"
+    "customImage": "https://i.ibb.co/2L0Sq26/Screenshot-2026-06-18-at-2-21-Background-Removed-41-PM.png"
   },
   {
     "id": "PRO-GOOFBALLZ-BLUE-1_SUSHI",
-    "groupColor": false,
-    "color": "Blue",
-    "name": "GoofBallz",
     "model": "PRO",
+    "name": "GoofBallz",
+    "color": "Blue",
     "variation": "1 - Sushi",
-    "bundleItems": [],
-    "notes": "1 - Sushi",
-    "customImage": "https://i.ibb.co/m7YKh0B/20260617-193049-Background-Removed.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/m7YKh0B/20260617-193049-Background-Removed.png"
   },
   {
     "id": "PRO-GOOFBALLZ-BLUE-2_DONUT",
-    "groupColor": false,
-    "color": "Blue",
-    "name": "GoofBallz",
     "model": "PRO",
+    "name": "GoofBallz",
+    "color": "Blue",
     "variation": "2 - Donut",
-    "bundleItems": [],
-    "notes": "2 - Donut",
-    "customImage": "https://i.ibb.co/sJjcLCCy/20260617-193040-Background-Removed.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/sJjcLCCy/20260617-193040-Background-Removed.png"
   },
   {
     "id": "PRO-GOOFBALLZ-YELLOW-3_HOT_DOG",
-    "groupColor": false,
-    "color": "Yellow",
-    "name": "GoofBallz",
     "model": "PRO",
+    "name": "GoofBallz",
+    "color": "Yellow",
     "variation": "3 - Hot Dog",
-    "bundleItems": [],
-    "notes": "3 - Hot Dog",
-    "customImage": "https://i.ibb.co/Nnt1D1nP/20260617-192955-Background-Removed.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/Nnt1D1nP/20260617-192955-Background-Removed.png"
   },
   {
     "id": "PRO-GOOFBALLZ-YELLOW-4_ICE_CREAM",
-    "groupColor": false,
-    "color": "Yellow",
-    "name": "GoofBallz",
     "model": "PRO",
+    "name": "GoofBallz",
+    "color": "Yellow",
     "variation": "4 - Ice Cream",
-    "bundleItems": [],
-    "notes": "4 - Ice Cream",
-    "customImage": "https://i.ibb.co/fzRD1Smf/20260617-193020-Background-Removed.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/fzRD1Smf/20260617-193020-Background-Removed.png"
   },
   {
     "id": "PRO-GO_NUTZ-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Go Nutz",
     "model": "PRO",
-    "bundleItems": [],
+    "name": "Go Nutz",
+    "color": "White",
     "customImage": "https://i.ibb.co/93ZwgZXb/Screenshot-2026-06-18-at-2-36-Background-Removed-13-PM.png",
-    "customImageBox": "https://i.ibb.co/ZRq7dLtj/c5e67ddb68c5.webp",
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/ZRq7dLtj/c5e67ddb68c5.webp"
   },
   {
     "id": "PRO-GREG_MIKE-BLUE-LOUDMOUF",
-    "groupColor": false,
-    "bundleItems": [],
-    "notes": "LOUDMOUF",
-    "color": "Blue",
-    "groupVariation": false,
-    "name": "Greg Mike",
     "model": "PRO",
+    "name": "Greg Mike",
+    "color": "Blue",
     "variation": "LOUDMOUF",
     "customImage": "https://i.ibb.co/SDx7yQLx/catalog-1781099312081-1eed-30fc-26c6.png",
-    "customImageBox": "https://i.ibb.co/G3pY92Gj/c8c3148eca43.png",
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/G3pY92Gj/c8c3148eca43.png"
   },
   {
     "id": "PRO-GREG_MIKE-GREEN-LOUDMOUF",
-    "groupColor": false,
-    "bundleItems": [],
-    "notes": "LOUDMOUF",
-    "color": "Green",
-    "groupVariation": false,
-    "name": "Greg Mike",
-    "customImage": "https://i.ibb.co/HTXbHP4Z/Adobe-Express-file-6.png",
     "model": "PRO",
+    "name": "Greg Mike",
+    "color": "Green",
     "variation": "LOUDMOUF",
-    "customImageBox": "https://i.ibb.co/8DzVDcMH/loudmouf-box.png",
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/HTXbHP4Z/Adobe-Express-file-6.png",
+    "customImageBox": "https://i.ibb.co/8DzVDcMH/loudmouf-box.png"
   },
   {
     "id": "PRO-GREG_MIKE-WHITE-EYE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Greg Mike",
     "model": "PRO",
+    "name": "Greg Mike",
+    "color": "White",
     "variation": "Eye",
-    "bundleItems": [],
-    "notes": "Eye",
     "customImage": "https://i.ibb.co/0VQTRKFg/catalog-1781099322679-f34c-b601-e58f.png",
-    "customImageBox": "https://i.ibb.co/KxZmfg5t/fc09730ee80b.png",
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/KxZmfg5t/fc09730ee80b.png"
   },
   {
     "id": "PRO-GREG_MIKE-YELLOW-SMILEY",
-    "bundleItems": [],
-    "color": "Yellow",
-    "name": "Greg Mike",
     "model": "PRO",
+    "name": "Greg Mike",
+    "color": "Yellow",
     "variation": "Smiley",
-    "notes": "Smiley",
     "customImage": "https://i.ibb.co/ZptHvRBw/Adobe-Express-file-2.png",
-    "customImageBox": "https://i.ibb.co/LXdH0tFh/greg-mike-smiley.png",
-    "groupColor": false,
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/LXdH0tFh/greg-mike-smiley.png"
   },
   {
     "id": "PRO-JUNIOR-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Junior",
     "model": "PRO",
-    "bundleItems": [],
+    "name": "Junior",
+    "color": "White",
     "customImage": "https://i.ibb.co/NnbHXm1z/catalog-1781097070113-f335-c5bc-7a23.png",
-    "customImageBox": "https://i.ibb.co/xKpqQ6Sj/0707e55532bf.webp",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/xKpqQ6Sj/0707e55532bf.webp"
   },
   {
     "id": "PRO-JUNIOR-YELLOW",
-    "groupColor": false,
-    "color": "Yellow",
-    "groupVariation": false,
-    "name": "Junior",
     "model": "PRO",
-    "bundleItems": [],
+    "name": "Junior",
+    "color": "Yellow",
     "customImage": "https://i.ibb.co/HDC9wCdD/catalog-1781097247845-f7b3-b6df-1947.png",
-    "customImageBox": "https://i.ibb.co/dyt2FSr/7b7dc1f1b20e.webp",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/dyt2FSr/7b7dc1f1b20e.webp"
   },
   {
     "id": "PRO-LIV_GOLF-YELLOW_BLACK_DRIP",
-    "groupColor": false,
-    "color": "Yellow/Black Drip",
-    "groupVariation": false,
-    "name": "LIV Golf",
     "model": "PRO",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/rKwfzQZd/Adobe-Express-file-2.png",
-    "rarity": "limited"
+    "name": "LIV Golf",
+    "color": "Yellow/Black Drip",
+    "customImage": "https://i.ibb.co/rKwfzQZd/Adobe-Express-file-2.png"
   },
   {
     "id": "PRO-LOCAL_LEGEND-WHITE-AMEN",
-    "groupColor": false,
-    "color": "White",
-    "name": "Local Legend",
     "model": "PRO",
-    "variation": "Amen",
-    "bundleItems": [],
-    "notes": "Amen",
-    "groupVariation": false,
-    "totalMade": 500,
-    "rarity": "rare"
+    "name": "Local Legend",
+    "color": "White",
+    "variation": "Amen"
   },
   {
     "id": "PRO-LOCAL_LEGEND-WHITE-MAGNOLIA",
-    "groupColor": false,
-    "color": "White",
-    "name": "Local Legend",
     "model": "PRO",
+    "name": "Local Legend",
+    "color": "White",
     "variation": "Magnolia",
-    "bundleItems": [],
-    "notes": "Magnolia",
-    "groupVariation": false,
-    "customImage": "https://i.ibb.co/JWJQdMyS/20260617-190302-Background-Removed.png",
-    "totalMade": 999,
-    "rarity": "rare"
+    "customImage": "https://i.ibb.co/JWJQdMyS/20260617-190302-Background-Removed.png"
   },
   {
     "id": "PRO-LOCAL_LEGEND-WHITE-SANDWICH",
-    "groupColor": false,
-    "color": "White",
-    "name": "Local Legend",
     "model": "PRO",
+    "name": "Local Legend",
+    "color": "White",
     "variation": "Sandwich",
-    "bundleItems": [],
-    "notes": "Sandwich",
-    "groupVariation": false,
-    "customImage": "https://i.ibb.co/v6Z2g8HL/20260617-190617-Background-Removed.png",
-    "totalMade": 444,
-    "rarity": "rare"
+    "customImage": "https://i.ibb.co/v6Z2g8HL/20260617-190617-Background-Removed.png"
   },
   {
     "id": "PRO-LOCAL_LEGEND_10_YEARS-LIME-AMEN",
-    "groupColor": false,
-    "color": "Lime",
-    "name": "Local Legend 10 Years",
     "model": "PRO",
+    "name": "Local Legend 10 Years",
+    "color": "Lime",
     "variation": "Amen",
-    "bundleItems": [],
-    "notes": "Amen",
-    "customImage": "https://i.ibb.co/byjptrr/6481d593-ce2a-408d-b357-77ac83b34972-copied-media-2-Background-Removed.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/byjptrr/6481d593-ce2a-408d-b357-77ac83b34972-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO-LOCAL_LEGEND_10_YEARS-LIME-LOCAL_LEGEND",
-    "groupColor": false,
-    "color": "Lime",
-    "name": "Local Legend 10 Years",
     "model": "PRO",
+    "name": "Local Legend 10 Years",
+    "color": "Lime",
     "variation": "Local Legend",
-    "bundleItems": [],
-    "notes": "Local Legend",
-    "customImage": "https://i.ibb.co/gFvZ4qDq/988914ad-9228-49cb-8f12-7f8cf58746b7-copied-media-2-Background-Removed.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/gFvZ4qDq/988914ad-9228-49cb-8f12-7f8cf58746b7-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO-LOCAL_LEGEND_10_YEARS-LIME-MAGNOLIA",
-    "groupColor": false,
-    "color": "Lime",
-    "name": "Local Legend 10 Years",
     "model": "PRO",
+    "name": "Local Legend 10 Years",
+    "color": "Lime",
     "variation": "Magnolia",
-    "bundleItems": [],
-    "notes": "Magnolia",
-    "customImage": "https://i.ibb.co/JWmT58xx/8b7f9d55-a11f-4968-a603-1bf7d2d6afd9-copied-media-2-Background-Removed.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/JWmT58xx/8b7f9d55-a11f-4968-a603-1bf7d2d6afd9-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO-LOCAL_LEGEND_10_YEARS-LIME-SANDWICH",
-    "groupColor": false,
-    "color": "Lime",
-    "name": "Local Legend 10 Years",
     "model": "PRO",
+    "name": "Local Legend 10 Years",
+    "color": "Lime",
     "variation": "Sandwich",
-    "bundleItems": [],
-    "notes": "Sandwich",
-    "customImage": "https://i.ibb.co/vCMGz09H/c3cde4ab-17e7-4b47-bad0-5c8057757654-copied-media-2-Background-Removed.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/vCMGz09H/c3cde4ab-17e7-4b47-bad0-5c8057757654-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO-MONACO_OKTOBERFEST-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Monaco Oktoberfest",
     "model": "PRO",
-    "totalMade": 222,
-    "rarity": "rare"
+    "name": "Monaco Oktoberfest",
+    "color": "White"
   },
   {
     "id": "PRO-MOONROCK-BLACK",
-    "groupColor": false,
-    "color": "Black",
-    "groupVariation": false,
-    "name": "Moonrock",
     "model": "PRO",
-    "bundleItems": [],
+    "name": "Moonrock",
+    "color": "Black",
     "customImage": "https://i.ibb.co/XkxHtbtx/catalog-1781097625467-cb89-4546-d198.png",
-    "customImageBox": "https://i.ibb.co/qF1DRLrX/34ec76b5534b.webp",
-    "totalMade": 12000,
-    "rarity": "rare"
+    "customImageBox": "https://i.ibb.co/qF1DRLrX/34ec76b5534b.webp"
   },
   {
     "id": "PRO-NEON-LIME",
-    "groupColor": false,
-    "color": "Lime",
-    "groupVariation": false,
-    "name": "Neon",
     "model": "PRO",
+    "name": "Neon",
+    "color": "Lime",
     "customImage": "https://i.ibb.co/L4CpBnL/catalog-1780358006949-7939-5542-c8a6.jpg",
     "customImageSleeve": "https://i.ibb.co/mVRjLJXw/0a64f2d33a3a.jpg",
-    "customImageBox": "https://i.ibb.co/ZRHPrwkH/7bc9e6156f5d.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/ZRHPrwkH/7bc9e6156f5d.jpg"
   },
   {
     "id": "PRO-NEON-RED",
-    "groupColor": false,
-    "color": "Red",
-    "groupVariation": false,
-    "name": "Neon",
     "model": "PRO",
+    "name": "Neon",
+    "color": "Red",
     "customImage": "https://i.ibb.co/PBR25s6/catalog-1780358007577-242d-2f0d-3ba2.jpg",
-    "customImageBox": "https://i.ibb.co/ch0nxdV6/cca696dd4ba7.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/ch0nxdV6/cca696dd4ba7.jpg"
   },
   {
     "id": "PRO-NEON_DRIP-WATERMELON_BUBBLEGUM",
-    "groupColor": false,
-    "color": "Watermelon Bubblegum",
-    "groupVariation": false,
-    "name": "Neon Drip",
     "model": "PRO",
-    "bundleItems": [],
+    "name": "Neon Drip",
+    "color": "Watermelon Bubblegum",
     "customImage": "https://i.ibb.co/tp4yjLD7/catalog-1781096984251-e599-9110-36ed.png",
-    "customImageBox": "https://i.ibb.co/cKg3CGSL/8854fd498eef.webp",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/cKg3CGSL/8854fd498eef.webp"
   },
   {
     "id": "PRO-NEVER_OUTGUNNED-WHITE-12",
-    "groupColor": false,
-    "bundleItems": [],
-    "color": "White",
-    "name": "Never Outgunned",
     "model": "PRO",
+    "name": "Never Outgunned",
+    "color": "White",
     "variation": "12",
-    "notes": "12",
-    "customImage": "https://i.ibb.co/ZzqC29Qk/be305b33-770d-4fec-8e75-e416188cf19d-copied-media-2-Background-Removed.png",
-    "rarity": "limited",
-    "groupVariation": true
+    "customImage": "https://i.ibb.co/ZzqC29Qk/be305b33-770d-4fec-8e75-e416188cf19d-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO-NEVER_OUTGUNNED-WHITE-23",
-    "bundleItems": [],
-    "color": "White",
-    "name": "Never Outgunned",
     "model": "PRO",
-    "groupColor": false,
+    "name": "Never Outgunned",
+    "color": "White",
     "variation": "23",
-    "notes": "23",
-    "customImage": "https://i.ibb.co/d9RkCPP/3d998b95-a103-4485-a032-611e8b9db8e7-copied-media-2-Background-Removed.png",
-    "rarity": "limited",
-    "groupVariation": true
+    "customImage": "https://i.ibb.co/d9RkCPP/3d998b95-a103-4485-a032-611e8b9db8e7-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO-NEVER_OUTGUNNED-WHITE-34",
-    "bundleItems": [],
-    "color": "White",
-    "name": "Never Outgunned",
     "model": "PRO",
-    "groupColor": false,
+    "name": "Never Outgunned",
+    "color": "White",
     "variation": "34",
-    "notes": "34",
-    "customImage": "https://i.ibb.co/SD79WFKb/8c31d8b3-57df-4cbb-a48c-7158bef07fe3-copied-media-2-Background-Removed.png",
-    "rarity": "limited",
-    "groupVariation": true
+    "customImage": "https://i.ibb.co/SD79WFKb/8c31d8b3-57df-4cbb-a48c-7158bef07fe3-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO-NEVER_OUTGUNNED-WHITE-93",
-    "bundleItems": [],
-    "color": "White",
-    "name": "Never Outgunned",
     "model": "PRO",
-    "groupColor": false,
+    "name": "Never Outgunned",
+    "color": "White",
     "variation": "93",
-    "notes": "93",
-    "customImage": "https://i.ibb.co/6cc4Qg5h/e2eb3250-d70c-471c-8bcd-1a36741dbcac-copied-media-2-Background-Removed.png",
-    "rarity": "limited",
-    "groupVariation": true
+    "customImage": "https://i.ibb.co/6cc4Qg5h/e2eb3250-d70c-471c-8bcd-1a36741dbcac-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO-OAKMONT_US_OPEN-RED_BLUE_DRIP",
-    "groupColor": false,
-    "color": "Red/Blue Drip",
-    "groupVariation": false,
-    "name": "Oakmont US Open",
     "model": "PRO",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/yF09bJB3/20260617-192944-Background-Removed.png",
-    "rarity": "limited"
+    "name": "Oakmont US Open",
+    "color": "Red/Blue Drip",
+    "customImage": "https://i.ibb.co/yF09bJB3/20260617-192944-Background-Removed.png"
   },
   {
     "id": "PRO-ORIGIN_OF_GOLF-RED",
-    "groupColor": false,
-    "bundleItems": [],
-    "color": "Red",
-    "groupVariation": false,
-    "name": "Origin of Golf",
-    "customImage": "https://i.ibb.co/Ym1MG38/20260617-193203-Background-Removed.png",
     "model": "PRO",
-    "rarity": "limited"
+    "name": "Origin of Golf",
+    "color": "Red",
+    "customImage": "https://i.ibb.co/Ym1MG38/20260617-193203-Background-Removed.png"
   },
   {
     "id": "PRO-PINEHURST_US_OPEN-RED_BLUE_DRIP",
-    "groupColor": false,
-    "bundleItems": [],
-    "color": "Red/Blue Drip",
-    "groupVariation": false,
-    "name": "Pinehurst US Open",
-    "customImage": "https://i.ibb.co/ksDnJCFK/Adobe-Express-file-3.png",
     "model": "PRO",
-    "rarity": "limited"
+    "name": "Pinehurst US Open",
+    "color": "Red/Blue Drip",
+    "customImage": "https://i.ibb.co/ksDnJCFK/Adobe-Express-file-3.png"
   },
   {
     "id": "PRO-PROPERTY_OF_BRAD-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Property of Brad",
     "model": "PRO",
-    "rarity": "limited"
+    "name": "Property of Brad",
+    "color": "White"
   },
   {
     "id": "PRO-PRO_ST-GOLD",
-    "groupColor": false,
-    "color": "Gold",
-    "groupVariation": false,
-    "name": "Pro(st)",
     "model": "PRO",
-    "bundleItems": [],
+    "name": "Pro(st)",
+    "color": "Gold",
     "customImage": "https://i.ibb.co/fYG9BXs1/catalog-1781098785525-6bfc-48a9-9d63.png",
-    "customImageBox": "https://i.ibb.co/qLxztHSv/77c1a7f48b14.webp",
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/qLxztHSv/77c1a7f48b14.webp"
   },
   {
     "id": "PRO-PRO_ST_CHARACTER-WHITE-BRATWURST",
-    "groupColor": false,
-    "color": "White",
-    "name": "Pro(st) Character",
     "model": "PRO",
+    "name": "Pro(st) Character",
+    "color": "White",
     "variation": "Bratwurst",
-    "bundleItems": [],
-    "notes": "Bratwurst",
-    "customImage": "https://i.ibb.co/qZjmy00/6fd8c27e-847a-40ba-bb97-02e07786af2d-copied-media-2-Background-Removed.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/qZjmy00/6fd8c27e-847a-40ba-bb97-02e07786af2d-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO-PRO_ST_CHARACTER-WHITE-FRIENDS",
-    "groupColor": false,
-    "color": "White",
-    "name": "Pro(st) Character",
     "model": "PRO",
+    "name": "Pro(st) Character",
+    "color": "White",
     "variation": "Friends",
-    "bundleItems": [],
-    "notes": "Friends",
-    "customImage": "https://i.ibb.co/svYXszmR/cfce9a55-d75f-4e00-b0d0-e1ad01e807c4-copied-media-2-Background-Removed.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/svYXszmR/cfce9a55-d75f-4e00-b0d0-e1ad01e807c4-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO-PRO_ST_CHARACTER-WHITE-MUG",
-    "groupColor": false,
-    "color": "White",
-    "name": "Pro(st) Character",
     "model": "PRO",
+    "name": "Pro(st) Character",
+    "color": "White",
     "variation": "Mug",
-    "bundleItems": [],
-    "notes": "Mug",
-    "customImage": "https://i.ibb.co/5gzNL7n5/c7fe953e-0289-4aaa-8deb-f0734bac6b52-copied-media-2-Background-Removed.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/5gzNL7n5/c7fe953e-0289-4aaa-8deb-f0734bac6b52-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO-PRO_ST_CHARACTER-WHITE-MUG_IN_GOLF_CART",
-    "groupColor": false,
-    "color": "White",
-    "name": "Pro(st) Character",
     "model": "PRO",
+    "name": "Pro(st) Character",
+    "color": "White",
     "variation": "Mug in Golf Cart",
-    "bundleItems": [],
-    "notes": "Mug in Golf Cart",
-    "customImage": "https://i.ibb.co/cSmgg8Mh/2b6572db-33ee-46d5-9b22-568dfd4ad8ce-copied-media-2-Background-Removed.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/cSmgg8Mh/2b6572db-33ee-46d5-9b22-568dfd4ad8ce-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO-SHADE-NIGHTHAWK",
-    "groupColor": false,
-    "color": "Nighthawk",
-    "groupVariation": false,
-    "name": "Shade",
     "model": "PRO",
-    "rarity": "common"
+    "name": "Shade",
+    "color": "Nighthawk"
   },
   {
     "id": "PRO-SHADE-RED_ORANGE",
-    "groupColor": false,
-    "color": "Red Orange",
-    "groupVariation": false,
-    "name": "Shade",
     "model": "PRO",
+    "name": "Shade",
+    "color": "Red Orange",
     "customImage": "https://i.ibb.co/8tLtg5V/catalog-1780358008336-653d-34bb-abd5.jpg",
     "customImageSleeve": "https://i.ibb.co/Hf1yNHbH/42d64aa6f9f1.jpg",
-    "customImageBox": "https://i.ibb.co/7Nyfhyg2/9a05428b6e33.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/7Nyfhyg2/9a05428b6e33.jpg"
   },
   {
     "id": "PRO-SHINNECOCK_US_OPEN-RED_BLUE_DRIP",
-    "groupColor": false,
-    "bundleItems": [],
-    "color": "Red/Blue Drip",
-    "groupVariation": false,
-    "name": "Shinnecock US Open",
     "model": "PRO",
-    "rarity": "limited",
+    "name": "Shinnecock US Open",
+    "color": "Red/Blue Drip",
     "customImage": "https://i.ibb.co/pjM22MGk/8940b6a0ec33.png"
   },
   {
     "id": "PRO-SILVER_HILLS-SLIVER_DRIP",
-    "groupColor": false,
-    "color": "Sliver Drip",
-    "groupVariation": false,
-    "name": "Silver Hills",
     "model": "PRO",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/Qj6rdc2X/20260617-192206-Background-Removed.png",
-    "rarity": "limited"
+    "name": "Silver Hills",
+    "color": "Sliver Drip",
+    "customImage": "https://i.ibb.co/Qj6rdc2X/20260617-192206-Background-Removed.png"
   },
   {
     "id": "PRO-STANDARD-GLACIER_BLAST",
-    "groupColor": false,
-    "bundleItems": [],
-    "color": "Glacier Blast",
-    "groupVariation": false,
-    "name": "Standard",
     "model": "PRO",
+    "name": "Standard",
+    "color": "Glacier Blast",
     "customImage": "https://i.ibb.co/MkywJzvD/catalog-1780358008946-b7a1-0be7-2eaa.jpg",
-    "customImageBox": "https://i.ibb.co/nMfg4F04/84ed3c4f751d.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/nMfg4F04/84ed3c4f751d.jpg"
   },
   {
     "id": "PRO-STANDARD-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Standard",
     "model": "PRO",
+    "name": "Standard",
+    "color": "White",
     "customImage": "https://i.ibb.co/5g25J2Gp/catalog-1780358009336-b102-665d-0303.jpg",
     "customImageSleeve": "https://i.ibb.co/RpMDvPtF/23945e5c18e6.jpg",
-    "customImageBox": "https://i.ibb.co/jvgw29v2/efcf309e7bcf.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/jvgw29v2/efcf309e7bcf.jpg"
   },
   {
     "id": "PRO-STANDARD_24_PACK-WHITE",
-    "bundleItems": [
-      {
-        "catalogId": "PRO-STANDARD-WHITE",
-        "qty": 24
-      }
-    ],
-    "color": "White",
-    "name": "Standard (24 Pack)",
     "model": "PRO",
-    "groupColor": false,
-    "groupVariation": false,
+    "name": "Standard (24 Pack)",
+    "color": "White",
     "customImage": "https://i.ibb.co/xTnPVFx/catalog-1780411756033-40e3-5fec-0320.jpg",
-    "customImageBox": "https://i.ibb.co/tpxFgMPb/f6d033cb7ce6.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/tpxFgMPb/f6d033cb7ce6.jpg"
   },
   {
     "id": "PRO-TAN-BROWN_WHITE",
-    "groupColor": false,
-    "color": "Brown White",
-    "groupVariation": false,
-    "name": "Tan",
     "model": "PRO",
-    "bundleItems": [],
+    "name": "Tan",
+    "color": "Brown White",
     "customImage": "https://i.ibb.co/VpTFXqZF/Screenshot-2026-06-18-at-11-44-Background-Removed-37-AM.png",
-    "customImageBox": "https://i.ibb.co/XrDT8Cc9/df3f764e7452.webp",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/XrDT8Cc9/df3f764e7452.webp"
   },
   {
     "id": "PRO-TCAF-PRUPLE_DRIP",
-    "groupColor": false,
-    "color": "Pruple Drip",
-    "groupVariation": false,
-    "name": "TCAF",
     "model": "PRO",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/0yZJ5079/0c3c743d-dc70-4d3f-966b-5ac8d8e74991-copied-media-2-Background-Removed.png",
-    "rarity": "limited"
+    "name": "TCAF",
+    "color": "Pruple Drip",
+    "customImage": "https://i.ibb.co/0yZJ5079/0c3c743d-dc70-4d3f-966b-5ac8d8e74991-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO-TRACER-FIREBALL",
-    "groupColor": false,
-    "color": "Fireball",
-    "groupVariation": false,
-    "name": "Tracer",
     "model": "PRO",
-    "bundleItems": [],
+    "name": "Tracer",
+    "color": "Fireball",
     "customImage": "https://i.ibb.co/YgF3PRk/catalog-1780783995917-fe89-eff1-d650.png",
-    "customImageBox": "https://i.ibb.co/GfHn14fW/ad4698c94587.webp",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/GfHn14fW/ad4698c94587.webp"
   },
   {
     "id": "PRO-TRACER-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Tracer",
     "model": "PRO",
+    "name": "Tracer",
+    "color": "White",
     "customImage": "https://i.ibb.co/CKQbP1WJ/catalog-1780358010558-c9aa-5fda-5b3b.jpg",
-    "customImageBox": "https://i.ibb.co/3msCNKzJ/3186bdd858ae.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/3msCNKzJ/3186bdd858ae.jpg"
   },
   {
     "id": "PRO-TRACER-YELLOW_GREEN-MAJOR_EDITION",
-    "groupColor": false,
-    "color": "Yellow/Green",
-    "groupVariation": false,
-    "name": "Tracer",
     "model": "PRO",
+    "name": "Tracer",
+    "color": "Yellow/Green",
     "variation": "Major Edition",
-    "bundleItems": [],
-    "notes": "Major Edition",
     "customImage": "https://i.ibb.co/bj9M1ycZ/catalog-1780784620341-b27f-8a72-186c.png",
-    "customImageBox": "https://i.ibb.co/kdCMLM9/1c059d97afee.webp",
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/kdCMLM9/1c059d97afee.webp"
   },
   {
     "id": "PRO-VICE_LINKS-GOLD_DRIP",
-    "color": "Gold Drip",
-    "groupVariation": false,
-    "name": "Vice Links",
     "model": "PRO",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/JW1H3pSJ/4a569be5-b56f-44e9-85db-edf67f84cd0d-copied-media-2-Background-Removed.png",
-    "groupColor": false,
-    "rarity": "limited"
+    "name": "Vice Links",
+    "color": "Gold Drip",
+    "customImage": "https://i.ibb.co/JW1H3pSJ/4a569be5-b56f-44e9-85db-edf67f84cd0d-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO-VICE_LINKS-PURPLE_DRIP",
-    "color": "Purple Drip",
-    "groupVariation": false,
-    "name": "Vice Links",
     "model": "PRO",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/LhBZBm8J/1d5bd613-16d1-4fe1-a710-43ab078e8c46-copied-media-2-Background-Removed.png",
-    "groupColor": false,
-    "rarity": "limited"
+    "name": "Vice Links",
+    "color": "Purple Drip",
+    "customImage": "https://i.ibb.co/LhBZBm8J/1d5bd613-16d1-4fe1-a710-43ab078e8c46-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO-WILD_WINDS-NEON_RED",
-    "groupColor": false,
-    "color": "Neon Red",
-    "groupVariation": false,
-    "name": "Wild Winds",
     "model": "PRO",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/M5Q7w9dp/20260617-190409-Background-Removed.png",
-    "totalMade": 499,
-    "rarity": "rare"
+    "name": "Wild Winds",
+    "color": "Neon Red",
+    "customImage": "https://i.ibb.co/M5Q7w9dp/20260617-190409-Background-Removed.png"
   },
   {
     "id": "PRO-ZARA_HOME_1_3-WHITE-GOLFER_BALL",
-    "groupColor": false,
-    "bundleItems": [],
-    "notes": "Golfer/Ball",
-    "color": "White",
-    "name": "Zara Home (1 & 3)",
     "model": "PRO",
+    "name": "Zara Home (1 & 3)",
+    "color": "White",
     "variation": "Golfer/Ball",
-    "groupVariation": false,
     "customImage": "https://i.ibb.co/Y48j7Tny/catalog-1781099613246-5c9c-8e5c-3f06.png",
-    "customImageBox": "https://i.ibb.co/Z6JDY4nB/ccde3aa753f3.png",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/Z6JDY4nB/ccde3aa753f3.png"
   },
   {
     "id": "PRO-ZARA_HOME_2_4-WHITE-CLUBS_GREEN",
-    "groupColor": false,
-    "bundleItems": [],
-    "notes": "Clubs/Green",
-    "color": "White",
-    "groupVariation": false,
-    "name": "Zara Home (2 & 4)",
     "model": "PRO",
+    "name": "Zara Home (2 & 4)",
+    "color": "White",
     "variation": "Clubs/Green",
     "customImage": "https://i.ibb.co/bMRjbGyk/catalog-1781099493621-2bfd-17da-9b19.png",
-    "customImageBox": "https://i.ibb.co/Z6JDY4nB/ccde3aa753f3.png",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/Z6JDY4nB/ccde3aa753f3.png"
   },
   {
     "id": "PRO_AIR-DRIP-PETROL_YELLOW",
-    "groupColor": false,
-    "color": "Petrol/Yellow",
-    "groupVariation": false,
-    "name": "Drip",
     "model": "PRO AIR",
+    "name": "Drip",
+    "color": "Petrol/Yellow",
     "customImage": "https://i.ibb.co/KjvPX7Z9/catalog-1780358011372-a77c-4751-9fc9.jpg",
     "customImageSleeve": "https://i.ibb.co/KcXy4WSd/df84409f813a.jpg",
-    "customImageBox": "https://i.ibb.co/SwwKc9Gm/8d5f095bc1dc.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/SwwKc9Gm/8d5f095bc1dc.jpg"
   },
   {
     "id": "PRO_AIR-DRIP-RED_BLACK",
-    "groupColor": false,
-    "color": "Red/Black",
-    "groupVariation": false,
-    "name": "Drip",
     "model": "PRO AIR",
+    "name": "Drip",
+    "color": "Red/Black",
     "customImage": "https://i.ibb.co/twV72849/catalog-1780358012011-c886-7bdd-8ae9.jpg",
     "customImageSleeve": "https://i.ibb.co/SXpCQzmm/336dbfaaccfc.jpg",
-    "customImageBox": "https://i.ibb.co/8gGQLYBd/d11ad863fbdf.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/8gGQLYBd/d11ad863fbdf.jpg"
   },
   {
     "id": "PRO_AIR-DRIP_SHADE-COTTON_CANDY",
-    "groupColor": false,
-    "color": "Cotton Candy",
-    "groupVariation": false,
-    "name": "Drip Shade",
     "model": "PRO AIR",
-    "bundleItems": [],
+    "name": "Drip Shade",
+    "color": "Cotton Candy",
     "customImage": "https://i.ibb.co/GvjyT0Sf/catalog-1781097433972-0c16-2900-a856.png",
-    "customImageBox": "https://i.ibb.co/MFVvGmx/36ba0f5c0804.webp",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/MFVvGmx/36ba0f5c0804.webp"
   },
   {
     "id": "PRO_AIR-GREEN_MILE_CLUB-WHITE-16",
-    "groupColor": false,
-    "color": "White",
-    "name": "Green Mile Club",
     "model": "PRO AIR",
-    "variation": "16",
-    "groupVariation": false,
-    "rarity": "limited"
+    "name": "Green Mile Club",
+    "color": "White",
+    "variation": "16"
   },
   {
     "id": "PRO_AIR-GREEN_MILE_CLUB-WHITE-17",
-    "groupColor": false,
-    "color": "White",
-    "name": "Green Mile Club",
     "model": "PRO AIR",
-    "variation": "17",
-    "groupVariation": false,
-    "rarity": "limited"
+    "name": "Green Mile Club",
+    "color": "White",
+    "variation": "17"
   },
   {
     "id": "PRO_AIR-GREEN_MILE_CLUB-WHITE-18",
-    "groupColor": false,
-    "color": "White",
-    "name": "Green Mile Club",
     "model": "PRO AIR",
-    "variation": "18",
-    "groupVariation": false,
-    "rarity": "limited"
+    "name": "Green Mile Club",
+    "color": "White",
+    "variation": "18"
   },
   {
     "id": "PRO_AIR-GREEN_MILE_CLUB-WHITE-28",
-    "groupColor": false,
-    "color": "White",
-    "name": "Green Mile Club",
     "model": "PRO AIR",
-    "variation": "28",
-    "groupVariation": false,
-    "rarity": "limited"
+    "name": "Green Mile Club",
+    "color": "White",
+    "variation": "28"
   },
   {
     "id": "PRO_AIR-NEON-LIME",
-    "groupColor": false,
-    "color": "Lime",
-    "groupVariation": false,
-    "name": "Neon",
     "model": "PRO AIR",
+    "name": "Neon",
+    "color": "Lime",
     "customImage": "https://i.ibb.co/bRMj04qw/catalog-1780358013025-a972-13e1-9c80.jpg",
     "customImageSleeve": "https://i.ibb.co/B28056BJ/b129a44cb853.jpg",
-    "customImageBox": "https://i.ibb.co/8nqCzgy0/a1dba8325dc1.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/8nqCzgy0/a1dba8325dc1.jpg"
   },
   {
     "id": "PRO_AIR-NEON-PINK",
-    "groupColor": false,
-    "color": "Pink",
-    "groupVariation": false,
-    "name": "Neon",
     "model": "PRO AIR",
+    "name": "Neon",
+    "color": "Pink",
     "customImage": "https://i.ibb.co/gFB8VRbf/catalog-1780358013714-6a3c-b53d-9d95.jpg",
     "customImageSleeve": "https://i.ibb.co/5XxG5CCY/a2e7b1d1dbe8.jpg",
-    "customImageBox": "https://i.ibb.co/JWgVnwXj/e329bfb8956d.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/JWgVnwXj/e329bfb8956d.jpg"
   },
   {
     "id": "PRO_AIR-NEON_DRIP-RED_BLACK",
-    "groupColor": false,
-    "color": "Red/Black",
-    "groupVariation": false,
-    "name": "Neon Drip",
     "model": "PRO AIR",
+    "name": "Neon Drip",
+    "color": "Red/Black",
     "customImage": "https://i.ibb.co/hJKN2Ssn/catalog-1780358014407-6cd5-0189-bbcd.jpg",
     "customImageSleeve": "https://i.ibb.co/HDVBSmWL/6d34b3654eb8.jpg",
-    "customImageBox": "https://i.ibb.co/VWjcynj3/a9c1c1c56561.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/VWjcynj3/a9c1c1c56561.jpg"
   },
   {
     "id": "PRO_AIR-STANDARD-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Standard",
     "model": "PRO AIR",
+    "name": "Standard",
+    "color": "White",
     "customImage": "https://i.ibb.co/84GGSjhg/catalog-1780358015057-2b8d-59bd-89e2.jpg",
     "customImageSleeve": "https://i.ibb.co/wr8d7wKc/d1b4f5e82638.jpg",
-    "customImageBox": "https://i.ibb.co/CK44LLkm/94fc509339ba.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/CK44LLkm/94fc509339ba.jpg"
   },
   {
     "id": "PRO_AIR-SWANNIES-WHITE",
-    "groupColor": false,
-    "bundleItems": [],
-    "color": "White",
-    "groupVariation": false,
-    "name": "Swannies",
-    "customImage": "https://i.ibb.co/PZgQZryN/9b0330c2e1fb.png",
     "model": "PRO AIR",
-    "customImageBox": "https://i.ibb.co/yn7QBgtk/e586e25263b4.png",
-    "rarity": "limited"
+    "name": "Swannies",
+    "color": "White",
+    "customImage": "https://i.ibb.co/PZgQZryN/9b0330c2e1fb.png",
+    "customImageBox": "https://i.ibb.co/yn7QBgtk/e586e25263b4.png"
   },
   {
     "id": "PRO_AIR-TRACER-NEON_TIDE",
-    "groupColor": false,
-    "color": "Neon Tide",
-    "groupVariation": false,
-    "name": "Tracer",
     "model": "PRO AIR",
-    "bundleItems": [],
+    "name": "Tracer",
+    "color": "Neon Tide",
     "customImage": "https://i.ibb.co/hRgpXsYQ/catalog-1780783976337-66b3-2099-d277.png",
-    "customImageBox": "https://i.ibb.co/FkhR4xBB/7b610b8e388a.webp",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/FkhR4xBB/7b610b8e388a.webp"
   },
   {
     "id": "PRO_AIR-TRACER-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Tracer",
     "model": "PRO AIR",
+    "name": "Tracer",
+    "color": "White",
     "customImage": "https://i.ibb.co/FqLWHH4V/catalog-1780358015956-402a-e809-1e07.jpg",
-    "customImageBox": "https://i.ibb.co/NgQszbtH/b2d96e330ee8.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/NgQszbtH/b2d96e330ee8.jpg"
   },
   {
     "id": "PRO_FLAKE-NEVER_OUTGUNNED-WHITE-93",
-    "groupColor": false,
-    "bundleItems": [],
-    "notes": "93",
-    "color": "White",
-    "groupVariation": false,
-    "name": "Never Outgunned",
-    "customImage": "https://i.ibb.co/KjZbcrcB/1c60fb4a-470e-4b9b-a724-7360b39644c6-copied-media-2-Background-Removed.png",
     "model": "PRO FLAKE",
+    "name": "Never Outgunned",
+    "color": "White",
     "variation": "93",
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/KjZbcrcB/1c60fb4a-470e-4b9b-a724-7360b39644c6-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-BETHPAGE_STATION-BLUE_EUROPE",
-    "bundleItems": [],
-    "color": "Blue (Europe)",
-    "groupVariation": false,
-    "name": "Bethpage Station",
     "model": "PRO PLUS",
+    "name": "Bethpage Station",
+    "color": "Blue (Europe)",
     "customImage": "https://i.ibb.co/b897xyv/catalog-1781100127063-8eed-c1d8-a464.jpg",
     "customImageSleeve": "https://i.ibb.co/LHFYcf4/9053f4b15c0e.png",
-    "customImageBox": "https://i.ibb.co/27jJ2p64/e54d6ec468e1.png",
-    "groupColor": false,
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/27jJ2p64/e54d6ec468e1.png"
   },
   {
     "id": "PRO_PLUS-BETHPAGE_STATION-RED_USA",
-    "bundleItems": [],
-    "color": "Red (USA)",
-    "groupVariation": false,
-    "name": "Bethpage Station",
     "model": "PRO PLUS",
+    "name": "Bethpage Station",
+    "color": "Red (USA)",
     "customImage": "https://i.ibb.co/BKtb8G49/catalog-1781099923252-45e9-45e4-aa7a.png",
     "customImageSleeve": "https://i.ibb.co/LHFYcf4/9053f4b15c0e.png",
-    "customImageBox": "https://i.ibb.co/27jJ2p64/e54d6ec468e1.png",
-    "groupColor": false,
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/27jJ2p64/e54d6ec468e1.png"
   },
   {
     "id": "PRO_PLUS-BORDEAUX_RED-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Bordeaux Red",
     "model": "PRO PLUS",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/k2qG9LsM/20260617-190240-Background-Removed.png",
-    "totalMade": 222,
-    "rarity": "rare"
+    "name": "Bordeaux Red",
+    "color": "White",
+    "customImage": "https://i.ibb.co/k2qG9LsM/20260617-190240-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-CLUBHAUS-WHITE_BLUE",
-    "bundleItems": [],
-    "color": "White/Blue",
-    "groupVariation": false,
-    "name": "Clubhaus",
-    "customImage": "https://i.ibb.co/93Yf1kqB/20260617-192032-Background-Removed.png",
     "model": "PRO PLUS",
-    "groupColor": false,
-    "rarity": "limited"
+    "name": "Clubhaus",
+    "color": "White/Blue",
+    "customImage": "https://i.ibb.co/93Yf1kqB/20260617-192032-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-CLUBHAUS-WHITE_GRAY",
-    "bundleItems": [],
-    "color": "White/Gray",
-    "groupVariation": false,
-    "name": "Clubhaus",
-    "customImage": "https://i.ibb.co/27GKV4LB/20260617-192139-Background-Removed.png",
     "model": "PRO PLUS",
-    "groupColor": false,
-    "rarity": "limited"
+    "name": "Clubhaus",
+    "color": "White/Gray",
+    "customImage": "https://i.ibb.co/27GKV4LB/20260617-192139-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-CLUBHAUS-WHITE_GREEN",
-    "bundleItems": [],
-    "color": "White/Green",
-    "groupVariation": false,
-    "name": "Clubhaus",
-    "customImage": "https://i.ibb.co/PZhs08NG/20260617-192118-Background-Removed.png",
     "model": "PRO PLUS",
-    "groupColor": false,
-    "rarity": "limited"
+    "name": "Clubhaus",
+    "color": "White/Green",
+    "customImage": "https://i.ibb.co/PZhs08NG/20260617-192118-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-CLUBHAUS-WHITE_RED",
-    "bundleItems": [],
-    "color": "White/Red",
-    "groupVariation": false,
-    "name": "Clubhaus",
-    "customImage": "https://i.ibb.co/39ZXXpRm/20260617-192053-Background-Removed.png",
     "model": "PRO PLUS",
-    "groupColor": false,
-    "rarity": "limited"
+    "name": "Clubhaus",
+    "color": "White/Red",
+    "customImage": "https://i.ibb.co/39ZXXpRm/20260617-192053-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-CLUBHAUS-WHITE_YELLOW",
-    "bundleItems": [],
-    "color": "White/Yellow",
-    "groupVariation": false,
-    "name": "Clubhaus",
-    "customImage": "https://i.ibb.co/Lz4xRwv2/Screenshot-2026-06-18-at-1-58-Background-Removed-43-PM.png",
     "model": "PRO PLUS",
-    "groupColor": false,
-    "rarity": "limited"
+    "name": "Clubhaus",
+    "color": "White/Yellow",
+    "customImage": "https://i.ibb.co/Lz4xRwv2/Screenshot-2026-06-18-at-1-58-Background-Removed-43-PM.png"
   },
   {
     "id": "PRO_PLUS-DIVOT_DUDES-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Divot Dudes",
     "model": "PRO PLUS",
-    "bundleItems": [],
+    "name": "Divot Dudes",
+    "color": "White",
     "customImage": "https://i.ibb.co/nqfVbB99/catalog-1781097525432-c79e-3b42-a0aa.png",
-    "customImageBox": "https://i.ibb.co/20qHP83X/827a96486d8f.webp",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/20qHP83X/827a96486d8f.webp"
   },
   {
     "id": "PRO_PLUS-DRIP-LIME_BLACK",
-    "groupColor": false,
-    "color": "Lime/Black",
-    "groupVariation": false,
-    "name": "Drip",
     "model": "PRO PLUS",
+    "name": "Drip",
+    "color": "Lime/Black",
     "customImage": "https://i.ibb.co/MxkFqv0b/catalog-1780358016992-35c9-b620-6ea9.jpg",
     "customImageSleeve": "https://i.ibb.co/twqxfvzY/12b2a931f3ab.jpg",
-    "customImageBox": "https://i.ibb.co/PGn0vj2Y/63035ee0f3be.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/PGn0vj2Y/63035ee0f3be.jpg"
   },
   {
     "id": "PRO_PLUS-DRIP-NAVY_ORANGE",
-    "groupColor": false,
-    "color": "Navy/Orange",
-    "groupVariation": false,
-    "name": "Drip",
     "model": "PRO PLUS",
+    "name": "Drip",
+    "color": "Navy/Orange",
     "customImage": "https://i.ibb.co/kVcMvZZQ/catalog-1780358017633-74e6-7453-401b.jpg",
     "customImageSleeve": "https://i.ibb.co/Xwcnk0B/142ccfbdb37f.jpg",
-    "customImageBox": "https://i.ibb.co/GQHYvPK3/29bb90ccf5d7.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/GQHYvPK3/29bb90ccf5d7.jpg"
   },
   {
     "id": "PRO_PLUS-EXTRA_BUTTER-GOLD",
-    "groupColor": false,
-    "color": "Gold",
-    "groupVariation": false,
-    "name": "Extra Butter",
     "model": "PRO PLUS",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/d0gjYDPb/20260617-190009-Background-Removed.png",
-    "rarity": "limited"
+    "name": "Extra Butter",
+    "color": "Gold",
+    "customImage": "https://i.ibb.co/d0gjYDPb/20260617-190009-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-FASTBALL-WHITE",
-    "groupColor": false,
-    "bundleItems": [],
-    "color": "White",
-    "groupVariation": false,
-    "name": "Fastball",
-    "customImage": "https://i.ibb.co/8n47XVv9/4c5f954abf32.png",
     "model": "PRO PLUS",
-    "customImageBox": "https://i.ibb.co/fz9Mfg7P/e2b1d9d08454.png",
-    "rarity": "common"
+    "name": "Fastball",
+    "color": "White",
+    "customImage": "https://i.ibb.co/8n47XVv9/4c5f954abf32.png",
+    "customImageBox": "https://i.ibb.co/fz9Mfg7P/e2b1d9d08454.png"
   },
   {
     "id": "PRO_PLUS-FLYER_S_CLUB-WHITE",
-    "groupColor": false,
-    "bundleItems": [],
-    "color": "White",
-    "groupVariation": false,
-    "name": "Flyer's Club",
     "model": "PRO PLUS",
-    "customImage": "https://i.ibb.co/gbmjTXjB/20260617-190331-Background-Removed.png",
-    "rarity": "limited"
+    "name": "Flyer's Club",
+    "color": "White",
+    "customImage": "https://i.ibb.co/gbmjTXjB/20260617-190331-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-FUGU-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Fugu",
     "model": "PRO PLUS",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/1G03X4k9/20260617-193249-Background-Removed.png",
-    "rarity": "limited"
+    "name": "Fugu",
+    "color": "White",
+    "customImage": "https://i.ibb.co/1G03X4k9/20260617-193249-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-GOLFERIA-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Golferia",
     "model": "PRO PLUS",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/yFBrzvDT/20260617-193232-Background-Removed.png",
-    "rarity": "limited"
+    "name": "Golferia",
+    "color": "White",
+    "customImage": "https://i.ibb.co/yFBrzvDT/20260617-193232-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-HERITAGE_COLLECTION-WHITE-1_MAGNOLIA",
-    "groupColor": false,
-    "color": "White",
-    "name": "Heritage Collection",
     "model": "PRO PLUS",
+    "name": "Heritage Collection",
+    "color": "White",
     "variation": "1 - Magnolia",
-    "bundleItems": [],
-    "notes": "1 - Magnolia",
-    "customImage": "https://i.ibb.co/9kyJMCDJ/Screenshot-2026-06-18-at-3-20-Background-Removed-07-PM.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/9kyJMCDJ/Screenshot-2026-06-18-at-3-20-Background-Removed-07-PM.png"
   },
   {
     "id": "PRO_PLUS-HERITAGE_COLLECTION-WHITE-2_CLUBHOUSE",
-    "groupColor": false,
-    "color": "White",
-    "name": "Heritage Collection",
     "model": "PRO PLUS",
+    "name": "Heritage Collection",
+    "color": "White",
     "variation": "2 - Clubhouse",
-    "bundleItems": [],
-    "notes": "2 - Clubhouse",
-    "customImage": "https://i.ibb.co/pB1CVL3p/Screenshot-2026-06-18-at-3-25-Background-Removed-47-PM.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/pB1CVL3p/Screenshot-2026-06-18-at-3-25-Background-Removed-47-PM.png"
   },
   {
     "id": "PRO_PLUS-HERITAGE_COLLECTION-WHITE-3_OAK_TREE",
-    "groupColor": false,
-    "color": "White",
-    "name": "Heritage Collection",
     "model": "PRO PLUS",
+    "name": "Heritage Collection",
+    "color": "White",
     "variation": "3 - Oak Tree",
-    "bundleItems": [],
-    "notes": "3 - Oak Tree",
-    "customImage": "https://i.ibb.co/zV50Rsh1/Screenshot-2026-06-18-at-3-19-Background-Removed-40-PM.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/zV50Rsh1/Screenshot-2026-06-18-at-3-19-Background-Removed-40-PM.png"
   },
   {
     "id": "PRO_PLUS-HERITAGE_COLLECTION-WHITE-4_CLUBS",
-    "groupColor": false,
-    "color": "White",
-    "name": "Heritage Collection",
     "model": "PRO PLUS",
+    "name": "Heritage Collection",
+    "color": "White",
     "variation": "4 - Clubs",
-    "bundleItems": [],
-    "notes": "4 - Clubs",
-    "customImage": "https://i.ibb.co/RTjtNRVW/Screenshot-2026-06-18-at-3-25-Background-Removed-40-PM.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/RTjtNRVW/Screenshot-2026-06-18-at-3-25-Background-Removed-40-PM.png"
   },
   {
     "id": "PRO_PLUS-LEGEND_LEGACY-WHITE-LEGACY",
-    "groupColor": false,
-    "color": "White",
-    "name": "Legend & Legacy",
     "model": "PRO PLUS",
+    "name": "Legend & Legacy",
+    "color": "White",
     "variation": "Legacy",
-    "bundleItems": [],
-    "notes": "Legacy",
-    "customImage": "https://i.ibb.co/rSsdX7R/Screenshot-2026-06-18-at-3-36-Background-Removed-09-PM.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/rSsdX7R/Screenshot-2026-06-18-at-3-36-Background-Removed-09-PM.png"
   },
   {
     "id": "PRO_PLUS-LEGEND_LEGACY-WHITE-LEGEND",
-    "groupColor": false,
-    "color": "White",
-    "name": "Legend & Legacy",
     "model": "PRO PLUS",
+    "name": "Legend & Legacy",
+    "color": "White",
     "variation": "Legend",
-    "bundleItems": [],
-    "notes": "Legend",
-    "customImage": "https://i.ibb.co/zTv57W1Y/1f041150c58a.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/zTv57W1Y/1f041150c58a.png"
   },
   {
     "id": "PRO_PLUS-LETTERS_TO_TROON-WHITE-FOX",
-    "groupColor": false,
-    "color": "White",
-    "name": "Letters to Troon",
     "model": "PRO PLUS",
+    "name": "Letters to Troon",
+    "color": "White",
     "variation": "Fox",
     "customImage": "https://i.ibb.co/HmTGN5Z/catalog-1780358018237-a014-97c2-531c.webp",
     "customImageSleeve": "https://i.ibb.co/pjm9KWYX/2853df9655f1.webp",
-    "customImageBox": "https://i.ibb.co/DDKNjL0C/c98a70660151.webp",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/DDKNjL0C/c98a70660151.webp"
   },
   {
     "id": "PRO_PLUS-LETTERS_TO_TROON-WHITE-SEAL",
-    "groupColor": false,
-    "color": "White",
-    "name": "Letters to Troon",
     "model": "PRO PLUS",
+    "name": "Letters to Troon",
+    "color": "White",
     "variation": "Seal",
     "customImage": "https://i.ibb.co/svzBkvDD/catalog-1780358018782-d45e-ee54-9604.webp",
     "customImageSleeve": "https://i.ibb.co/pjm9KWYX/2853df9655f1.webp",
-    "customImageBox": "https://i.ibb.co/DDKNjL0C/c98a70660151.webp",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/DDKNjL0C/c98a70660151.webp"
   },
   {
     "id": "PRO_PLUS-LETTERS_TO_TROON-WHITE-WELL",
-    "groupColor": false,
-    "color": "White",
-    "name": "Letters to Troon",
     "model": "PRO PLUS",
+    "name": "Letters to Troon",
+    "color": "White",
     "variation": "Well",
     "customImage": "https://i.ibb.co/HD1KfP92/catalog-1780358019327-744f-3102-07b9.webp",
     "customImageSleeve": "https://i.ibb.co/pjm9KWYX/2853df9655f1.webp",
-    "customImageBox": "https://i.ibb.co/DDKNjL0C/c98a70660151.webp",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImageBox": "https://i.ibb.co/DDKNjL0C/c98a70660151.webp"
   },
   {
     "id": "PRO_PLUS-NEON-LIME",
-    "groupColor": false,
-    "color": "Lime",
-    "groupVariation": false,
-    "name": "Neon",
     "model": "PRO PLUS",
+    "name": "Neon",
+    "color": "Lime",
     "customImage": "https://i.ibb.co/FLF3BRpF/catalog-1780358019884-feb3-b63a-1666.jpg",
     "customImageSleeve": "https://i.ibb.co/KzW3ZHcS/ecadd19c2cad.jpg",
-    "customImageBox": "https://i.ibb.co/tPwtK2ky/38d7fde3c899.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/tPwtK2ky/38d7fde3c899.jpg"
   },
   {
     "id": "PRO_PLUS-ODE_TO_AUGUSTA-WHITE-11_AMEN_CORNER",
-    "groupColor": false,
-    "color": "White",
-    "name": "Ode to Augusta",
     "model": "PRO PLUS",
-    "variation": "11 - Amen Corner",
-    "groupVariation": false,
-    "rarity": "limited"
+    "name": "Ode to Augusta",
+    "color": "White",
+    "variation": "11 - Amen Corner"
   },
   {
     "id": "PRO_PLUS-ODE_TO_AUGUSTA-WHITE-12_GOLDEN_BELL",
-    "groupColor": false,
-    "color": "White",
-    "name": "Ode to Augusta",
     "model": "PRO PLUS",
-    "variation": "12 - Golden Bell",
-    "groupVariation": false,
-    "rarity": "limited"
+    "name": "Ode to Augusta",
+    "color": "White",
+    "variation": "12 - Golden Bell"
   },
   {
     "id": "PRO_PLUS-ODE_TO_AUGUSTA-WHITE-16_RED_BUD",
-    "groupColor": false,
-    "color": "White",
-    "name": "Ode to Augusta",
     "model": "PRO PLUS",
-    "variation": "16 - Red Bud",
-    "groupVariation": false,
-    "rarity": "limited"
+    "name": "Ode to Augusta",
+    "color": "White",
+    "variation": "16 - Red Bud"
   },
   {
     "id": "PRO_PLUS-ODE_TO_AUGUSTA-WHITE-5_MAGNOLIA",
-    "groupColor": false,
-    "color": "White",
-    "name": "Ode to Augusta",
     "model": "PRO PLUS",
-    "variation": "5  - Magnolia",
-    "groupVariation": false,
-    "rarity": "limited"
+    "name": "Ode to Augusta",
+    "color": "White",
+    "variation": "5  - Magnolia"
   },
   {
     "id": "PRO_PLUS-PINE_HURST-ORANGE",
-    "groupColor": false,
-    "color": "Orange",
-    "groupVariation": false,
-    "name": "Pine(Hurst)",
     "model": "PRO PLUS",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/Mx6p9nx5/20260617-192532-Background-Removed.png",
-    "rarity": "limited"
+    "name": "Pine(Hurst)",
+    "color": "Orange",
+    "customImage": "https://i.ibb.co/Mx6p9nx5/20260617-192532-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-RANDOM_GOLF_CLUB_RGC-WHITE-DOODLE",
-    "groupColor": false,
-    "color": "White",
-    "name": "Random Golf Club (RGC)",
     "model": "PRO PLUS",
+    "name": "Random Golf Club (RGC)",
+    "color": "White",
     "variation": "Doodle",
-    "bundleItems": [],
-    "notes": "Doodle",
-    "customImage": "https://i.ibb.co/YTRcb50j/20260617-193621-Background-Removed.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/YTRcb50j/20260617-193621-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-RANDOM_GOLF_CLUB_RGC-WHITE-RULE_17B",
-    "groupColor": false,
-    "color": "White",
-    "name": "Random Golf Club (RGC)",
     "model": "PRO PLUS",
+    "name": "Random Golf Club (RGC)",
+    "color": "White",
     "variation": "Rule 17b",
-    "bundleItems": [],
-    "notes": "Rule 17b",
-    "customImage": "https://i.ibb.co/tTv9Msv8/20260617-192243-Background-Removed.png",
-    "groupVariation": false,
-    "totalMade": 500,
-    "rarity": "rare"
+    "customImage": "https://i.ibb.co/tTv9Msv8/20260617-192243-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-CHUNK",
-    "groupColor": false,
-    "color": "White",
-    "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Chunk",
-    "groupVariation": false,
-    "totalMade": 999,
-    "rarity": "rare"
+    "name": "RGC Class of 2021",
+    "color": "White",
+    "variation": "Chunk"
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-FIN",
-    "groupColor": false,
-    "color": "White",
-    "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Fin",
-    "groupVariation": false,
-    "totalMade": 999,
-    "rarity": "rare"
+    "name": "RGC Class of 2021",
+    "color": "White",
+    "variation": "Fin"
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-JUICED",
-    "groupColor": false,
-    "color": "White",
-    "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Juiced",
-    "groupVariation": false,
-    "totalMade": 999,
-    "rarity": "rare"
+    "name": "RGC Class of 2021",
+    "color": "White",
+    "variation": "Juiced"
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-KLAWS",
-    "groupColor": false,
-    "color": "White",
-    "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Klaws",
-    "groupVariation": false,
-    "totalMade": 999,
-    "rarity": "rare"
+    "name": "RGC Class of 2021",
+    "color": "White",
+    "variation": "Klaws"
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-MOONMAN",
-    "groupColor": false,
-    "color": "White",
-    "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Moonman",
-    "groupVariation": false,
-    "totalMade": 999,
-    "rarity": "rare"
+    "name": "RGC Class of 2021",
+    "color": "White",
+    "variation": "Moonman"
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-MULLIGAN_MARCHER",
-    "groupColor": false,
-    "color": "White",
-    "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Mulligan Marcher",
-    "groupVariation": false,
-    "totalMade": 999,
-    "rarity": "rare"
+    "name": "RGC Class of 2021",
+    "color": "White",
+    "variation": "Mulligan Marcher"
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-PITTED",
-    "groupColor": false,
-    "color": "White",
-    "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Pitted",
-    "groupVariation": false,
-    "totalMade": 999,
-    "rarity": "rare"
+    "name": "RGC Class of 2021",
+    "color": "White",
+    "variation": "Pitted"
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-PRICKLY_PAR",
-    "groupColor": false,
-    "color": "White",
-    "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Prickly Par",
-    "groupVariation": false,
-    "totalMade": 999,
-    "rarity": "rare"
+    "name": "RGC Class of 2021",
+    "color": "White",
+    "variation": "Prickly Par"
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-ROO",
-    "groupColor": false,
-    "color": "White",
-    "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Roo",
-    "groupVariation": false,
-    "totalMade": 999,
-    "rarity": "rare"
+    "name": "RGC Class of 2021",
+    "color": "White",
+    "variation": "Roo"
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-SLICE",
-    "groupColor": false,
-    "color": "White",
-    "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Slice",
-    "groupVariation": false,
-    "totalMade": 999,
-    "rarity": "rare"
+    "name": "RGC Class of 2021",
+    "color": "White",
+    "variation": "Slice"
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-STINGER_STRAT",
-    "groupColor": false,
-    "color": "White",
-    "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "Stinger Strat",
-    "groupVariation": false,
-    "totalMade": 999,
-    "rarity": "rare"
+    "name": "RGC Class of 2021",
+    "color": "White",
+    "variation": "Stinger Strat"
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-THE_DROPOUT",
-    "groupColor": false,
-    "color": "White",
-    "name": "RGC Class of 2021",
     "model": "PRO PLUS",
-    "variation": "The Dropout",
-    "groupVariation": false,
-    "totalMade": 999,
-    "rarity": "rare"
+    "name": "RGC Class of 2021",
+    "color": "White",
+    "variation": "The Dropout"
   },
   {
     "id": "PRO_PLUS-ROYAL_RUSH-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Royal Rush",
     "model": "PRO PLUS",
-    "bundleItems": [],
+    "name": "Royal Rush",
+    "color": "White",
     "customImage": "https://i.ibb.co/mrfGdTLF/20260617-190603-Background-Removed.png",
-    "customImageBox": "https://i.ibb.co/cKg3CGSL/8854fd498eef.webp",
-    "totalMade": 999,
-    "rarity": "rare"
+    "customImageBox": "https://i.ibb.co/cKg3CGSL/8854fd498eef.webp"
   },
   {
     "id": "PRO_PLUS-SHADE-EARLY_BIRD",
-    "groupColor": false,
-    "color": "Early Bird",
-    "groupVariation": false,
-    "name": "Shade",
     "model": "PRO PLUS",
-    "rarity": "common"
+    "name": "Shade",
+    "color": "Early Bird"
   },
   {
     "id": "PRO_PLUS-SHADE-ORANGE_YELLOW",
-    "groupColor": false,
-    "color": "Orange Yellow",
-    "groupVariation": false,
-    "name": "Shade",
     "model": "PRO PLUS",
+    "name": "Shade",
+    "color": "Orange Yellow",
     "customImage": "https://i.ibb.co/Q7ztkbXY/catalog-1780358020512-13d7-dd86-b033.jpg",
     "customImageSleeve": "https://i.ibb.co/ycprxGyx/999ea16f9ef8.jpg",
-    "customImageBox": "https://i.ibb.co/pc8pb14/3549c6eb5b91.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/pc8pb14/3549c6eb5b91.jpg"
   },
   {
     "id": "PRO_PLUS-SHADE_X_EDITION-YELLOW_WHITE",
-    "groupColor": false,
-    "color": "Yellow/White",
-    "groupVariation": false,
-    "name": "Shade X Edition",
     "model": "PRO PLUS",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/6xQpQJ6/20260617-192850-Background-Removed.png",
-    "rarity": "common"
+    "name": "Shade X Edition",
+    "color": "Yellow/White",
+    "customImage": "https://i.ibb.co/6xQpQJ6/20260617-192850-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-STANDARD-BLACK",
-    "groupColor": false,
-    "color": "Black",
-    "groupVariation": false,
-    "name": "Standard",
     "model": "PRO PLUS",
+    "name": "Standard",
+    "color": "Black",
     "customImage": "https://i.ibb.co/Fk1bz3gw/catalog-1780358021107-0f71-9dcc-6d03.jpg",
-    "customImageBox": "https://i.ibb.co/VcBc7Yyc/8374ad299353.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/VcBc7Yyc/8374ad299353.jpg"
   },
   {
     "id": "PRO_PLUS-STANDARD-GOLD",
-    "groupColor": false,
-    "color": "Gold",
-    "groupVariation": false,
-    "name": "Standard",
     "model": "PRO PLUS",
+    "name": "Standard",
+    "color": "Gold",
     "customImage": "https://i.ibb.co/XZB4mNzB/ab5cd2333882.jpg",
-    "customImageBox": "https://i.ibb.co/3qzhKdy/fbc0979511b9.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/3qzhKdy/fbc0979511b9.jpg"
   },
   {
     "id": "PRO_PLUS-STANDARD-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Standard",
     "model": "PRO PLUS",
+    "name": "Standard",
+    "color": "White",
     "customImage": "https://i.ibb.co/tMgYDYsG/678cde7f8095.jpg",
     "customImageSleeve": "https://i.ibb.co/qGQBmpV/d20f77282ab5.jpg",
-    "customImageBox": "https://i.ibb.co/ymJKZD96/bdb5ef4f7cc6.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/ymJKZD96/bdb5ef4f7cc6.jpg"
   },
   {
     "id": "PRO_PLUS-TAXI-DRIP_YELLOW_BLACK",
-    "groupColor": false,
-    "bundleItems": [],
-    "color": "Drip Yellow/Black",
-    "groupVariation": false,
-    "name": "Taxi",
-    "customImage": "https://i.ibb.co/rKhRs30x/Screenshot-2026-06-18-at-4-36-Background-Removed-25-PM.png",
     "model": "PRO PLUS",
-    "rarity": "limited"
+    "name": "Taxi",
+    "color": "Drip Yellow/Black",
+    "customImage": "https://i.ibb.co/rKhRs30x/Screenshot-2026-06-18-at-4-36-Background-Removed-25-PM.png"
   },
   {
     "id": "PRO_PLUS-TORREY-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Torrey",
     "model": "PRO PLUS",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/FbpJ0Xyg/20260617-193603-Background-Removed.png",
-    "rarity": "limited"
+    "name": "Torrey",
+    "color": "White",
+    "customImage": "https://i.ibb.co/FbpJ0Xyg/20260617-193603-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-TRACER-ARCTIC_BOMB",
-    "groupColor": false,
-    "color": "Arctic Bomb",
-    "groupVariation": false,
-    "name": "Tracer",
     "model": "PRO PLUS",
-    "bundleItems": [],
+    "name": "Tracer",
+    "color": "Arctic Bomb",
     "customImage": "https://i.ibb.co/9HKkXGLS/c2f00137124c.png",
-    "customImageBox": "https://i.ibb.co/LB0QTxd/6cf1a6ba7d0d.webp",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/LB0QTxd/6cf1a6ba7d0d.webp"
   },
   {
     "id": "PRO_PLUS-TRACER-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Tracer",
     "model": "PRO PLUS",
+    "name": "Tracer",
+    "color": "White",
     "customImage": "https://i.ibb.co/sprZp1WK/bfe031b32a08.jpg",
-    "customImageBox": "https://i.ibb.co/ksHCyNBB/db51a5ba30ce.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/ksHCyNBB/db51a5ba30ce.jpg"
   },
   {
     "id": "PRO_PLUS-UNCRATE-MATTE_BLACK",
-    "groupColor": false,
-    "color": "Matte Black",
-    "groupVariation": false,
-    "name": "uncrate",
     "model": "PRO PLUS",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/QvTvhgnv/20260617-192825-Background-Removed.png",
-    "rarity": "limited"
+    "name": "uncrate",
+    "color": "Matte Black",
+    "customImage": "https://i.ibb.co/QvTvhgnv/20260617-192825-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-VOYAGE_TO_VALHALLA-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Voyage to Valhalla",
     "model": "PRO PLUS",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/4RG0C9jn/20260617-193528-Background-Removed.png",
-    "rarity": "limited"
+    "name": "Voyage to Valhalla",
+    "color": "White",
+    "customImage": "https://i.ibb.co/4RG0C9jn/20260617-193528-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-WINNER_WINNER-WHITE-05_LOBSTER",
-    "groupColor": false,
-    "color": "White",
-    "name": "Winner Winner",
     "model": "PRO PLUS",
+    "name": "Winner Winner",
+    "color": "White",
     "variation": "05 - Lobster",
-    "bundleItems": [],
-    "notes": "05 - Lobster",
-    "customImage": "https://i.ibb.co/VcCFMbng/b684450a-0d6d-4ca1-8406-e7b8f797383d-copied-media-2-Background-Removed.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/VcCFMbng/b684450a-0d6d-4ca1-8406-e7b8f797383d-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-WINNER_WINNER-WHITE-22_SUSHI",
-    "groupColor": false,
-    "color": "White",
-    "name": "Winner Winner",
     "model": "PRO PLUS",
+    "name": "Winner Winner",
+    "color": "White",
     "variation": "22 - Sushi",
-    "bundleItems": [],
-    "notes": "22 - Sushi",
-    "customImage": "https://i.ibb.co/9mkCfSgm/d08a0214-0be9-479e-be81-62974e1d7384-copied-media-2-Background-Removed.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/9mkCfSgm/d08a0214-0be9-479e-be81-62974e1d7384-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-WINNER_WINNER-WHITE-89_BURGER",
-    "groupColor": false,
-    "color": "White",
-    "name": "Winner Winner",
     "model": "PRO PLUS",
+    "name": "Winner Winner",
+    "color": "White",
     "variation": "89 - Burger",
-    "bundleItems": [],
-    "notes": "89 - Burger",
-    "customImage": "https://i.ibb.co/9kMMMHs6/30fa1a47-22bd-4836-bf16-cd965df28b0a-copied-media-2-Background-Removed.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/9kMMMHs6/30fa1a47-22bd-4836-bf16-cd965df28b0a-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-WINNER_WINNER-WHITE-94_TARTE",
-    "groupColor": false,
-    "color": "White",
-    "name": "Winner Winner",
     "model": "PRO PLUS",
+    "name": "Winner Winner",
+    "color": "White",
     "variation": "94 - Tarte",
-    "bundleItems": [],
-    "notes": "94 - Tarte",
-    "customImage": "https://i.ibb.co/0RKBGLrX/eea6d351-b5b8-4c81-b9dc-8a20f6c62ce1-copied-media-2-Background-Removed.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/0RKBGLrX/eea6d351-b5b8-4c81-b9dc-8a20f6c62ce1-copied-media-2-Background-Removed.png"
   },
   {
     "id": "PRO_PLUS-YOU_LL_NEVER_PUTT_ALONE-ORANGE_DRIP-1_FLOWER",
-    "groupColor": false,
-    "bundleItems": [],
-    "notes": "1 - Flower",
-    "color": "Orange Drip",
-    "name": "You'll Never Putt Alone",
-    "customImage": "https://i.ibb.co/wZ117MMz/Screenshot-2026-06-18-at-3-39-Background-Removed-11-PM.png",
     "model": "PRO PLUS",
+    "name": "You'll Never Putt Alone",
+    "color": "Orange Drip",
     "variation": "1 - Flower",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/wZ117MMz/Screenshot-2026-06-18-at-3-39-Background-Removed-11-PM.png"
   },
   {
     "id": "PRO_PLUS-YOU_LL_NEVER_PUTT_ALONE-ORANGE_DRIP-2_SUN",
-    "groupColor": false,
-    "bundleItems": [],
-    "notes": "2 - Sun",
-    "color": "Orange Drip",
-    "name": "You'll Never Putt Alone",
-    "customImage": "https://i.ibb.co/DPsVC0yM/Screenshot-2026-06-18-at-3-39-Background-Removed-39-PM.png",
     "model": "PRO PLUS",
+    "name": "You'll Never Putt Alone",
+    "color": "Orange Drip",
     "variation": "2 - Sun",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/DPsVC0yM/Screenshot-2026-06-18-at-3-39-Background-Removed-39-PM.png"
   },
   {
     "id": "PRO_PLUS-YOU_LL_NEVER_PUTT_ALONE-ORANGE_DRIP-3_OCTOPUS",
-    "groupColor": false,
-    "bundleItems": [],
-    "notes": "3 - Octopus",
-    "color": "Orange Drip",
-    "name": "You'll Never Putt Alone",
-    "customImage": "https://i.ibb.co/qGQGJCM/Screenshot-2026-06-18-at-3-38-Background-Removed-57-PM.png",
     "model": "PRO PLUS",
+    "name": "You'll Never Putt Alone",
+    "color": "Orange Drip",
     "variation": "3 - Octopus",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/qGQGJCM/Screenshot-2026-06-18-at-3-38-Background-Removed-57-PM.png"
   },
   {
     "id": "PRO_PLUS-YOU_LL_NEVER_PUTT_ALONE-ORANGE_DRIP-4_WALRUS",
-    "groupColor": false,
-    "bundleItems": [],
-    "notes": "4 - Walrus",
-    "color": "Orange Drip",
-    "name": "You'll Never Putt Alone",
-    "customImage": "https://i.ibb.co/TMCTT9td/Screenshot-2026-06-18-at-3-39-Background-Removed-26-PM.png",
     "model": "PRO PLUS",
+    "name": "You'll Never Putt Alone",
+    "color": "Orange Drip",
     "variation": "4 - Walrus",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/TMCTT9td/Screenshot-2026-06-18-at-3-39-Background-Removed-26-PM.png"
   },
   {
     "id": "PRO_SOFT-CYPRESS-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Cypress",
     "model": "PRO SOFT",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/9mQLpqyV/Screenshot-2026-06-18-at-3-43-Background-Removed-07-PM.png",
-    "totalMade": 999,
-    "rarity": "rare"
+    "name": "Cypress",
+    "color": "White",
+    "customImage": "https://i.ibb.co/9mQLpqyV/Screenshot-2026-06-18-at-3-43-Background-Removed-07-PM.png"
   },
   {
     "id": "PRO_SOFT-DRIP-RED_BLACK",
-    "groupColor": false,
-    "color": "Red/Black",
-    "groupVariation": false,
-    "name": "Drip",
     "model": "PRO SOFT",
+    "name": "Drip",
+    "color": "Red/Black",
     "customImage": "https://i.ibb.co/zLxRMd3/45309b85f2af.jpg",
-    "customImageBox": "https://i.ibb.co/ymxQNNnJ/7e9c59073a29.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/ymxQNNnJ/7e9c59073a29.jpg"
   },
   {
     "id": "PRO_SOFT-HUE-BLUE_LIGHT",
-    "groupColor": false,
-    "color": "Blue Light",
-    "groupVariation": false,
-    "name": "Hue",
     "model": "PRO SOFT",
+    "name": "Hue",
+    "color": "Blue Light",
     "customImage": "https://i.ibb.co/FLXy0wF3/2d13c1137500.jpg",
-    "customImageBox": "https://i.ibb.co/Gyr6sD4/9a67095dba4c.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/Gyr6sD4/9a67095dba4c.jpg"
   },
   {
     "id": "PRO_SOFT-HUE-LIVING_CORAL",
-    "groupColor": false,
-    "color": "Living Coral",
-    "groupVariation": false,
-    "name": "Hue",
     "model": "PRO SOFT",
+    "name": "Hue",
+    "color": "Living Coral",
     "customImage": "https://i.ibb.co/dw4zyKVL/85b3a1727027.jpg",
-    "customImageBox": "https://i.ibb.co/ZR5QZpz3/cee40f6c2d69.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/ZR5QZpz3/cee40f6c2d69.jpg"
   },
   {
     "id": "PRO_SOFT-HUE-PEACH_PARFAIT",
-    "groupColor": false,
-    "color": "Peach Parfait",
-    "groupVariation": false,
-    "name": "Hue",
     "model": "PRO SOFT",
+    "name": "Hue",
+    "color": "Peach Parfait",
     "customImage": "https://i.ibb.co/xSRvZG4j/64b2ca447ba9.jpg",
-    "customImageBox": "https://i.ibb.co/MkyX9Mpj/dd494ed831d1.webp",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/MkyX9Mpj/dd494ed831d1.webp"
   },
   {
     "id": "PRO_SOFT-MATTE-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Matte",
     "model": "PRO SOFT",
+    "name": "Matte",
+    "color": "White",
     "customImage": "https://i.ibb.co/VYc3cHrL/7847b8e19898.jpg",
-    "customImageBox": "https://i.ibb.co/KzxDQLyq/6084d5b891ea.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/KzxDQLyq/6084d5b891ea.jpg"
   },
   {
     "id": "PRO_SOFT-MATTE_NEON-LIME",
-    "groupColor": false,
-    "color": "Lime",
-    "groupVariation": false,
-    "name": "Matte Neon",
     "model": "PRO SOFT",
+    "name": "Matte Neon",
+    "color": "Lime",
     "customImage": "https://i.ibb.co/PvVCpN82/a140f5392535.webp",
     "customImageSleeve": "https://i.ibb.co/j91xfMJ9/0322ae729234.jpg",
-    "customImageBox": "https://i.ibb.co/JR88gtZT/b65b7a3f3056.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/JR88gtZT/b65b7a3f3056.jpg"
   },
   {
     "id": "PRO_SOFT-MATTE_NEON-RED",
-    "groupColor": false,
-    "color": "Red",
-    "groupVariation": false,
-    "name": "Matte Neon",
     "model": "PRO SOFT",
+    "name": "Matte Neon",
+    "color": "Red",
     "customImage": "https://i.ibb.co/B2hjK5rc/062084668a66.webp",
     "customImageSleeve": "https://i.ibb.co/GQS7Y9HF/5252862b97a1.jpg",
-    "customImageBox": "https://i.ibb.co/7JLGCtGQ/005bd16a63cf.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/7JLGCtGQ/005bd16a63cf.jpg"
   },
   {
     "id": "PRO_SOFT-NEON-LIME",
-    "groupColor": false,
-    "color": "Lime",
-    "groupVariation": false,
-    "name": "Neon",
     "model": "PRO SOFT",
-    "bundleItems": [],
+    "name": "Neon",
+    "color": "Lime",
     "customImage": "https://i.ibb.co/TMqQWGXr/19d25e0e4069.jpg",
     "customImageSleeve": "https://i.ibb.co/j91xfMJ9/0322ae729234.jpg",
-    "customImageBox": "https://i.ibb.co/JR88gtZT/b65b7a3f3056.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/JR88gtZT/b65b7a3f3056.jpg"
   },
   {
     "id": "PRO_SOFT-NEON-RED",
-    "groupColor": false,
-    "color": "Red",
-    "groupVariation": false,
-    "name": "Neon",
     "model": "PRO SOFT",
-    "bundleItems": [],
+    "name": "Neon",
+    "color": "Red",
     "customImage": "https://i.ibb.co/PBR25s6/catalog-1780358007577-242d-2f0d-3ba2.jpg",
     "customImageSleeve": "https://i.ibb.co/GQS7Y9HF/5252862b97a1.jpg",
-    "customImageBox": "https://i.ibb.co/whfvPq3M/04322c72fc2b.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/whfvPq3M/04322c72fc2b.jpg"
   },
   {
     "id": "PRO_SOFT-STANDARD-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Standard",
     "model": "PRO SOFT",
+    "name": "Standard",
+    "color": "White",
     "customImage": "https://i.ibb.co/Cpspqtmf/65bd6b894cff.jpg",
-    "customImageBox": "https://i.ibb.co/spkmMXcQ/c0b0ce4dcd23.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/spkmMXcQ/c0b0ce4dcd23.jpg"
   },
   {
     "id": "PRO_SOFT-TAILGATE-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Tailgate",
     "model": "PRO SOFT",
-    "bundleItems": [],
-    "customImage": "https://i.ibb.co/Ldm7FWTF/20260617-192423-Background-Removed.png",
-    "rarity": "limited"
+    "name": "Tailgate",
+    "color": "White",
+    "customImage": "https://i.ibb.co/Ldm7FWTF/20260617-192423-Background-Removed.png"
   },
   {
     "id": "PRO_ZERO-STANDARD-WHITE",
-    "groupColor": false,
-    "bundleItems": [],
-    "color": "White",
-    "groupVariation": false,
-    "name": "Standard",
     "model": "PRO ZERO",
+    "name": "Standard",
+    "color": "White",
     "customImage": "https://i.ibb.co/KpPnsMPw/113bd532c8e9.jpg",
-    "customImageBox": "https://i.ibb.co/WNt57Jwr/1379c66af6c8.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/WNt57Jwr/1379c66af6c8.jpg"
   },
   {
     "id": "SIM-VICE_SIM-WHITE",
-    "groupColor": false,
-    "bundleItems": [],
-    "color": "White",
-    "groupVariation": false,
-    "name": "Vice Sim",
-    "customImage": "https://i.ibb.co/LhN7SQg6/Screenshot-2026-06-18-at-2-08-Background-Removed-35-PM.png",
     "model": "SIM",
-    "rarity": "common"
+    "name": "Vice Sim",
+    "color": "White",
+    "customImage": "https://i.ibb.co/LhN7SQg6/Screenshot-2026-06-18-at-2-08-Background-Removed-35-PM.png"
   },
   {
     "id": "TOUR-ALL_OVER_PRINT-SKETCH",
-    "groupColor": false,
-    "color": "Sketch",
-    "groupVariation": false,
-    "name": "All Over Print",
     "model": "TOUR",
+    "name": "All Over Print",
+    "color": "Sketch",
     "customImage": "https://i.ibb.co/NgvnbZB5/0fbc08226ae7.jpg",
     "customImageSleeve": "https://i.ibb.co/N6Lx9LpY/b2c8c48422e7.jpg",
-    "customImageBox": "https://i.ibb.co/xS49XTg2/f7e7a90d5841.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/xS49XTg2/f7e7a90d5841.jpg"
   },
   {
     "id": "TOUR-ALL_OVER_PRINT-ZAP",
-    "groupColor": false,
-    "color": "Zap",
-    "groupVariation": false,
-    "name": "All Over Print",
     "model": "TOUR",
+    "name": "All Over Print",
+    "color": "Zap",
     "customImage": "https://i.ibb.co/WW6CW5G4/fbdd2415dcb8.jpg",
     "customImageSleeve": "https://i.ibb.co/MxkZX5dM/e334c8511de4.jpg",
-    "customImageBox": "https://i.ibb.co/SDdn4q0N/4029cab35663.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/SDdn4q0N/4029cab35663.jpg"
   },
   {
     "id": "TOUR-CORONA_PREMIER-WHITE",
-    "groupColor": false,
-    "bundleItems": [],
-    "color": "White",
-    "groupVariation": false,
-    "name": "Corona Premier",
-    "customImage": "https://i.ibb.co/yFXLQd1v/5d4a1761cdcb.png",
     "model": "TOUR",
-    "customImageBox": "https://i.ibb.co/60TFsk20/8c86e62cb1b0.png",
-    "rarity": "limited"
+    "name": "Corona Premier",
+    "color": "White",
+    "customImage": "https://i.ibb.co/yFXLQd1v/5d4a1761cdcb.png",
+    "customImageBox": "https://i.ibb.co/60TFsk20/8c86e62cb1b0.png"
   },
   {
     "id": "TOUR-GRAY-GRAY",
-    "groupColor": false,
-    "color": "Gray",
-    "groupVariation": false,
-    "name": "Gray",
     "model": "TOUR",
+    "name": "Gray",
+    "color": "Gray",
     "customImage": "https://i.ibb.co/NdYn2Rcw/be09794a0caf.jpg",
     "customImageSleeve": "https://i.ibb.co/nNhrksK3/abae6389ec5e.jpg",
-    "customImageBox": "https://i.ibb.co/ccjmWrX8/ddf930506c6a.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/ccjmWrX8/ddf930506c6a.jpg"
   },
   {
     "id": "TOUR-JET-WHITE",
-    "groupColor": false,
-    "bundleItems": [],
-    "color": "White",
-    "groupVariation": false,
-    "name": "Jet",
-    "customImage": "https://i.ibb.co/r2FxhLjp/78a5a3fd2f93.png",
     "model": "TOUR",
-    "customImageBox": "https://i.ibb.co/wNpnBLR1/950cef56a9e4.png",
-    "rarity": "common"
+    "name": "Jet",
+    "color": "White",
+    "customImage": "https://i.ibb.co/r2FxhLjp/78a5a3fd2f93.png",
+    "customImageBox": "https://i.ibb.co/wNpnBLR1/950cef56a9e4.png"
   },
   {
     "id": "TOUR-JUNIOR-WHITE",
-    "groupColor": false,
-    "bundleItems": [],
-    "color": "White",
-    "groupVariation": false,
-    "name": "Junior",
     "model": "TOUR",
+    "name": "Junior",
+    "color": "White",
     "customImage": "https://i.ibb.co/t6V3ghs/b4aa314f755b.png",
     "customImageSleeve": "https://i.ibb.co/mVQswPWJ/c66474889d08.jpg",
-    "customImageBox": "https://i.ibb.co/fzwCjCNS/0cd4c1feda21.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/fzwCjCNS/0cd4c1feda21.jpg"
   },
   {
     "id": "TOUR-JUNIOR-YELLOW",
-    "groupColor": false,
-    "bundleItems": [],
-    "color": "Yellow",
-    "groupVariation": false,
-    "name": "Junior",
     "model": "TOUR",
+    "name": "Junior",
+    "color": "Yellow",
     "customImage": "https://i.ibb.co/G3Pk7grb/aa11441ec30f.png",
-    "customImageBox": "https://i.ibb.co/b4vRjq6/d48aad947992.webp",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/b4vRjq6/d48aad947992.webp"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-EUR1",
-    "groupColor": false,
-    "color": "White",
-    "name": "Ryder Cup",
     "model": "TOUR",
+    "name": "Ryder Cup",
+    "color": "White",
     "variation": "EUR1",
-    "bundleItems": [],
-    "notes": "EUR1",
-    "customImage": "https://i.ibb.co/VYw2nSTD/1cd3d94ab1b9.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/VYw2nSTD/1cd3d94ab1b9.png"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-EUR2",
-    "groupColor": false,
-    "color": "White",
-    "name": "Ryder Cup",
     "model": "TOUR",
+    "name": "Ryder Cup",
+    "color": "White",
     "variation": "EUR2",
-    "bundleItems": [],
-    "notes": "EUR2",
-    "customImage": "https://i.ibb.co/qFDBcgc1/fec511ae6e06.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/qFDBcgc1/fec511ae6e06.png"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-EUR3",
-    "groupColor": false,
-    "color": "White",
-    "name": "Ryder Cup",
     "model": "TOUR",
+    "name": "Ryder Cup",
+    "color": "White",
     "variation": "EUR3",
-    "bundleItems": [],
-    "notes": "EUR3",
-    "customImage": "https://i.ibb.co/Gf7JDBhC/730c581253f6.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/Gf7JDBhC/730c581253f6.png"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USA1",
-    "groupColor": false,
-    "color": "White",
-    "name": "Ryder Cup",
     "model": "TOUR",
+    "name": "Ryder Cup",
+    "color": "White",
     "variation": "USA1",
-    "bundleItems": [],
-    "notes": "USA1",
-    "customImage": "https://i.ibb.co/Kc5t4n3T/e40d92a2a4e8.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/Kc5t4n3T/e40d92a2a4e8.png"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USA2",
-    "groupColor": false,
-    "color": "White",
-    "name": "Ryder Cup",
     "model": "TOUR",
+    "name": "Ryder Cup",
+    "color": "White",
     "variation": "USA2",
-    "bundleItems": [],
-    "notes": "USA2",
-    "customImage": "https://i.ibb.co/gZLt5bth/e4c8fd95d9da.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/gZLt5bth/e4c8fd95d9da.png"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USA3",
-    "groupColor": false,
-    "color": "White",
-    "name": "Ryder Cup",
     "model": "TOUR",
+    "name": "Ryder Cup",
+    "color": "White",
     "variation": "USA3",
-    "bundleItems": [],
-    "notes": "USA3",
-    "customImage": "https://i.ibb.co/Q74TtXWR/64bbaf8e73d0.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/Q74TtXWR/64bbaf8e73d0.png"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USVEU1",
-    "groupColor": false,
-    "color": "White",
-    "name": "Ryder Cup",
     "model": "TOUR",
+    "name": "Ryder Cup",
+    "color": "White",
     "variation": "USvEU1",
-    "bundleItems": [],
-    "notes": "USvEU1",
-    "customImage": "https://i.ibb.co/21FJwrh4/aa8b51b37191.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/21FJwrh4/aa8b51b37191.png"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USVEU2",
-    "groupColor": false,
-    "color": "White",
-    "name": "Ryder Cup",
     "model": "TOUR",
+    "name": "Ryder Cup",
+    "color": "White",
     "variation": "USvEU2",
-    "bundleItems": [],
-    "notes": "USvEU2",
-    "customImage": "https://i.ibb.co/B5XL0s69/cd64a6cab551.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/B5XL0s69/cd64a6cab551.png"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USVEU3",
-    "groupColor": false,
-    "color": "White",
-    "name": "Ryder Cup",
     "model": "TOUR",
+    "name": "Ryder Cup",
+    "color": "White",
     "variation": "USvEU3",
-    "bundleItems": [],
-    "notes": "USvEU3",
-    "customImage": "https://i.ibb.co/RMkmH6n/fce60885d5f7.png",
-    "groupVariation": false,
-    "rarity": "limited"
+    "customImage": "https://i.ibb.co/RMkmH6n/fce60885d5f7.png"
   },
   {
     "id": "TOUR-STANDARD-WHITE",
-    "groupColor": false,
-    "color": "White",
-    "groupVariation": false,
-    "name": "Standard",
     "model": "TOUR",
+    "name": "Standard",
+    "color": "White",
     "customImage": "https://i.ibb.co/tMj74W7p/777f8d004133.jpg",
     "customImageSleeve": "https://i.ibb.co/0RFXLgm8/d438b7f79c34.jpg",
-    "customImageBox": "https://i.ibb.co/5gy3VTcY/5e2ddbdb2c0f.jpg",
-    "rarity": "common"
+    "customImageBox": "https://i.ibb.co/5gy3VTcY/5e2ddbdb2c0f.jpg"
   }
 ]

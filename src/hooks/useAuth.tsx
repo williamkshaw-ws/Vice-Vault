@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { onAuthStateChanged, signOut, User as FirebaseUser } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { UserProfile } from "../types";
+import { getAuthHeaders } from "../utils/authHeaders";
 
 export function useAuth() {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
@@ -30,17 +31,25 @@ export function useAuth() {
           wishlist: parsed.wishlist || []
         });
         setAccentColor(parsed.preferredColor || "#2563eb");
+        setIsAuthLoading(false);
       } catch (e) {
         console.error("Error loading mock user:", e);
       }
     }
 
+    // Safety timeout to ensure isAuthLoading never stays true indefinitely on native WKWebView or slow network
+    const safetyTimer = setTimeout(() => {
+      setIsAuthLoading(false);
+    }, 1500);
+
     if (!auth) {
       setIsAuthLoading(false);
+      clearTimeout(safetyTimer);
       return;
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      clearTimeout(safetyTimer);
       if (user) {
         // Clear mock user if a real Firebase user signs in
         localStorage.removeItem("vice_vault_mock_user");
@@ -48,7 +57,8 @@ export function useAuth() {
 
         try {
           if (db) {
-            const profileRes = await fetch(`/api/users/${user.uid}/profile`, { headers: {} });
+            const headers = await getAuthHeaders();
+            const profileRes = await fetch(`/api/users/${user.uid}/profile`, { headers });
             if (profileRes.ok) {
               const profileData = await profileRes.json();
               const userDocId = profileData.uid.startsWith("u-") ? profileData.uid : `u-${profileData.username}`;
@@ -105,14 +115,18 @@ export function useAuth() {
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      clearTimeout(safetyTimer);
+    };
   }, []);
 
   // Load mock user cloud data when mock user logs in or is loaded on mount
   useEffect(() => {
     if (currentUser && ((currentUser as any).isMock || (currentUser as any).token)) {
-      fetch(`/api/users/${currentUser.uid}/profile`, { headers: {} })
-        .then(async (res) => {
+      getAuthHeaders().then((headers) => {
+        fetch(`/api/users/${currentUser.uid}/profile`, { headers })
+          .then(async (res) => {
           if (res.ok) {
             const data = await res.json();
             if (data) {
@@ -143,6 +157,7 @@ export function useAuth() {
           }
         })
         .catch((err) => console.error("Error loading mock user profile data:", err));
+      });
     }
   }, [currentUser]);
 

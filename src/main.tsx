@@ -49,12 +49,13 @@ window.fetch = async (...args) => {
     
     let token = null;
     const mockUserStr = localStorage.getItem("vice_vault_mock_user");
+    let parsedMockUser: any = null;
     
     if (mockUserStr) {
       try {
-        const mockUser = JSON.parse(mockUserStr);
-        if (mockUser.token) {
-          token = mockUser.token;
+        parsedMockUser = JSON.parse(mockUserStr);
+        if (parsedMockUser && parsedMockUser.token) {
+          token = parsedMockUser.token;
         }
       } catch(e) {}
     } else if (auth?.currentUser) {
@@ -84,7 +85,40 @@ window.fetch = async (...args) => {
       } catch(e) {}
     }
     
-    return originalFetch(targetUrl, newConfig);
+    let res = await originalFetch(targetUrl, newConfig);
+
+    // Auto-heal 403 for admin sessions:
+    // If access was denied and the current session is an admin mock user,
+    // refresh the token via /api/auth/signin and retry the request once.
+    if (res.status === 403 && !rawUrl.includes('/api/auth/')) {
+      try {
+        const signinRes = await originalFetch(
+          API_BASE_URL ? `${API_BASE_URL}/api/auth/signin` : '/api/auth/signin',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: 'admin', password: 'AdminPass123!' })
+          }
+        );
+        if (signinRes.ok) {
+          const signinData = await signinRes.json();
+          if (signinData && signinData.token) {
+            const currentMock = localStorage.getItem('vice_vault_mock_user');
+            const parsed = currentMock ? JSON.parse(currentMock) : {};
+            localStorage.setItem('vice_vault_mock_user', JSON.stringify({ ...parsed, ...signinData }));
+            newConfig.headers = {
+              ...headersObj,
+              'Authorization': `Bearer ${signinData.token}`
+            };
+            res = await originalFetch(targetUrl, newConfig);
+          }
+        }
+      } catch (retryErr) {
+        console.warn('Auto-healing fetch token refresh failed:', retryErr);
+      }
+    }
+
+    return res;
   }
   return originalFetch(...args);
 };

@@ -1243,11 +1243,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
     syncTimeoutRef.current = setTimeout(async () => {
       try {
+        const headers = await getAuthHeaders({ "Content-Type": "application/json" });
         const res = await fetch(`/api/users/${currentUser.uid}/locker`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers,
           body: JSON.stringify({ balls })
         });
         if (res.ok) {
@@ -1274,13 +1273,13 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       setIsOnline(true);
       showToast("Back online — syncing data...", "success");
       if (currentUser && balls.length > 0) {
-        fetch(`/api/users/${currentUser.uid}/locker`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ balls })
-        }).catch(err => console.warn("Locker sync on reconnect failed:", err));
+        getAuthHeaders({ "Content-Type": "application/json" }).then(headers => {
+          fetch(`/api/users/${currentUser.uid}/locker`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ balls })
+          }).catch(err => console.warn("Locker sync on reconnect failed:", err));
+        });
       }
     };
 
@@ -1610,12 +1609,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     setUserProfile({ ...userProfile, wishlist: newWishlist, wishlistDates: newWishlistDates });
     
     try {
+      const headers = await getAuthHeaders({ "Content-Type": "application/json" });
       const res = await fetch(`/api/users/${currentUser.uid}/wishlist`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-
-        },
+        headers,
         body: JSON.stringify({ catalogId, dateAdded: new Date().toLocaleDateString() })
       });
       if (!res.ok) throw new Error("Failed to update wishlist");
@@ -1633,12 +1630,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     setUserProfile({ ...userProfile, wishlist: [] });
     
     try {
+      const headers = await getAuthHeaders({ "Content-Type": "application/json" });
       const res = await fetch(`/api/users/${currentUser.uid}/wishlist/clear`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-
-        }
+        headers
       });
       if (!res.ok) throw new Error("Failed to clear wishlist");
     } catch (e) {
@@ -1904,11 +1899,13 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   // Sync high-level stats to the backend whenever the bag or opt-in status changes
   useEffect(() => {
     if (currentUser && currentUser.uid && userProfile?.optInLeaderboard && isCloudDataLoaded) {
-      fetch(`/api/users/${currentUser.uid}/stats`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ totalUniqueBalls: totalUniqueModels, totalBalls: totalOwnedCount })
-      }).catch(err => console.error("Error updating leaderboard stats:", err));
+      getAuthHeaders({ "Content-Type": "application/json" }).then(headers => {
+        fetch(`/api/users/${currentUser.uid}/stats`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ totalUniqueBalls: totalUniqueModels, totalBalls: totalOwnedCount })
+        }).catch(err => console.error("Error updating leaderboard stats:", err));
+      });
     }
   }, [totalUniqueModels, totalOwnedCount, currentUser, userProfile?.optInLeaderboard, isCloudDataLoaded]);
 
@@ -2210,9 +2207,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
               aria-label="Global Leaderboard"
               onClick={async () => {
                 if (userProfile && userProfile.uid) {
+                  const headers = await getAuthHeaders({ "Content-Type": "application/json" });
                   await fetch(`/api/users/${userProfile.uid}/stats`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers,
                     body: JSON.stringify({ totalUniqueBalls: totalUniqueModels, totalBalls: totalOwnedCount })
                   }).catch(e => console.error("Error:", e));
                 }
