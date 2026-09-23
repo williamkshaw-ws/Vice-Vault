@@ -3,24 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useMemo, useRef, useDeferredValue } from "react";
+import React, { useState, useEffect, useMemo, useRef, useDeferredValue, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GolfBall, CatalogItem, BallModel, BallColor, BallCondition, UserProfile } from "./types";
 import { VICE_BALLS_SPECS, COLOR_STYLES, SCRAPED_BALLS } from "./constants";
 import CatalogItemCard from "./components/CatalogItemCard";
-import VaultManagerModal from "./components/VaultManagerModal";
-const XlsImporter = React.lazy(() => import("./components/XlsImporter"));
-import FriendsPortal from "./components/FriendsPortal";
+const VaultManagerModal = React.lazy(() => import("./components/VaultManagerModal"));
+const FriendsPortal = React.lazy(() => import("./components/FriendsPortal"));
 import MetricCards from "./components/MetricCards";
 import { useAuth } from "./hooks/useAuth";
 import { useBallLocker } from "./hooks/useBallLocker";
 import { filterLegacyBalls, safeJSONParse } from "./utils/bagUtils";
+import { idbGet, idbSet, idbDelete, migrateLocalStorageToIdb } from "./utils/storage";
 import OwnedBallCard from "./components/OwnedBallCard";
 import SearchInput from "./components/SearchInput";
 import { ACCENT_COLORS, sanitizeId } from "./utils";
 import TrophyCase from "./components/TrophyCase";
-import ImportExportModal from "./components/ImportExportModal";
-import LeaderboardModal from "./components/LeaderboardModal";
+const ImportExportModal = React.lazy(() => import("./components/ImportExportModal"));
+const LeaderboardModal = React.lazy(() => import("./components/LeaderboardModal"));
 import VaultFilterBar from "./components/VaultFilterBar";
 import BallVisual from "./components/BallVisual";
 import CatalogView from "./views/CatalogView";
@@ -339,6 +339,16 @@ export default function App() {
     }
     return generateDefaultCatalog();
   });
+
+  // Hydrate catalog from IndexedDB on startup (and run one-time localStorage migration)
+  useEffect(() => {
+    migrateLocalStorageToIdb();
+    idbGet<CatalogItem[]>("vice_vault_catalog").then((cached) => {
+      if (cached && Array.isArray(cached) && cached.length > 0) {
+        setCatalog(cached);
+      }
+    }).catch(err => console.warn("Failed to load catalog from IndexedDB:", err));
+  }, []);
 
   const { searchQuery, setSearchQuery, bagSearchQuery, setBagSearchQuery, wishlistSearchQuery, setWishlistSearchQuery } = useAppStore();
   // Quick filter to narrow core brand models
@@ -996,12 +1006,15 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     return () => { active = false; };
   }, [isFirebaseConfigured, db, currentUser]);
 
-  // Synchronize catalog changes to localStorage for instant UI caching on refresh
+  // Synchronize catalog changes to IndexedDB and localStorage (for fast fallback)
   useEffect(() => {
+    idbSet("vice_vault_catalog", catalog).catch(err => {
+      console.warn("Failed to write catalog to IndexedDB:", err);
+    });
     try {
       localStorage.setItem("vice_vault_catalog", JSON.stringify(catalog));
     } catch (e) {
-      console.warn("Failed to write catalog to localStorage:", e);
+      // localStorage 5MB quota exceeded on iOS with large image thumbnails; IndexedDB handles this gracefully
     }
   }, [catalog]);
 
@@ -1254,17 +1267,15 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     };
   }, [currentUser, balls]);
 
-  // Synchronize balls changes to localStorage for instant UI caching on refresh
+  // Synchronize balls changes to IndexedDB and localStorage for instant UI caching on refresh
   useEffect(() => {
     if (balls.length > 0) {
+      const bagKey = currentUser?.uid ? "vice_vault_bag_" + currentUser.uid : "vice_vault_guest_v2";
+      idbSet(bagKey, balls).catch(err => console.warn("Failed to write bag to IndexedDB:", err));
       try {
-        if (currentUser && currentUser.uid) {
-          localStorage.setItem("vice_vault_bag_" + currentUser.uid, JSON.stringify(balls));
-        } else {
-          localStorage.setItem("vice_vault_guest_v2", JSON.stringify(balls));
-        }
+        localStorage.setItem(bagKey, JSON.stringify(balls));
       } catch (e) {
-        console.warn("Failed to write bag to localStorage:", e);
+        // localStorage quota exceeded; IndexedDB handles this gracefully
       }
     }
   }, [balls, currentUser]);
@@ -1690,6 +1701,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     setCatalog(standardCatalog);
     localStorage.removeItem("vice_vault_guest_v2");
     localStorage.removeItem("vice_vault_catalog");
+    idbDelete("vice_vault_guest_v2").catch(() => {});
+    idbDelete("vice_vault_catalog").catch(() => {});
     setSearchQuery("");
     setSelectedBrandFilter("ALL");
     setDbPanelTab("browse");
@@ -2508,11 +2521,13 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       </footer>
 
       {/* Leaderboard Modal */}
-      <LeaderboardModal 
-        isOpen={showLeaderboard}
-        onClose={() => setShowLeaderboard(false)}
-        currentUserUsername={userProfile?.username || currentUser?.username}
-      />
+      <Suspense fallback={null}>
+        <LeaderboardModal 
+          isOpen={showLeaderboard}
+          onClose={() => setShowLeaderboard(false)}
+          currentUserUsername={userProfile?.username || currentUser?.username}
+        />
+      </Suspense>
 
       {/* Firebase Auth Modal */}
       <AuthModal 
@@ -2917,45 +2932,49 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
          </div>
        )}
 
-      <VaultManagerModal
-        isOpen={isVaultManagerOpen}
-        onClose={() => setIsVaultManagerOpen(false)}
-        isVaultProcessing={isVaultProcessing}
-        catalog={catalog}
-        registeredModels={registeredModels}
-        handleAddCatalogItem={handleAddCatalogItem}
-        handleUpdateCatalogItem={handleUpdateCatalogItem}
-        handleDeleteCatalogItem={handleDeleteCatalogItem}
-        handleXlsImportCatalogItems={handleXlsImportCatalogItems}
-        handleExportCatalogToExcel={handleExportCatalogToExcel}
-        handleDeleteAllCatalog={handleDeleteAllCatalog}
-      />
+      <Suspense fallback={null}>
+        <VaultManagerModal
+          isOpen={isVaultManagerOpen}
+          onClose={() => setIsVaultManagerOpen(false)}
+          isVaultProcessing={isVaultProcessing}
+          catalog={catalog}
+          registeredModels={registeredModels}
+          handleAddCatalogItem={handleAddCatalogItem}
+          handleUpdateCatalogItem={handleUpdateCatalogItem}
+          handleDeleteCatalogItem={handleDeleteCatalogItem}
+          handleXlsImportCatalogItems={handleXlsImportCatalogItems}
+          handleExportCatalogToExcel={handleExportCatalogToExcel}
+          handleDeleteAllCatalog={handleDeleteAllCatalog}
+        />
+      </Suspense>
 
       {/* User Manager Modal */}
       
       {isFriendsPortalOpen && userProfile && (
-        <FriendsPortal
-          currentUserUid={userProfile.uid}
-          onClose={() => {
-            setIsFriendsPortalOpen(false);
-            if (userProfile?.uid) {
-              fetch(`/api/users/${userProfile.uid}/profile`)
-                .then(res => res.json())
-                .then(data => {
-                  if (data) {
-                    setUserProfile(prev => prev ? {
-                      ...prev,
-                      pendingFriendRequestsCount: data.pendingFriendRequestsCount || 0
-                    } : null);
-                  }
-                })
-                .catch(err => console.error("Failed to refresh friend requests count", err));
-            }
-          }}
-          onViewBag={(username) => {
-            setFriendBagUsername(username);
-          }}
-        />
+        <Suspense fallback={null}>
+          <FriendsPortal
+            currentUserUid={userProfile.uid}
+            onClose={() => {
+              setIsFriendsPortalOpen(false);
+              if (userProfile?.uid) {
+                fetch(`/api/users/${userProfile.uid}/profile`)
+                  .then(res => res.json())
+                  .then(data => {
+                    if (data) {
+                      setUserProfile(prev => prev ? {
+                        ...prev,
+                        pendingFriendRequestsCount: data.pendingFriendRequestsCount || 0
+                      } : null);
+                    }
+                  })
+                  .catch(err => console.error("Failed to refresh friend requests count", err));
+              }
+            }}
+            onViewBag={(username) => {
+              setFriendBagUsername(username);
+            }}
+          />
+        </Suspense>
       )}
 
       {isUserManagerOpen && (
@@ -3475,14 +3494,16 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       })()}
 
       {/* Import/Export Modal */}
-      <ImportExportModal
-        isOpen={isImportExportModalOpen}
-        onClose={() => setIsImportExportModalOpen(false)}
-        onExport={handleExportData}
-        onImport={handleImportData}
-        onDeleteBag={handleDeleteAllLocker}
-        hasBagItems={balls.length > 0}
-      />
+      <Suspense fallback={null}>
+        <ImportExportModal
+          isOpen={isImportExportModalOpen}
+          onClose={() => setIsImportExportModalOpen(false)}
+          onExport={handleExportData}
+          onImport={handleImportData}
+          onDeleteBag={handleDeleteAllLocker}
+          hasBagItems={balls.length > 0}
+        />
+      </Suspense>
 
       {/* Clear Wishlist Confirmation Modal */}
       <AnimatePresence>

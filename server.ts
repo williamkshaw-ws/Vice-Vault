@@ -1351,20 +1351,20 @@ function maskEmail(email: string): string {
   return `${maskedLocal}@${domain}`;
 }
 
-// Resolve username to email address (returns masked email to prevent user harvesting)
+// Resolve username to email address
 app.get("/api/auth/resolve-email", authLimiter, async (req, res) => {
   const { username } = req.query;
   if (!username || typeof username !== "string") {
     return res.status(400).json({ error: "Username query parameter is required." });
   }
 
-  const clean = username.trim().toLowerCase();
+  const clean = username.trim().toLowerCase().replace(/^@/, "");
   
   // 1. Check local DEFAULT_USERS / loadUsers()
   const localUsers = loadUsers();
   const localUser = localUsers.find(u => u.username?.toLowerCase() === clean);
   if (localUser && localUser.email) {
-    return res.json({ email: maskEmail(localUser.email) });
+    return res.json({ email: localUser.email });
   }
 
   // 2. Check Firestore if configured
@@ -1375,7 +1375,7 @@ app.get("/api/auth/resolve-email", authLimiter, async (req, res) => {
       if (!snapshot.empty) {
         const userData = snapshot.docs[0].data();
         if (userData.email) {
-          return res.json({ email: maskEmail(userData.email) });
+          return res.json({ email: userData.email });
         }
       }
     } catch (e) {

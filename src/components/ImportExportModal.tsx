@@ -1,6 +1,5 @@
 import React, { useRef, useState } from "react";
 import { Download, Upload, X, AlertTriangle, Trash2 } from "lucide-react";
-import * as XLSX from "xlsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { GolfBall } from "../types";
 
@@ -28,6 +27,7 @@ export default function ImportExportModal({ isOpen, onClose, onExport, onImport,
 
     try {
       const arrayBuffer = await file.arrayBuffer();
+      const XLSX = await import("xlsx");
       const workbook = XLSX.read(arrayBuffer, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];

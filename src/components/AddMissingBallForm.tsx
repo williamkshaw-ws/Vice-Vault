@@ -6,6 +6,7 @@
 import React, { useState, useRef } from "react";
 import { CatalogItem, BundleItem } from "../types";
 import { Plus, Upload, Trash, Sparkles, CheckCircle2, Box, X } from "lucide-react";
+import { compressImage } from "../utils/imageCompressor";
 
 interface AddMissingBallFormProps {
   catalog: CatalogItem[];
@@ -155,21 +156,29 @@ export default function AddMissingBallForm({
     setBundleItems(bundleItems.filter(b => b.catalogId !== catalogId));
   };
 
-  // Helper to convert files to Base64 for localStorage storage
-  const processFile = (file: File, type: "ball" | "sleeve" | "box") => {
+  // Helper to convert files to compressed Base64 for storage and upload
+  const processFile = async (file: File, type: "ball" | "sleeve" | "box") => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       alert("Please select a valid image file.");
       return;
     }
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const result = reader.result as string;
-      if (type === "ball") setCustomImage(result);
-      else if (type === "sleeve") setCustomImageSleeve(result);
-      else if (type === "box") setCustomImageBox(result);
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await compressImage(file, { maxWidth: 1024, maxHeight: 1024, quality: 0.82 });
+      if (type === "ball") setCustomImage(compressed);
+      else if (type === "sleeve") setCustomImageSleeve(compressed);
+      else if (type === "box") setCustomImageBox(compressed);
+    } catch (e) {
+      console.error("Image compression error:", e);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        if (type === "ball") setCustomImage(result);
+        else if (type === "sleeve") setCustomImageSleeve(result);
+        else if (type === "box") setCustomImageBox(result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {

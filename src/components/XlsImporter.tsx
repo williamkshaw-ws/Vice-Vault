@@ -4,7 +4,6 @@
  */
 
 import React, { useState, useRef } from "react";
-import * as XLSX from "xlsx";
 import { CatalogItem } from "../types";
 import { FileSpreadsheet, Upload, Check, AlertCircle, Info, ArrowRight, Trash2 } from "lucide-react";
 
@@ -77,9 +76,10 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
     setFile(uploadedFile);
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const XLSX = await import("xlsx");
         const workbook = XLSX.read(data, { type: "array" });
         
         if (workbook.SheetNames.length === 0) {
@@ -323,8 +323,9 @@ export default function XlsImporter({ onImportItems }: XlsImporterProps) {
     // Reparse the original raw worksheet json using the updated mappings
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const XLSX = await import("xlsx");
         const workbook = XLSX.read(data, { type: "array" });
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];

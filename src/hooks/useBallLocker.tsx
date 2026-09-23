@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { filterLegacyBalls, safeJSONParse, INITIAL_OWNED_BALLS } from "../utils/bagUtils";
 import { GolfBall } from "../types";
+import { idbGet, idbSet } from "../utils/storage";
 
 export function useBallLocker(currentUser: any) {
   const [balls, setBalls] = useState<GolfBall[]>(() => {
@@ -23,13 +24,21 @@ export function useBallLocker(currentUser: any) {
     if (currentUser) {
       setIsLoadingCloudData(true);
       
-      // Check cache first for immediate render
-      const cachedBag = localStorage.getItem("vice_vault_bag_" + currentUser.uid);
+      // Check cache first for immediate render (IndexedDB with localStorage fast preview)
+      const bagKey = "vice_vault_bag_" + currentUser.uid;
+      const cachedBag = localStorage.getItem(bagKey);
       if (cachedBag) {
         try {
           setBalls(filterLegacyBalls(safeJSONParse(cachedBag)));
         } catch (e) {}
       }
+
+      // Also check IndexedDB for any large bag data that exceeded localStorage
+      idbGet<GolfBall[]>(bagKey).then((idbBalls) => {
+        if (idbBalls && Array.isArray(idbBalls) && idbBalls.length > 0) {
+          setBalls(filterLegacyBalls(idbBalls));
+        }
+      }).catch(() => {});
 
       // Fetch from cloud
       fetch(`/api/users/${currentUser.uid}/locker`, { headers: {} })
@@ -39,9 +48,11 @@ export function useBallLocker(currentUser: any) {
             if (data && data.balls !== null) {
               const finalBalls = filterLegacyBalls(data.balls);
               setBalls(finalBalls);
+              // Store in IndexedDB for unlimited capacity
+              await idbSet(bagKey, finalBalls);
               try {
-                localStorage.setItem("vice_vault_bag_" + currentUser.uid, JSON.stringify(finalBalls));
-              } catch (e) { console.warn("localStorage quota exceeded"); }
+                localStorage.setItem(bagKey, JSON.stringify(finalBalls));
+              } catch (e) { /* localStorage quota exceeded on iOS; IndexedDB has it covered */ }
             } else {
               // If locker doesn't exist on server, upload current client balls (migration of guest data)
               await fetch(`/api/users/${currentUser.uid}/locker`, {
@@ -72,15 +83,16 @@ export function useBallLocker(currentUser: any) {
     }
   }, [currentUser]);
 
-  // Effect to sync balls back to localstorage when not logged in
+  // Effect to sync balls back to local storage and IndexedDB when not logged in
   useEffect(() => {
     if (!currentUser && !localStorage.getItem("vice_vault_mock_user")) {
+      idbSet("vice_vault_guest_v2", balls);
       try {
         if (balls.length !== INITIAL_OWNED_BALLS.length || balls.some((b, i) => b.id !== INITIAL_OWNED_BALLS[i]?.id)) {
           localStorage.setItem("vice_vault_guest_v2", JSON.stringify(balls));
         }
       } catch (e) {
-        console.warn("Failed to write to localStorage:", e);
+        /* localStorage quota exceeded on iOS; IndexedDB has it covered */
       }
     }
   }, [balls, currentUser]);
