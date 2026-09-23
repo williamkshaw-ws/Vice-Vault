@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.williamkshaw.vicevault',
-  appName: 'Vice Vault',
+  appName: 'Golf Ball Vault',
   webDir: 'dist',
   server: {
     androidScheme: 'https',

@@ -84,7 +84,7 @@ export const nativeShare = {
         const canShare = await Share.canShare();
         if (canShare.value) {
           await Share.share({
-            title: options.title || "Vice Vault",
+            title: options.title || "Golf Ball Vault",
             text: options.text,
             url: options.url,
             dialogTitle: options.title || "Share Golf Bag"
@@ -97,7 +97,7 @@ export const nativeShare = {
       if (typeof navigator !== "undefined" && navigator.share) {
         try {
           await navigator.share({
-            title: options.title || "Vice Vault",
+            title: options.title || "Golf Ball Vault",
             text: options.text,
             url: options.url
           });

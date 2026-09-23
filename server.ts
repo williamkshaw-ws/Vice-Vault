@@ -7,6 +7,7 @@ import { fileURLToPath } from "url";
 import admin from "firebase-admin";
 import crypto from "crypto";
 import rateLimit from "express-rate-limit";
+import nodemailer from "nodemailer";
 import { BallModel } from "./src/types";
 import { VICE_BALLS_SPECS, COLOR_STYLES, SCRAPED_BALLS } from "./src/constants";
 
@@ -111,6 +112,85 @@ function verifyMockToken(token: string): string | null {
   } catch (err) {
     return null;
   }
+}
+
+// Mail Transport Setup (Optional SMTP for direct branded emails with Reset Password Button)
+let mailTransporter: any = null;
+if (process.env.SMTP_HOST && process.env.SMTP_USER) {
+  mailTransporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT || "587", 10),
+    secure: process.env.SMTP_SECURE === "true" || process.env.SMTP_PORT === "465",
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS || ""
+    }
+  });
+  console.log(`Configured SMTP mail transporter for host: ${process.env.SMTP_HOST}`);
+}
+
+function getBrandedPasswordResetHtml(email: string, resetUrl: string): string {
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset Your Golf Ball Vault Password</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0a0a0a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #ffffff;">
+  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0a0a0a; padding: 40px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 480px; background-color: #171717; border: 1px solid #262626; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+          <tr>
+            <td style="padding: 32px 32px 24px 32px; text-align: center; border-bottom: 1px solid #262626;">
+              <div style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 12px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; font-size: 20px; font-weight: 900; margin-bottom: 12px; text-align: center;">
+                ⛳
+              </div>
+              <h1 style="margin: 0; font-size: 18px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: #ffffff;">GOLF BALL VAULT</h1>
+              <p style="margin: 4px 0 0 0; font-size: 11px; font-family: monospace; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Account Security & Recovery</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 32px;">
+              <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 22px; color: #e5e5e5;">
+                Hello,
+              </p>
+              <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 22px; color: #d4d4d4;">
+                We received a request to reset the password for your <strong>Golf Ball Vault</strong> account (<span style="color: #60a5fa; font-family: monospace;">${email}</span>). Click the button below to choose a new password:
+              </p>
+              
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td align="center" style="padding: 8px 0 28px 0;">
+                    <a href="${resetUrl}" target="_blank" style="display: inline-block; background-color: #2563eb; color: #ffffff; font-size: 13px; font-weight: 800; text-decoration: none; padding: 14px 32px; border-radius: 12px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);">
+                      Reset Password
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 0 0 8px 0; font-size: 12px; line-height: 18px; color: #737373;">
+                This link will expire in <strong>1 hour</strong>.
+              </p>
+              <p style="margin: 0; font-size: 12px; line-height: 18px; color: #737373;">
+                If you did not request a password reset, you can safely disregard this email. Your password will remain unchanged.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 20px 32px; background-color: #0f0f0f; border-top: 1px solid #262626; text-align: center;">
+              <p style="margin: 0; font-size: 11px; font-family: monospace; color: #525252;">
+                Golf Ball Vault • <a href="https://golfballvault.app" target="_blank" style="color: #60a5fa; text-decoration: none;">golfballvault.app</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
 }
 
 interface CatalogItem {
@@ -1515,13 +1595,74 @@ app.post("/api/auth/forgot-password", authLimiter, async (req, res) => {
     });
   }
 
+  let emailSentDirectly = false;
+
+  // If SMTP is configured and Firebase Admin is initialized, generate reset link and send branded email directly
+  if (mailTransporter && isFirebaseAdminInitialized && user.email) {
+    try {
+      const rawLink = await admin.auth().generatePasswordResetLink(user.email, {
+        url: "https://golfballvault.app/reset-password",
+        handleCodeInApp: false
+      });
+      const parsedUrl = new URL(rawLink);
+      const oobCode = parsedUrl.searchParams.get("oobCode") || "";
+      const resetUrl = `https://golfballvault.app/reset-password?oobCode=${encodeURIComponent(oobCode)}`;
+
+      await mailTransporter.sendMail({
+        from: process.env.MAIL_FROM || '"Golf Ball Vault" <noreply@golfballvault.app>',
+        to: user.email,
+        subject: "Reset your Golf Ball Vault password",
+        html: getBrandedPasswordResetHtml(user.email, resetUrl)
+      });
+      emailSentDirectly = true;
+      console.log(`Sent branded password reset email with button to ${user.email}`);
+    } catch (mailErr) {
+      console.error("Failed to send branded password reset email directly via SMTP:", mailErr);
+    }
+  }
+
   return res.json({
     success: true,
     message: "Password reset instructions dispatched.",
     emailFound: true,
-    email: user.email,
-    maskedEmail: maskEmail(user.email)
+    emailSentDirectly,
+    email: user.email
   });
+});
+
+// Sync password reset update to backend local data/Firestore
+app.post("/api/auth/reset-password-sync", authLimiter, async (req, res) => {
+  const { email, newPassword } = req.body;
+  if (!email || !newPassword) {
+    return res.status(400).json({ error: "Email and new password are required." });
+  }
+
+  try {
+    const cleanEmail = email.trim().toLowerCase();
+    const users = await getUsersList();
+    const userIndex = users.findIndex(u => u.email?.toLowerCase() === cleanEmail);
+    if (userIndex !== -1) {
+      users[userIndex].password = hashPassword(newPassword);
+      await saveUsersList(users);
+    }
+
+    if (isFirebaseAdminInitialized && dbAdmin) {
+      const snap = await dbAdmin.collection("users").where("email", "==", cleanEmail).get();
+      if (!snap.empty) {
+        for (const doc of snap.docs) {
+          await doc.ref.update({
+            password: hashPassword(newPassword),
+            updatedAt: new Date().toISOString()
+          });
+        }
+      }
+    }
+
+    return res.json({ success: true, message: "Password synchronized successfully." });
+  } catch (err: any) {
+    console.error("Error syncing password reset to backend:", err);
+    return res.status(500).json({ error: "Failed to synchronize password reset." });
+  }
 });
 
 // Auth SignIn

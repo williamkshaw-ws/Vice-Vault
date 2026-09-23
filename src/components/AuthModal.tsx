@@ -35,6 +35,7 @@ interface AuthModalProps {
   theme?: 'light' | 'dark' | 'system';
   onThemeChange?: (theme: 'light' | 'dark' | 'system') => void;
   hasBagItems?: boolean;
+  initialEmail?: string;
 }
 
 const DISPOSABLE_EMAIL_DOMAINS = new Set([
@@ -213,12 +214,13 @@ export default function AuthModal({
   onSignOut,
   theme = "system",
   onThemeChange,
-  hasBagItems
+  hasBagItems,
+  initialEmail
 }: AuthModalProps) {
   const [tab, setTab] = useState<"signin" | "signup" | "settings" | "forgot">("signin");
   
   // Auth Form State
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail || "");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -298,7 +300,7 @@ export default function AuthModal({
         }
       } else {
         setTab("signin");
-        setEmail("");
+        setEmail(initialEmail || "");
         setPassword("");
         setDisplayName("");
         setUsername("");
@@ -309,7 +311,7 @@ export default function AuthModal({
       }
     }
     prevIsOpenRef.current = isOpen;
-  }, [isOpen, currentUser, userProfile]);
+  }, [isOpen, currentUser, userProfile, initialEmail]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -413,43 +415,34 @@ export default function AuthModal({
 
     try {
       let targetEmail = cleanId;
+      let emailSentDirectly = false;
 
-      // If user entered a username (no @), resolve via backend endpoint
-      if (!cleanId.includes("@")) {
-        const res = await fetch("/api/auth/forgot-password", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ identifier: cleanId })
-        });
-        const data = await res.json();
-        if (data.email) {
-          targetEmail = data.email;
-        } else {
-          // Standard safe notification if username not found
-          setResetSuccessMessage("If an account matches that info, instructions have been sent.");
-          nativeHaptics.notificationSuccess();
-          setIsSendingReset(false);
-          return;
-        }
+      // 1. Call backend to resolve username and/or send branded HTML email with Reset Password button
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier: cleanId })
+      });
+      const data = await res.json();
+      
+      if (data.email) {
+        targetEmail = data.email;
+      }
+      if (data.emailSentDirectly) {
+        emailSentDirectly = true;
       }
 
-      // If Firebase Auth is configured on client, send password reset email directly
-      if (isFirebaseConfigured && auth) {
-        await sendPasswordResetEmail(auth, targetEmail);
-      } else {
-        // Fallback: call backend forgot-password
-        await fetch("/api/auth/forgot-password", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ identifier: targetEmail })
-        });
+      // 2. If backend did not send email directly, send via Firebase Auth with actionCodeSettings targeting golfballvault.app
+      if (!emailSentDirectly && isFirebaseConfigured && auth) {
+        const actionCodeSettings = {
+          url: "https://golfballvault.app/reset-password",
+          handleCodeInApp: false
+        };
+        await sendPasswordResetEmail(auth, targetEmail, actionCodeSettings);
       }
 
       nativeHaptics.notificationSuccess();
-      const masked = targetEmail.includes("@")
-        ? targetEmail.replace(/^(.)(.*)(@.*)$/, (_, a, b, c) => `${a}***${c}`)
-        : targetEmail;
-      setResetSuccessMessage(`Password reset link sent to ${masked}! Please check your inbox and spam folder.`);
+      setResetSuccessMessage(`Password reset instructions sent to ${targetEmail}! Please check your inbox and spam folder.`);
     } catch (err: any) {
       console.error("Forgot password error:", err);
       if (err.code === "auth/user-not-found") {
@@ -1565,7 +1558,7 @@ export default function AuthModal({
                           await nativeShare.shareLink({
                             url: link,
                             title: `${userProfile?.displayName || "Golfer"}'s Golf Ball Vault`,
-                            text: `Check out my golf ball collection on Vice Vault!`
+                            text: `Check out my golf ball collection on Golf Ball Vault!`
                           });
                         }}
                         className="px-2.5 py-2 bg-accent text-black font-bold text-[10px] uppercase tracking-wider rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1 shrink-0 hover:brightness-110 shadow-sm"

@@ -68,6 +68,7 @@ import {
 
 import { auth, db, isFirebaseConfigured } from "./firebase";
 import AuthModal, { AvatarRenderer } from "./components/AuthModal";
+import ResetPasswordModal from "./components/ResetPasswordModal";
 import { User as FirebaseUser } from "firebase/auth";
 import { doc, getDoc, setDoc, query, where, collection, getDocs } from "firebase/firestore";
 
@@ -294,6 +295,28 @@ export default function App() {
     setAuthModalOpen, 
     handleSignOut 
   } = useAuth();
+
+  const [resetPasswordCode, setResetPasswordCode] = useState<string | null>(null);
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
+  const [prefilledAuthEmail, setPrefilledAuthEmail] = useState<string>("");
+
+  useEffect(() => {
+    const checkUrlForPasswordReset = () => {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("oobCode");
+      const mode = params.get("mode");
+      const isResetPath = window.location.pathname.includes("reset-password") || mode === "resetPassword";
+      
+      if (code && isResetPath) {
+        setResetPasswordCode(code);
+        setIsResetPasswordModalOpen(true);
+      }
+    };
+
+    checkUrlForPasswordReset();
+    window.addEventListener("popstate", checkUrlForPasswordReset);
+    return () => window.removeEventListener("popstate", checkUrlForPasswordReset);
+  }, []);
 
   const isAdmin = useMemo(() => {
     const role = (userProfile?.role || (currentUser as any)?.role || "").toLowerCase();
@@ -2598,10 +2621,34 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         />
       </Suspense>
 
+      {/* Password Reset Modal (Landing on golfballvault.app) */}
+      {isResetPasswordModalOpen && resetPasswordCode && (
+        <ResetPasswordModal
+          isOpen={isResetPasswordModalOpen}
+          oobCode={resetPasswordCode}
+          onClose={() => {
+            setIsResetPasswordModalOpen(false);
+            setResetPasswordCode(null);
+            window.history.replaceState({}, document.title, window.location.pathname.replace(/\/reset-password\/?/, "/") || "/");
+          }}
+          onSuccess={(email) => {
+            setIsResetPasswordModalOpen(false);
+            setResetPasswordCode(null);
+            window.history.replaceState({}, document.title, window.location.pathname.replace(/\/reset-password\/?/, "/") || "/");
+            setPrefilledAuthEmail(email);
+            setAuthModalOpen(true);
+          }}
+        />
+      )}
+
       {/* Firebase Auth Modal */}
       <AuthModal 
         isOpen={authModalOpen} 
-        onClose={() => setAuthModalOpen(false)} 
+        onClose={() => {
+          setAuthModalOpen(false);
+          setPrefilledAuthEmail("");
+        }}
+        initialEmail={prefilledAuthEmail}
         currentUser={currentUser}
         userProfile={userProfile}
         theme={theme}

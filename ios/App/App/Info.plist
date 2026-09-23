@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Vice Vault</string>
+	<string>Golf Ball Vault</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -32,9 +32,9 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Vice Vault requires camera access to photograph golf balls for your locker.</string>
+	<string>Golf Ball Vault requires camera access to photograph golf balls for your locker.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Vice Vault requires photo library access to upload golf ball images.</string>
+	<string>Golf Ball Vault requires photo library access to upload golf ball images.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
