@@ -181,9 +181,30 @@ function cleanUsernameString(username: string): string {
 const app = express();
 app.set('trust proxy', 1);
 
-// Enable CORS for native iOS / Capacitor and cross-origin requests
+// Standard security headers
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  next();
+});
+
+// Enable CORS for trusted web origins, native iOS / Capacitor, and local development
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    const isAllowed = 
+      origin === "https://golfballvault.app" ||
+      origin.endsWith(".golfballvault.app") ||
+      origin.startsWith("http://localhost") ||
+      origin.startsWith("capacitor://localhost");
+    if (isAllowed) {
+      res.header("Access-Control-Allow-Origin", origin);
+    }
+  } else {
+    // Non-browser or native shell requests without origin header
+    res.header("Access-Control-Allow-Origin", "*");
+  }
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   if (req.method === "OPTIONS") {
@@ -225,6 +246,15 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: "Too many login attempts from this IP, please try again after 15 minutes" }
 });
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 600, // Allow up to 600 API requests per 15 minutes per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests from this IP, please try again later." }
+});
+app.use("/api", apiLimiter);
 
 // Paths for JSON file persistence
 const DATA_DIR = path.join(process.cwd(), "data");
@@ -1328,7 +1358,7 @@ app.post("/api/auth/signup", authLimiter, async (req, res) => {
     username: cleanUsername,
     preferredColor: preferredColor || "#2563eb",
     avatarUrl: avatarUrl || "preset-1",
-    role: cleanUsername === "admin" ? "Admin" : "User",
+    role: "User",
     createdAt: new Date().toISOString()
   };
 
@@ -1375,7 +1405,7 @@ app.get("/api/auth/resolve-email", authLimiter, async (req, res) => {
   const localUsers = loadUsers();
   const localUser = localUsers.find(u => u.username?.toLowerCase() === clean);
   if (localUser && localUser.email) {
-    return res.json({ email: localUser.email });
+    return res.json({ email: maskEmail(localUser.email) });
   }
 
   // 2. Check Firestore if configured
@@ -1386,7 +1416,7 @@ app.get("/api/auth/resolve-email", authLimiter, async (req, res) => {
       if (!snapshot.empty) {
         const userData = snapshot.docs[0].data();
         if (userData.email) {
-          return res.json({ email: userData.email });
+          return res.json({ email: maskEmail(userData.email) });
         }
       }
     } catch (e) {

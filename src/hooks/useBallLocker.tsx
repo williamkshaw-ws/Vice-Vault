@@ -51,28 +51,6 @@ export function useBallLocker(currentUser: any) {
           let headers = await getAuthHeaders();
           let res = await fetch(`/api/users/${targetUid}/locker`, { headers });
 
-          if (res.status === 403) {
-            try {
-              const authRes = await fetch("/api/auth/signin", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: "admin", password: "AdminPass123!" })
-              });
-              if (authRes.ok) {
-                const authData = await authRes.json();
-                if (authData.token) {
-                  const currentMock = localStorage.getItem("vice_vault_mock_user");
-                  const parsed = currentMock ? JSON.parse(currentMock) : {};
-                  localStorage.setItem("vice_vault_mock_user", JSON.stringify({ ...parsed, ...authData }));
-                  headers = { Authorization: `Bearer ${authData.token}` };
-                  res = await fetch(`/api/users/${targetUid}/locker`, { headers });
-                }
-              }
-            } catch (retryErr) {
-              console.warn("Locker auth retry failed:", retryErr);
-            }
-          }
-
           if (res.ok) {
             const data = await res.json();
             if (data && data.balls !== null && data.balls !== undefined) {

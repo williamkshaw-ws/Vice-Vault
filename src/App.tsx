@@ -1045,30 +1045,6 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     try {
       let headers = await getAuthHeaders();
       let res = await fetch("/api/users", { headers });
-
-      // If 403, attempt a transparent token refresh for the admin session
-      if (res.status === 403) {
-        try {
-          const authRes = await fetch("/api/auth/signin", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: "admin", password: "AdminPass123!" })
-          });
-          if (authRes.ok) {
-            const authData = await authRes.json();
-            if (authData.token) {
-              const currentMock = localStorage.getItem("vice_vault_mock_user");
-              const parsed = currentMock ? JSON.parse(currentMock) : {};
-              localStorage.setItem("vice_vault_mock_user", JSON.stringify({ ...parsed, ...authData }));
-              headers = { Authorization: `Bearer ${authData.token}` };
-              res = await fetch("/api/users", { headers });
-            }
-          }
-        } catch (retryErr) {
-          console.warn("Admin retry signin failed:", retryErr);
-        }
-      }
-
       const contentType = res.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         throw new Error(`Server returned unexpected response (${res.status})`);
