@@ -639,7 +639,7 @@ export default function AuthModal({
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck={false}
-                    autoComplete="username"
+                    autoComplete="off"
                     className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2.5 pl-10 pr-4 text-sm sm:text-xs text-white placeholder-neutral-550 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all font-mono"
                     placeholder="name@domain.com or username"
                   />
@@ -658,7 +658,7 @@ export default function AuthModal({
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck={false}
-                    autoComplete="current-password"
+                    autoComplete="off"
                     className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2.5 pl-10 pr-10 text-sm sm:text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all font-mono"
                     placeholder="••••••••"
                   />
@@ -721,6 +721,7 @@ export default function AuthModal({
                       autoCapitalize="words"
                       autoCorrect="off"
                       spellCheck={false}
+                      autoComplete="off"
                       className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-sm sm:text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
                       placeholder="John Doe"
                     />
@@ -739,7 +740,7 @@ export default function AuthModal({
                       autoCapitalize="none"
                       autoCorrect="off"
                       spellCheck={false}
-                      autoComplete="username"
+                      autoComplete="off"
                       className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-8 pr-3 text-sm sm:text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
                       placeholder="johndoe"
                     />
@@ -759,7 +760,7 @@ export default function AuthModal({
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck={false}
-                    autoComplete="email"
+                    autoComplete="off"
                     className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-sm sm:text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
                     placeholder="name@domain.com"
                   />
@@ -780,7 +781,7 @@ export default function AuthModal({
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck={false}
-                    autoComplete="new-password"
+                    autoComplete="off"
                     className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-9 text-sm sm:text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
                     placeholder="Enter password"
                   />
@@ -841,7 +842,7 @@ export default function AuthModal({
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck={false}
-                    autoComplete="new-password"
+                    autoComplete="off"
                     className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-9 text-sm sm:text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
                     placeholder="Verify password"
                   />
