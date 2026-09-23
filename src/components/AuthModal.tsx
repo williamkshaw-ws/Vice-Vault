@@ -29,7 +29,7 @@ interface AuthModalProps {
   onClose: () => void;
   onMockLogin?: (user: any) => void;
   currentUser?: any;
-  userProfile?: { displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; createdAt?: string; email?: string; emailVerified?: boolean; shareBag?: boolean; shareToken?: string; optInLeaderboard?: boolean; } | null;
+  userProfile?: { uid?: string; displayName: string; username?: string; avatarUrl?: string; preferredColor: string; role?: string; createdAt?: string; email?: string; emailVerified?: boolean; shareBag?: boolean; shareToken?: string; optInLeaderboard?: boolean; } | null;
   onProfileUpdate?: (updatedUser: any) => void;
   onSignOut?: () => void;
   theme?: 'light' | 'dark' | 'system';

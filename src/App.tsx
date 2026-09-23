@@ -303,7 +303,7 @@ export default function App() {
   useEffect(() => {
     const checkUrlForPasswordReset = () => {
       const params = new URLSearchParams(window.location.search);
-      const code = params.get("oobCode");
+      const code = params.get("oobCode") || params.get("token");
       const mode = params.get("mode");
       const isResetPath = window.location.pathname.includes("reset-password") || mode === "resetPassword";
       

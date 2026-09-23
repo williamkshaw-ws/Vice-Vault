@@ -114,6 +114,29 @@ function verifyMockToken(token: string): string | null {
   }
 }
 
+function generateResetToken(email: string): string {
+  const payload = Buffer.from(JSON.stringify({ email: email.trim().toLowerCase(), exp: Date.now() + 3600000 })).toString('base64url'); // 1 hour
+  const signature = crypto.createHmac('sha256', SECRET_KEY).update(payload).digest('base64url');
+  return `reset.${payload}.${signature}`;
+}
+
+function verifyResetToken(token: string): string | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3 || parts[0] !== 'reset') return null;
+    const expectedSignature = crypto.createHmac('sha256', SECRET_KEY).update(parts[1]).digest('base64url');
+    const expectedBuf = Buffer.from(expectedSignature, 'utf8');
+    const actualBuf = Buffer.from(parts[2], 'utf8');
+    if (expectedBuf.length !== actualBuf.length || !crypto.timingSafeEqual(expectedBuf, actualBuf)) return null;
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+    if (payload.exp < Date.now()) return null;
+    return payload.email;
+  } catch (err) {
+    return null;
+  }
+}
+
+
 // Mail Transport Setup (Optional SMTP for direct branded emails with Reset Password Button)
 let mailTransporter: any = null;
 if (process.env.SMTP_HOST && process.env.SMTP_USER) {
@@ -1065,19 +1088,40 @@ const SERVICE_ACCOUNT_FILE = path.join(process.cwd(), "service-account.json");
 let dbAdmin: admin.firestore.Firestore | null = null;
 let isFirebaseAdminInitialized = false;
 
+let serviceAccountConfig: any = null;
 if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
   try {
     const rawConfig = fs.readFileSync(SERVICE_ACCOUNT_FILE, "utf-8");
-    const serviceAccount = JSON.parse(rawConfig);
-    const storageBucket = process.env.VITE_FIREBASE_STORAGE_BUCKET || process.env.FIREBASE_STORAGE_BUCKET || `${serviceAccount.project_id}.firebasestorage.app`;
+    serviceAccountConfig = JSON.parse(rawConfig);
+  } catch (e) {
+    console.error("Failed to parse service-account.json:", e);
+  }
+} else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  try {
+    const raw = process.env.FIREBASE_SERVICE_ACCOUNT.trim();
+    if (raw.startsWith("{")) {
+      serviceAccountConfig = JSON.parse(raw);
+    } else {
+      const decoded = Buffer.from(raw, "base64").toString("utf-8");
+      serviceAccountConfig = JSON.parse(decoded);
+    }
+  } catch (e) {
+    console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT env variable:", e);
+  }
+}
+
+if (serviceAccountConfig) {
+  try {
+    const storageBucket = process.env.VITE_FIREBASE_STORAGE_BUCKET || process.env.FIREBASE_STORAGE_BUCKET || `${serviceAccountConfig.project_id}.firebasestorage.app`;
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+      credential: admin.credential.cert(serviceAccountConfig),
       storageBucket
     });
     dbAdmin = admin.firestore();
     dbAdmin.settings({ ignoreUndefinedProperties: true });
     isFirebaseAdminInitialized = true;
-    console.log("Firebase Admin SDK successfully initialized with service-account.json");
+    console.log("Firebase Admin SDK successfully initialized");
+
 
     // Proactively seed default items and sync local catalog data on boot
     (async () => {
@@ -1645,18 +1689,27 @@ app.post("/api/auth/forgot-password", authLimiter, async (req, res) => {
 
   let emailSentDirectly = false;
 
-  // If Resend API or SMTP is configured and Firebase Admin is initialized, generate reset link and send branded email directly
-  if ((process.env.RESEND_API_KEY || mailTransporter) && isFirebaseAdminInitialized && user.email) {
+  // If Resend API or SMTP is configured, generate reset link and send branded email directly
+  if ((process.env.RESEND_API_KEY || mailTransporter) && user.email) {
     try {
-      const rawLink = await admin.auth().generatePasswordResetLink(user.email, {
-        url: "https://golfballvault.app/reset-password",
-        handleCodeInApp: false
-      });
-      const parsedUrl = new URL(rawLink);
-      const oobCode = parsedUrl.searchParams.get("oobCode") || "";
-      const resetUrl = `https://golfballvault.app/reset-password?oobCode=${encodeURIComponent(oobCode)}`;
+      let resetUrl = "";
+      if (isFirebaseAdminInitialized) {
+        const rawLink = await admin.auth().generatePasswordResetLink(user.email, {
+          url: "https://golfballvault.app/reset-password",
+          handleCodeInApp: false
+        });
+        const parsedUrl = new URL(rawLink);
+        const oobCode = parsedUrl.searchParams.get("oobCode") || "";
+        resetUrl = `https://golfballvault.app/reset-password?oobCode=${encodeURIComponent(oobCode)}`;
+      } else {
+        // Fallback for environments without Firebase Admin initialized
+        const token = generateResetToken(user.email);
+        resetUrl = `https://golfballvault.app/reset-password?token=${encodeURIComponent(token)}`;
+      }
 
-      emailSentDirectly = await sendBrandedPasswordResetEmail(user.email, resetUrl);
+      if (resetUrl) {
+        emailSentDirectly = await sendBrandedPasswordResetEmail(user.email, resetUrl);
+      }
     } catch (mailErr) {
       console.error("Failed to generate or send branded password reset email:", mailErr);
     }
@@ -1671,20 +1724,38 @@ app.post("/api/auth/forgot-password", authLimiter, async (req, res) => {
   });
 });
 
+// Verify reset token for non-Firebase-Admin token-based resets
+app.post("/api/auth/verify-reset-token", authLimiter, (req, res) => {
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ error: "Token is required." });
+  const email = verifyResetToken(token);
+  if (!email) return res.status(400).json({ error: "Invalid or expired reset token." });
+  return res.json({ success: true, email });
+});
+
 // Sync password reset update to backend local data/Firestore
 app.post("/api/auth/reset-password-sync", authLimiter, async (req, res) => {
-  const { email, newPassword } = req.body;
-  if (!email || !newPassword) {
-    return res.status(400).json({ error: "Email and new password are required." });
+  const { email, newPassword, token } = req.body;
+  if (!newPassword || (!email && !token)) {
+    return res.status(400).json({ error: "Email or token and new password are required." });
   }
 
   try {
-    const cleanEmail = email.trim().toLowerCase();
+    let targetEmail = email;
+    if (token) {
+      const verifiedEmail = verifyResetToken(token);
+      if (!verifiedEmail) {
+        return res.status(400).json({ error: "Invalid or expired reset token." });
+      }
+      targetEmail = verifiedEmail;
+    }
+
+    const cleanEmail = targetEmail.trim().toLowerCase();
     const users = await getUsersList();
     const userIndex = users.findIndex(u => u.email?.toLowerCase() === cleanEmail);
     if (userIndex !== -1) {
       users[userIndex].password = hashPassword(newPassword);
-      await saveUsersList(users);
+      saveUsers(users);
     }
 
     if (isFirebaseAdminInitialized && dbAdmin) {
@@ -1705,6 +1776,7 @@ app.post("/api/auth/reset-password-sync", authLimiter, async (req, res) => {
     return res.status(500).json({ error: "Failed to synchronize password reset." });
   }
 });
+
 
 // Auth SignIn
 app.post("/api/auth/signin", authLimiter, async (req, res) => {

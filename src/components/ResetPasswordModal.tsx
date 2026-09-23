@@ -44,6 +44,25 @@ export default function ResetPasswordModal({
 
     const checkCode = async () => {
       try {
+        if (oobCode.startsWith("reset.")) {
+          const res = await fetch("/api/auth/verify-reset-token", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: oobCode })
+          });
+          const data = await res.json();
+          if (isMounted) {
+            if (data.success && data.email) {
+              setEmail(data.email);
+              setStatus("ready");
+            } else {
+              setStatus("error");
+              setErrorMessage(data.error || "This password reset link has expired or is invalid.");
+            }
+          }
+          return;
+        }
+
         if (!auth) {
           throw new Error("Authentication service is unavailable.");
         }
@@ -99,6 +118,22 @@ export default function ResetPasswordModal({
     nativeHaptics.impactLight();
 
     try {
+      if (oobCode.startsWith("reset.")) {
+        // Backend token-based reset
+        const res = await fetch("/api/auth/reset-password-sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: oobCode, newPassword })
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          throw new Error(data.error || "Failed to reset password.");
+        }
+        nativeHaptics.notificationSuccess();
+        setStatus("success");
+        return;
+      }
+
       if (!auth) {
         throw new Error("Authentication service is unavailable.");
       }
