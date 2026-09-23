@@ -2509,43 +2509,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 12px)" }}
         >
           <div className="max-w-md mx-auto grid grid-cols-2 gap-3">
-            {/* Left: My Bag */}
-            <button
-              type="button"
-              onClick={() => {
-                if (mobileTab !== "bag") {
-                  nativeHaptics.selectionChanged();
-                  setMobileTab("bag");
-                }
-              }}
-              className={`flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition-all cursor-pointer relative select-none active:scale-95 ${
-                mobileTab === "bag"
-                  ? "bg-accent/15 text-accent shadow-sm"
-                  : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/40"
-              }`}
-            >
-              <div className="relative flex items-center justify-center">
-                <GolfBagIcon className={`w-5 h-5 transition-transform duration-200 ${mobileTab === "bag" ? "scale-110" : ""}`} />
-                {totalOwnedCount > 0 && (
-                  <span 
-                    className={`absolute -top-1.5 -right-3 text-[9px] font-black px-1.5 py-0.2 rounded-full font-mono transition-colors ${
-                      mobileTab === "bag" 
-                        ? "bg-accent text-black font-extrabold shadow-sm" 
-                        : "bg-neutral-800 text-neutral-300 border border-neutral-700"
-                    }`}
-                  >
-                    {totalOwnedCount}
-                  </span>
-                )}
-              </div>
-              <span className={`text-[11px] uppercase tracking-wider font-mono mt-1 ${
-                mobileTab === "bag" ? "font-black text-accent" : "font-semibold text-neutral-400"
-              }`}>
-                My Bag
-              </span>
-            </button>
-
-            {/* Right: Ball Vault */}
+            {/* Left: Ball Vault */}
             <button
               type="button"
               onClick={() => {
@@ -2578,6 +2542,42 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                 mobileTab === "catalog" ? "font-black text-accent" : "font-semibold text-neutral-400"
               }`}>
                 Ball Vault
+              </span>
+            </button>
+
+            {/* Right: My Bag */}
+            <button
+              type="button"
+              onClick={() => {
+                if (mobileTab !== "bag") {
+                  nativeHaptics.selectionChanged();
+                  setMobileTab("bag");
+                }
+              }}
+              className={`flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition-all cursor-pointer relative select-none active:scale-95 ${
+                mobileTab === "bag"
+                  ? "bg-accent/15 text-accent shadow-sm"
+                  : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/40"
+              }`}
+            >
+              <div className="relative flex items-center justify-center">
+                <GolfBagIcon className={`w-5 h-5 transition-transform duration-200 ${mobileTab === "bag" ? "scale-110" : ""}`} />
+                {totalOwnedCount > 0 && (
+                  <span 
+                    className={`absolute -top-1.5 -right-3 text-[9px] font-black px-1.5 py-0.2 rounded-full font-mono transition-colors ${
+                      mobileTab === "bag" 
+                        ? "bg-accent text-black font-extrabold shadow-sm" 
+                        : "bg-neutral-800 text-neutral-300 border border-neutral-700"
+                    }`}
+                  >
+                    {totalOwnedCount}
+                  </span>
+                )}
+              </div>
+              <span className={`text-[11px] uppercase tracking-wider font-mono mt-1 ${
+                mobileTab === "bag" ? "font-black text-accent" : "font-semibold text-neutral-400"
+              }`}>
+                My Bag
               </span>
             </button>
           </div>
