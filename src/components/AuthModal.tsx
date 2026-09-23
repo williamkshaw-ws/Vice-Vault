@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor, Copy, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import { ACCENT_COLORS, isStrongPassword } from "../utils";
@@ -214,10 +214,11 @@ export default function AuthModal({
   const [newPasswordFocused, setNewPasswordFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const prevIsOpenRef = useRef(false);
 
-  // Initialize/Load state on mount/open
+  // Initialize/Load state ONLY when modal transitions from closed to open
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !prevIsOpenRef.current) {
       setError(null);
       setSuccessMsg(null);
       setConfirmPassword("");
@@ -257,6 +258,7 @@ export default function AuthModal({
         setOptInLeaderboard(false);
       }
     }
+    prevIsOpenRef.current = isOpen;
   }, [isOpen, currentUser, userProfile]);
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -634,7 +636,11 @@ export default function AuthModal({
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white placeholder-neutral-550 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all font-mono"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    autoComplete="username"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2.5 pl-10 pr-4 text-sm sm:text-xs text-white placeholder-neutral-550 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all font-mono"
                     placeholder="name@domain.com or username"
                   />
                 </div>
@@ -649,7 +655,11 @@ export default function AuthModal({
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2.5 pl-10 pr-10 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all font-mono"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    autoComplete="current-password"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2.5 pl-10 pr-10 text-sm sm:text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all font-mono"
                     placeholder="••••••••"
                   />
                   <button
@@ -708,7 +718,10 @@ export default function AuthModal({
                       required
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
-                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
+                      autoCapitalize="words"
+                      autoCorrect="off"
+                      spellCheck={false}
+                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-sm sm:text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
                       placeholder="John Doe"
                     />
                   </div>
@@ -723,7 +736,11 @@ export default function AuthModal({
                       required
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-8 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck={false}
+                      autoComplete="username"
+                      className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-8 pr-3 text-sm sm:text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
                       placeholder="johndoe"
                     />
                   </div>
@@ -739,7 +756,11 @@ export default function AuthModal({
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    autoComplete="email"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-3 text-sm sm:text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
                     placeholder="name@domain.com"
                   />
                 </div>
@@ -756,7 +777,11 @@ export default function AuthModal({
                     onChange={(e) => setPassword(e.target.value)}
                     onFocus={() => setPasswordFocused(true)}
                     onBlur={() => setTimeout(() => setPasswordFocused(false), 200)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-9 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    autoComplete="new-password"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-9 text-sm sm:text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
                     placeholder="Enter password"
                   />
                   <button
@@ -813,7 +838,11 @@ export default function AuthModal({
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-9 text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    autoComplete="new-password"
+                    className="w-full bg-neutral-950 border border-neutral-850 rounded-xl py-2 pl-9 pr-9 text-sm sm:text-xs text-white placeholder-neutral-555 focus:outline-none focus:border-accent transition-all font-mono"
                     placeholder="Verify password"
                   />
                   <button
