@@ -58,7 +58,7 @@ interface CatalogViewProps {
     bundleItems?: { catalogId: string; qty: number }[],
     catalogId?: string
   ) => void;
-  handleToggleWishlist: (item: CatalogItem) => void;
+  handleToggleWishlist: (catalogId: string) => void;
   globalCatalogStats: Record<string, number>;
 }
 

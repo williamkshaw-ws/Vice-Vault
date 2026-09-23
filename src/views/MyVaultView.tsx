@@ -102,7 +102,7 @@ interface MyVaultViewProps {
     bundleItems?: { catalogId: string; qty: number }[],
     catalogId?: string
   ) => void;
-  handleToggleWishlist: (item: CatalogItem) => void;
+  handleToggleWishlist: (catalogId: string) => void;
   handleUpdateBall: (id: string, updates: Partial<GolfBall>) => void;
   handleDeleteBall: (id: string) => void;
   bFilterModel: string;

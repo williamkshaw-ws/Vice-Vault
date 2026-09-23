@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import path from "path";
 import fs from "fs";
@@ -101,7 +102,9 @@ function verifyMockToken(token: string): string | null {
     const parts = token.split('.');
     if (parts.length !== 3 || parts[0] !== 'mock') return null;
     const expectedSignature = crypto.createHmac('sha256', SECRET_KEY).update(parts[1]).digest('base64url');
-    if (expectedSignature !== parts[2]) return null;
+    const expectedBuf = Buffer.from(expectedSignature, 'utf8');
+    const actualBuf = Buffer.from(parts[2], 'utf8');
+    if (expectedBuf.length !== actualBuf.length || !crypto.timingSafeEqual(expectedBuf, actualBuf)) return null;
     const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
     if (payload.exp < Date.now()) return null;
     return payload.uid;
@@ -1332,13 +1335,23 @@ app.post("/api/auth/signup", authLimiter, async (req, res) => {
     shareBag: false,
     shareToken: encryptUsername(newUser.username || ""),
     wishlist: newUser.wishlist || [],
-    isMock: !isFirebaseAdminInitialized
+    isMock: !isFirebaseAdminInitialized,
+    token: !isFirebaseAdminInitialized ? generateMockToken(newUser.uid) : undefined
   };
 
   res.status(211).json(clientUser);
 });
 
-// Resolve username to email address
+function maskEmail(email: string): string {
+  const [localPart, domain] = email.split("@");
+  if (!domain) return "***";
+  const maskedLocal = localPart.length <= 2
+    ? localPart[0] + "***"
+    : localPart[0] + "***" + localPart[localPart.length - 1];
+  return `${maskedLocal}@${domain}`;
+}
+
+// Resolve username to email address (returns masked email to prevent user harvesting)
 app.get("/api/auth/resolve-email", authLimiter, async (req, res) => {
   const { username } = req.query;
   if (!username || typeof username !== "string") {
@@ -1351,7 +1364,7 @@ app.get("/api/auth/resolve-email", authLimiter, async (req, res) => {
   const localUsers = loadUsers();
   const localUser = localUsers.find(u => u.username?.toLowerCase() === clean);
   if (localUser && localUser.email) {
-    return res.json({ email: localUser.email });
+    return res.json({ email: maskEmail(localUser.email) });
   }
 
   // 2. Check Firestore if configured
@@ -1362,7 +1375,7 @@ app.get("/api/auth/resolve-email", authLimiter, async (req, res) => {
       if (!snapshot.empty) {
         const userData = snapshot.docs[0].data();
         if (userData.email) {
-          return res.json({ email: userData.email });
+          return res.json({ email: maskEmail(userData.email) });
         }
       }
     } catch (e) {
@@ -1412,7 +1425,8 @@ app.post("/api/auth/signin", authLimiter, async (req, res) => {
     shareToken: encryptUsername(user.username || ""),
     wishlist: user.wishlist || [],
     wishlistDates: user.wishlistDates || {},
-    isMock: true
+    isMock: true,
+    token: generateMockToken(user.uid)
   };
 
   res.json(clientUser);
@@ -1827,7 +1841,8 @@ app.get("/api/users/:id/profile", async (req, res) => {
       if (docSnap.exists) {
         const data = docSnap.data();
         if (isOwnerOrAdmin) {
-          return res.json({ uid: docSnap.id, ...data });
+          const { password: _pwd, ...safeData } = data || {};
+          return res.json({ uid: docSnap.id, ...safeData });
         } else {
           return res.json({
             uid: docSnap.id,
@@ -2087,8 +2102,16 @@ app.post("/api/users/:uid/stats", async (req, res) => {
   res.json({ success: true });
 });
 
+let cachedStats: { data: Record<string, number>; timestamp: number } | null = null;
+const STATS_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
 app.get("/api/catalog/stats", async (req, res) => {
   try {
+    const now = Date.now();
+    if (cachedStats && (now - cachedStats.timestamp < STATS_CACHE_TTL_MS)) {
+      return res.json(cachedStats.data);
+    }
+
     const users = await getUsersList();
     const stats: Record<string, number> = {};
     for (const u of users) {
@@ -2101,6 +2124,7 @@ app.get("/api/catalog/stats", async (req, res) => {
         }
       }
     }
+    cachedStats = { data: stats, timestamp: now };
     res.json(stats);
   } catch (err) {
     console.error("Stats error", err);
@@ -2137,8 +2161,13 @@ app.get("/api/users", async (req, res) => {
   res.json(users.map(({ password, ...u }) => u));
 });
 
-// Create a new customized profile user
+// Create a new customized profile user (Admin only)
 app.post("/api/users", async (req, res) => {
+  const actingUserId = (req as any).user?.uid as string | undefined;
+  if (!(await verifyAdmin(actingUserId))) {
+    return res.status(403).json({ error: "Access Denied. Only Admin users can create user accounts." });
+  }
+
   const { displayName, username, email, password, preferredColor, avatarUrl, role } = req.body;
   if (!displayName || !displayName.trim()) {
     return res.status(400).json({ error: "Display name is required" });
@@ -2195,7 +2224,8 @@ app.post("/api/users", async (req, res) => {
   };
 
   await saveUserToDb(newUser);
-  res.status(211).json(newUser);
+  const { password: _pwd, ...safeNewUser } = newUser;
+  res.status(211).json(safeNewUser);
 });
 
 // Appoint or modify roles (Admin / User)
@@ -2448,40 +2478,6 @@ app.delete("/api/users/:id", async (req, res) => {
 app.get("/api/catalog", async (req, res) => {
   const catalog = await getGlobalCatalog();
   res.json(catalog);
-
-  // Background check: ensure default users exist in Firebase Auth
-  if (isFirebaseAdminInitialized) {
-    (async () => {
-      try {
-        for (const user of DEFAULT_USERS) {
-          if (user.email) {
-            try {
-              await admin.auth().getUserByEmail(user.email);
-            } catch (authErr: any) {
-              if (authErr.code === 'auth/user-not-found') {
-                console.log(`Dynamically re-seeding missing Firebase Auth user: ${user.email}`);
-                try {
-                  const authUser = await admin.auth().createUser({
-                    uid: user.uid,
-                    email: user.email,
-                    password: INITIAL_ADMIN_PASSWORD,
-                    displayName: user.displayName
-                  });
-                  await dbAdmin!.collection("users").doc(user.uid).set({
-                    authUid: authUser.uid
-                  }, { merge: true });
-                } catch (createErr) {
-                  console.error(`Failed to seed Firebase Auth user ${user.email}:`, createErr);
-                }
-              }
-            }
-          }
-        }
-      } catch (err) {
-        console.error("Error in background Firebase Auth user seed:", err);
-      }
-    })();
-  }
 });
 
 // POST: Add new design to catalog (Admin only)
@@ -2918,7 +2914,11 @@ app.post("/api/admin/migrate-images", async (req, res) => {
   }
 });
 
-app.get("/api/admin/status", (req, res) => {
+app.get("/api/admin/status", async (req, res) => {
+  const actingUserId = (req as any).user?.uid as string | undefined;
+  if (!(await verifyAdmin(actingUserId))) {
+    return res.status(403).json({ error: "Access Denied." });
+  }
   res.json({
     isFirebaseAdminInitialized,
     hasServiceAccount: fs.existsSync(SERVICE_ACCOUNT_FILE),

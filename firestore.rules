@@ -27,9 +27,6 @@ service cloud.firestore {
         (resource == null || resource.data.uid == request.auth.uid) &&
         (request.resource == null || (request.resource.data.uid == request.auth.uid && request.resource.data.role == (resource == null ? "User" : resource.data.role)))
       ));
-      
-      // Allow public read if shareBag is true
-      allow read: if resource.data.shareBag == true;
 
       // Rules for locker subcollection
       match /locker/{document=**} {

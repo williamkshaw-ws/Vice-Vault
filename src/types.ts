@@ -122,8 +122,12 @@ export interface FittingRecommendation {
 }
 
 export interface UserProfile {
-  id: string;
-  name: string;
+  id?: string;
+  uid?: string;
+  name?: string;
+  displayName?: string;
+  username?: string;
+  email?: string;
   role: "Admin" | "User";
   preferredColor: string;
   avatarUrl?: string;
@@ -131,5 +135,12 @@ export interface UserProfile {
   shareToken?: string;
   wishlist?: string[]; // Array of catalog item IDs
   wishlistDates?: Record<string, string>; // Maps catalog item ID to date added
-  createdAt: string;
+  createdAt?: string;
+  pendingFriendRequestsCount?: number;
+  friends?: string[];
+  friendRequestsIn?: string[];
+  friendRequestsOut?: string[];
+  optInLeaderboard?: boolean;
+  totalUniqueBalls?: number;
+  totalBalls?: number;
 }

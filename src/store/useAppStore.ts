@@ -25,8 +25,8 @@ type AppState = {
   wishlistSearchQuery: string;
   setWishlistSearchQuery: (query: string) => void;
   
-  dbPanelTab: 'browse' | 'admin' | 'users' | 'register';
-  setDbPanelTab: (tab: 'browse' | 'admin' | 'users' | 'register') => void;
+  dbPanelTab: 'browse' | 'admin' | 'users' | 'register' | 'wishlist';
+  setDbPanelTab: (tab: 'browse' | 'admin' | 'users' | 'register' | 'wishlist') => void;
 
   activeAddingCardId: string | null;
   setActiveAddingCardId: (id: string | null) => void;
