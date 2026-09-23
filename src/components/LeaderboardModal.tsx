@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, X, Target, BarChart2, Medal } from "lucide-react";
+import { Trophy, X, Target, BarChart2, Medal, User } from "lucide-react";
 import { AvatarRenderer } from "./AuthModal";
 
 interface LeaderboardUser {
@@ -15,9 +15,17 @@ interface LeaderboardModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentUserUsername?: string;
+  isAdmin?: boolean;
+  onOpenUserManager?: () => void;
 }
 
-export default function LeaderboardModal({ isOpen, onClose, currentUserUsername }: LeaderboardModalProps) {
+export default function LeaderboardModal({ 
+  isOpen, 
+  onClose, 
+  currentUserUsername,
+  isAdmin,
+  onOpenUserManager
+}: LeaderboardModalProps) {
   const [activeTab, setActiveTab] = useState<"unique" | "total">("unique");
   const [users, setUsers] = useState<LeaderboardUser[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,8 +55,13 @@ export default function LeaderboardModal({ isOpen, onClose, currentUserUsername 
         }
       });
       if (!res.ok) throw new Error("Failed to load leaderboard");
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        setUsers([]);
+        return;
+      }
       const data = await res.json();
-      setUsers(data);
+      setUsers(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError(err.message || "An error occurred");
     } finally {
@@ -92,12 +105,24 @@ export default function LeaderboardModal({ isOpen, onClose, currentUserUsername 
                   <p className="text-xs text-neutral-400 font-mono">The biggest collections in the Vault</p>
                 </div>
               </div>
-              <button
-                onClick={onClose}
-                className="text-neutral-500 hover:text-white p-2 hover:bg-neutral-800 rounded-full transition-colors cursor-pointer"
-              >
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-2">
+                {isAdmin && onOpenUserManager && (
+                  <button
+                    onClick={onOpenUserManager}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent/20 border border-accent/40 text-accent hover:bg-accent/30 text-xs font-mono font-bold transition-all cursor-pointer shadow-sm active:scale-95"
+                    title="Open User Manager"
+                  >
+                    <User size={13} />
+                    <span>Manage</span>
+                  </button>
+                )}
+                <button
+                  onClick={onClose}
+                  className="text-neutral-500 hover:text-white p-2 hover:bg-neutral-800 rounded-full transition-colors cursor-pointer"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             {/* Tab Selector */}

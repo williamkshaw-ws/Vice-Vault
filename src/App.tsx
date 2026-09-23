@@ -15,6 +15,8 @@ import { useAuth } from "./hooks/useAuth";
 import { useBallLocker } from "./hooks/useBallLocker";
 import { filterLegacyBalls, safeJSONParse } from "./utils/bagUtils";
 import { idbGet, idbSet, idbDelete, migrateLocalStorageToIdb } from "./utils/storage";
+import { initNativeApp } from "./utils/nativeBridge";
+import { getAuthHeaders } from "./utils/authHeaders";
 import OwnedBallCard from "./components/OwnedBallCard";
 import SearchInput from "./components/SearchInput";
 import { ACCENT_COLORS, sanitizeId } from "./utils";
@@ -292,6 +294,12 @@ export default function App() {
     handleSignOut 
   } = useAuth();
 
+  const isAdmin = useMemo(() => {
+    const role = (userProfile?.role || (currentUser as any)?.role || "").toLowerCase();
+    const username = (userProfile?.username || currentUser?.username || "").toLowerCase();
+    return role === "admin" || username === "admin";
+  }, [userProfile, currentUser]);
+
   const { 
     balls, 
     setBalls, 
@@ -342,6 +350,7 @@ export default function App() {
 
   // Hydrate catalog from IndexedDB on startup (and run one-time localStorage migration)
   useEffect(() => {
+    initNativeApp();
     migrateLocalStorageToIdb();
     idbGet<CatalogItem[]>("vice_vault_catalog").then((cached) => {
       if (cached && Array.isArray(cached) && cached.length > 0) {
@@ -1023,37 +1032,39 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   // Redirect safety for administrative panels if role changes or user logs out
   useEffect(() => {
     if (dbPanelTab === "admin" || dbPanelTab === "users") {
-      if (!currentUser || userProfile?.role !== "Admin") {
+      if (!currentUser || !isAdmin) {
         setDbPanelTab("browse");
       }
     }
-  }, [currentUser, userProfile, dbPanelTab]);
+  }, [currentUser, isAdmin, dbPanelTab]);
 
   const fetchUsers = async () => {
     if (!currentUser) return;
     setIsLoadingUsers(true);
     setUsersError(null);
     try {
-      const res = await fetch("/api/users", {
-        headers: {
-
-        }
-      });
+      const headers = await getAuthHeaders();
+      const res = await fetch("/api/users", { headers });
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error(`Server returned unexpected response (${res.status})`);
+      }
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || "Failed to fetch users");
       }
       // Normalize each user to have both id & uid, and name & displayName for compatibility
-      const normalized = data.map((u: any) => ({
+      const normalized = (Array.isArray(data) ? data : []).map((u: any) => ({
         ...u,
         id: u.uid || u.id,
         uid: u.uid || u.id,
         name: u.displayName || u.name,
         displayName: u.displayName || u.name,
-        role: (u.role && u.role.toLowerCase() === "admin") ? "Admin" : "User"
+        role: ((u.role && u.role.toLowerCase() === "admin") || u.username?.toLowerCase() === "admin") ? "Admin" : "User"
       }));
       setUsersList(normalized);
     } catch (err: any) {
+      console.error("fetchUsers error:", err);
       setUsersError(err.message || "Failed to fetch users");
     } finally {
       setIsLoadingUsers(false);
@@ -1068,12 +1079,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
   const handleUpdateUser = async (userId: string, updatedFields: { displayName: string; username: string; role: string; preferredColor: string; avatarUrl: string; email?: string; password?: string }) => {
     try {
+      const headers = await getAuthHeaders({ "Content-Type": "application/json" });
       const res = await fetch(`/api/users/${userId}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-
-        },
+        headers,
         body: JSON.stringify(updatedFields)
       });
       const data = await res.json();
@@ -1087,9 +1096,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           uid: data.uid || currentUser.uid,
           displayName: data.displayName,
           username: data.username,
-          avatarUrl: data.photoURL || data.avatarUrl,
+          avatarUrl: data.photoURL || data.avatarUrl || "preset-1",
           preferredColor: data.preferredColor,
-          role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User",
+          role: ((data.role && data.role.toLowerCase() === "admin") || data.username?.toLowerCase() === "admin") ? "Admin" : "User",
           shareBag: !!data.shareBag,
           shareToken: data.shareToken, pendingFriendRequestsCount: data.pendingFriendRequestsCount || 0
         });
@@ -1110,11 +1119,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
     if (currentUser) {
       try {
+        const headers = await getAuthHeaders();
         const res = await fetch(`/api/users/${userId}`, {
           method: "DELETE",
-          headers: {
-
-          }
+          headers
         });
         const data = await res.json();
         if (!res.ok) {
@@ -1139,7 +1147,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     setModalCondition(BallCondition.NEW);
     setModalNotes("");
     try {
-      const res = await fetch(`/api/users/${user.uid || user.id}/locker`);
+      const headers = await getAuthHeaders();
+      const res = await fetch(`/api/users/${user.uid || user.id}/locker`, { headers });
       if (res.ok) {
         const data = await res.json();
         setSelectedUserBalls(filterLegacyBalls(data.balls || []));
@@ -1158,12 +1167,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   const handleSaveUserBag = async () => {
     if (!selectedUserForBag) return;
     try {
+      const headers = await getAuthHeaders({ "Content-Type": "application/json" });
       const res = await fetch(`/api/users/${selectedUserForBag.uid || selectedUserForBag.id}/locker`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-
-        },
+        headers,
         body: JSON.stringify({ balls: selectedUserBalls })
       });
       if (!res.ok) {
@@ -2238,7 +2245,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                     ) : null}
                   </div>
                   <span>{userProfile?.displayName || currentUser.displayName || "User"}</span>
-                  {userProfile?.role === "Admin" && (
+                  {isAdmin && (
                     <span className="px-1 py-0.2 rounded border border-accent/30 text-[9px] uppercase tracking-wider font-extrabold text-accent bg-accent/10 leading-none">
                       Admin
                     </span>
@@ -2270,7 +2277,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                               ) : (
                                 <span className="text-[9px] text-neutral-500 truncate font-bold">@user</span>
                               )}
-                              {userProfile?.role === "Admin" && (
+                              {isAdmin && (
                                 <span className="px-1 py-px rounded border border-accent/30 text-accent bg-accent/10 text-[9px] uppercase tracking-wider font-extrabold shrink-0 leading-none">
                                   Admin
                                 </span>
@@ -2281,7 +2288,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                         </div>
                       </div>
 
-                      {userProfile?.role === "Admin" && (
+                      {isAdmin && (
                         <>
                           <button
                             onClick={() => {
@@ -2526,6 +2533,11 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           isOpen={showLeaderboard}
           onClose={() => setShowLeaderboard(false)}
           currentUserUsername={userProfile?.username || currentUser?.username}
+          isAdmin={isAdmin}
+          onOpenUserManager={() => {
+            setShowLeaderboard(false);
+            setIsUserManagerOpen(true);
+          }}
         />
       </Suspense>
 
@@ -2543,9 +2555,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             uid: updatedUser.uid || updatedUser.id,
             displayName: updatedUser.displayName,
             username: updatedUser.username,
-            avatarUrl: updatedUser.photoURL,
+            avatarUrl: updatedUser.photoURL || updatedUser.avatarUrl || "preset-1",
             preferredColor: updatedUser.preferredColor,
-            role: updatedUser.role,
+            role: ((updatedUser.role && updatedUser.role.toLowerCase() === "admin") || updatedUser.username?.toLowerCase() === "admin") ? "Admin" : "User",
             shareBag: !!updatedUser.shareBag,
             shareToken: updatedUser.shareToken, pendingFriendRequestsCount: userProfile?.pendingFriendRequestsCount || 0
           });
@@ -2557,9 +2569,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             uid: mockUser.uid || mockUser.id,
             displayName: mockUser.displayName,
             username: mockUser.username,
-            avatarUrl: mockUser.photoURL,
+            avatarUrl: mockUser.photoURL || mockUser.avatarUrl || "preset-1",
             preferredColor: mockUser.preferredColor,
-            role: mockUser.role,
+            role: ((mockUser.role && mockUser.role.toLowerCase() === "admin") || mockUser.username?.toLowerCase() === "admin") ? "Admin" : "User",
             shareBag: !!mockUser.shareBag,
             shareToken: mockUser.shareToken, pendingFriendRequestsCount: mockUser.pendingFriendRequestsCount || 0
           });
@@ -2978,7 +2990,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       )}
 
       {isUserManagerOpen && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
           <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="flex justify-between items-center p-5 border-b border-neutral-800 bg-neutral-950/60">

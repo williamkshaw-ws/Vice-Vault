@@ -24,3 +24,9 @@ scratch/
 *.js
 *.cjs
 *.mjs
+
+# Xcode & Capacitor
+ios/App/Pods/
+ios/App/.build/
+*.xcuserdata
+ios/App/App/public/

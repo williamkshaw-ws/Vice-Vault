@@ -21,9 +21,9 @@ export function useAuth() {
           uid: parsed.uid || parsed.id || "",
           displayName: parsed.displayName || "User",
           username: parsed.username || "",
-          avatarUrl: parsed.photoURL || "initials",
+          avatarUrl: parsed.photoURL || parsed.avatarUrl || "preset-1",
           preferredColor: parsed.preferredColor || "#2563eb",
-          role: (parsed.role && parsed.role.toLowerCase() === "admin") ? "Admin" : "User",
+          role: ((parsed.role && parsed.role.toLowerCase() === "admin") || parsed.username?.toLowerCase() === "admin") ? "Admin" : "User",
           shareBag: !!parsed.shareBag,
           shareToken: parsed.shareToken,
           pendingFriendRequestsCount: parsed.pendingFriendRequestsCount || 0,
@@ -110,7 +110,7 @@ export function useAuth() {
 
   // Load mock user cloud data when mock user logs in or is loaded on mount
   useEffect(() => {
-    if (currentUser && (currentUser as any).isMock) {
+    if (currentUser && ((currentUser as any).isMock || (currentUser as any).token)) {
       fetch(`/api/users/${currentUser.uid}/profile`, { headers: {} })
         .then(async (res) => {
           if (res.ok) {
@@ -120,9 +120,9 @@ export function useAuth() {
                 uid: data.uid || data.id,
                 displayName: data.displayName || "User",
                 username: data.username || "",
-                avatarUrl: data.photoURL || "initials",
+                avatarUrl: data.photoURL || data.avatarUrl || "preset-1",
                 preferredColor: data.preferredColor || "#2563eb",
-                role: (data.role && data.role.toLowerCase() === "admin") ? "Admin" : "User",
+                role: ((data.role && data.role.toLowerCase() === "admin") || data.username?.toLowerCase() === "admin") ? "Admin" : "User",
                 shareBag: !!data.shareBag,
                 shareToken: data.shareToken, 
                 pendingFriendRequestsCount: data.pendingFriendRequestsCount || 0,
@@ -134,7 +134,9 @@ export function useAuth() {
                 if (existing) {
                   const parsed = JSON.parse(existing);
                   if (parsed.token) data.token = parsed.token;
+                  if (parsed.isMock !== undefined) data.isMock = parsed.isMock;
                 }
+                data.isMock = true;
                 localStorage.setItem("vice_vault_mock_user", JSON.stringify(data));
               } catch(e) {}
             }
