@@ -2424,42 +2424,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       </header>
 
       {/* Main Single-View Workspace */}
-      <main id="main-content" className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main id="main-content" className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 lg:pb-8">
         
-        {/* Mobile View Tab Switcher */}
-        {currentUser && (
-          <div className="lg:hidden flex p-1.5 bg-neutral-950 border border-neutral-850 rounded-2xl mb-6 shadow-md">
-            <button
-              onClick={() => {
-                nativeHaptics.selectionChanged();
-                setMobileTab("bag");
-              }}
-              className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                mobileTab === "bag"
-                  ? "bg-accent text-black font-extrabold shadow-sm"
-                  : "text-neutral-400 hover:text-white"
-              }`}
-            >
-              <GolfBagIcon className="w-4 h-4" />
-              <span>My Bag</span>
-            </button>
-            <button
-              onClick={() => {
-                nativeHaptics.selectionChanged();
-                setMobileTab("catalog");
-              }}
-              className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                mobileTab === "catalog"
-                  ? "bg-accent text-black font-extrabold shadow-sm"
-                  : "text-neutral-400 hover:text-white"
-              }`}
-            >
-              <BallVaultIcon className={`w-4 h-4 ${mobileTab === "catalog" ? "text-neutral-950" : "text-neutral-400"}`} />
-              <span>Ball Vault</span>
-            </button>
-          </div>
-        )}
-
         {/* Responsive Grid layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
@@ -2524,7 +2490,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       </main>
 
       {/* Styled Footer space */}
-      <footer className="border-t border-neutral-850 bg-neutral-950 py-6 mt-12 text-neutral-600 text-xs">
+      <footer className="border-t border-neutral-850 bg-neutral-950 py-6 mt-12 pb-28 lg:pb-6 text-neutral-600 text-xs">
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <span>© 2026 Golf Ball Vault.</span>
@@ -2534,6 +2500,89 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           </div>
         </div>
       </footer>
+
+      {/* Mobile Bottom Navigation Bar (Persistent iOS Tab Bar) */}
+      {currentUser && (
+        <nav 
+          aria-label="Mobile Navigation"
+          className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-neutral-950/90 backdrop-blur-xl border-t border-neutral-850/80 px-4 pt-2 shadow-[0_-8px_30px_rgba(0,0,0,0.5)] transition-all"
+          style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 12px)" }}
+        >
+          <div className="max-w-md mx-auto grid grid-cols-2 gap-3">
+            {/* Left: My Bag */}
+            <button
+              type="button"
+              onClick={() => {
+                if (mobileTab !== "bag") {
+                  nativeHaptics.selectionChanged();
+                  setMobileTab("bag");
+                }
+              }}
+              className={`flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition-all cursor-pointer relative select-none active:scale-95 ${
+                mobileTab === "bag"
+                  ? "bg-accent/15 text-accent shadow-sm"
+                  : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/40"
+              }`}
+            >
+              <div className="relative flex items-center justify-center">
+                <GolfBagIcon className={`w-5 h-5 transition-transform duration-200 ${mobileTab === "bag" ? "scale-110" : ""}`} />
+                {totalOwnedCount > 0 && (
+                  <span 
+                    className={`absolute -top-1.5 -right-3 text-[9px] font-black px-1.5 py-0.2 rounded-full font-mono transition-colors ${
+                      mobileTab === "bag" 
+                        ? "bg-accent text-black font-extrabold shadow-sm" 
+                        : "bg-neutral-800 text-neutral-300 border border-neutral-700"
+                    }`}
+                  >
+                    {totalOwnedCount}
+                  </span>
+                )}
+              </div>
+              <span className={`text-[11px] uppercase tracking-wider font-mono mt-1 ${
+                mobileTab === "bag" ? "font-black text-accent" : "font-semibold text-neutral-400"
+              }`}>
+                My Bag
+              </span>
+            </button>
+
+            {/* Right: Ball Vault */}
+            <button
+              type="button"
+              onClick={() => {
+                if (mobileTab !== "catalog") {
+                  nativeHaptics.selectionChanged();
+                  setMobileTab("catalog");
+                }
+              }}
+              className={`flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition-all cursor-pointer relative select-none active:scale-95 ${
+                mobileTab === "catalog"
+                  ? "bg-accent/15 text-accent shadow-sm"
+                  : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/40"
+              }`}
+            >
+              <div className="relative flex items-center justify-center">
+                <BallVaultIcon className={`w-5 h-5 transition-transform duration-200 ${mobileTab === "catalog" ? "scale-110 text-accent" : "text-neutral-400"}`} />
+                {catalog.length > 0 && (
+                  <span 
+                    className={`absolute -top-1.5 -right-3.5 text-[9px] font-black px-1.5 py-0.2 rounded-full font-mono transition-colors ${
+                      mobileTab === "catalog" 
+                        ? "bg-accent text-black font-extrabold shadow-sm" 
+                        : "bg-neutral-800 text-neutral-300 border border-neutral-700"
+                    }`}
+                  >
+                    {catalog.length}
+                  </span>
+                )}
+              </div>
+              <span className={`text-[11px] uppercase tracking-wider font-mono mt-1 ${
+                mobileTab === "catalog" ? "font-black text-accent" : "font-semibold text-neutral-400"
+              }`}>
+                Ball Vault
+              </span>
+            </button>
+          </div>
+        </nav>
+      )}
 
       {/* Leaderboard Modal */}
       <Suspense fallback={null}>
