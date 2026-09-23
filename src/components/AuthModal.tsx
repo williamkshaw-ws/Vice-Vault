@@ -266,61 +266,82 @@ export default function AuthModal({
     setError(null);
     setIsLoading(true);
 
-    if (!isFirebaseConfigured || !auth) {
-      try {
-        const res = await fetch("/api/auth/signin", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ email, password })
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || "Failed to log in.");
-        }
-        
+    const inputEmail = email.trim();
+    const inputPassword = password;
+
+    try {
+      // 1. Primary backend authentication against live server
+      const res = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email: inputEmail, password: inputPassword })
+      });
+      const data = await res.json();
+      
+      if (res.ok) {
         localStorage.setItem("vice_vault_mock_user", JSON.stringify(data));
-        setSuccessMsg("Logged in locally!");
+        setSuccessMsg("Logged in successfully!");
+
+        // Optional background Firebase Auth session with 2s safety timeout
+        if (isFirebaseConfigured && auth) {
+          try {
+            const resolvedEmail = data.email || (inputEmail.includes("@") ? inputEmail : `${inputEmail}@vault.com`);
+            const fbPromise = signInWithEmailAndPassword(auth, resolvedEmail, inputPassword);
+            const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 2000));
+            await Promise.race([fbPromise, timeoutPromise]);
+          } catch (fbErr) {
+            console.warn("Background Firebase auth session skipped:", fbErr);
+          }
+        }
+
         setTimeout(() => {
           onMockLogin?.(data);
           onClose();
           setIsLoading(false);
-        }, 1000);
+        }, 500);
         return;
-      } catch (err: any) {
-        setError(err.message || "Local auth failed.");
-        setIsLoading(false);
-        return;
+      } else {
+        throw new Error(data.error || "Invalid email/username or password.");
       }
-    }
-
-    let resolvedEmail = email.trim();
-    if (!resolvedEmail.includes("@")) {
-      try {
-        const resolveRes = await fetch(`/api/auth/resolve-email?username=${encodeURIComponent(resolvedEmail)}`);
-        if (!resolveRes.ok) {
-          const resolveData = await resolveRes.json();
-          throw new Error(resolveData.error || `Username '${resolvedEmail}' not found.`);
-        }
-        const resolveData = await resolveRes.json();
-        resolvedEmail = resolveData.email;
-      } catch (err: any) {
-        setError(err.message || "Failed to resolve username to email.");
-        setIsLoading(false);
-        return;
-      }
-    }
-
-    try {
-      await signInWithEmailAndPassword(auth, resolvedEmail, password);
-      setSuccessMsg("Logged in successfully!");
-      setTimeout(() => {
-        onClose();
-        setIsLoading(false);
-      }, 1000);
     } catch (err: any) {
-      console.error("Sign in error:", err);
+      console.warn("Primary signin failed:", err);
+
+      // Fallback: If backend was completely unreachable, try client Firebase sign in
+      if (isFirebaseConfigured && auth) {
+        let resolvedEmail = inputEmail;
+        if (!resolvedEmail.includes("@")) {
+          try {
+            const resolveRes = await fetch(`/api/auth/resolve-email?username=${encodeURIComponent(resolvedEmail)}`);
+            if (resolveRes.ok) {
+              const resolveData = await resolveRes.json();
+              resolvedEmail = resolveData.email || `${resolvedEmail}@vault.com`;
+            }
+          } catch (rErr) {
+            resolvedEmail = `${resolvedEmail}@vault.com`;
+          }
+        }
+
+        try {
+          const fbPromise = signInWithEmailAndPassword(auth, resolvedEmail, inputPassword);
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Authentication request timed out. Please check your network connection.")), 6000)
+          );
+          await Promise.race([fbPromise, timeoutPromise]);
+          setSuccessMsg("Logged in successfully!");
+          setTimeout(() => {
+            onClose();
+            setIsLoading(false);
+          }, 500);
+          return;
+        } catch (fbErr: any) {
+          setError(fbErr.message || "Failed to log in. Please check credentials.");
+          setIsLoading(false);
+          return;
+        }
+      }
+
       setError(err.message || "Failed to log in. Please check credentials.");
       setIsLoading(false);
     }
@@ -374,33 +395,30 @@ export default function AuthModal({
         throw new Error(data.error || "Failed to create account.");
       }
 
-      if (!isFirebaseConfigured || !auth) {
-        localStorage.setItem("vice_vault_mock_user", JSON.stringify(data));
-        setSuccessMsg("Local account created!");
-        setTimeout(() => {
-          onMockLogin?.(data);
-          onClose();
-          setIsLoading(false);
-        }, 1000);
-        return;
-      }
-
-      // Real Firebase environment: sign in the user client-side now that the server created their Auth/Firestore record
-      await signInWithEmailAndPassword(auth, email, password);
-
-      // Ensure client-side user profile displayName and photoURL match
-      if (auth.currentUser) {
-        await updateProfile(auth.currentUser, { 
-          displayName: displayName.trim(),
-          photoURL: finalAvatar
-        });
-      }
-
+      localStorage.setItem("vice_vault_mock_user", JSON.stringify(data));
       setSuccessMsg("Account created successfully!");
+
+      if (isFirebaseConfigured && auth) {
+        try {
+          const fbPromise = signInWithEmailAndPassword(auth, email, password);
+          const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 2000));
+          await Promise.race([fbPromise, timeoutPromise]);
+          if (auth.currentUser) {
+            await updateProfile(auth.currentUser, { 
+              displayName: displayName.trim(),
+              photoURL: finalAvatar
+            }).catch(() => {});
+          }
+        } catch (fbErr) {
+          console.warn("Background Firebase signup sync skipped:", fbErr);
+        }
+      }
+
       setTimeout(() => {
+        onMockLogin?.(data);
         onClose();
         setIsLoading(false);
-      }, 1000);
+      }, 500);
     } catch (err: any) {
       console.error("Sign up error:", err);
       setError(err.message || "Failed to create account.");

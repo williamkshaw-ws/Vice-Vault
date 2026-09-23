@@ -4,7 +4,8 @@
  */
 
 import { initializeApp, getApp, getApps } from "firebase/app";
-import { getAuth, Auth } from "firebase/auth";
+import { initializeAuth, getAuth, indexedDBLocalPersistence, Auth } from "firebase/auth";
+import { Capacitor } from "@capacitor/core";
 import { 
   initializeFirestore, 
   Firestore, 
@@ -81,7 +82,17 @@ if (isConfigured) {
     } else {
       app = getApp();
     }
-    auth = getAuth(app);
+    if (Capacitor.isNativePlatform()) {
+      try {
+        auth = initializeAuth(app, {
+          persistence: indexedDBLocalPersistence
+        });
+      } catch (authInitErr) {
+        auth = getAuth(app);
+      }
+    } else {
+      auth = getAuth(app);
+    }
     try {
       db = initializeFirestore(app, {
         ignoreUndefinedProperties: true,
