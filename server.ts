@@ -558,9 +558,28 @@ app.use("/api", async (req, res, next) => {
   } else if (isFirebaseAdminInitialized) {
     try {
       const decodedToken = await admin.auth().verifyIdToken(token);
-      (req as any).user = { uid: decodedToken.uid };
+      (req as any).user = { uid: decodedToken.uid, email: decodedToken.email };
+      await resolveUserDocId(decodedToken.uid, decodedToken.email);
     } catch (err) {
       // Invalid Firebase token
+    }
+  } else {
+    // Local dev mode fallback for Firebase Auth ID tokens when service-account.json is absent
+    try {
+      const parts = token.split(".");
+      if (parts.length === 3) {
+        const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
+        if (payload && (payload.user_id || payload.sub)) {
+          const uid = payload.user_id || payload.sub;
+          const email = payload.email;
+          if (!payload.exp || payload.exp * 1000 > Date.now()) {
+            (req as any).user = { uid, email };
+            await resolveUserDocId(uid, email);
+          }
+        }
+      }
+    } catch (jwtErr) {
+      // Invalid JWT format
     }
   }
   next();
@@ -1423,33 +1442,10 @@ if (serviceAccountConfig) {
   }
 }
 
-// User-verification middleware helper
-async function verifyAdmin(userId: string | undefined): Promise<boolean> {
-  if (!userId) return false;
-  if (dbAdmin) {
-    try {
-      const resolvedId = await resolveUserDocId(userId);
-      const docRef = dbAdmin.collection("users").doc(resolvedId);
-      const docSnap = await docRef.get();
-      if (docSnap.exists) {
-        const role = docSnap.data()?.role;
-        return role && typeof role === "string" && role.toLowerCase() === "admin";
-      }
-    } catch (e) {
-      console.error("verifyAdmin failed in Firebase Admin SDK:", e);
-    }
-    return false;
-  }
-  const users = loadUsers();
-  const user = users.find(u => u.uid === userId);
-  return user ? user.role?.toLowerCase() === "admin" : false;
-}
-
-
 // Async Database Helpers
-async function resolveUserDocId(uid: string): Promise<string> {
+async function resolveUserDocId(uid: string, emailHint?: string): Promise<string> {
   if (!uid) return "";
-  if (uid.startsWith("u-")) return uid;
+  if (uid === "u-admin" || uid === "u-user") return uid;
   if (dbAdmin) {
     try {
       let q = await dbAdmin.collection("users").where("authUid", "==", uid).get();
@@ -1459,7 +1455,8 @@ async function resolveUserDocId(uid: string): Promise<string> {
       if (!q.empty) {
         return q.docs[0].id;
       }
-      const qEmail = await dbAdmin.collection("users").where("email", "==", uid).get();
+      const lookupEmail = emailHint || uid;
+      const qEmail = await dbAdmin.collection("users").where("email", "==", lookupEmail).get();
       if (!qEmail.empty) {
         return qEmail.docs[0].id;
       }
@@ -1468,10 +1465,57 @@ async function resolveUserDocId(uid: string): Promise<string> {
     }
   }
   const users = loadUsers();
-  const u = users.find(x => x.authUid === uid || x.uid === uid || x.email === uid);
-  if (u) return u.uid;
+  const targetEmail = (emailHint || uid).trim().toLowerCase();
+  const u = users.find(x => 
+    x.authUid === uid || 
+    x.uid === uid || 
+    (x.email && x.email.toLowerCase() === targetEmail)
+  );
+  if (u) {
+    if (!u.authUid && !uid.startsWith("u-")) {
+      u.authUid = uid;
+      saveUsers(users);
+    }
+    return u.uid;
+  }
   return uid;
 }
+
+// User-verification middleware helper
+async function verifyAdmin(userId: string | undefined, emailHint?: string): Promise<boolean> {
+  if (!userId) return false;
+  if (userId === "u-admin") return true;
+
+  const resolvedId = await resolveUserDocId(userId, emailHint);
+  if (resolvedId === "u-admin") return true;
+
+  if (dbAdmin) {
+    try {
+      const docRef = dbAdmin.collection("users").doc(resolvedId);
+      const docSnap = await docRef.get();
+      if (docSnap.exists) {
+        const data = docSnap.data();
+        const role = data?.role;
+        return (role && typeof role === "string" && role.toLowerCase() === "admin") || data?.username?.toLowerCase() === "admin";
+      }
+    } catch (e) {
+      console.error("verifyAdmin failed in Firebase Admin SDK:", e);
+    }
+    return false;
+  }
+  const users = loadUsers();
+  const user = users.find(u => 
+    u.uid === resolvedId || 
+    u.uid === userId || 
+    u.authUid === userId || 
+    (emailHint && u.email?.toLowerCase() === emailHint.toLowerCase())
+  );
+  if (user) {
+    return user.role?.toLowerCase() === "admin" || user.username?.toLowerCase() === "admin";
+  }
+  return false;
+}
+
 
 // Async Database Helpers
 async function getUsersList(): Promise<UserProfile[]> {
@@ -2448,12 +2492,19 @@ app.get("/api/friends/:id/bag/:friendUsername", async (req, res) => {
 app.get("/api/users/:uid/locker", async (req, res) => {
   const { uid } = req.params;
   const actingUserId = (req as any).user?.uid as string | undefined;
+  const actingEmail = (req as any).user?.email as string | undefined;
   
-  if (!actingUserId || (actingUserId !== uid && !(await verifyAdmin(actingUserId)))) {
+  const resolvedUid = await resolveUserDocId(uid, actingEmail);
+  const resolvedActingId = actingUserId ? await resolveUserDocId(actingUserId, actingEmail) : undefined;
+
+  const isAdmin = await verifyAdmin(actingUserId, actingEmail);
+  const isSelf = actingUserId === uid || resolvedActingId === resolvedUid || actingUserId === resolvedUid;
+  
+  if (!actingUserId || (!isSelf && !isAdmin)) {
     return res.status(403).json({ error: "Access Denied." });
   }
 
-  const balls = await getUserLocker(uid);
+  const balls = await getUserLocker(resolvedUid);
   res.json({ balls });
 });
 
@@ -2499,8 +2550,15 @@ app.get("/api/share/:token", async (req, res) => {
 app.post("/api/users/:uid/locker", async (req, res) => {
   const { uid } = req.params;
   const actingUserId = (req as any).user?.uid as string | undefined;
+  const actingEmail = (req as any).user?.email as string | undefined;
   
-  if (!actingUserId || (actingUserId !== uid && !(await verifyAdmin(actingUserId)))) {
+  const resolvedUid = await resolveUserDocId(uid, actingEmail);
+  const resolvedActingId = actingUserId ? await resolveUserDocId(actingUserId, actingEmail) : undefined;
+
+  const isAdmin = await verifyAdmin(actingUserId, actingEmail);
+  const isSelf = actingUserId === uid || resolvedActingId === resolvedUid || actingUserId === resolvedUid;
+  
+  if (!actingUserId || (!isSelf && !isAdmin)) {
     return res.status(403).json({ error: "Access Denied." });
   }
 
@@ -2513,18 +2571,18 @@ app.post("/api/users/:uid/locker", async (req, res) => {
     for (let i = 0; i < balls.length; i++) {
       const b = balls[i];
       if (b.customImage?.startsWith('data:image/')) {
-        b.customImage = await uploadBase64ToStorage(b.customImage, `users/${uid}`);
+        b.customImage = await uploadBase64ToStorage(b.customImage, `users/${resolvedUid}`);
       }
       if (b.customImageSleeve?.startsWith('data:image/')) {
-        b.customImageSleeve = await uploadBase64ToStorage(b.customImageSleeve, `users/${uid}`);
+        b.customImageSleeve = await uploadBase64ToStorage(b.customImageSleeve, `users/${resolvedUid}`);
       }
       if (b.customImageBox?.startsWith('data:image/')) {
-        b.customImageBox = await uploadBase64ToStorage(b.customImageBox, `users/${uid}`);
+        b.customImageBox = await uploadBase64ToStorage(b.customImageBox, `users/${resolvedUid}`);
       }
     }
   }
 
-  await saveUserLocker(uid, balls);
+  await saveUserLocker(resolvedUid, balls);
   res.json({ success: true });
 });
 
@@ -2625,10 +2683,12 @@ app.post("/api/users/:uid/wishlist/clear", async (req, res) => {
 // Fetch user profile details (Name, Username, avatarUrl, preferredColor, role)
 app.get("/api/users/:id/profile", async (req, res) => {
   const { id } = req.params;
-  const resolvedId = await resolveUserDocId(id);
   const actingUserId = (req as any).user?.uid as string | undefined;
+  const actingEmail = (req as any).user?.email as string | undefined;
+  const resolvedId = await resolveUserDocId(id, actingEmail);
+  const resolvedActingId = actingUserId ? await resolveUserDocId(actingUserId, actingEmail) : undefined;
   
-  const isOwnerOrAdmin = actingUserId === resolvedId || (await verifyAdmin(actingUserId));
+  const isOwnerOrAdmin = actingUserId === id || actingUserId === resolvedId || resolvedActingId === resolvedId || (await verifyAdmin(actingUserId, actingEmail));
   
   if (dbAdmin) {
     try {
@@ -2950,7 +3010,8 @@ app.get("/api/leaderboard", async (req, res) => {
 // Fetch all registered profile users
 app.get("/api/users", async (req, res) => {
   const actingUserId = (req as any).user?.uid as string | undefined;
-  if (!(await verifyAdmin(actingUserId))) {
+  const actingEmail = (req as any).user?.email as string | undefined;
+  if (!(await verifyAdmin(actingUserId, actingEmail))) {
     return res.status(403).json({ error: "Access Denied. Only Admin users can view user accounts." });
   }
   const users = await getUsersList();
@@ -2960,7 +3021,8 @@ app.get("/api/users", async (req, res) => {
 // Create a new customized profile user (Admin only)
 app.post("/api/users", async (req, res) => {
   const actingUserId = (req as any).user?.uid as string | undefined;
-  if (!(await verifyAdmin(actingUserId))) {
+  const actingEmail = (req as any).user?.email as string | undefined;
+  if (!(await verifyAdmin(actingUserId, actingEmail))) {
     return res.status(403).json({ error: "Access Denied. Only Admin users can create user accounts." });
   }
 
@@ -3029,6 +3091,7 @@ app.patch("/api/users/:id/role", async (req, res) => {
   const { id } = req.params;
   const { role } = req.body;
   const actingUserId = (req as any).user?.uid as string | undefined;
+  const actingEmail = (req as any).user?.email as string | undefined;
 
   const normalizedRole = role && role.toLowerCase() === "admin" ? "Admin" : role && role.toLowerCase() === "user" ? "User" : null;
   if (!normalizedRole) {
@@ -3036,7 +3099,7 @@ app.patch("/api/users/:id/role", async (req, res) => {
   }
 
   // To check that the user appointing roles is an Admin
-  if (!(await verifyAdmin(actingUserId))) {
+  if (!(await verifyAdmin(actingUserId, actingEmail))) {
     return res.status(403).json({ error: "Unauthorized. Only administrators can change roles." });
   }
 
@@ -3057,13 +3120,14 @@ app.patch("/api/users/:id", async (req, res) => {
   const { id } = req.params;
   const { displayName, username, role, preferredColor, avatarUrl, email, password } = req.body;
   const actingUserId = (req as any).user?.uid as string | undefined;
+  const actingEmail = (req as any).user?.email as string | undefined;
 
-  if (!(await verifyAdmin(actingUserId))) {
+  if (!(await verifyAdmin(actingUserId, actingEmail))) {
     return res.status(403).json({ error: "Access Denied. Only Admin users can update user details." });
   }
 
   const resolvedId = await resolveUserDocId(id);
-  const resolvedActingId = await resolveUserDocId(actingUserId);
+  const resolvedActingId = await resolveUserDocId(actingUserId, actingEmail);
   const users = await getUsersList();
   const targetUser = users.find(u => u.uid === resolvedId);
   if (!targetUser) {
@@ -3252,14 +3316,15 @@ app.patch("/api/users/:id", async (req, res) => {
 app.delete("/api/users/:id", async (req, res) => {
   const { id } = req.params;
   const actingUserId = (req as any).user?.uid as string | undefined;
+  const actingEmail = (req as any).user?.email as string | undefined;
 
   if (!actingUserId) {
     return res.status(401).json({ error: "Authentication required to delete an account." });
   }
 
   const resolvedId = await resolveUserDocId(id);
-  const resolvedActingId = await resolveUserDocId(actingUserId);
-  const isAdmin = await verifyAdmin(actingUserId);
+  const resolvedActingId = await resolveUserDocId(actingUserId, actingEmail);
+  const isAdmin = await verifyAdmin(actingUserId, actingEmail);
   const isSelf = resolvedId && resolvedActingId && resolvedId === resolvedActingId;
 
   if (!isAdmin && !isSelf) {

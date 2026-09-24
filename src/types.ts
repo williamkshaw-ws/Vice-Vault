@@ -29,8 +29,16 @@ export enum BallCondition {
   NEW = "Brand New",
   MINT = "Near-Mint / Scuffed-0",
   PLAYED = "Played / Scuffed-1",
-  SHAG = "Shag / Water Ball"
+  DAMAGED = "Damaged"
 }
+
+// Backward compatibility alias (non-enumerable so Object.values stays clean)
+Object.defineProperty(BallCondition, 'SHAG', {
+  value: BallCondition.DAMAGED,
+  enumerable: false,
+  configurable: true,
+  writable: true
+});
 
 export interface GolfBall {
   id: string;

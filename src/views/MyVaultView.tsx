@@ -1,6 +1,6 @@
 import React, { useMemo, useDeferredValue } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RefreshCw, Trophy, Heart, X } from 'lucide-react';
+import { RefreshCw, Trophy, Heart, X, Flag } from 'lucide-react';
 import { GolfBall, CatalogItem, UserProfile, BallCondition } from '../types';
 import OwnedBallCard from '../components/OwnedBallCard';
 import TrophyCase from '../components/TrophyCase';
@@ -117,6 +117,8 @@ interface MyVaultViewProps {
   wFilterVariation: string;
   wFilterYear: string;
   wFilterName: string;
+  activeRound?: any;
+  onOpenRoundModal?: () => void;
 }
 
 export default function MyVaultView({
@@ -154,6 +156,8 @@ export default function MyVaultView({
   wFilterVariation,
   wFilterYear,
   wFilterName,
+  activeRound,
+  onOpenRoundModal,
 }: MyVaultViewProps) {
   const {
     mobileTab,
@@ -312,6 +316,41 @@ export default function MyVaultView({
         </div>
       </div>
 
+      {activeRound && onOpenRoundModal && (
+        <div className="bg-gradient-to-r from-emerald-950/40 via-neutral-900 to-neutral-900 border border-emerald-500/30 p-3.5 rounded-2xl flex items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+              <Flag size={18} className="fill-emerald-400/30" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-white font-bold text-xs truncate font-sans">
+                  {activeRound.courseName || "Round in Progress"}
+                </span>
+                <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 text-[9px] font-mono font-bold uppercase tracking-wider">
+                  {activeRound.holes}H
+                </span>
+              </div>
+              <p className="text-[10px] text-neutral-600 dark:text-neutral-400 font-mono mt-0.5 flex flex-wrap items-center gap-1.5 font-medium">
+                <span>{activeRound.balls.length} included:</span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-semibold">{activeRound.balls.filter((b: any) => b.status === 'survived').length} survived</span>
+                <span className="text-neutral-400">•</span>
+                <span className="text-amber-700 dark:text-amber-400 font-semibold">{activeRound.balls.filter((b: any) => b.status === 'damaged' || b.status === 'scuffed').length} damaged</span>
+                <span className="text-neutral-400">•</span>
+                <span className="text-rose-700 dark:text-rose-400 font-semibold">{activeRound.balls.filter((b: any) => b.status === 'lost').length} lost</span>
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onOpenRoundModal}
+            className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-[10px] uppercase tracking-wider rounded-xl transition-all cursor-pointer shrink-0 font-sans shadow-sm"
+          >
+            Track Round
+          </button>
+        </div>
+      )}
+
       <div className="space-y-4">
         <div className="flex items-center justify-between border-b border-neutral-850 pb-2 gap-2">
           <div className="flex items-center gap-6">
@@ -352,6 +391,22 @@ export default function MyVaultView({
             )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {onOpenRoundModal && (
+              <button
+                type="button"
+                onClick={onOpenRoundModal}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-mono font-bold transition-all cursor-pointer border ${
+                  activeRound
+                    ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/25"
+                    : "bg-neutral-950/60 hover:bg-neutral-900 text-neutral-300 hover:text-white border-neutral-850"
+                }`}
+                title="Track balls during your golf round"
+              >
+                <Flag size={11} className={activeRound ? "text-emerald-400 fill-emerald-400" : "text-accent"} />
+                <span>{activeRound ? "Live Round" : "Round Mode"}</span>
+              </button>
+            )}
+
             {balls.length > 0 && (
               <div className="relative">
                 <select

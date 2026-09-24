@@ -55,7 +55,13 @@
     "name": "Selected Variety",
     "color": "White",
     "customImage": "https://i.ibb.co/xTnPVFx/catalog-1780411756033-40e3-5fec-0320.jpg",
-    "customImageBox": "https://i.ibb.co/wq7NQ9h/76c0edcc1baa.png"
+    "customImageBox": "https://i.ibb.co/wq7NQ9h/76c0edcc1baa.png",
+    "bundleItems": [
+      { "catalogId": "PRO-STANDARD-WHITE", "qty": 3 },
+      { "catalogId": "PRO_PLUS-STANDARD-WHITE", "qty": 3 },
+      { "catalogId": "PRO_SOFT-STANDARD-WHITE", "qty": 3 },
+      { "catalogId": "TOUR-STANDARD-WHITE", "qty": 3 }
+    ]
   },
   {
     "id": "MULTIPLE-VARIETY_PACK-MULTI_COLORED",
@@ -63,7 +69,13 @@
     "name": "Variety Pack",
     "color": "Multi-colored",
     "customImage": "https://i.ibb.co/MxxyDqTG/catalog-1780360045269-4890-503b-df13.jpg",
-    "customImageBox": "https://i.ibb.co/DfQPqPCc/5ca444b1e905.jpg"
+    "customImageBox": "https://i.ibb.co/DfQPqPCc/5ca444b1e905.jpg",
+    "bundleItems": [
+      { "catalogId": "PRO-NEON-LIME", "qty": 3 },
+      { "catalogId": "PRO_PLUS-NEON-LIME", "qty": 3 },
+      { "catalogId": "PRO_SOFT-NEON-RED", "qty": 3 },
+      { "catalogId": "DRIVE-STANDARD-YELLOW", "qty": 3 }
+    ]
   },
   {
     "id": "PRO-101-NEON_LIME",

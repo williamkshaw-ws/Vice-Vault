@@ -10,6 +10,7 @@ import BallVisual from "./BallVisual";
 import { Trash2, Calendar, FileText, ChevronDown, ChevronUp, Check, Save, Edit2, X, Package, MessageSquare, AlertTriangle, Box, Share2, Loader2 } from "lucide-react";
 import { TradingCardRenderer } from "./TradingCardRenderer";
 import { nativeHaptics } from "../utils/native";
+import { getBundleItemsForBall } from "../utils/bagUtils";
 
 interface OwnedBallCardProps {
   key?: string | number;
@@ -43,6 +44,8 @@ export default function OwnedBallCard({
   const catalogItem = catalog.find(c => c.id === (ball.catalogId || ball.id));
   const rarity = catalogItem?.rarity || 'common';
   const totalMade = catalogItem?.totalMade;
+  const bundleItems = getBundleItemsForBall(ball, catalog);
+  const isBundle = bundleItems.length > 0;
 
   const downscaleImageToDataUrl = async (url: string | undefined): Promise<string | undefined> => {
     if (!url) return undefined;
@@ -356,7 +359,7 @@ export default function OwnedBallCard({
         return "text-emerald-700 bg-emerald-100 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-950/30 dark:border-emerald-900";
       case BallCondition.PLAYED:
         return "text-amber-700 bg-amber-100 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-900";
-      case BallCondition.SHAG:
+      case BallCondition.DAMAGED:
         return "text-rose-700 bg-rose-100 border-rose-200 dark:text-rose-400 dark:bg-rose-950/30 dark:border-rose-900";
       default:
         return "text-neutral-550 bg-neutral-100 border-neutral-200 dark:text-neutral-400 dark:bg-neutral-950/40 dark:border-neutral-900";
@@ -746,7 +749,7 @@ export default function OwnedBallCard({
                     {ball.model}
                   </span>
                   <span className={`text-[10px] font-mono border px-2 py-0.5 rounded leading-none shrink-0 select-none ${
-                    ball.bundleItems && ball.bundleItems.length > 0
+                    isBundle
                       ? "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/60 text-amber-700 dark:text-amber-400"
                       : ball.packageType === 'box'
                       ? "bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-900/60 text-blue-700 dark:text-blue-400"
@@ -754,7 +757,7 @@ export default function OwnedBallCard({
                       ? "bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-900/60 text-purple-700 dark:text-purple-400"
                       : "bg-teal-50 dark:bg-teal-950/40 border-teal-200 dark:border-teal-900/60 text-teal-700 dark:text-teal-400"
                   }`}>
-                    {ball.bundleItems && ball.bundleItems.length > 0 ? 'Bundle' : ball.packageType === 'box' ? 'Box' : ball.packageType === 'sleeve' ? 'Sleeve' : 'Ball'}
+                    {isBundle ? 'Bundle' : ball.packageType === 'box' ? 'Box' : ball.packageType === 'sleeve' ? 'Sleeve' : 'Ball'}
                   </span>
                   {ball.year && (
                     <span className="text-[10px] font-mono bg-neutral-900 border border-neutral-800 text-neutral-450 px-2 py-0.5 rounded leading-none shrink-0 select-none">
@@ -874,8 +877,8 @@ export default function OwnedBallCard({
           <span className="text-[10px] font-mono text-neutral-500 uppercase">Quantity Owned:</span>
           
           <div className="px-3 py-1 bg-neutral-950 rounded-lg border border-neutral-850 text-xs font-mono font-black text-[#2563eb]">
-            {ball.bundleItems && ball.bundleItems.length > 0 ? (() => {
-              const bundleTotal = ball.bundleItems.reduce((acc, b) => acc + b.qty, 0);
+            {isBundle ? (() => {
+              const bundleTotal = bundleItems.reduce((acc, b) => acc + b.qty, 0);
               const numBundles = Math.max(1, Math.round(ball.quantity / bundleTotal));
               return (
                 <span>
@@ -922,7 +925,7 @@ export default function OwnedBallCard({
       </div>
 
       {/* Bundle Contents Accordion */}
-      {ball.bundleItems && ball.bundleItems.length > 0 && (
+      {isBundle && (
         <div className="mt-4 pt-3 border-t border-neutral-800/70">
           <button 
             type="button"
@@ -930,13 +933,13 @@ export default function OwnedBallCard({
             className="flex items-center gap-2 text-xs font-bold text-[#2563eb] hover:text-[#3b82f6] uppercase tracking-wider transition-colors"
           >
             <Box className="w-4 h-4" />
-            Contains {ball.bundleItems.reduce((acc, item) => acc + item.qty, 0)} Items
+            Contains {bundleItems.reduce((acc, item) => acc + item.qty, 0)} Items
             {showBundleContents ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
           
           {showBundleContents && (
             <div className="mt-3 space-y-2 pl-6 animate-fade-in">
-              {ball.bundleItems.map((item, idx) => {
+              {bundleItems.map((item, idx) => {
                 const catItem = catalog.find(c => c.id === item.catalogId);
                 return (
                   <div key={idx} className="flex items-center gap-2 text-xs text-neutral-300">

@@ -13,7 +13,7 @@ const FriendsPortal = React.lazy(() => import("./components/FriendsPortal"));
 import MetricCards from "./components/MetricCards";
 import { useAuth } from "./hooks/useAuth";
 import { useBallLocker } from "./hooks/useBallLocker";
-import { filterLegacyBalls, safeJSONParse } from "./utils/bagUtils";
+import { filterLegacyBalls, safeJSONParse, getBundleItemsForBall } from "./utils/bagUtils";
 import { idbGet, idbSet, idbDelete, migrateLocalStorageToIdb } from "./utils/storage";
 import { initNativeApp } from "./utils/nativeBridge";
 import { getAuthHeaders } from "./utils/authHeaders";
@@ -24,6 +24,8 @@ import { ACCENT_COLORS, sanitizeId } from "./utils";
 import TrophyCase from "./components/TrophyCase";
 const ImportExportModal = React.lazy(() => import("./components/ImportExportModal"));
 const LeaderboardModal = React.lazy(() => import("./components/LeaderboardModal"));
+const RoundTrackerModal = React.lazy(() => import("./components/RoundTrackerModal"));
+import type { RoundBallInPlay, GolfRound } from "./components/RoundTrackerModal";
 import VaultFilterBar from "./components/VaultFilterBar";
 import BallVisual from "./components/BallVisual";
 import CatalogView from "./views/CatalogView";
@@ -62,6 +64,7 @@ import {
   Users,
   Heart,
   Trophy,
+  Flag,
   WifiOff,
   Wifi
 } from "lucide-react";
@@ -255,7 +258,7 @@ export default function App() {
   // Toast state for beautiful UI notifications matching site theme with optional action button (e.g. Undo)
   const [toast, setToast] = useState<{ 
     message: string; 
-    type: "success" | "error"; 
+    type: "success" | "error" | "info"; 
     action?: { label: string; onClick: () => void } 
   } | null>(null);
 
@@ -268,7 +271,7 @@ export default function App() {
 
   const showToast = (
     message: string, 
-    type: "success" | "error" = "success",
+    type: "success" | "error" | "info" = "success",
     action?: { label: string; onClick: () => void }
   ) => {
     setToast({ message, type, action });
@@ -337,7 +340,7 @@ export default function App() {
     isLoadingCloudData, 
     isCloudDataLoaded, 
     setIsCloudDataLoaded 
-  } = useBallLocker(currentUser);
+  } = useBallLocker(currentUser, userProfile);
 
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [isImportExportModalOpen, setIsImportExportModalOpen] = useState(false);
@@ -500,6 +503,16 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   const [bagModalErrorMessage, setBagModalErrorMessage] = useState<string | null>(null);
   const [isSavingUserBag, setIsSavingUserBag] = useState(false);
 
+  // Round Mode (In-Play & Loss Tracker)
+  const [isRoundTrackerOpen, setIsRoundTrackerOpen] = useState(false);
+  const [activeRound, setActiveRound] = useState<GolfRound | null>(() => {
+    try {
+      const saved = localStorage.getItem("golf_ball_vault_active_round");
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return null;
+  });
+
   // User Editing States
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
@@ -546,7 +559,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       selectedUserForBag ||
       authModalOpen ||
       deletingUserId ||
-      isImportExportModalOpen
+      isImportExportModalOpen ||
+      isRoundTrackerOpen
     );
     if (isAnyModalOpen) {
       document.body.style.overflow = "hidden";
@@ -556,7 +570,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isUserManagerOpen, isVaultManagerOpen, selectedUserForBag, authModalOpen, deletingUserId, isImportExportModalOpen]);
+  }, [isUserManagerOpen, isVaultManagerOpen, selectedUserForBag, authModalOpen, deletingUserId, isImportExportModalOpen, isRoundTrackerOpen]);
 
   // Load shared locker data if share username is in query param
   useEffect(() => {
@@ -1245,7 +1259,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     syncTimeoutRef.current = setTimeout(async () => {
       try {
         const headers = await getAuthHeaders({ "Content-Type": "application/json" });
-        const res = await fetch(`/api/users/${currentUser.uid}/locker`, {
+        const targetSyncUid = userProfile?.uid || currentUser.uid;
+        const res = await fetch(`/api/users/${targetSyncUid}/locker`, {
           method: "POST",
           headers,
           body: JSON.stringify({ balls })
@@ -1266,7 +1281,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         clearTimeout(syncTimeoutRef.current);
       }
     };
-  }, [balls, currentUser, isCloudDataLoaded, isOnline]);
+  }, [balls, currentUser, userProfile?.uid, isCloudDataLoaded, isOnline]);
 
   // Online / Offline connectivity listener & auto-reconnect sync
   useEffect(() => {
@@ -1275,7 +1290,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       showToast("Back online — syncing data...", "success");
       if (currentUser && balls.length > 0) {
         getAuthHeaders({ "Content-Type": "application/json" }).then(headers => {
-          fetch(`/api/users/${currentUser.uid}/locker`, {
+          const targetSyncUid = userProfile?.uid || currentUser.uid;
+          fetch(`/api/users/${targetSyncUid}/locker`, {
             method: "POST",
             headers,
             body: JSON.stringify({ balls })
@@ -1689,6 +1705,145 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         setBalls((prev) => [ballToDelete, ...prev]);
         showToast(`Restored "${ballName}" to your bag`, "success");
       }
+    });
+  };
+
+  // Apply ball losses and condition downgrades from completed golf round
+  const handleApplyRoundInventory = (ballsInPlay: RoundBallInPlay[]) => {
+    setBalls((prevBalls) => {
+      let updated = [...prevBalls];
+      for (const item of ballsInPlay) {
+        if (item.status === 'lost') {
+          const idx = updated.findIndex(b => b.id === item.ballId);
+          if (idx !== -1) {
+            const ball = updated[idx];
+            // Check if ball was pulled from a variety pack / bundle
+            const bItems = item.bundleCatalogId ? (ball.bundleItems && ball.bundleItems.length > 0 ? ball.bundleItems : getBundleItemsForBall(ball, catalog)) : undefined;
+            if (item.bundleCatalogId && bItems && bItems.length > 0) {
+              const updatedBundleItems = [...bItems];
+              const subIdx = updatedBundleItems.findIndex(s => s.catalogId === item.bundleCatalogId);
+              if (subIdx !== -1) {
+                if (updatedBundleItems[subIdx].qty > 1) {
+                  updatedBundleItems[subIdx] = {
+                    ...updatedBundleItems[subIdx],
+                    qty: updatedBundleItems[subIdx].qty - 1
+                  };
+                } else {
+                  updatedBundleItems.splice(subIdx, 1);
+                }
+              }
+              const newTotalQty = updatedBundleItems.reduce((acc, s) => acc + s.qty, 0);
+              if (newTotalQty <= 0) {
+                updated.splice(idx, 1);
+              } else {
+                updated[idx] = {
+                  ...ball,
+                  quantity: newTotalQty,
+                  bundleItems: updatedBundleItems
+                };
+              }
+            } else {
+              // Standard individual ball deduction
+              if (updated[idx].quantity > 1) {
+                updated[idx] = { ...updated[idx], quantity: updated[idx].quantity - 1 };
+              } else {
+                updated.splice(idx, 1);
+              }
+            }
+          }
+        } else if (item.status === 'damaged' || item.status === 'scuffed') {
+          const targetCond = BallCondition.DAMAGED;
+          const idx = updated.findIndex(b => b.id === item.ballId);
+          if (idx !== -1) {
+            const ball = updated[idx];
+            // Check if ball was pulled from a variety pack / bundle
+            const bItems = item.bundleCatalogId ? (ball.bundleItems && ball.bundleItems.length > 0 ? ball.bundleItems : getBundleItemsForBall(ball, catalog)) : undefined;
+            if (item.bundleCatalogId && bItems && bItems.length > 0) {
+              // 1. Deduct sub-item from variety pack
+              const updatedBundleItems = [...bItems];
+              const subIdx = updatedBundleItems.findIndex(s => s.catalogId === item.bundleCatalogId);
+              if (subIdx !== -1) {
+                if (updatedBundleItems[subIdx].qty > 1) {
+                  updatedBundleItems[subIdx] = {
+                    ...updatedBundleItems[subIdx],
+                    qty: updatedBundleItems[subIdx].qty - 1
+                  };
+                } else {
+                  updatedBundleItems.splice(subIdx, 1);
+                }
+              }
+              const newTotalQty = updatedBundleItems.reduce((acc, s) => acc + s.qty, 0);
+              if (newTotalQty <= 0) {
+                updated.splice(idx, 1);
+              } else {
+                updated[idx] = {
+                  ...ball,
+                  quantity: newTotalQty,
+                  bundleItems: updatedBundleItems
+                };
+              }
+
+              // 2. Deposit 1 individual Damaged ball of this model & color into locker
+              const existingDamagedIdx = updated.findIndex(b =>
+                b.model.toLowerCase() === item.model.toLowerCase() &&
+                b.color.toLowerCase() === item.color.toLowerCase() &&
+                b.condition === targetCond &&
+                (!b.bundleItems || b.bundleItems.length === 0)
+              );
+              if (existingDamagedIdx !== -1) {
+                updated[existingDamagedIdx] = {
+                  ...updated[existingDamagedIdx],
+                  quantity: updated[existingDamagedIdx].quantity + 1
+                };
+              } else {
+                const newDamagedBall: GolfBall = {
+                  id: `BALL-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                  model: item.model,
+                  color: item.color,
+                  quantity: 1,
+                  condition: targetCond,
+                  packageType: 'ea',
+                  customNumber: item.customNumber || 1,
+                  notes: 'Damaged during round (retired from Variety Pack)',
+                  dateAdded: new Date().toLocaleDateString(),
+                  customImage: item.customImage
+                };
+                updated.push(newDamagedBall);
+              }
+            } else {
+              // Standard ball damage handling
+              if (updated[idx].condition === targetCond || (updated[idx].condition as any) === "Shag / Water Ball") {
+                // Already damaged condition
+              } else if (updated[idx].quantity === 1) {
+                updated[idx] = { ...updated[idx], condition: targetCond };
+              } else {
+                updated[idx] = { ...updated[idx], quantity: updated[idx].quantity - 1 };
+                const existingDamagedIdx = updated.findIndex(b =>
+                  b.model === updated[idx].model &&
+                  b.color === updated[idx].color &&
+                  (b.condition === targetCond || (b.condition as any) === "Shag / Water Ball") &&
+                  (!b.bundleItems || b.bundleItems.length === 0)
+                );
+                if (existingDamagedIdx !== -1) {
+                  updated[existingDamagedIdx] = { ...updated[existingDamagedIdx], condition: targetCond, quantity: updated[existingDamagedIdx].quantity + 1 };
+                } else {
+                  const newDamagedBall: GolfBall = {
+                    ...updated[idx],
+                    id: `BALL-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                    quantity: 1,
+                    condition: targetCond,
+                    packageType: 'ea',
+                    notes: 'Retired during round (damaged)',
+                    dateAdded: new Date().toLocaleDateString()
+                  };
+                  updated.push(newDamagedBall);
+                }
+              }
+            }
+          }
+        }
+      }
+      return updated;
     });
   };
 
@@ -2206,6 +2361,23 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             
 
             
+            {/* Round Mode Quick Button */}
+            <button
+              aria-label="Round Mode"
+              onClick={() => setIsRoundTrackerOpen(true)}
+              className={`border transition-all cursor-pointer flex items-center justify-center p-2 rounded-xl relative ${
+                activeRound
+                  ? "text-emerald-400 bg-emerald-500/15 border-emerald-500/30"
+                  : "text-neutral-500 hover:text-white border-transparent hover:border-neutral-800 bg-transparent hover:bg-neutral-900"
+              }`}
+              title={activeRound ? "Round Active: Open Tracker" : "Round Mode: Track Balls In Play"}
+            >
+              <Flag size={18} className={activeRound ? "fill-emerald-400 text-emerald-400" : ""} />
+              {activeRound && (
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full border border-neutral-950 animate-pulse" />
+              )}
+            </button>
+
             {/* Leaderboard Button */}
             <button
               aria-label="Global Leaderboard"
@@ -2508,6 +2680,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
               wFilterVariation={wFilterVariation}
               wFilterYear={wFilterYear}
               wFilterName={wFilterName}
+              activeRound={activeRound}
+              onOpenRoundModal={() => setIsRoundTrackerOpen(true)}
             />
         </div>
 
@@ -2619,6 +2793,20 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             setShowLeaderboard(false);
             setIsUserManagerOpen(true);
           }}
+        />
+      </Suspense>
+
+      {/* Round Tracker Modal (Round Mode) */}
+      <Suspense fallback={null}>
+        <RoundTrackerModal
+          isOpen={isRoundTrackerOpen}
+          onClose={() => setIsRoundTrackerOpen(false)}
+          balls={balls}
+          catalog={catalog}
+          onApplyInventoryChanges={handleApplyRoundInventory}
+          activeRound={activeRound}
+          setActiveRound={setActiveRound}
+          showToast={showToast}
         />
       </Suspense>
 
@@ -3379,7 +3567,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                                             <option value={BallCondition.NEW}>{BallCondition.NEW}</option>
                                             <option value={BallCondition.MINT}>{BallCondition.MINT}</option>
                                             <option value={BallCondition.PLAYED}>{BallCondition.PLAYED}</option>
-                                            <option value={BallCondition.SHAG}>{BallCondition.SHAG}</option>
+                                            <option value={BallCondition.DAMAGED}>{BallCondition.DAMAGED}</option>
                                           </select>
 
                                           {/* Delete Button */}
@@ -3574,13 +3762,35 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
        {/* Toast Notification with Optimistic Action (Undo) */}
        {toast && (
-         <div role="alert" aria-live="polite" className={`fixed bottom-5 right-5 z-[100] px-4 py-3 rounded-2xl border shadow-2xl flex items-center gap-3 font-mono text-xs animate-fade-in backdrop-blur-md ${
-           toast.type === 'success' 
-             ? 'bg-neutral-900/95 border-emerald-500/40 text-emerald-300 shadow-emerald-950/30' 
-             : 'bg-rose-950/95 border-rose-500/40 text-rose-200 shadow-rose-950/30'
-         }`}>
-           <div className={`w-2 h-2 rounded-full shrink-0 ${toast.type === 'success' ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400 animate-pulse'}`} />
-           <span className="font-sans font-medium text-xs text-white">{toast.message}</span>
+         <div 
+           role="alert" 
+           aria-live="polite" 
+           className={`fixed bottom-5 right-5 z-[100] px-4 py-3 rounded-2xl border shadow-2xl flex items-center gap-3 font-mono text-xs animate-fade-in backdrop-blur-md transition-all ${
+             toast.type === 'info'
+               ? 'bg-amber-50 border-amber-300 text-amber-950 shadow-amber-900/10 dark:bg-amber-950/90 dark:border-amber-500/40 dark:text-amber-200 dark:shadow-amber-950/40'
+               : toast.type === 'error'
+               ? 'bg-rose-50 border-rose-300 text-rose-950 shadow-rose-900/10 dark:bg-rose-950/90 dark:border-rose-500/40 dark:text-rose-200 dark:shadow-rose-950/40'
+               : 'bg-emerald-50 border-emerald-300 text-emerald-950 shadow-emerald-900/10 dark:bg-neutral-900/95 dark:border-emerald-500/40 dark:text-emerald-300 dark:shadow-emerald-950/30'
+           }`}
+         >
+           <div 
+             className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+               toast.type === 'info'
+                 ? 'bg-amber-500 dark:bg-amber-400 animate-pulse'
+                 : toast.type === 'error'
+                 ? 'bg-rose-600 dark:bg-rose-400 animate-pulse'
+                 : 'bg-emerald-600 dark:bg-emerald-400 animate-pulse'
+             }`} 
+           />
+           <span className={`font-sans font-bold text-xs ${
+             toast.type === 'info'
+               ? 'text-amber-950 dark:text-amber-100'
+               : toast.type === 'error'
+               ? 'text-rose-950 dark:text-rose-100'
+               : 'text-emerald-950 dark:text-emerald-100'
+           }`}>
+             {toast.message}
+           </span>
            {toast.action && (
              <button
                type="button"
@@ -3588,7 +3798,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                  toast.action?.onClick();
                  setToast(null);
                }}
-               className="ml-2 px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 hover:text-white font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer border border-emerald-500/40"
+               className="ml-2 px-2.5 py-1 rounded-lg bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-800 dark:bg-emerald-500/20 dark:hover:bg-emerald-500/30 dark:text-emerald-300 dark:hover:text-white font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer border border-emerald-500/40"
              >
                {toast.action.label}
              </button>
@@ -3596,7 +3806,13 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
            <button
              type="button"
              onClick={() => setToast(null)}
-             className="text-neutral-500 hover:text-neutral-300 transition-colors ml-1 p-0.5 cursor-pointer"
+             className={`transition-colors ml-1 p-0.5 cursor-pointer ${
+               toast.type === 'info'
+                 ? 'text-amber-700 hover:text-amber-950 dark:text-amber-400 dark:hover:text-amber-100'
+                 : toast.type === 'error'
+                 ? 'text-rose-700 hover:text-rose-950 dark:text-rose-400 dark:hover:text-rose-100'
+                 : 'text-emerald-700 hover:text-emerald-950 dark:text-emerald-400 dark:hover:text-emerald-100'
+             }`}
              aria-label="Close notification"
            >
              <X size={13} />

@@ -210,7 +210,7 @@ export default function ChartsPanel({ balls }: ChartsPanelProps) {
               if (item.condition === BallCondition.NEW) ringColor = "text-primary-600 dark:text-primary-400";
               if (item.condition === BallCondition.MINT) ringColor = "text-sky-600 dark:text-sky-400";
               if (item.condition === BallCondition.PLAYED) ringColor = "text-amber-600 dark:text-amber-400";
-              if (item.condition === BallCondition.SHAG) ringColor = "text-rose-600 dark:text-rose-500";
+              if (item.condition === BallCondition.DAMAGED) ringColor = "text-rose-600 dark:text-rose-500";
 
               return (
                 <div key={item.condition} className="bg-neutral-950 p-2.5 rounded-xl border border-neutral-800 text-center flex flex-col items-center justify-between" id={`condition-gauge-${item.condition.replace(/[^a-zA-Z]/g, "-")}`}>
