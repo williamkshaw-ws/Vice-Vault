@@ -318,21 +318,21 @@ export default function MyVaultView({
       </div>
 
       {activeRound && onOpenRoundModal && (
-        <div className="bg-gradient-to-r from-emerald-950/40 via-neutral-900 to-neutral-900 border border-emerald-500/30 p-3.5 rounded-2xl flex items-center justify-between gap-3 shadow-lg">
+        <div className="bg-neutral-900 border border-emerald-500/30 dark:border-emerald-500/30 p-3.5 rounded-2xl flex items-center justify-between gap-3 shadow-sm">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
-              <Flag size={18} className="fill-emerald-400/30" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-100 border border-emerald-300 dark:bg-emerald-500/15 dark:border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 shrink-0">
+              <Flag size={18} className="fill-emerald-600/30 dark:fill-emerald-400/30" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-white font-bold text-xs truncate font-sans">
                   {activeRound.courseName || "Round in Progress"}
                 </span>
-                <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 text-[9px] font-mono font-bold uppercase tracking-wider">
+                <span className="px-1.5 py-0.5 rounded bg-emerald-100 border border-emerald-300 text-emerald-800 dark:bg-emerald-500/20 dark:border-emerald-500/30 dark:text-emerald-300 text-[9px] font-mono font-bold uppercase tracking-wider">
                   {activeRound.holes}H
                 </span>
               </div>
-              <p className="text-[10px] text-neutral-600 dark:text-neutral-400 font-mono mt-0.5 flex flex-wrap items-center gap-1.5 font-medium">
+              <p className="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono mt-0.5 flex flex-wrap items-center gap-1.5 font-medium">
                 <span>{activeRound.balls.length} included:</span>
                 <span className="text-emerald-700 dark:text-emerald-400 font-semibold">{activeRound.balls.filter((b: any) => b.status === 'survived').length} survived</span>
                 <span className="text-neutral-400">•</span>
@@ -345,7 +345,7 @@ export default function MyVaultView({
           <button
             type="button"
             onClick={onOpenRoundModal}
-            className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-[10px] uppercase tracking-wider rounded-xl transition-all cursor-pointer shrink-0 font-sans shadow-sm"
+            className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-[10px] uppercase tracking-wider rounded-xl transition-all cursor-pointer shrink-0 font-sans shadow-sm"
           >
             Track Round
           </button>

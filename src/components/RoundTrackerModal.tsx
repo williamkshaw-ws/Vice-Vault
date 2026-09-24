@@ -19,7 +19,8 @@ import {
   HelpCircle,
   Skull,
   ChevronDown,
-  Box
+  Box,
+  XCircle
 } from 'lucide-react';
 import { GolfBall, BallCondition, CatalogItem, BundleItem } from '../types';
 import BallVisual from './BallVisual';
@@ -120,6 +121,7 @@ export default function RoundTrackerModal({
   const [roundHistory, setRoundHistory] = useState<GolfRound[]>([]);
   const [expandedRoundSection, setExpandedRoundSection] = useState<{ roundId: string; filter: 'survived' | 'damaged' | 'lost' | 'all' } | null>(null);
   const [roundToDelete, setRoundToDelete] = useState<GolfRound | null>(null);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
   // Setup / Pack bag state (when starting a new round)
   const [courseInput, setCourseInput] = useState('');
@@ -370,13 +372,11 @@ export default function RoundTrackerModal({
 
   // Abandon active round
   const handleAbandonRound = () => {
-    if (!window.confirm('Are you sure you want to discard this round? Your locker will remain unchanged.')) {
-      return;
-    }
     setActiveRound(null);
     try {
       localStorage.removeItem(ACTIVE_ROUND_KEY);
     } catch (e) {}
+    setShowDiscardConfirm(false);
     showToast('Active round discarded.', 'info');
   };
 
@@ -830,8 +830,8 @@ export default function RoundTrackerModal({
                   <div className="pt-3 border-t border-neutral-800 flex flex-wrap items-center justify-between gap-3">
                     <button
                       type="button"
-                      onClick={handleAbandonRound}
-                      className="px-3.5 py-2 bg-neutral-950 hover:bg-rose-950/40 border border-neutral-850 hover:border-rose-900 text-neutral-500 hover:text-rose-400 rounded-xl font-mono text-xs transition-all cursor-pointer"
+                      onClick={() => setShowDiscardConfirm(true)}
+                      className="px-3.5 py-2 bg-neutral-900 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-neutral-800 hover:border-rose-300 dark:hover:border-rose-900 text-neutral-600 hover:text-rose-700 dark:text-neutral-400 dark:hover:text-rose-400 rounded-xl font-mono text-xs transition-all cursor-pointer"
                     >
                       Discard Round
                     </button>
@@ -1617,6 +1617,62 @@ export default function RoundTrackerModal({
                   className="flex-1 py-2.5 px-3 bg-rose-600 hover:bg-rose-500 text-white rounded-xl transition-all cursor-pointer font-bold shadow-md shadow-rose-950/40"
                 >
                   Delete Record
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Discard Active Round Confirmation Prompt Modal */}
+        {showDiscardConfirm && activeRound && (
+          <div className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+            <div className="bg-neutral-950 border border-neutral-800 rounded-3xl p-5 max-w-sm w-full space-y-4 shadow-2xl animate-in zoom-in-95 duration-150">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-200 dark:bg-rose-500/10 dark:border-rose-500/30 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
+                  <XCircle size={20} />
+                </div>
+                <div className="min-w-0">
+                  <h4 className="font-bold text-white text-base font-sans">
+                    Discard Active Round?
+                  </h4>
+                  <span className="text-[11px] text-neutral-500 font-mono block truncate">
+                    {activeRound.courseName} • {activeRound.holes} Holes
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2.5 text-xs font-mono">
+                <p className="text-neutral-600 dark:text-neutral-300 leading-relaxed px-0.5">
+                  Are you sure you want to discard this active round? Your current round progress will be cancelled.
+                </p>
+
+                {/* Locker status notice in green */}
+                <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 dark:bg-emerald-950/40 dark:border-emerald-900/60 dark:text-emerald-200 flex items-start gap-2.5 text-[11px] leading-snug">
+                  <ShieldCheck size={15} className="shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
+                  <div>
+                    <span className="font-bold text-emerald-950 dark:text-emerald-100 block mb-0.5">Locker Notice:</span>
+                    <span>Your locker inventory will <span className="underline font-bold">remain unchanged</span>. No balls will be deducted or downgraded.</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 pt-1 font-mono text-xs">
+                <button
+                  type="button"
+                  onClick={() => setShowDiscardConfirm(false)}
+                  className="flex-1 py-2.5 px-3 bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 text-white rounded-xl transition-all cursor-pointer font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    nativeHaptics.notificationWarning();
+                    handleAbandonRound();
+                  }}
+                  className="flex-1 py-2.5 px-3 bg-rose-600 hover:bg-rose-500 text-white rounded-xl transition-all cursor-pointer font-bold shadow-md shadow-rose-950/40"
+                >
+                  Discard Round
                 </button>
               </div>
             </div>
