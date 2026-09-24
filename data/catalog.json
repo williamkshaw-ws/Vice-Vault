@@ -4,14 +4,18 @@
     "model": "DRIVE",
     "name": "LIV Golf",
     "color": "White",
-    "customImage": "https://i.ibb.co/wrBL9X1B/catalog-1781112751272-bd43-7ada-24a4.png"
+    "customImage": "https://i.ibb.co/wrBL9X1B/catalog-1781112751272-bd43-7ada-24a4.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "DRIVE-PSYCHO_BUNNY-WHITE",
     "model": "DRIVE",
     "name": "Psycho Bunny",
     "color": "White",
-    "customImage": "https://i.ibb.co/yc13FyYr/catalog-1781112612736-2d66-08f7-4eea.png"
+    "customImage": "https://i.ibb.co/yc13FyYr/catalog-1781112612736-2d66-08f7-4eea.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "DRIVE-STANDARD-BLUE",
@@ -20,7 +24,9 @@
     "color": "Blue",
     "customImage": "https://i.ibb.co/ksMQ4y86/catalog-1780357996470-cb4e-422e-f880.jpg",
     "customImageSleeve": "https://i.ibb.co/fdFTHV09/342ac9edb922.jpg",
-    "customImageBox": "https://i.ibb.co/GDPgWC2/7b5bf90743c1.jpg"
+    "customImageBox": "https://i.ibb.co/GDPgWC2/7b5bf90743c1.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "DRIVE-STANDARD-PINK",
@@ -29,7 +35,9 @@
     "color": "Pink",
     "customImage": "https://i.ibb.co/ynWSkvzJ/catalog-1780357997981-310a-8621-049a.jpg",
     "customImageSleeve": "https://i.ibb.co/cKP8p4Ds/7985cad30aad.jpg",
-    "customImageBox": "https://i.ibb.co/bgW4cqhq/f91556c60a0e.jpg"
+    "customImageBox": "https://i.ibb.co/bgW4cqhq/f91556c60a0e.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "DRIVE-STANDARD-WHITE",
@@ -38,7 +46,9 @@
     "color": "White",
     "customImage": "https://i.ibb.co/gM0rwHp1/catalog-1780357998697-a9c3-b2d4-9a7d.jpg",
     "customImageSleeve": "https://i.ibb.co/FG2SqNz/c0e6e158bca4.jpg",
-    "customImageBox": "https://i.ibb.co/cch4WsWH/83c0e6565cee.jpg"
+    "customImageBox": "https://i.ibb.co/cch4WsWH/83c0e6565cee.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "DRIVE-STANDARD-YELLOW",
@@ -47,7 +57,9 @@
     "color": "Yellow",
     "customImage": "https://i.ibb.co/Kx1ssjjB/catalog-1780357999386-6e7a-9b6a-d64c.jpg",
     "customImageSleeve": "https://i.ibb.co/3YfQrJYN/6ea77528b0c5.jpg",
-    "customImageBox": "https://i.ibb.co/gbZjk0jL/b3d43b56725e.jpg"
+    "customImageBox": "https://i.ibb.co/gbZjk0jL/b3d43b56725e.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "MULTIPLE-SELECTED_VARIETY-WHITE",
@@ -57,11 +69,25 @@
     "customImage": "https://i.ibb.co/xTnPVFx/catalog-1780411756033-40e3-5fec-0320.jpg",
     "customImageBox": "https://i.ibb.co/wq7NQ9h/76c0edcc1baa.png",
     "bundleItems": [
-      { "catalogId": "PRO-STANDARD-WHITE", "qty": 3 },
-      { "catalogId": "PRO_PLUS-STANDARD-WHITE", "qty": 3 },
-      { "catalogId": "PRO_SOFT-STANDARD-WHITE", "qty": 3 },
-      { "catalogId": "TOUR-STANDARD-WHITE", "qty": 3 }
-    ]
+      {
+        "catalogId": "PRO-STANDARD-WHITE",
+        "qty": 3
+      },
+      {
+        "catalogId": "PRO_PLUS-STANDARD-WHITE",
+        "qty": 3
+      },
+      {
+        "catalogId": "PRO_SOFT-STANDARD-WHITE",
+        "qty": 3
+      },
+      {
+        "catalogId": "TOUR-STANDARD-WHITE",
+        "qty": 3
+      }
+    ],
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "MULTIPLE-VARIETY_PACK-MULTI_COLORED",
@@ -71,65 +97,95 @@
     "customImage": "https://i.ibb.co/MxxyDqTG/catalog-1780360045269-4890-503b-df13.jpg",
     "customImageBox": "https://i.ibb.co/DfQPqPCc/5ca444b1e905.jpg",
     "bundleItems": [
-      { "catalogId": "PRO-NEON-LIME", "qty": 3 },
-      { "catalogId": "PRO_PLUS-NEON-LIME", "qty": 3 },
-      { "catalogId": "PRO_SOFT-NEON-RED", "qty": 3 },
-      { "catalogId": "DRIVE-STANDARD-YELLOW", "qty": 3 }
-    ]
+      {
+        "catalogId": "PRO-NEON-LIME",
+        "qty": 3
+      },
+      {
+        "catalogId": "PRO_PLUS-NEON-LIME",
+        "qty": 3
+      },
+      {
+        "catalogId": "PRO_SOFT-NEON-RED",
+        "qty": 3
+      },
+      {
+        "catalogId": "DRIVE-STANDARD-YELLOW",
+        "qty": 3
+      }
+    ],
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-101-NEON_LIME",
     "model": "PRO",
     "name": "101",
     "color": "Neon Lime",
-    "customImage": "https://i.ibb.co/Df5nsvzt/Adobe-Express-file-2.png"
+    "customImage": "https://i.ibb.co/Df5nsvzt/Adobe-Express-file-2.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-ADIDAS-LIME_BLACK_DRIP",
     "model": "PRO",
     "name": "Adidas",
     "color": "Lime/Black Drip",
-    "customImage": "https://i.ibb.co/Lhhw0xGW/Adobe-Express-file-4.png"
+    "customImage": "https://i.ibb.co/Lhhw0xGW/Adobe-Express-file-4.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-ADIDAS_THREE_STRIPE-GREEN",
     "model": "PRO",
     "name": "Adidas Three Stripe",
     "color": "Green",
-    "customImage": "https://i.ibb.co/xKL4gzhq/Screenshot-2026-06-18-at-2-28-Background-Removed-15-PM.png"
+    "customImage": "https://i.ibb.co/xKL4gzhq/Screenshot-2026-06-18-at-2-28-Background-Removed-15-PM.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-ADIDAS_TREFOIL_STAN_SMITH-GREEN",
     "model": "PRO",
     "name": "Adidas Trefoil/Stan Smith",
     "color": "Green",
-    "customImage": "https://i.ibb.co/xKL4gzhq/Screenshot-2026-06-18-at-2-28-Background-Removed-15-PM.png"
+    "customImage": "https://i.ibb.co/xKL4gzhq/Screenshot-2026-06-18-at-2-28-Background-Removed-15-PM.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-ADIDAS_TREFOIL_STAN_SMITH-RED",
     "model": "PRO",
     "name": "Adidas Trefoil/Stan Smith",
-    "color": "Red"
+    "color": "Red",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-ADIDAS_TREFOIL_STAN_SMITH-WHITE",
     "model": "PRO",
     "name": "Adidas Trefoil/Stan Smith",
-    "color": "White"
+    "color": "White",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-AMEN-YELLOW_GREEN_DRIP",
     "model": "PRO",
     "name": "Amen",
     "color": "Yellow/Green Drip",
-    "customImage": "https://i.ibb.co/d08vxHZ2/Screenshot-2026-06-18-at-2-33-Background-Removed-50-PM.png"
+    "customImage": "https://i.ibb.co/d08vxHZ2/Screenshot-2026-06-18-at-2-33-Background-Removed-50-PM.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-ARCHIVE-YELLOW_WHITE_SHADE",
     "model": "PRO",
     "name": "Archive",
     "color": "Yellow/White Shade",
-    "customImage": "https://i.ibb.co/XZFHgtD3/20260617-191205-Background-Removed.png"
+    "customImage": "https://i.ibb.co/XZFHgtD3/20260617-191205-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-BEAR-GOLD",
@@ -137,7 +193,9 @@
     "name": "Bear",
     "color": "Gold",
     "customImage": "https://i.ibb.co/5WpyF2M0/catalog-1780358000068-e28e-0e69-b9e2.jpg",
-    "customImageBox": "https://i.ibb.co/hGJBzNW/752b3ce3eabf.webp"
+    "customImageBox": "https://i.ibb.co/hGJBzNW/752b3ce3eabf.webp",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO-BEAR-WHITE",
@@ -145,7 +203,9 @@
     "name": "Bear",
     "color": "White",
     "customImage": "https://i.ibb.co/Y7r5vDFQ/catalog-1780358000483-7b44-aecf-b26b.webp",
-    "customImageBox": "https://i.ibb.co/hGJBzNW/752b3ce3eabf.webp"
+    "customImageBox": "https://i.ibb.co/hGJBzNW/752b3ce3eabf.webp",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO-BEASTIN-FROST_BLUE",
@@ -153,14 +213,18 @@
     "name": "Beastin'",
     "color": "Frost Blue",
     "customImage": "https://i.ibb.co/GQyXpXD1/Screenshot-2026-06-18-at-4-33-Background-Removed-03-PM.png",
-    "customImageBox": "https://i.ibb.co/dJXywpQs/37705eccdb6b.webp"
+    "customImageBox": "https://i.ibb.co/dJXywpQs/37705eccdb6b.webp",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO-BEASTIN-GLACIER",
     "model": "PRO",
     "name": "Beastin'",
     "color": "Glacier",
-    "customImage": "https://i.ibb.co/gLkZFwSB/0931533d-6e4d-451e-a5fe-9fa4c69930d2-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/gLkZFwSB/0931533d-6e4d-451e-a5fe-9fa4c69930d2-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-BEASTIN-LIMEADE",
@@ -168,7 +232,9 @@
     "name": "Beastin'",
     "color": "Limeade",
     "customImage": "https://i.ibb.co/B2bCLB8k/59b8b873-5555-437d-99b8-94984e64c08b-copied-media-2-Background-Removed.png",
-    "customImageBox": "https://i.ibb.co/dJXywpQs/37705eccdb6b.webp"
+    "customImageBox": "https://i.ibb.co/dJXywpQs/37705eccdb6b.webp",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO-BEASTIN-ORANGE_BLAST",
@@ -176,7 +242,9 @@
     "name": "Beastin'",
     "color": "Orange Blast",
     "customImage": "https://i.ibb.co/4Z6jvH9X/97fac682-b513-4737-90b9-f9c77e4bc552-copied-media-2-Background-Removed.png",
-    "customImageBox": "https://i.ibb.co/dJXywpQs/37705eccdb6b.webp"
+    "customImageBox": "https://i.ibb.co/dJXywpQs/37705eccdb6b.webp",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO-BEASTIN-WATERMELON_PUNCH",
@@ -184,21 +252,27 @@
     "name": "Beastin'",
     "color": "Watermelon Punch",
     "customImage": "https://i.ibb.co/b5XpN8Mj/f12c50a5-875e-467b-b4ca-845c4f264fea-copied-media-2-Background-Removed.png",
-    "customImageBox": "https://i.ibb.co/dJXywpQs/37705eccdb6b.webp"
+    "customImageBox": "https://i.ibb.co/dJXywpQs/37705eccdb6b.webp",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO-BOUNTY-BLACK",
     "model": "PRO",
     "name": "Bounty",
     "color": "Black",
-    "customImage": "https://i.ibb.co/NdbBg0Hy/20260617-192337-Background-Removed.png"
+    "customImage": "https://i.ibb.co/NdbBg0Hy/20260617-192337-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-BREAKFAST_BALLS-YELLOW",
     "model": "PRO",
     "name": "Breakfast Balls",
     "color": "Yellow",
-    "customImage": "https://i.ibb.co/vyT36vB/20260617-192404-Background-Removed.png"
+    "customImage": "https://i.ibb.co/vyT36vB/20260617-192404-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-COSMIC_COLLECTION-AURORA_FIELDS",
@@ -206,7 +280,9 @@
     "name": "Cosmic Collection",
     "color": "Aurora Fields",
     "customImage": "https://i.ibb.co/mMcjKcc/catalog-1780783716987-81c0-9282-1675.png",
-    "customImageBox": "https://i.ibb.co/VYyVNgR4/809e0b0e7df5.webp"
+    "customImageBox": "https://i.ibb.co/VYyVNgR4/809e0b0e7df5.webp",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO-COSMIC_COLLECTION-BLUE_SUPERCLUSTER",
@@ -214,7 +290,9 @@
     "name": "Cosmic Collection",
     "color": "Blue Supercluster",
     "customImage": "https://i.ibb.co/VcSwVZjD/catalog-1780783696360-aad4-10a0-bb92.png",
-    "customImageBox": "https://i.ibb.co/VYyVNgR4/809e0b0e7df5.webp"
+    "customImageBox": "https://i.ibb.co/VYyVNgR4/809e0b0e7df5.webp",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO-COSMIC_COLLECTION-NEBULA_MIST",
@@ -222,7 +300,9 @@
     "name": "Cosmic Collection",
     "color": "Nebula Mist",
     "customImage": "https://i.ibb.co/SDTjyz74/catalog-1780783754578-4ddb-c72d-42e3.png",
-    "customImageBox": "https://i.ibb.co/VYyVNgR4/809e0b0e7df5.webp"
+    "customImageBox": "https://i.ibb.co/VYyVNgR4/809e0b0e7df5.webp",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO-COSMIC_COLLECTION-STELLAR_EMBER",
@@ -230,7 +310,9 @@
     "name": "Cosmic Collection",
     "color": "Stellar Ember",
     "customImage": "https://i.ibb.co/x8XH9P8J/catalog-1780783736308-8b15-0206-a21d.png",
-    "customImageBox": "https://i.ibb.co/VYyVNgR4/809e0b0e7df5.webp"
+    "customImageBox": "https://i.ibb.co/VYyVNgR4/809e0b0e7df5.webp",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO-DRIP-LIME_BLACK",
@@ -239,7 +321,9 @@
     "color": "Lime/Black",
     "customImage": "https://i.ibb.co/qMzYdG0Z/catalog-1780358003148-665f-28b7-6584.jpg",
     "customImageSleeve": "https://i.ibb.co/nsBVMh31/d0999edb3da8.jpg",
-    "customImageBox": "https://i.ibb.co/hFFdMRQv/c9176fb4ae39.jpg"
+    "customImageBox": "https://i.ibb.co/hFFdMRQv/c9176fb4ae39.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-DRIP-RED_BLUE",
@@ -248,7 +332,9 @@
     "color": "Red/Blue",
     "customImage": "https://i.ibb.co/SD9whnH8/catalog-1780358003851-ab04-e7b6-629e.jpg",
     "customImageSleeve": "https://i.ibb.co/24jsS5v/22708ea8f649.jpg",
-    "customImageBox": "https://i.ibb.co/gZxRCkgZ/8224bed06a57.jpg"
+    "customImageBox": "https://i.ibb.co/gZxRCkgZ/8224bed06a57.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-DRIP-YELLOW_GREEN",
@@ -256,7 +342,9 @@
     "name": "Drip",
     "color": "Yellow/Green",
     "customImage": "https://i.ibb.co/99cqH9Ws/catalog-1780358004531-1c9c-5d72-76ad.jpg",
-    "customImageBox": "https://i.ibb.co/B5k8J4d9/ecaf7799e22d.jpg"
+    "customImageBox": "https://i.ibb.co/B5k8J4d9/ecaf7799e22d.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-DRIP_SHADE-GALAXY",
@@ -264,7 +352,9 @@
     "name": "Drip Shade",
     "color": "Galaxy",
     "customImage": "https://i.ibb.co/ycJDxVZn/catalog-1780358004949-d598-9173-07db.jpg",
-    "customImageBox": "https://i.ibb.co/5xTm7f4c/bb497c1fb264.jpg"
+    "customImageBox": "https://i.ibb.co/5xTm7f4c/bb497c1fb264.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-DRIP_SHADE-NEON_SUNSET",
@@ -272,21 +362,27 @@
     "name": "Drip Shade",
     "color": "Neon Sunset",
     "customImage": "https://i.ibb.co/WvF8yBNs/catalog-1781096901198-3efa-b461-93db.png",
-    "customImageBox": "https://i.ibb.co/HDyDL48y/3bf33fab6737.png"
+    "customImageBox": "https://i.ibb.co/HDyDL48y/3bf33fab6737.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-DRIP_SHADE-ROYAL_GOLD",
     "model": "PRO",
     "name": "Drip Shade",
     "color": "Royal Gold",
-    "customImage": "https://i.ibb.co/HLDQT6vQ/catalog-1781096955198-87e4-783e-265b.png"
+    "customImage": "https://i.ibb.co/HLDQT6vQ/catalog-1781096955198-87e4-783e-265b.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-FLAMINGO-PINK",
     "model": "PRO",
     "name": "Flamingo",
     "color": "Pink",
-    "customImage": "https://i.ibb.co/pjZvnDbb/20260617-190507-0-Background-Removed.png"
+    "customImage": "https://i.ibb.co/pjZvnDbb/20260617-190507-0-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-GOOD_SUNDAYS-WHITE-EAT_THIS",
@@ -294,7 +390,9 @@
     "name": "Good Sundays",
     "color": "White",
     "variation": "Eat This",
-    "customImage": "https://i.ibb.co/PR7Xnjd/Screenshot-2026-06-18-at-2-22-Background-Removed-08-PM.png"
+    "customImage": "https://i.ibb.co/PR7Xnjd/Screenshot-2026-06-18-at-2-22-Background-Removed-08-PM.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-GOOD_SUNDAYS-WHITE-I_HEART_HOLES",
@@ -302,7 +400,9 @@
     "name": "Good Sundays",
     "color": "White",
     "variation": "I Heart Holes",
-    "customImage": "https://i.ibb.co/k6mdGwxx/Screenshot-2026-06-18-at-2-22-Background-Removed-00-PM.png"
+    "customImage": "https://i.ibb.co/k6mdGwxx/Screenshot-2026-06-18-at-2-22-Background-Removed-00-PM.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-GOOD_SUNDAYS-WHITE-SLAP_ON_ME",
@@ -310,7 +410,9 @@
     "name": "Good Sundays",
     "color": "White",
     "variation": "Slap On Me",
-    "customImage": "https://i.ibb.co/jvX7FntP/Screenshot-2026-06-18-at-2-21-Background-Removed-52-PM.png"
+    "customImage": "https://i.ibb.co/jvX7FntP/Screenshot-2026-06-18-at-2-21-Background-Removed-52-PM.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-GOOD_SUNDAYS-WHITE-YES_U_CAN",
@@ -318,7 +420,9 @@
     "name": "Good Sundays",
     "color": "White",
     "variation": "Yes U Can",
-    "customImage": "https://i.ibb.co/2L0Sq26/Screenshot-2026-06-18-at-2-21-Background-Removed-41-PM.png"
+    "customImage": "https://i.ibb.co/2L0Sq26/Screenshot-2026-06-18-at-2-21-Background-Removed-41-PM.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-GOOFBALLZ-BLUE-1_SUSHI",
@@ -326,7 +430,9 @@
     "name": "GoofBallz",
     "color": "Blue",
     "variation": "1 - Sushi",
-    "customImage": "https://i.ibb.co/m7YKh0B/20260617-193049-Background-Removed.png"
+    "customImage": "https://i.ibb.co/m7YKh0B/20260617-193049-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-GOOFBALLZ-BLUE-2_DONUT",
@@ -334,7 +440,9 @@
     "name": "GoofBallz",
     "color": "Blue",
     "variation": "2 - Donut",
-    "customImage": "https://i.ibb.co/sJjcLCCy/20260617-193040-Background-Removed.png"
+    "customImage": "https://i.ibb.co/sJjcLCCy/20260617-193040-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-GOOFBALLZ-YELLOW-3_HOT_DOG",
@@ -342,7 +450,9 @@
     "name": "GoofBallz",
     "color": "Yellow",
     "variation": "3 - Hot Dog",
-    "customImage": "https://i.ibb.co/Nnt1D1nP/20260617-192955-Background-Removed.png"
+    "customImage": "https://i.ibb.co/Nnt1D1nP/20260617-192955-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-GOOFBALLZ-YELLOW-4_ICE_CREAM",
@@ -350,7 +460,9 @@
     "name": "GoofBallz",
     "color": "Yellow",
     "variation": "4 - Ice Cream",
-    "customImage": "https://i.ibb.co/fzRD1Smf/20260617-193020-Background-Removed.png"
+    "customImage": "https://i.ibb.co/fzRD1Smf/20260617-193020-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-GO_NUTZ-WHITE",
@@ -358,7 +470,9 @@
     "name": "Go Nutz",
     "color": "White",
     "customImage": "https://i.ibb.co/93ZwgZXb/Screenshot-2026-06-18-at-2-36-Background-Removed-13-PM.png",
-    "customImageBox": "https://i.ibb.co/ZRq7dLtj/c5e67ddb68c5.webp"
+    "customImageBox": "https://i.ibb.co/ZRq7dLtj/c5e67ddb68c5.webp",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-GREG_MIKE-BLUE-LOUDMOUF",
@@ -367,7 +481,9 @@
     "color": "Blue",
     "variation": "LOUDMOUF",
     "customImage": "https://i.ibb.co/SDx7yQLx/catalog-1781099312081-1eed-30fc-26c6.png",
-    "customImageBox": "https://i.ibb.co/G3pY92Gj/c8c3148eca43.png"
+    "customImageBox": "https://i.ibb.co/G3pY92Gj/c8c3148eca43.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-GREG_MIKE-GREEN-LOUDMOUF",
@@ -376,7 +492,9 @@
     "color": "Green",
     "variation": "LOUDMOUF",
     "customImage": "https://i.ibb.co/HTXbHP4Z/Adobe-Express-file-6.png",
-    "customImageBox": "https://i.ibb.co/8DzVDcMH/loudmouf-box.png"
+    "customImageBox": "https://i.ibb.co/8DzVDcMH/loudmouf-box.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-GREG_MIKE-WHITE-EYE",
@@ -385,7 +503,9 @@
     "color": "White",
     "variation": "Eye",
     "customImage": "https://i.ibb.co/0VQTRKFg/catalog-1781099322679-f34c-b601-e58f.png",
-    "customImageBox": "https://i.ibb.co/KxZmfg5t/fc09730ee80b.png"
+    "customImageBox": "https://i.ibb.co/KxZmfg5t/fc09730ee80b.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-GREG_MIKE-YELLOW-SMILEY",
@@ -394,7 +514,9 @@
     "color": "Yellow",
     "variation": "Smiley",
     "customImage": "https://i.ibb.co/ZptHvRBw/Adobe-Express-file-2.png",
-    "customImageBox": "https://i.ibb.co/LXdH0tFh/greg-mike-smiley.png"
+    "customImageBox": "https://i.ibb.co/LXdH0tFh/greg-mike-smiley.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-JUNIOR-WHITE",
@@ -402,7 +524,9 @@
     "name": "Junior",
     "color": "White",
     "customImage": "https://i.ibb.co/NnbHXm1z/catalog-1781097070113-f335-c5bc-7a23.png",
-    "customImageBox": "https://i.ibb.co/xKpqQ6Sj/0707e55532bf.webp"
+    "customImageBox": "https://i.ibb.co/xKpqQ6Sj/0707e55532bf.webp",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-JUNIOR-YELLOW",
@@ -410,21 +534,27 @@
     "name": "Junior",
     "color": "Yellow",
     "customImage": "https://i.ibb.co/HDC9wCdD/catalog-1781097247845-f7b3-b6df-1947.png",
-    "customImageBox": "https://i.ibb.co/dyt2FSr/7b7dc1f1b20e.webp"
+    "customImageBox": "https://i.ibb.co/dyt2FSr/7b7dc1f1b20e.webp",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-LIV_GOLF-YELLOW_BLACK_DRIP",
     "model": "PRO",
     "name": "LIV Golf",
     "color": "Yellow/Black Drip",
-    "customImage": "https://i.ibb.co/rKwfzQZd/Adobe-Express-file-2.png"
+    "customImage": "https://i.ibb.co/rKwfzQZd/Adobe-Express-file-2.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-LOCAL_LEGEND-WHITE-AMEN",
     "model": "PRO",
     "name": "Local Legend",
     "color": "White",
-    "variation": "Amen"
+    "variation": "Amen",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-LOCAL_LEGEND-WHITE-MAGNOLIA",
@@ -432,7 +562,9 @@
     "name": "Local Legend",
     "color": "White",
     "variation": "Magnolia",
-    "customImage": "https://i.ibb.co/JWJQdMyS/20260617-190302-Background-Removed.png"
+    "customImage": "https://i.ibb.co/JWJQdMyS/20260617-190302-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-LOCAL_LEGEND-WHITE-SANDWICH",
@@ -440,7 +572,9 @@
     "name": "Local Legend",
     "color": "White",
     "variation": "Sandwich",
-    "customImage": "https://i.ibb.co/v6Z2g8HL/20260617-190617-Background-Removed.png"
+    "customImage": "https://i.ibb.co/v6Z2g8HL/20260617-190617-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-LOCAL_LEGEND_10_YEARS-LIME-AMEN",
@@ -448,7 +582,9 @@
     "name": "Local Legend 10 Years",
     "color": "Lime",
     "variation": "Amen",
-    "customImage": "https://i.ibb.co/byjptrr/6481d593-ce2a-408d-b357-77ac83b34972-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/byjptrr/6481d593-ce2a-408d-b357-77ac83b34972-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-LOCAL_LEGEND_10_YEARS-LIME-LOCAL_LEGEND",
@@ -456,7 +592,9 @@
     "name": "Local Legend 10 Years",
     "color": "Lime",
     "variation": "Local Legend",
-    "customImage": "https://i.ibb.co/gFvZ4qDq/988914ad-9228-49cb-8f12-7f8cf58746b7-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/gFvZ4qDq/988914ad-9228-49cb-8f12-7f8cf58746b7-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-LOCAL_LEGEND_10_YEARS-LIME-MAGNOLIA",
@@ -464,7 +602,9 @@
     "name": "Local Legend 10 Years",
     "color": "Lime",
     "variation": "Magnolia",
-    "customImage": "https://i.ibb.co/JWmT58xx/8b7f9d55-a11f-4968-a603-1bf7d2d6afd9-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/JWmT58xx/8b7f9d55-a11f-4968-a603-1bf7d2d6afd9-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-LOCAL_LEGEND_10_YEARS-LIME-SANDWICH",
@@ -472,13 +612,17 @@
     "name": "Local Legend 10 Years",
     "color": "Lime",
     "variation": "Sandwich",
-    "customImage": "https://i.ibb.co/vCMGz09H/c3cde4ab-17e7-4b47-bad0-5c8057757654-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/vCMGz09H/c3cde4ab-17e7-4b47-bad0-5c8057757654-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-MONACO_OKTOBERFEST-WHITE",
     "model": "PRO",
     "name": "Monaco Oktoberfest",
-    "color": "White"
+    "color": "White",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-MOONROCK-BLACK",
@@ -486,7 +630,9 @@
     "name": "Moonrock",
     "color": "Black",
     "customImage": "https://i.ibb.co/XkxHtbtx/catalog-1781097625467-cb89-4546-d198.png",
-    "customImageBox": "https://i.ibb.co/qF1DRLrX/34ec76b5534b.webp"
+    "customImageBox": "https://i.ibb.co/qF1DRLrX/34ec76b5534b.webp",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-NEON-LIME",
@@ -495,7 +641,9 @@
     "color": "Lime",
     "customImage": "https://i.ibb.co/L4CpBnL/catalog-1780358006949-7939-5542-c8a6.jpg",
     "customImageSleeve": "https://i.ibb.co/mVRjLJXw/0a64f2d33a3a.jpg",
-    "customImageBox": "https://i.ibb.co/ZRHPrwkH/7bc9e6156f5d.jpg"
+    "customImageBox": "https://i.ibb.co/ZRHPrwkH/7bc9e6156f5d.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-NEON-RED",
@@ -503,7 +651,9 @@
     "name": "Neon",
     "color": "Red",
     "customImage": "https://i.ibb.co/PBR25s6/catalog-1780358007577-242d-2f0d-3ba2.jpg",
-    "customImageBox": "https://i.ibb.co/ch0nxdV6/cca696dd4ba7.jpg"
+    "customImageBox": "https://i.ibb.co/ch0nxdV6/cca696dd4ba7.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-NEON_DRIP-WATERMELON_BUBBLEGUM",
@@ -511,7 +661,9 @@
     "name": "Neon Drip",
     "color": "Watermelon Bubblegum",
     "customImage": "https://i.ibb.co/tp4yjLD7/catalog-1781096984251-e599-9110-36ed.png",
-    "customImageBox": "https://i.ibb.co/cKg3CGSL/8854fd498eef.webp"
+    "customImageBox": "https://i.ibb.co/cKg3CGSL/8854fd498eef.webp",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-NEVER_OUTGUNNED-WHITE-12",
@@ -519,7 +671,9 @@
     "name": "Never Outgunned",
     "color": "White",
     "variation": "12",
-    "customImage": "https://i.ibb.co/ZzqC29Qk/be305b33-770d-4fec-8e75-e416188cf19d-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/ZzqC29Qk/be305b33-770d-4fec-8e75-e416188cf19d-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-NEVER_OUTGUNNED-WHITE-23",
@@ -527,7 +681,9 @@
     "name": "Never Outgunned",
     "color": "White",
     "variation": "23",
-    "customImage": "https://i.ibb.co/d9RkCPP/3d998b95-a103-4485-a032-611e8b9db8e7-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/d9RkCPP/3d998b95-a103-4485-a032-611e8b9db8e7-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-NEVER_OUTGUNNED-WHITE-34",
@@ -535,7 +691,9 @@
     "name": "Never Outgunned",
     "color": "White",
     "variation": "34",
-    "customImage": "https://i.ibb.co/SD79WFKb/8c31d8b3-57df-4cbb-a48c-7158bef07fe3-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/SD79WFKb/8c31d8b3-57df-4cbb-a48c-7158bef07fe3-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-NEVER_OUTGUNNED-WHITE-93",
@@ -543,34 +701,44 @@
     "name": "Never Outgunned",
     "color": "White",
     "variation": "93",
-    "customImage": "https://i.ibb.co/6cc4Qg5h/e2eb3250-d70c-471c-8bcd-1a36741dbcac-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/6cc4Qg5h/e2eb3250-d70c-471c-8bcd-1a36741dbcac-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-OAKMONT_US_OPEN-RED_BLUE_DRIP",
     "model": "PRO",
     "name": "Oakmont US Open",
     "color": "Red/Blue Drip",
-    "customImage": "https://i.ibb.co/yF09bJB3/20260617-192944-Background-Removed.png"
+    "customImage": "https://i.ibb.co/yF09bJB3/20260617-192944-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-ORIGIN_OF_GOLF-RED",
     "model": "PRO",
     "name": "Origin of Golf",
     "color": "Red",
-    "customImage": "https://i.ibb.co/Ym1MG38/20260617-193203-Background-Removed.png"
+    "customImage": "https://i.ibb.co/Ym1MG38/20260617-193203-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-PINEHURST_US_OPEN-RED_BLUE_DRIP",
     "model": "PRO",
     "name": "Pinehurst US Open",
     "color": "Red/Blue Drip",
-    "customImage": "https://i.ibb.co/ksDnJCFK/Adobe-Express-file-3.png"
+    "customImage": "https://i.ibb.co/ksDnJCFK/Adobe-Express-file-3.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-PROPERTY_OF_BRAD-WHITE",
     "model": "PRO",
     "name": "Property of Brad",
-    "color": "White"
+    "color": "White",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-PRO_ST-GOLD",
@@ -578,7 +746,9 @@
     "name": "Pro(st)",
     "color": "Gold",
     "customImage": "https://i.ibb.co/fYG9BXs1/catalog-1781098785525-6bfc-48a9-9d63.png",
-    "customImageBox": "https://i.ibb.co/qLxztHSv/77c1a7f48b14.webp"
+    "customImageBox": "https://i.ibb.co/qLxztHSv/77c1a7f48b14.webp",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-PRO_ST_CHARACTER-WHITE-BRATWURST",
@@ -586,7 +756,9 @@
     "name": "Pro(st) Character",
     "color": "White",
     "variation": "Bratwurst",
-    "customImage": "https://i.ibb.co/qZjmy00/6fd8c27e-847a-40ba-bb97-02e07786af2d-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/qZjmy00/6fd8c27e-847a-40ba-bb97-02e07786af2d-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-PRO_ST_CHARACTER-WHITE-FRIENDS",
@@ -594,7 +766,9 @@
     "name": "Pro(st) Character",
     "color": "White",
     "variation": "Friends",
-    "customImage": "https://i.ibb.co/svYXszmR/cfce9a55-d75f-4e00-b0d0-e1ad01e807c4-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/svYXszmR/cfce9a55-d75f-4e00-b0d0-e1ad01e807c4-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-PRO_ST_CHARACTER-WHITE-MUG",
@@ -602,7 +776,9 @@
     "name": "Pro(st) Character",
     "color": "White",
     "variation": "Mug",
-    "customImage": "https://i.ibb.co/5gzNL7n5/c7fe953e-0289-4aaa-8deb-f0734bac6b52-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/5gzNL7n5/c7fe953e-0289-4aaa-8deb-f0734bac6b52-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-PRO_ST_CHARACTER-WHITE-MUG_IN_GOLF_CART",
@@ -610,13 +786,17 @@
     "name": "Pro(st) Character",
     "color": "White",
     "variation": "Mug in Golf Cart",
-    "customImage": "https://i.ibb.co/cSmgg8Mh/2b6572db-33ee-46d5-9b22-568dfd4ad8ce-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/cSmgg8Mh/2b6572db-33ee-46d5-9b22-568dfd4ad8ce-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO-SHADE-NIGHTHAWK",
     "model": "PRO",
     "name": "Shade",
-    "color": "Nighthawk"
+    "color": "Nighthawk",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-SHADE-RED_ORANGE",
@@ -625,21 +805,27 @@
     "color": "Red Orange",
     "customImage": "https://i.ibb.co/8tLtg5V/catalog-1780358008336-653d-34bb-abd5.jpg",
     "customImageSleeve": "https://i.ibb.co/Hf1yNHbH/42d64aa6f9f1.jpg",
-    "customImageBox": "https://i.ibb.co/7Nyfhyg2/9a05428b6e33.jpg"
+    "customImageBox": "https://i.ibb.co/7Nyfhyg2/9a05428b6e33.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-SHINNECOCK_US_OPEN-RED_BLUE_DRIP",
     "model": "PRO",
     "name": "Shinnecock US Open",
     "color": "Red/Blue Drip",
-    "customImage": "https://i.ibb.co/pjM22MGk/8940b6a0ec33.png"
+    "customImage": "https://i.ibb.co/pjM22MGk/8940b6a0ec33.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-SILVER_HILLS-SLIVER_DRIP",
     "model": "PRO",
     "name": "Silver Hills",
     "color": "Sliver Drip",
-    "customImage": "https://i.ibb.co/Qj6rdc2X/20260617-192206-Background-Removed.png"
+    "customImage": "https://i.ibb.co/Qj6rdc2X/20260617-192206-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-STANDARD-GLACIER_BLAST",
@@ -647,7 +833,9 @@
     "name": "Standard",
     "color": "Glacier Blast",
     "customImage": "https://i.ibb.co/MkywJzvD/catalog-1780358008946-b7a1-0be7-2eaa.jpg",
-    "customImageBox": "https://i.ibb.co/nMfg4F04/84ed3c4f751d.jpg"
+    "customImageBox": "https://i.ibb.co/nMfg4F04/84ed3c4f751d.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-STANDARD-WHITE",
@@ -656,7 +844,9 @@
     "color": "White",
     "customImage": "https://i.ibb.co/5g25J2Gp/catalog-1780358009336-b102-665d-0303.jpg",
     "customImageSleeve": "https://i.ibb.co/RpMDvPtF/23945e5c18e6.jpg",
-    "customImageBox": "https://i.ibb.co/jvgw29v2/efcf309e7bcf.jpg"
+    "customImageBox": "https://i.ibb.co/jvgw29v2/efcf309e7bcf.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-STANDARD_24_PACK-WHITE",
@@ -664,7 +854,9 @@
     "name": "Standard (24 Pack)",
     "color": "White",
     "customImage": "https://i.ibb.co/xTnPVFx/catalog-1780411756033-40e3-5fec-0320.jpg",
-    "customImageBox": "https://i.ibb.co/tpxFgMPb/f6d033cb7ce6.jpg"
+    "customImageBox": "https://i.ibb.co/tpxFgMPb/f6d033cb7ce6.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-TAN-BROWN_WHITE",
@@ -672,14 +864,18 @@
     "name": "Tan",
     "color": "Brown White",
     "customImage": "https://i.ibb.co/VpTFXqZF/Screenshot-2026-06-18-at-11-44-Background-Removed-37-AM.png",
-    "customImageBox": "https://i.ibb.co/XrDT8Cc9/df3f764e7452.webp"
+    "customImageBox": "https://i.ibb.co/XrDT8Cc9/df3f764e7452.webp",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-TCAF-PRUPLE_DRIP",
     "model": "PRO",
     "name": "TCAF",
     "color": "Pruple Drip",
-    "customImage": "https://i.ibb.co/0yZJ5079/0c3c743d-dc70-4d3f-966b-5ac8d8e74991-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/0yZJ5079/0c3c743d-dc70-4d3f-966b-5ac8d8e74991-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-TRACER-FIREBALL",
@@ -687,7 +883,9 @@
     "name": "Tracer",
     "color": "Fireball",
     "customImage": "https://i.ibb.co/YgF3PRk/catalog-1780783995917-fe89-eff1-d650.png",
-    "customImageBox": "https://i.ibb.co/GfHn14fW/ad4698c94587.webp"
+    "customImageBox": "https://i.ibb.co/GfHn14fW/ad4698c94587.webp",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-TRACER-WHITE",
@@ -695,7 +893,9 @@
     "name": "Tracer",
     "color": "White",
     "customImage": "https://i.ibb.co/CKQbP1WJ/catalog-1780358010558-c9aa-5fda-5b3b.jpg",
-    "customImageBox": "https://i.ibb.co/3msCNKzJ/3186bdd858ae.jpg"
+    "customImageBox": "https://i.ibb.co/3msCNKzJ/3186bdd858ae.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-TRACER-YELLOW_GREEN-MAJOR_EDITION",
@@ -704,28 +904,36 @@
     "color": "Yellow/Green",
     "variation": "Major Edition",
     "customImage": "https://i.ibb.co/bj9M1ycZ/catalog-1780784620341-b27f-8a72-186c.png",
-    "customImageBox": "https://i.ibb.co/kdCMLM9/1c059d97afee.webp"
+    "customImageBox": "https://i.ibb.co/kdCMLM9/1c059d97afee.webp",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-VICE_LINKS-GOLD_DRIP",
     "model": "PRO",
     "name": "Vice Links",
     "color": "Gold Drip",
-    "customImage": "https://i.ibb.co/JW1H3pSJ/4a569be5-b56f-44e9-85db-edf67f84cd0d-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/JW1H3pSJ/4a569be5-b56f-44e9-85db-edf67f84cd0d-copied-media-2-Background-Removed.png",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO-VICE_LINKS-PURPLE_DRIP",
     "model": "PRO",
     "name": "Vice Links",
     "color": "Purple Drip",
-    "customImage": "https://i.ibb.co/LhBZBm8J/1d5bd613-16d1-4fe1-a710-43ab078e8c46-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/LhBZBm8J/1d5bd613-16d1-4fe1-a710-43ab078e8c46-copied-media-2-Background-Removed.png",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO-WILD_WINDS-NEON_RED",
     "model": "PRO",
     "name": "Wild Winds",
     "color": "Neon Red",
-    "customImage": "https://i.ibb.co/M5Q7w9dp/20260617-190409-Background-Removed.png"
+    "customImage": "https://i.ibb.co/M5Q7w9dp/20260617-190409-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-ZARA_HOME_1_3-WHITE-GOLFER_BALL",
@@ -734,7 +942,9 @@
     "color": "White",
     "variation": "Golfer/Ball",
     "customImage": "https://i.ibb.co/Y48j7Tny/catalog-1781099613246-5c9c-8e5c-3f06.png",
-    "customImageBox": "https://i.ibb.co/Z6JDY4nB/ccde3aa753f3.png"
+    "customImageBox": "https://i.ibb.co/Z6JDY4nB/ccde3aa753f3.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO-ZARA_HOME_2_4-WHITE-CLUBS_GREEN",
@@ -743,7 +953,9 @@
     "color": "White",
     "variation": "Clubs/Green",
     "customImage": "https://i.ibb.co/bMRjbGyk/catalog-1781099493621-2bfd-17da-9b19.png",
-    "customImageBox": "https://i.ibb.co/Z6JDY4nB/ccde3aa753f3.png"
+    "customImageBox": "https://i.ibb.co/Z6JDY4nB/ccde3aa753f3.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_AIR-DRIP-PETROL_YELLOW",
@@ -752,7 +964,9 @@
     "color": "Petrol/Yellow",
     "customImage": "https://i.ibb.co/KjvPX7Z9/catalog-1780358011372-a77c-4751-9fc9.jpg",
     "customImageSleeve": "https://i.ibb.co/KcXy4WSd/df84409f813a.jpg",
-    "customImageBox": "https://i.ibb.co/SwwKc9Gm/8d5f095bc1dc.jpg"
+    "customImageBox": "https://i.ibb.co/SwwKc9Gm/8d5f095bc1dc.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_AIR-DRIP-RED_BLACK",
@@ -761,7 +975,9 @@
     "color": "Red/Black",
     "customImage": "https://i.ibb.co/twV72849/catalog-1780358012011-c886-7bdd-8ae9.jpg",
     "customImageSleeve": "https://i.ibb.co/SXpCQzmm/336dbfaaccfc.jpg",
-    "customImageBox": "https://i.ibb.co/8gGQLYBd/d11ad863fbdf.jpg"
+    "customImageBox": "https://i.ibb.co/8gGQLYBd/d11ad863fbdf.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_AIR-DRIP_SHADE-COTTON_CANDY",
@@ -769,35 +985,45 @@
     "name": "Drip Shade",
     "color": "Cotton Candy",
     "customImage": "https://i.ibb.co/GvjyT0Sf/catalog-1781097433972-0c16-2900-a856.png",
-    "customImageBox": "https://i.ibb.co/MFVvGmx/36ba0f5c0804.webp"
+    "customImageBox": "https://i.ibb.co/MFVvGmx/36ba0f5c0804.webp",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_AIR-GREEN_MILE_CLUB-WHITE-16",
     "model": "PRO AIR",
     "name": "Green Mile Club",
     "color": "White",
-    "variation": "16"
+    "variation": "16",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_AIR-GREEN_MILE_CLUB-WHITE-17",
     "model": "PRO AIR",
     "name": "Green Mile Club",
     "color": "White",
-    "variation": "17"
+    "variation": "17",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_AIR-GREEN_MILE_CLUB-WHITE-18",
     "model": "PRO AIR",
     "name": "Green Mile Club",
     "color": "White",
-    "variation": "18"
+    "variation": "18",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_AIR-GREEN_MILE_CLUB-WHITE-28",
     "model": "PRO AIR",
     "name": "Green Mile Club",
     "color": "White",
-    "variation": "28"
+    "variation": "28",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_AIR-NEON-LIME",
@@ -806,7 +1032,9 @@
     "color": "Lime",
     "customImage": "https://i.ibb.co/bRMj04qw/catalog-1780358013025-a972-13e1-9c80.jpg",
     "customImageSleeve": "https://i.ibb.co/B28056BJ/b129a44cb853.jpg",
-    "customImageBox": "https://i.ibb.co/8nqCzgy0/a1dba8325dc1.jpg"
+    "customImageBox": "https://i.ibb.co/8nqCzgy0/a1dba8325dc1.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_AIR-NEON-PINK",
@@ -815,7 +1043,9 @@
     "color": "Pink",
     "customImage": "https://i.ibb.co/gFB8VRbf/catalog-1780358013714-6a3c-b53d-9d95.jpg",
     "customImageSleeve": "https://i.ibb.co/5XxG5CCY/a2e7b1d1dbe8.jpg",
-    "customImageBox": "https://i.ibb.co/JWgVnwXj/e329bfb8956d.jpg"
+    "customImageBox": "https://i.ibb.co/JWgVnwXj/e329bfb8956d.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_AIR-NEON_DRIP-RED_BLACK",
@@ -824,7 +1054,9 @@
     "color": "Red/Black",
     "customImage": "https://i.ibb.co/hJKN2Ssn/catalog-1780358014407-6cd5-0189-bbcd.jpg",
     "customImageSleeve": "https://i.ibb.co/HDVBSmWL/6d34b3654eb8.jpg",
-    "customImageBox": "https://i.ibb.co/VWjcynj3/a9c1c1c56561.jpg"
+    "customImageBox": "https://i.ibb.co/VWjcynj3/a9c1c1c56561.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_AIR-STANDARD-WHITE",
@@ -833,7 +1065,9 @@
     "color": "White",
     "customImage": "https://i.ibb.co/84GGSjhg/catalog-1780358015057-2b8d-59bd-89e2.jpg",
     "customImageSleeve": "https://i.ibb.co/wr8d7wKc/d1b4f5e82638.jpg",
-    "customImageBox": "https://i.ibb.co/CK44LLkm/94fc509339ba.jpg"
+    "customImageBox": "https://i.ibb.co/CK44LLkm/94fc509339ba.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_AIR-SWANNIES-WHITE",
@@ -841,7 +1075,9 @@
     "name": "Swannies",
     "color": "White",
     "customImage": "https://i.ibb.co/PZgQZryN/9b0330c2e1fb.png",
-    "customImageBox": "https://i.ibb.co/yn7QBgtk/e586e25263b4.png"
+    "customImageBox": "https://i.ibb.co/yn7QBgtk/e586e25263b4.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_AIR-TRACER-NEON_TIDE",
@@ -849,7 +1085,9 @@
     "name": "Tracer",
     "color": "Neon Tide",
     "customImage": "https://i.ibb.co/hRgpXsYQ/catalog-1780783976337-66b3-2099-d277.png",
-    "customImageBox": "https://i.ibb.co/FkhR4xBB/7b610b8e388a.webp"
+    "customImageBox": "https://i.ibb.co/FkhR4xBB/7b610b8e388a.webp",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_AIR-TRACER-WHITE",
@@ -857,7 +1095,9 @@
     "name": "Tracer",
     "color": "White",
     "customImage": "https://i.ibb.co/FqLWHH4V/catalog-1780358015956-402a-e809-1e07.jpg",
-    "customImageBox": "https://i.ibb.co/NgQszbtH/b2d96e330ee8.jpg"
+    "customImageBox": "https://i.ibb.co/NgQszbtH/b2d96e330ee8.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_FLAKE-NEVER_OUTGUNNED-WHITE-93",
@@ -865,7 +1105,9 @@
     "name": "Never Outgunned",
     "color": "White",
     "variation": "93",
-    "customImage": "https://i.ibb.co/KjZbcrcB/1c60fb4a-470e-4b9b-a724-7360b39644c6-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/KjZbcrcB/1c60fb4a-470e-4b9b-a724-7360b39644c6-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-BETHPAGE_STATION-BLUE_EUROPE",
@@ -874,7 +1116,9 @@
     "color": "Blue (Europe)",
     "customImage": "https://i.ibb.co/b897xyv/catalog-1781100127063-8eed-c1d8-a464.jpg",
     "customImageSleeve": "https://i.ibb.co/LHFYcf4/9053f4b15c0e.png",
-    "customImageBox": "https://i.ibb.co/27jJ2p64/e54d6ec468e1.png"
+    "customImageBox": "https://i.ibb.co/27jJ2p64/e54d6ec468e1.png",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-BETHPAGE_STATION-RED_USA",
@@ -883,49 +1127,63 @@
     "color": "Red (USA)",
     "customImage": "https://i.ibb.co/BKtb8G49/catalog-1781099923252-45e9-45e4-aa7a.png",
     "customImageSleeve": "https://i.ibb.co/LHFYcf4/9053f4b15c0e.png",
-    "customImageBox": "https://i.ibb.co/27jJ2p64/e54d6ec468e1.png"
+    "customImageBox": "https://i.ibb.co/27jJ2p64/e54d6ec468e1.png",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-BORDEAUX_RED-WHITE",
     "model": "PRO PLUS",
     "name": "Bordeaux Red",
     "color": "White",
-    "customImage": "https://i.ibb.co/k2qG9LsM/20260617-190240-Background-Removed.png"
+    "customImage": "https://i.ibb.co/k2qG9LsM/20260617-190240-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-CLUBHAUS-WHITE_BLUE",
     "model": "PRO PLUS",
     "name": "Clubhaus",
     "color": "White/Blue",
-    "customImage": "https://i.ibb.co/93Yf1kqB/20260617-192032-Background-Removed.png"
+    "customImage": "https://i.ibb.co/93Yf1kqB/20260617-192032-Background-Removed.png",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-CLUBHAUS-WHITE_GRAY",
     "model": "PRO PLUS",
     "name": "Clubhaus",
     "color": "White/Gray",
-    "customImage": "https://i.ibb.co/27GKV4LB/20260617-192139-Background-Removed.png"
+    "customImage": "https://i.ibb.co/27GKV4LB/20260617-192139-Background-Removed.png",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-CLUBHAUS-WHITE_GREEN",
     "model": "PRO PLUS",
     "name": "Clubhaus",
     "color": "White/Green",
-    "customImage": "https://i.ibb.co/PZhs08NG/20260617-192118-Background-Removed.png"
+    "customImage": "https://i.ibb.co/PZhs08NG/20260617-192118-Background-Removed.png",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-CLUBHAUS-WHITE_RED",
     "model": "PRO PLUS",
     "name": "Clubhaus",
     "color": "White/Red",
-    "customImage": "https://i.ibb.co/39ZXXpRm/20260617-192053-Background-Removed.png"
+    "customImage": "https://i.ibb.co/39ZXXpRm/20260617-192053-Background-Removed.png",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-CLUBHAUS-WHITE_YELLOW",
     "model": "PRO PLUS",
     "name": "Clubhaus",
     "color": "White/Yellow",
-    "customImage": "https://i.ibb.co/Lz4xRwv2/Screenshot-2026-06-18-at-1-58-Background-Removed-43-PM.png"
+    "customImage": "https://i.ibb.co/Lz4xRwv2/Screenshot-2026-06-18-at-1-58-Background-Removed-43-PM.png",
+    "groupColor": true,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-DIVOT_DUDES-WHITE",
@@ -933,7 +1191,9 @@
     "name": "Divot Dudes",
     "color": "White",
     "customImage": "https://i.ibb.co/nqfVbB99/catalog-1781097525432-c79e-3b42-a0aa.png",
-    "customImageBox": "https://i.ibb.co/20qHP83X/827a96486d8f.webp"
+    "customImageBox": "https://i.ibb.co/20qHP83X/827a96486d8f.webp",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-DRIP-LIME_BLACK",
@@ -942,7 +1202,9 @@
     "color": "Lime/Black",
     "customImage": "https://i.ibb.co/MxkFqv0b/catalog-1780358016992-35c9-b620-6ea9.jpg",
     "customImageSleeve": "https://i.ibb.co/twqxfvzY/12b2a931f3ab.jpg",
-    "customImageBox": "https://i.ibb.co/PGn0vj2Y/63035ee0f3be.jpg"
+    "customImageBox": "https://i.ibb.co/PGn0vj2Y/63035ee0f3be.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-DRIP-NAVY_ORANGE",
@@ -951,14 +1213,18 @@
     "color": "Navy/Orange",
     "customImage": "https://i.ibb.co/kVcMvZZQ/catalog-1780358017633-74e6-7453-401b.jpg",
     "customImageSleeve": "https://i.ibb.co/Xwcnk0B/142ccfbdb37f.jpg",
-    "customImageBox": "https://i.ibb.co/GQHYvPK3/29bb90ccf5d7.jpg"
+    "customImageBox": "https://i.ibb.co/GQHYvPK3/29bb90ccf5d7.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-EXTRA_BUTTER-GOLD",
     "model": "PRO PLUS",
     "name": "Extra Butter",
     "color": "Gold",
-    "customImage": "https://i.ibb.co/d0gjYDPb/20260617-190009-Background-Removed.png"
+    "customImage": "https://i.ibb.co/d0gjYDPb/20260617-190009-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-FASTBALL-WHITE",
@@ -966,28 +1232,36 @@
     "name": "Fastball",
     "color": "White",
     "customImage": "https://i.ibb.co/8n47XVv9/4c5f954abf32.png",
-    "customImageBox": "https://i.ibb.co/fz9Mfg7P/e2b1d9d08454.png"
+    "customImageBox": "https://i.ibb.co/fz9Mfg7P/e2b1d9d08454.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-FLYER_S_CLUB-WHITE",
     "model": "PRO PLUS",
     "name": "Flyer's Club",
     "color": "White",
-    "customImage": "https://i.ibb.co/gbmjTXjB/20260617-190331-Background-Removed.png"
+    "customImage": "https://i.ibb.co/gbmjTXjB/20260617-190331-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-FUGU-WHITE",
     "model": "PRO PLUS",
     "name": "Fugu",
     "color": "White",
-    "customImage": "https://i.ibb.co/1G03X4k9/20260617-193249-Background-Removed.png"
+    "customImage": "https://i.ibb.co/1G03X4k9/20260617-193249-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-GOLFERIA-WHITE",
     "model": "PRO PLUS",
     "name": "Golferia",
     "color": "White",
-    "customImage": "https://i.ibb.co/yFBrzvDT/20260617-193232-Background-Removed.png"
+    "customImage": "https://i.ibb.co/yFBrzvDT/20260617-193232-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-HERITAGE_COLLECTION-WHITE-1_MAGNOLIA",
@@ -995,7 +1269,9 @@
     "name": "Heritage Collection",
     "color": "White",
     "variation": "1 - Magnolia",
-    "customImage": "https://i.ibb.co/9kyJMCDJ/Screenshot-2026-06-18-at-3-20-Background-Removed-07-PM.png"
+    "customImage": "https://i.ibb.co/9kyJMCDJ/Screenshot-2026-06-18-at-3-20-Background-Removed-07-PM.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-HERITAGE_COLLECTION-WHITE-2_CLUBHOUSE",
@@ -1003,7 +1279,9 @@
     "name": "Heritage Collection",
     "color": "White",
     "variation": "2 - Clubhouse",
-    "customImage": "https://i.ibb.co/pB1CVL3p/Screenshot-2026-06-18-at-3-25-Background-Removed-47-PM.png"
+    "customImage": "https://i.ibb.co/pB1CVL3p/Screenshot-2026-06-18-at-3-25-Background-Removed-47-PM.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-HERITAGE_COLLECTION-WHITE-3_OAK_TREE",
@@ -1011,7 +1289,9 @@
     "name": "Heritage Collection",
     "color": "White",
     "variation": "3 - Oak Tree",
-    "customImage": "https://i.ibb.co/zV50Rsh1/Screenshot-2026-06-18-at-3-19-Background-Removed-40-PM.png"
+    "customImage": "https://i.ibb.co/zV50Rsh1/Screenshot-2026-06-18-at-3-19-Background-Removed-40-PM.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-HERITAGE_COLLECTION-WHITE-4_CLUBS",
@@ -1019,7 +1299,9 @@
     "name": "Heritage Collection",
     "color": "White",
     "variation": "4 - Clubs",
-    "customImage": "https://i.ibb.co/RTjtNRVW/Screenshot-2026-06-18-at-3-25-Background-Removed-40-PM.png"
+    "customImage": "https://i.ibb.co/RTjtNRVW/Screenshot-2026-06-18-at-3-25-Background-Removed-40-PM.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-LEGEND_LEGACY-WHITE-LEGACY",
@@ -1027,7 +1309,9 @@
     "name": "Legend & Legacy",
     "color": "White",
     "variation": "Legacy",
-    "customImage": "https://i.ibb.co/rSsdX7R/Screenshot-2026-06-18-at-3-36-Background-Removed-09-PM.png"
+    "customImage": "https://i.ibb.co/rSsdX7R/Screenshot-2026-06-18-at-3-36-Background-Removed-09-PM.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-LEGEND_LEGACY-WHITE-LEGEND",
@@ -1035,7 +1319,9 @@
     "name": "Legend & Legacy",
     "color": "White",
     "variation": "Legend",
-    "customImage": "https://i.ibb.co/zTv57W1Y/1f041150c58a.png"
+    "customImage": "https://i.ibb.co/zTv57W1Y/1f041150c58a.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-LETTERS_TO_TROON-WHITE-FOX",
@@ -1045,7 +1331,9 @@
     "variation": "Fox",
     "customImage": "https://i.ibb.co/HmTGN5Z/catalog-1780358018237-a014-97c2-531c.webp",
     "customImageSleeve": "https://i.ibb.co/pjm9KWYX/2853df9655f1.webp",
-    "customImageBox": "https://i.ibb.co/DDKNjL0C/c98a70660151.webp"
+    "customImageBox": "https://i.ibb.co/DDKNjL0C/c98a70660151.webp",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-LETTERS_TO_TROON-WHITE-SEAL",
@@ -1055,7 +1343,9 @@
     "variation": "Seal",
     "customImage": "https://i.ibb.co/svzBkvDD/catalog-1780358018782-d45e-ee54-9604.webp",
     "customImageSleeve": "https://i.ibb.co/pjm9KWYX/2853df9655f1.webp",
-    "customImageBox": "https://i.ibb.co/DDKNjL0C/c98a70660151.webp"
+    "customImageBox": "https://i.ibb.co/DDKNjL0C/c98a70660151.webp",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-LETTERS_TO_TROON-WHITE-WELL",
@@ -1065,7 +1355,9 @@
     "variation": "Well",
     "customImage": "https://i.ibb.co/HD1KfP92/catalog-1780358019327-744f-3102-07b9.webp",
     "customImageSleeve": "https://i.ibb.co/pjm9KWYX/2853df9655f1.webp",
-    "customImageBox": "https://i.ibb.co/DDKNjL0C/c98a70660151.webp"
+    "customImageBox": "https://i.ibb.co/DDKNjL0C/c98a70660151.webp",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-NEON-LIME",
@@ -1074,42 +1366,54 @@
     "color": "Lime",
     "customImage": "https://i.ibb.co/FLF3BRpF/catalog-1780358019884-feb3-b63a-1666.jpg",
     "customImageSleeve": "https://i.ibb.co/KzW3ZHcS/ecadd19c2cad.jpg",
-    "customImageBox": "https://i.ibb.co/tPwtK2ky/38d7fde3c899.jpg"
+    "customImageBox": "https://i.ibb.co/tPwtK2ky/38d7fde3c899.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-ODE_TO_AUGUSTA-WHITE-11_AMEN_CORNER",
     "model": "PRO PLUS",
     "name": "Ode to Augusta",
     "color": "White",
-    "variation": "11 - Amen Corner"
+    "variation": "11 - Amen Corner",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-ODE_TO_AUGUSTA-WHITE-12_GOLDEN_BELL",
     "model": "PRO PLUS",
     "name": "Ode to Augusta",
     "color": "White",
-    "variation": "12 - Golden Bell"
+    "variation": "12 - Golden Bell",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-ODE_TO_AUGUSTA-WHITE-16_RED_BUD",
     "model": "PRO PLUS",
     "name": "Ode to Augusta",
     "color": "White",
-    "variation": "16 - Red Bud"
+    "variation": "16 - Red Bud",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-ODE_TO_AUGUSTA-WHITE-5_MAGNOLIA",
     "model": "PRO PLUS",
     "name": "Ode to Augusta",
     "color": "White",
-    "variation": "5  - Magnolia"
+    "variation": "5  - Magnolia",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-PINE_HURST-ORANGE",
     "model": "PRO PLUS",
     "name": "Pine(Hurst)",
     "color": "Orange",
-    "customImage": "https://i.ibb.co/Mx6p9nx5/20260617-192532-Background-Removed.png"
+    "customImage": "https://i.ibb.co/Mx6p9nx5/20260617-192532-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-RANDOM_GOLF_CLUB_RGC-WHITE-DOODLE",
@@ -1117,7 +1421,9 @@
     "name": "Random Golf Club (RGC)",
     "color": "White",
     "variation": "Doodle",
-    "customImage": "https://i.ibb.co/YTRcb50j/20260617-193621-Background-Removed.png"
+    "customImage": "https://i.ibb.co/YTRcb50j/20260617-193621-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-RANDOM_GOLF_CLUB_RGC-WHITE-RULE_17B",
@@ -1125,91 +1431,117 @@
     "name": "Random Golf Club (RGC)",
     "color": "White",
     "variation": "Rule 17b",
-    "customImage": "https://i.ibb.co/tTv9Msv8/20260617-192243-Background-Removed.png"
+    "customImage": "https://i.ibb.co/tTv9Msv8/20260617-192243-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-CHUNK",
     "model": "PRO PLUS",
     "name": "RGC Class of 2021",
     "color": "White",
-    "variation": "Chunk"
+    "variation": "Chunk",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-FIN",
     "model": "PRO PLUS",
     "name": "RGC Class of 2021",
     "color": "White",
-    "variation": "Fin"
+    "variation": "Fin",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-JUICED",
     "model": "PRO PLUS",
     "name": "RGC Class of 2021",
     "color": "White",
-    "variation": "Juiced"
+    "variation": "Juiced",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-KLAWS",
     "model": "PRO PLUS",
     "name": "RGC Class of 2021",
     "color": "White",
-    "variation": "Klaws"
+    "variation": "Klaws",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-MOONMAN",
     "model": "PRO PLUS",
     "name": "RGC Class of 2021",
     "color": "White",
-    "variation": "Moonman"
+    "variation": "Moonman",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-MULLIGAN_MARCHER",
     "model": "PRO PLUS",
     "name": "RGC Class of 2021",
     "color": "White",
-    "variation": "Mulligan Marcher"
+    "variation": "Mulligan Marcher",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-PITTED",
     "model": "PRO PLUS",
     "name": "RGC Class of 2021",
     "color": "White",
-    "variation": "Pitted"
+    "variation": "Pitted",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-PRICKLY_PAR",
     "model": "PRO PLUS",
     "name": "RGC Class of 2021",
     "color": "White",
-    "variation": "Prickly Par"
+    "variation": "Prickly Par",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-ROO",
     "model": "PRO PLUS",
     "name": "RGC Class of 2021",
     "color": "White",
-    "variation": "Roo"
+    "variation": "Roo",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-SLICE",
     "model": "PRO PLUS",
     "name": "RGC Class of 2021",
     "color": "White",
-    "variation": "Slice"
+    "variation": "Slice",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-STINGER_STRAT",
     "model": "PRO PLUS",
     "name": "RGC Class of 2021",
     "color": "White",
-    "variation": "Stinger Strat"
+    "variation": "Stinger Strat",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-THE_DROPOUT",
     "model": "PRO PLUS",
     "name": "RGC Class of 2021",
     "color": "White",
-    "variation": "The Dropout"
+    "variation": "The Dropout",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-ROYAL_RUSH-WHITE",
@@ -1217,13 +1549,17 @@
     "name": "Royal Rush",
     "color": "White",
     "customImage": "https://i.ibb.co/mrfGdTLF/20260617-190603-Background-Removed.png",
-    "customImageBox": "https://i.ibb.co/cKg3CGSL/8854fd498eef.webp"
+    "customImageBox": "https://i.ibb.co/cKg3CGSL/8854fd498eef.webp",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-SHADE-EARLY_BIRD",
     "model": "PRO PLUS",
     "name": "Shade",
-    "color": "Early Bird"
+    "color": "Early Bird",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-SHADE-ORANGE_YELLOW",
@@ -1232,14 +1568,18 @@
     "color": "Orange Yellow",
     "customImage": "https://i.ibb.co/Q7ztkbXY/catalog-1780358020512-13d7-dd86-b033.jpg",
     "customImageSleeve": "https://i.ibb.co/ycprxGyx/999ea16f9ef8.jpg",
-    "customImageBox": "https://i.ibb.co/pc8pb14/3549c6eb5b91.jpg"
+    "customImageBox": "https://i.ibb.co/pc8pb14/3549c6eb5b91.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-SHADE_X_EDITION-YELLOW_WHITE",
     "model": "PRO PLUS",
     "name": "Shade X Edition",
     "color": "Yellow/White",
-    "customImage": "https://i.ibb.co/6xQpQJ6/20260617-192850-Background-Removed.png"
+    "customImage": "https://i.ibb.co/6xQpQJ6/20260617-192850-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-STANDARD-BLACK",
@@ -1247,7 +1587,9 @@
     "name": "Standard",
     "color": "Black",
     "customImage": "https://i.ibb.co/Fk1bz3gw/catalog-1780358021107-0f71-9dcc-6d03.jpg",
-    "customImageBox": "https://i.ibb.co/VcBc7Yyc/8374ad299353.jpg"
+    "customImageBox": "https://i.ibb.co/VcBc7Yyc/8374ad299353.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-STANDARD-GOLD",
@@ -1255,7 +1597,9 @@
     "name": "Standard",
     "color": "Gold",
     "customImage": "https://i.ibb.co/XZB4mNzB/ab5cd2333882.jpg",
-    "customImageBox": "https://i.ibb.co/3qzhKdy/fbc0979511b9.jpg"
+    "customImageBox": "https://i.ibb.co/3qzhKdy/fbc0979511b9.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-STANDARD-WHITE",
@@ -1264,21 +1608,27 @@
     "color": "White",
     "customImage": "https://i.ibb.co/tMgYDYsG/678cde7f8095.jpg",
     "customImageSleeve": "https://i.ibb.co/qGQBmpV/d20f77282ab5.jpg",
-    "customImageBox": "https://i.ibb.co/ymJKZD96/bdb5ef4f7cc6.jpg"
+    "customImageBox": "https://i.ibb.co/ymJKZD96/bdb5ef4f7cc6.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-TAXI-DRIP_YELLOW_BLACK",
     "model": "PRO PLUS",
     "name": "Taxi",
     "color": "Drip Yellow/Black",
-    "customImage": "https://i.ibb.co/rKhRs30x/Screenshot-2026-06-18-at-4-36-Background-Removed-25-PM.png"
+    "customImage": "https://i.ibb.co/rKhRs30x/Screenshot-2026-06-18-at-4-36-Background-Removed-25-PM.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-TORREY-WHITE",
     "model": "PRO PLUS",
     "name": "Torrey",
     "color": "White",
-    "customImage": "https://i.ibb.co/FbpJ0Xyg/20260617-193603-Background-Removed.png"
+    "customImage": "https://i.ibb.co/FbpJ0Xyg/20260617-193603-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-TRACER-ARCTIC_BOMB",
@@ -1286,7 +1636,9 @@
     "name": "Tracer",
     "color": "Arctic Bomb",
     "customImage": "https://i.ibb.co/9HKkXGLS/c2f00137124c.png",
-    "customImageBox": "https://i.ibb.co/LB0QTxd/6cf1a6ba7d0d.webp"
+    "customImageBox": "https://i.ibb.co/LB0QTxd/6cf1a6ba7d0d.webp",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-TRACER-WHITE",
@@ -1294,21 +1646,27 @@
     "name": "Tracer",
     "color": "White",
     "customImage": "https://i.ibb.co/sprZp1WK/bfe031b32a08.jpg",
-    "customImageBox": "https://i.ibb.co/ksHCyNBB/db51a5ba30ce.jpg"
+    "customImageBox": "https://i.ibb.co/ksHCyNBB/db51a5ba30ce.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-UNCRATE-MATTE_BLACK",
     "model": "PRO PLUS",
     "name": "uncrate",
     "color": "Matte Black",
-    "customImage": "https://i.ibb.co/QvTvhgnv/20260617-192825-Background-Removed.png"
+    "customImage": "https://i.ibb.co/QvTvhgnv/20260617-192825-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-VOYAGE_TO_VALHALLA-WHITE",
     "model": "PRO PLUS",
     "name": "Voyage to Valhalla",
     "color": "White",
-    "customImage": "https://i.ibb.co/4RG0C9jn/20260617-193528-Background-Removed.png"
+    "customImage": "https://i.ibb.co/4RG0C9jn/20260617-193528-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_PLUS-WINNER_WINNER-WHITE-05_LOBSTER",
@@ -1316,7 +1674,9 @@
     "name": "Winner Winner",
     "color": "White",
     "variation": "05 - Lobster",
-    "customImage": "https://i.ibb.co/VcCFMbng/b684450a-0d6d-4ca1-8406-e7b8f797383d-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/VcCFMbng/b684450a-0d6d-4ca1-8406-e7b8f797383d-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-WINNER_WINNER-WHITE-22_SUSHI",
@@ -1324,7 +1684,9 @@
     "name": "Winner Winner",
     "color": "White",
     "variation": "22 - Sushi",
-    "customImage": "https://i.ibb.co/9mkCfSgm/d08a0214-0be9-479e-be81-62974e1d7384-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/9mkCfSgm/d08a0214-0be9-479e-be81-62974e1d7384-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-WINNER_WINNER-WHITE-89_BURGER",
@@ -1332,7 +1694,9 @@
     "name": "Winner Winner",
     "color": "White",
     "variation": "89 - Burger",
-    "customImage": "https://i.ibb.co/9kMMMHs6/30fa1a47-22bd-4836-bf16-cd965df28b0a-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/9kMMMHs6/30fa1a47-22bd-4836-bf16-cd965df28b0a-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-WINNER_WINNER-WHITE-94_TARTE",
@@ -1340,7 +1704,9 @@
     "name": "Winner Winner",
     "color": "White",
     "variation": "94 - Tarte",
-    "customImage": "https://i.ibb.co/0RKBGLrX/eea6d351-b5b8-4c81-b9dc-8a20f6c62ce1-copied-media-2-Background-Removed.png"
+    "customImage": "https://i.ibb.co/0RKBGLrX/eea6d351-b5b8-4c81-b9dc-8a20f6c62ce1-copied-media-2-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-YOU_LL_NEVER_PUTT_ALONE-ORANGE_DRIP-1_FLOWER",
@@ -1348,7 +1714,9 @@
     "name": "You'll Never Putt Alone",
     "color": "Orange Drip",
     "variation": "1 - Flower",
-    "customImage": "https://i.ibb.co/wZ117MMz/Screenshot-2026-06-18-at-3-39-Background-Removed-11-PM.png"
+    "customImage": "https://i.ibb.co/wZ117MMz/Screenshot-2026-06-18-at-3-39-Background-Removed-11-PM.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-YOU_LL_NEVER_PUTT_ALONE-ORANGE_DRIP-2_SUN",
@@ -1356,7 +1724,9 @@
     "name": "You'll Never Putt Alone",
     "color": "Orange Drip",
     "variation": "2 - Sun",
-    "customImage": "https://i.ibb.co/DPsVC0yM/Screenshot-2026-06-18-at-3-39-Background-Removed-39-PM.png"
+    "customImage": "https://i.ibb.co/DPsVC0yM/Screenshot-2026-06-18-at-3-39-Background-Removed-39-PM.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-YOU_LL_NEVER_PUTT_ALONE-ORANGE_DRIP-3_OCTOPUS",
@@ -1364,7 +1734,9 @@
     "name": "You'll Never Putt Alone",
     "color": "Orange Drip",
     "variation": "3 - Octopus",
-    "customImage": "https://i.ibb.co/qGQGJCM/Screenshot-2026-06-18-at-3-38-Background-Removed-57-PM.png"
+    "customImage": "https://i.ibb.co/qGQGJCM/Screenshot-2026-06-18-at-3-38-Background-Removed-57-PM.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_PLUS-YOU_LL_NEVER_PUTT_ALONE-ORANGE_DRIP-4_WALRUS",
@@ -1372,14 +1744,18 @@
     "name": "You'll Never Putt Alone",
     "color": "Orange Drip",
     "variation": "4 - Walrus",
-    "customImage": "https://i.ibb.co/TMCTT9td/Screenshot-2026-06-18-at-3-39-Background-Removed-26-PM.png"
+    "customImage": "https://i.ibb.co/TMCTT9td/Screenshot-2026-06-18-at-3-39-Background-Removed-26-PM.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "PRO_SOFT-CYPRESS-WHITE",
     "model": "PRO SOFT",
     "name": "Cypress",
     "color": "White",
-    "customImage": "https://i.ibb.co/9mQLpqyV/Screenshot-2026-06-18-at-3-43-Background-Removed-07-PM.png"
+    "customImage": "https://i.ibb.co/9mQLpqyV/Screenshot-2026-06-18-at-3-43-Background-Removed-07-PM.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_SOFT-DRIP-RED_BLACK",
@@ -1387,7 +1763,9 @@
     "name": "Drip",
     "color": "Red/Black",
     "customImage": "https://i.ibb.co/zLxRMd3/45309b85f2af.jpg",
-    "customImageBox": "https://i.ibb.co/ymxQNNnJ/7e9c59073a29.jpg"
+    "customImageBox": "https://i.ibb.co/ymxQNNnJ/7e9c59073a29.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_SOFT-HUE-BLUE_LIGHT",
@@ -1395,7 +1773,9 @@
     "name": "Hue",
     "color": "Blue Light",
     "customImage": "https://i.ibb.co/FLXy0wF3/2d13c1137500.jpg",
-    "customImageBox": "https://i.ibb.co/Gyr6sD4/9a67095dba4c.jpg"
+    "customImageBox": "https://i.ibb.co/Gyr6sD4/9a67095dba4c.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_SOFT-HUE-LIVING_CORAL",
@@ -1403,7 +1783,9 @@
     "name": "Hue",
     "color": "Living Coral",
     "customImage": "https://i.ibb.co/dw4zyKVL/85b3a1727027.jpg",
-    "customImageBox": "https://i.ibb.co/ZR5QZpz3/cee40f6c2d69.jpg"
+    "customImageBox": "https://i.ibb.co/ZR5QZpz3/cee40f6c2d69.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_SOFT-HUE-PEACH_PARFAIT",
@@ -1411,7 +1793,9 @@
     "name": "Hue",
     "color": "Peach Parfait",
     "customImage": "https://i.ibb.co/xSRvZG4j/64b2ca447ba9.jpg",
-    "customImageBox": "https://i.ibb.co/MkyX9Mpj/dd494ed831d1.webp"
+    "customImageBox": "https://i.ibb.co/MkyX9Mpj/dd494ed831d1.webp",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_SOFT-MATTE-WHITE",
@@ -1419,7 +1803,9 @@
     "name": "Matte",
     "color": "White",
     "customImage": "https://i.ibb.co/VYc3cHrL/7847b8e19898.jpg",
-    "customImageBox": "https://i.ibb.co/KzxDQLyq/6084d5b891ea.jpg"
+    "customImageBox": "https://i.ibb.co/KzxDQLyq/6084d5b891ea.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_SOFT-MATTE_NEON-LIME",
@@ -1428,7 +1814,9 @@
     "color": "Lime",
     "customImage": "https://i.ibb.co/PvVCpN82/a140f5392535.webp",
     "customImageSleeve": "https://i.ibb.co/j91xfMJ9/0322ae729234.jpg",
-    "customImageBox": "https://i.ibb.co/JR88gtZT/b65b7a3f3056.jpg"
+    "customImageBox": "https://i.ibb.co/JR88gtZT/b65b7a3f3056.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_SOFT-MATTE_NEON-RED",
@@ -1437,7 +1825,9 @@
     "color": "Red",
     "customImage": "https://i.ibb.co/B2hjK5rc/062084668a66.webp",
     "customImageSleeve": "https://i.ibb.co/GQS7Y9HF/5252862b97a1.jpg",
-    "customImageBox": "https://i.ibb.co/7JLGCtGQ/005bd16a63cf.jpg"
+    "customImageBox": "https://i.ibb.co/7JLGCtGQ/005bd16a63cf.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_SOFT-NEON-LIME",
@@ -1446,7 +1836,9 @@
     "color": "Lime",
     "customImage": "https://i.ibb.co/TMqQWGXr/19d25e0e4069.jpg",
     "customImageSleeve": "https://i.ibb.co/j91xfMJ9/0322ae729234.jpg",
-    "customImageBox": "https://i.ibb.co/JR88gtZT/b65b7a3f3056.jpg"
+    "customImageBox": "https://i.ibb.co/JR88gtZT/b65b7a3f3056.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_SOFT-NEON-RED",
@@ -1455,7 +1847,9 @@
     "color": "Red",
     "customImage": "https://i.ibb.co/PBR25s6/catalog-1780358007577-242d-2f0d-3ba2.jpg",
     "customImageSleeve": "https://i.ibb.co/GQS7Y9HF/5252862b97a1.jpg",
-    "customImageBox": "https://i.ibb.co/whfvPq3M/04322c72fc2b.jpg"
+    "customImageBox": "https://i.ibb.co/whfvPq3M/04322c72fc2b.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_SOFT-STANDARD-WHITE",
@@ -1463,14 +1857,18 @@
     "name": "Standard",
     "color": "White",
     "customImage": "https://i.ibb.co/Cpspqtmf/65bd6b894cff.jpg",
-    "customImageBox": "https://i.ibb.co/spkmMXcQ/c0b0ce4dcd23.jpg"
+    "customImageBox": "https://i.ibb.co/spkmMXcQ/c0b0ce4dcd23.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_SOFT-TAILGATE-WHITE",
     "model": "PRO SOFT",
     "name": "Tailgate",
     "color": "White",
-    "customImage": "https://i.ibb.co/Ldm7FWTF/20260617-192423-Background-Removed.png"
+    "customImage": "https://i.ibb.co/Ldm7FWTF/20260617-192423-Background-Removed.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "PRO_ZERO-STANDARD-WHITE",
@@ -1478,14 +1876,18 @@
     "name": "Standard",
     "color": "White",
     "customImage": "https://i.ibb.co/KpPnsMPw/113bd532c8e9.jpg",
-    "customImageBox": "https://i.ibb.co/WNt57Jwr/1379c66af6c8.jpg"
+    "customImageBox": "https://i.ibb.co/WNt57Jwr/1379c66af6c8.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "SIM-VICE_SIM-WHITE",
     "model": "SIM",
     "name": "Vice Sim",
     "color": "White",
-    "customImage": "https://i.ibb.co/LhN7SQg6/Screenshot-2026-06-18-at-2-08-Background-Removed-35-PM.png"
+    "customImage": "https://i.ibb.co/LhN7SQg6/Screenshot-2026-06-18-at-2-08-Background-Removed-35-PM.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "TOUR-ALL_OVER_PRINT-SKETCH",
@@ -1494,7 +1896,9 @@
     "color": "Sketch",
     "customImage": "https://i.ibb.co/NgvnbZB5/0fbc08226ae7.jpg",
     "customImageSleeve": "https://i.ibb.co/N6Lx9LpY/b2c8c48422e7.jpg",
-    "customImageBox": "https://i.ibb.co/xS49XTg2/f7e7a90d5841.jpg"
+    "customImageBox": "https://i.ibb.co/xS49XTg2/f7e7a90d5841.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "TOUR-ALL_OVER_PRINT-ZAP",
@@ -1503,7 +1907,9 @@
     "color": "Zap",
     "customImage": "https://i.ibb.co/WW6CW5G4/fbdd2415dcb8.jpg",
     "customImageSleeve": "https://i.ibb.co/MxkZX5dM/e334c8511de4.jpg",
-    "customImageBox": "https://i.ibb.co/SDdn4q0N/4029cab35663.jpg"
+    "customImageBox": "https://i.ibb.co/SDdn4q0N/4029cab35663.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "TOUR-CORONA_PREMIER-WHITE",
@@ -1511,7 +1917,9 @@
     "name": "Corona Premier",
     "color": "White",
     "customImage": "https://i.ibb.co/yFXLQd1v/5d4a1761cdcb.png",
-    "customImageBox": "https://i.ibb.co/60TFsk20/8c86e62cb1b0.png"
+    "customImageBox": "https://i.ibb.co/60TFsk20/8c86e62cb1b0.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "TOUR-GRAY-GRAY",
@@ -1520,7 +1928,9 @@
     "color": "Gray",
     "customImage": "https://i.ibb.co/NdYn2Rcw/be09794a0caf.jpg",
     "customImageSleeve": "https://i.ibb.co/nNhrksK3/abae6389ec5e.jpg",
-    "customImageBox": "https://i.ibb.co/ccjmWrX8/ddf930506c6a.jpg"
+    "customImageBox": "https://i.ibb.co/ccjmWrX8/ddf930506c6a.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "TOUR-JET-WHITE",
@@ -1528,7 +1938,9 @@
     "name": "Jet",
     "color": "White",
     "customImage": "https://i.ibb.co/r2FxhLjp/78a5a3fd2f93.png",
-    "customImageBox": "https://i.ibb.co/wNpnBLR1/950cef56a9e4.png"
+    "customImageBox": "https://i.ibb.co/wNpnBLR1/950cef56a9e4.png",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "TOUR-JUNIOR-WHITE",
@@ -1537,7 +1949,9 @@
     "color": "White",
     "customImage": "https://i.ibb.co/t6V3ghs/b4aa314f755b.png",
     "customImageSleeve": "https://i.ibb.co/mVQswPWJ/c66474889d08.jpg",
-    "customImageBox": "https://i.ibb.co/fzwCjCNS/0cd4c1feda21.jpg"
+    "customImageBox": "https://i.ibb.co/fzwCjCNS/0cd4c1feda21.jpg",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "TOUR-JUNIOR-YELLOW",
@@ -1545,7 +1959,9 @@
     "name": "Junior",
     "color": "Yellow",
     "customImage": "https://i.ibb.co/G3Pk7grb/aa11441ec30f.png",
-    "customImageBox": "https://i.ibb.co/b4vRjq6/d48aad947992.webp"
+    "customImageBox": "https://i.ibb.co/b4vRjq6/d48aad947992.webp",
+    "groupColor": false,
+    "groupVariation": false
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-EUR1",
@@ -1553,7 +1969,9 @@
     "name": "Ryder Cup",
     "color": "White",
     "variation": "EUR1",
-    "customImage": "https://i.ibb.co/VYw2nSTD/1cd3d94ab1b9.png"
+    "customImage": "https://i.ibb.co/VYw2nSTD/1cd3d94ab1b9.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-EUR2",
@@ -1561,7 +1979,9 @@
     "name": "Ryder Cup",
     "color": "White",
     "variation": "EUR2",
-    "customImage": "https://i.ibb.co/qFDBcgc1/fec511ae6e06.png"
+    "customImage": "https://i.ibb.co/qFDBcgc1/fec511ae6e06.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-EUR3",
@@ -1569,7 +1989,9 @@
     "name": "Ryder Cup",
     "color": "White",
     "variation": "EUR3",
-    "customImage": "https://i.ibb.co/Gf7JDBhC/730c581253f6.png"
+    "customImage": "https://i.ibb.co/Gf7JDBhC/730c581253f6.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USA1",
@@ -1577,7 +1999,9 @@
     "name": "Ryder Cup",
     "color": "White",
     "variation": "USA1",
-    "customImage": "https://i.ibb.co/Kc5t4n3T/e40d92a2a4e8.png"
+    "customImage": "https://i.ibb.co/Kc5t4n3T/e40d92a2a4e8.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USA2",
@@ -1585,7 +2009,9 @@
     "name": "Ryder Cup",
     "color": "White",
     "variation": "USA2",
-    "customImage": "https://i.ibb.co/gZLt5bth/e4c8fd95d9da.png"
+    "customImage": "https://i.ibb.co/gZLt5bth/e4c8fd95d9da.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USA3",
@@ -1593,7 +2019,9 @@
     "name": "Ryder Cup",
     "color": "White",
     "variation": "USA3",
-    "customImage": "https://i.ibb.co/Q74TtXWR/64bbaf8e73d0.png"
+    "customImage": "https://i.ibb.co/Q74TtXWR/64bbaf8e73d0.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USVEU1",
@@ -1601,7 +2029,9 @@
     "name": "Ryder Cup",
     "color": "White",
     "variation": "USvEU1",
-    "customImage": "https://i.ibb.co/21FJwrh4/aa8b51b37191.png"
+    "customImage": "https://i.ibb.co/21FJwrh4/aa8b51b37191.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USVEU2",
@@ -1609,7 +2039,9 @@
     "name": "Ryder Cup",
     "color": "White",
     "variation": "USvEU2",
-    "customImage": "https://i.ibb.co/B5XL0s69/cd64a6cab551.png"
+    "customImage": "https://i.ibb.co/B5XL0s69/cd64a6cab551.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USVEU3",
@@ -1617,7 +2049,9 @@
     "name": "Ryder Cup",
     "color": "White",
     "variation": "USvEU3",
-    "customImage": "https://i.ibb.co/RMkmH6n/fce60885d5f7.png"
+    "customImage": "https://i.ibb.co/RMkmH6n/fce60885d5f7.png",
+    "groupColor": false,
+    "groupVariation": true
   },
   {
     "id": "TOUR-STANDARD-WHITE",
@@ -1626,6 +2060,8 @@
     "color": "White",
     "customImage": "https://i.ibb.co/tMj74W7p/777f8d004133.jpg",
     "customImageSleeve": "https://i.ibb.co/0RFXLgm8/d438b7f79c34.jpg",
-    "customImageBox": "https://i.ibb.co/5gy3VTcY/5e2ddbdb2c0f.jpg"
+    "customImageBox": "https://i.ibb.co/5gy3VTcY/5e2ddbdb2c0f.jpg",
+    "groupColor": false,
+    "groupVariation": false
   }
 ]

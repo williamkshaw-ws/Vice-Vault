@@ -183,7 +183,7 @@ const getOwnedUniqueCount = (balls: GolfBall[], catalog: CatalogItem[]) => {
   const ownedUniqueHashes = new Set<string>();
   
   balls.forEach(b => {
-    const isGroupBox = b.packageType === "box" && (b.color === "Mixed" || b.color === "" || b.variation === "Mixed" || b.variation === "") && catalog.some(c => 
+    const isGroupBox = b.packageType === "box" && catalog.some(c => 
       c.model.trim().toLowerCase() === b.model.trim().toLowerCase() &&
       (c.name || "").trim().toLowerCase() === (b.name || "").trim().toLowerCase() &&
       (c.groupColor || c.groupVariation)
@@ -215,7 +215,7 @@ const getUniqueCatalogItems = (balls: GolfBall[], catalog: CatalogItem[]): Catal
   const uniqueItems = new Map<string, CatalogItem>();
   
   balls.forEach(b => {
-    const isGroupBox = b.packageType === "box" && (b.color === "Mixed" || b.color === "" || b.variation === "Mixed" || b.variation === "") && catalog.some(c => 
+    const isGroupBox = b.packageType === "box" && catalog.some(c => 
       c.model.trim().toLowerCase() === b.model.trim().toLowerCase() &&
       (c.name || "").trim().toLowerCase() === (b.name || "").trim().toLowerCase() &&
       (c.groupColor || c.groupVariation)
@@ -929,11 +929,11 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             
             const colorMatch = normalize(ball.color) === normalize(originalItem.color);
             const nameAsColorMatch = normalize(ball.color) === normalize(originalItem.name) && normalize(originalItem.name) !== "";
-            const isGroupColorMatch = originalItem.groupColor && normalize(ball.color) === normalize("Mixed");
+            const isGroupColorMatch = originalItem.groupColor && (normalize(ball.color) === normalize("Mixed") || ball.packageType === 'box');
             const finalColorMatch = colorMatch || nameAsColorMatch || isGroupColorMatch;
 
             const varMatch = normalize(ball.variation) === normalize(originalItem.variation);
-            const isGroupVarMatch = originalItem.groupVariation && normalize(ball.variation) === normalize("Mixed");
+            const isGroupVarMatch = originalItem.groupVariation && (normalize(ball.variation) === normalize("Mixed") || ball.packageType === 'box');
             const finalVarMatch = varMatch || isGroupVarMatch;
 
             const nameMatch = normalize(ball.name) === normalize(originalItem.name);
@@ -1351,13 +1351,13 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
             const colorMatch = normalize(c.color) === normalize(b.color);
             const nameAsColorMatch = normalize(c.name) === normalize(b.color) && normalize(c.name) !== "";
-            const isGroupColorMatch = c.groupColor && normalize(b.color) === normalize("Mixed");
+            const isGroupColorMatch = c.groupColor && (normalize(b.color) === normalize("Mixed") || b.packageType === 'box');
             const finalColorMatch = colorMatch || nameAsColorMatch || isGroupColorMatch;
             
             const nameMatch = normalize(c.name) === normalize(b.name);
             
             const varMatch = normalize(c.variation) === normalize(b.variation);
-            const isGroupVarMatch = c.groupVariation && normalize(b.variation) === normalize("Mixed");
+            const isGroupVarMatch = c.groupVariation && (normalize(b.variation) === normalize("Mixed") || b.packageType === 'box');
             const finalVarMatch = varMatch || isGroupVarMatch;
 
             const isNameValid = nameMatch || !b.name || nameAsColorMatch;
