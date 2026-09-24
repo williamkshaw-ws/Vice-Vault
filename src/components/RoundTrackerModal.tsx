@@ -46,6 +46,7 @@ export interface RoundBallInPlay {
   status: 'survived' | 'damaged' | 'lost' | 'scuffed';
   lostHole?: number;
   hazard?: string;
+  hazardDetail?: string;
 }
 
 export interface PackedBallItem {
@@ -321,15 +322,18 @@ export default function RoundTrackerModal({
     } catch (e) {}
   };
 
-  // Update lost hole or hazard
-  const handleUpdateLostDetails = (itemId: string, hole?: number, hazard?: string) => {
+  // Update lost hole, hazard, or custom detail
+  const handleUpdateLostDetails = (itemId: string, hole?: number, hazard?: string, hazardDetail?: string) => {
     if (!activeRound) return;
     const updatedBalls = activeRound.balls.map(b => {
       if (b.id === itemId) {
         return {
           ...b,
           lostHole: hole !== undefined ? hole : b.lostHole,
-          hazard: hazard !== undefined ? hazard : b.hazard
+          hazard: hazard !== undefined ? hazard : b.hazard,
+          hazardDetail: hazardDetail !== undefined 
+            ? hazardDetail 
+            : (hazard && hazard !== 'Other' ? undefined : b.hazardDetail)
         };
       }
       return b;
@@ -783,35 +787,47 @@ export default function RoundTrackerModal({
 
                             {/* Extra details when lost */}
                             {item.status === 'lost' && (
-                              <div className="pt-2 border-t border-rose-200 dark:border-rose-950/40 flex flex-wrap items-center gap-2.5 text-[10px] font-mono text-neutral-600 dark:text-neutral-400">
+                              <div className="pt-2 border-t border-rose-200 dark:border-rose-950/40 flex flex-wrap items-center gap-2.5 text-[10px] font-mono">
                                 <span className="text-rose-700 dark:text-rose-400 font-bold">Lost Details:</span>
                                 <div className="flex items-center gap-1">
-                                  <span>Hole:</span>
+                                  <span className="font-semibold text-neutral-300">Hole:</span>
                                   <select
                                     value={item.lostHole || 1}
                                     onChange={(e) => handleUpdateLostDetails(item.id, parseInt(e.target.value, 10))}
-                                    className="bg-neutral-900 border border-neutral-800 text-neutral-800 dark:text-neutral-200 rounded px-1.5 py-0.5 cursor-pointer outline-none focus:border-rose-500"
+                                    className="bg-neutral-900 border border-neutral-800 text-white font-medium rounded px-1.5 py-0.5 cursor-pointer outline-none focus:border-rose-500"
                                   >
                                     {Array.from({ length: activeRound.holes }, (_, i) => i + 1).map(h => (
-                                      <option key={h} value={h}>Hole {h}</option>
+                                      <option key={h} value={h} className="bg-neutral-900 text-white">Hole {h}</option>
                                     ))}
                                   </select>
                                 </div>
                                 <div className="flex items-center gap-1">
-                                  <span>Hazard:</span>
+                                  <span className="font-semibold text-neutral-300">Hazard:</span>
                                   <select
                                     value={item.hazard || 'Water Hazard'}
                                     onChange={(e) => handleUpdateLostDetails(item.id, undefined, e.target.value)}
-                                    className="bg-neutral-900 border border-neutral-800 text-neutral-800 dark:text-neutral-200 rounded px-1.5 py-0.5 cursor-pointer outline-none focus:border-rose-500"
+                                    className="bg-neutral-900 border border-neutral-800 text-white font-medium rounded px-1.5 py-0.5 cursor-pointer outline-none focus:border-rose-500"
                                   >
-                                    <option value="Water Hazard">Water Hazard</option>
-                                    <option value="Woods / Trees">Woods / Trees</option>
-                                    <option value="Deep Rough">Deep Rough</option>
-                                    <option value="Out of Bounds">Out of Bounds</option>
-                                    <option value="Cart Path">Cart Path Bounce</option>
-                                    <option value="Other">Other</option>
+                                    <option value="Water Hazard" className="bg-neutral-900 text-white">Water Hazard</option>
+                                    <option value="Woods / Trees" className="bg-neutral-900 text-white">Woods / Trees</option>
+                                    <option value="Deep Rough" className="bg-neutral-900 text-white">Deep Rough</option>
+                                    <option value="Out of Bounds" className="bg-neutral-900 text-white">Out of Bounds</option>
+                                    <option value="Cart Path" className="bg-neutral-900 text-white">Cart Path Bounce</option>
+                                    <option value="Other" className="bg-neutral-900 text-white">Other</option>
                                   </select>
                                 </div>
+                                {item.hazard === 'Other' && (
+                                  <div className="flex items-center gap-1 animate-in fade-in duration-150">
+                                    <span className="font-semibold text-neutral-300">Reason:</span>
+                                    <input
+                                      type="text"
+                                      value={item.hazardDetail || ''}
+                                      onChange={(e) => handleUpdateLostDetails(item.id, undefined, undefined, e.target.value)}
+                                      placeholder="Specify reason..."
+                                      className="bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-500 rounded px-2 py-0.5 text-[10px] font-mono outline-none focus:border-rose-500 w-36 sm:w-48"
+                                    />
+                                  </div>
+                                )}
                               </div>
                             )}
 
@@ -1521,7 +1537,7 @@ export default function RoundTrackerModal({
                                           {isLost ? (
                                             <span className="text-rose-700 dark:text-rose-400 flex items-center gap-1 font-extrabold">
                                               <Skull size={11} />
-                                              Lost {b.lostHole ? `H${b.lostHole}` : ''} {b.hazard ? `(${b.hazard})` : ''}
+                                              Lost {b.lostHole ? `H${b.lostHole}` : ''} {b.hazard ? `(${b.hazard === 'Other' && (b as any).hazardDetail ? (b as any).hazardDetail : b.hazard})` : ''}
                                             </span>
                                           ) : isDamaged ? (
                                             <span className="text-amber-800 dark:text-amber-300 flex items-center gap-1 font-extrabold">
