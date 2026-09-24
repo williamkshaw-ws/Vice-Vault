@@ -69,6 +69,7 @@ import {
 import { auth, db, isFirebaseConfigured } from "./firebase";
 import AuthModal, { AvatarRenderer } from "./components/AuthModal";
 import ResetPasswordModal from "./components/ResetPasswordModal";
+import VerifyEmailModal from "./components/VerifyEmailModal";
 import { User as FirebaseUser } from "firebase/auth";
 import { doc, getDoc, setDoc, query, where, collection, getDocs } from "firebase/firestore";
 
@@ -298,24 +299,30 @@ export default function App() {
 
   const [resetPasswordCode, setResetPasswordCode] = useState<string | null>(null);
   const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
+  const [verifyEmailCode, setVerifyEmailCode] = useState<string | null>(null);
+  const [isVerifyEmailModalOpen, setIsVerifyEmailModalOpen] = useState(false);
   const [prefilledAuthEmail, setPrefilledAuthEmail] = useState<string>("");
 
   useEffect(() => {
-    const checkUrlForPasswordReset = () => {
+    const checkUrlForAuthActions = () => {
       const params = new URLSearchParams(window.location.search);
-      const code = params.get("oobCode") || params.get("token");
+      const code = params.get("oobCode") || params.get("token") || params.get("code");
       const mode = params.get("mode");
       const isResetPath = window.location.pathname.includes("reset-password") || mode === "resetPassword";
+      const isVerifyEmailPath = window.location.pathname.includes("verify-email") || mode === "verifyEmail";
       
       if (code && isResetPath) {
         setResetPasswordCode(code);
         setIsResetPasswordModalOpen(true);
+      } else if (code && isVerifyEmailPath) {
+        setVerifyEmailCode(code);
+        setIsVerifyEmailModalOpen(true);
       }
     };
 
-    checkUrlForPasswordReset();
-    window.addEventListener("popstate", checkUrlForPasswordReset);
-    return () => window.removeEventListener("popstate", checkUrlForPasswordReset);
+    checkUrlForAuthActions();
+    window.addEventListener("popstate", checkUrlForAuthActions);
+    return () => window.removeEventListener("popstate", checkUrlForAuthActions);
   }, []);
 
   const isAdmin = useMemo(() => {
@@ -2637,6 +2644,30 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             window.history.replaceState({}, document.title, window.location.pathname.replace(/\/reset-password\/?/, "/") || "/");
             setPrefilledAuthEmail(email);
             setAuthModalOpen(true);
+          }}
+        />
+      )}
+
+      {/* Email Verification Modal */}
+      {isVerifyEmailModalOpen && verifyEmailCode && (
+        <VerifyEmailModal
+          isOpen={isVerifyEmailModalOpen}
+          code={verifyEmailCode}
+          onClose={() => {
+            setIsVerifyEmailModalOpen(false);
+            setVerifyEmailCode(null);
+            window.history.replaceState({}, document.title, window.location.pathname.replace(/\/verify-email\/?/, "/") || "/");
+          }}
+          onSuccess={(email) => {
+            setIsVerifyEmailModalOpen(false);
+            setVerifyEmailCode(null);
+            window.history.replaceState({}, document.title, window.location.pathname.replace(/\/verify-email\/?/, "/") || "/");
+            if (userProfile) {
+              setUserProfile({ ...userProfile, emailVerified: true, email: email || userProfile.email });
+            }
+            if (currentUser) {
+              setCurrentUser({ ...currentUser, emailVerified: true, email: email || (currentUser as any).email });
+            }
           }}
         />
       )}

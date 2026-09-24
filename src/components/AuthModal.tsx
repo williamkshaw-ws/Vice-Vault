@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor, Copy, Eye, EyeOff, AlertTriangle, Share2, Trash2, ArrowLeft, CheckCircle2, ShieldCheck } from "lucide-react";
+import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor, Copy, Eye, EyeOff, AlertTriangle, Share2, Trash2, ArrowLeft, CheckCircle2, ShieldCheck, Pencil } from "lucide-react";
 import { ACCENT_COLORS, isStrongPassword } from "../utils";
 import { nativeHaptics, nativeShare } from "../utils/native";
 import { getAuthHeaders } from "../utils/authHeaders";
@@ -249,6 +249,13 @@ export default function AuthModal({
   const [isSendingVerification, setIsSendingVerification] = useState(false);
   const [verificationSuccessMessage, setVerificationSuccessMessage] = useState<string | null>(null);
 
+  // Email Change State
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [editEmailValue, setEditEmailValue] = useState("");
+  const [isSavingEmail, setIsSavingEmail] = useState(false);
+  const [emailUpdateError, setEmailUpdateError] = useState<string | null>(null);
+  const [emailUpdateSuccess, setEmailUpdateSuccess] = useState<string | null>(null);
+
   // Account Deletion State (Apple Guideline 5.1.1v)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmationInput, setDeleteConfirmationInput] = useState("");
@@ -276,6 +283,11 @@ export default function AuthModal({
       setResetSuccessMessage(null);
       setIsSendingVerification(false);
       setVerificationSuccessMessage(null);
+      setIsEditingEmail(false);
+      setEditEmailValue(currentUser?.email || userProfile?.email || "");
+      setIsSavingEmail(false);
+      setEmailUpdateError(null);
+      setEmailUpdateSuccess(null);
       
       if (currentUser) {
         setTab("settings");
@@ -687,8 +699,9 @@ export default function AuthModal({
   };
 
   const handleSendEmailVerification = async () => {
-    if (!auth || !auth.currentUser) {
-      setError("Email verification is only available for online accounts.");
+    const targetEmail = currentUser?.email || userProfile?.email;
+    if (!targetEmail) {
+      setError("No email address found for this account.");
       return;
     }
 
@@ -698,10 +711,29 @@ export default function AuthModal({
     nativeHaptics.impactLight();
 
     try {
-      await sendEmailVerification(auth.currentUser);
+      const headers = await getAuthHeaders({ "Content-Type": "application/json" });
+      const res = await fetch("/api/auth/send-verification-email", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ email: targetEmail })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to send verification email.");
+      }
+
+      // If client is online with Firebase Auth, also attempt client-side send as backup
+      if (auth?.currentUser) {
+        try {
+          await sendEmailVerification(auth.currentUser);
+        } catch (e) {
+          // Handled via backend Resend dispatch
+        }
+      }
+
       nativeHaptics.notificationSuccess();
-      setVerificationSuccessMessage(`Verification email sent to ${auth.currentUser.email}! Please click the link in your email to verify.`);
-      setTimeout(() => setVerificationSuccessMessage(null), 6000);
+      setVerificationSuccessMessage(`Verification email sent to ${targetEmail}! Please check your inbox and spam folder.`);
+      setTimeout(() => setVerificationSuccessMessage(null), 8000);
     } catch (err: any) {
       console.error("Verification email failed:", err);
       if (err.code === "auth/too-many-requests") {
@@ -712,6 +744,87 @@ export default function AuthModal({
       nativeHaptics.notificationWarning();
     } finally {
       setIsSendingVerification(false);
+    }
+  };
+
+  const handleUpdateEmail = async () => {
+    const cleanEmail = editEmailValue.trim().toLowerCase();
+    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setEmailUpdateError("Please enter a valid email address (e.g. name@domain.com).");
+      nativeHaptics.notificationWarning();
+      return;
+    }
+
+    const domain = cleanEmail.split("@")[1];
+    if (domain && DISPOSABLE_EMAIL_DOMAINS.has(domain)) {
+      setEmailUpdateError("Temporary or disposable email addresses are not permitted. Please use a permanent email address (e.g. Gmail, Apple, Outlook).");
+      nativeHaptics.notificationWarning();
+      return;
+    }
+
+    const currentEmail = (currentUser?.email || userProfile?.email || "").toLowerCase();
+    if (cleanEmail === currentEmail) {
+      setEmailUpdateError("New email address is identical to your current email address.");
+      nativeHaptics.notificationWarning();
+      return;
+    }
+
+    setIsSavingEmail(true);
+    setEmailUpdateError(null);
+    setEmailUpdateSuccess(null);
+    nativeHaptics.impactLight();
+
+    try {
+      const targetUid = userProfile?.uid || currentUser?.uid;
+      const headers = await getAuthHeaders({ "Content-Type": "application/json" });
+      const res = await fetch(`/api/users/${targetUid}/email`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ newEmail: cleanEmail })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to update email address.");
+      }
+
+      // Update local storage if mock user
+      const mockStr = localStorage.getItem("vice_vault_mock_user");
+      if (mockStr) {
+        try {
+          const parsed = JSON.parse(mockStr);
+          parsed.email = cleanEmail;
+          parsed.emailVerified = false;
+          localStorage.setItem("vice_vault_mock_user", JSON.stringify(parsed));
+        } catch (e) {}
+      }
+
+      // Update client user profile and current user
+      if (currentUser) {
+        currentUser.email = cleanEmail;
+        currentUser.emailVerified = false;
+      }
+      if (userProfile) {
+        userProfile.email = cleanEmail;
+        userProfile.emailVerified = false;
+      }
+
+      onProfileUpdate?.({
+        ...(currentUser || {}),
+        ...(userProfile || {}),
+        email: cleanEmail,
+        emailVerified: false
+      });
+
+      setIsEditingEmail(false);
+      setEmailUpdateSuccess(`Email updated to ${cleanEmail}! A verification link has been sent to your new address.`);
+      nativeHaptics.notificationSuccess();
+      setTimeout(() => setEmailUpdateSuccess(null), 8000);
+    } catch (err: any) {
+      console.error("Email update failed:", err);
+      setEmailUpdateError(err.message || "Failed to update email address.");
+      nativeHaptics.notificationWarning();
+    } finally {
+      setIsSavingEmail(false);
     }
   };
 
@@ -1348,7 +1461,25 @@ export default function AuthModal({
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-[10px] font-mono uppercase text-neutral-400">Email Address</label>
+                  <div className="flex items-center gap-1.5">
+                    <label className="block text-[10px] font-mono uppercase text-neutral-400">Email Address</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsEditingEmail(!isEditingEmail);
+                        setEditEmailValue(currentUser?.email || userProfile?.email || "");
+                        setEmailUpdateError(null);
+                        nativeHaptics.selectionChanged();
+                      }}
+                      className={`p-0.5 rounded transition-colors cursor-pointer ${
+                        isEditingEmail ? "text-accent bg-accent/15" : "text-neutral-400 hover:text-white"
+                      }`}
+                      title={isEditingEmail ? "Cancel editing email" : "Change Email Address"}
+                      aria-label="Change Email Address"
+                    >
+                      <Pencil size={11} />
+                    </button>
+                  </div>
                   {isEmailVerified ? (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                       <ShieldCheck size={11} className="text-emerald-400" />
@@ -1360,7 +1491,7 @@ export default function AuthModal({
                         <AlertTriangle size={10} className="text-amber-400" />
                         Unverified
                       </span>
-                      {currentUser?.email && !currentUser?.isMock && (
+                      {(currentUser?.email || userProfile?.email) && (
                         <button
                           type="button"
                           onClick={handleSendEmailVerification}
@@ -1380,15 +1511,83 @@ export default function AuthModal({
                     </div>
                   )}
                 </div>
-                <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-600" size={12} />
-                  <input
-                    type="email"
-                    disabled
-                    value={currentUser?.email || ""}
-                    className="w-full bg-neutral-950/50 border border-neutral-900 rounded-xl py-2 pl-9 pr-3 text-xs text-neutral-500 cursor-not-allowed font-mono opacity-60"
-                  />
-                </div>
+
+                {!isEditingEmail ? (
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-600" size={12} />
+                    <input
+                      type="email"
+                      disabled
+                      value={currentUser?.email || userProfile?.email || ""}
+                      className="w-full bg-neutral-950/50 border border-neutral-900 rounded-xl py-2 pl-9 pr-3 text-xs text-neutral-500 cursor-not-allowed font-mono opacity-60"
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-2.5 p-3 bg-neutral-950 border border-accent/40 rounded-xl">
+                    <div className="relative">
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-accent" size={12} />
+                      <input
+                        type="email"
+                        value={editEmailValue}
+                        onChange={(e) => {
+                          setEditEmailValue(e.target.value);
+                          if (emailUpdateError) setEmailUpdateError(null);
+                        }}
+                        placeholder="Enter new email address"
+                        autoFocus
+                        className="w-full bg-neutral-900 border border-neutral-800 rounded-lg py-2 pl-9 pr-3 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-accent font-mono transition-all"
+                      />
+                    </div>
+
+                    {emailUpdateError && (
+                      <div className="p-2 bg-rose-950/40 border border-rose-900/50 rounded-lg text-rose-300 text-[11px] font-mono flex items-center gap-1.5">
+                        <AlertTriangle size={12} className="text-rose-400 shrink-0" />
+                        <span>{emailUpdateError}</span>
+                      </div>
+                    )}
+
+                    <p className="text-[10px] font-mono text-neutral-400">
+                      Changing your email address will require re-verifying the new address.
+                    </p>
+
+                    <div className="flex items-center justify-end gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsEditingEmail(false);
+                          setEmailUpdateError(null);
+                          nativeHaptics.impactLight();
+                        }}
+                        className="px-3 py-1.5 rounded-lg text-xs font-mono text-neutral-400 hover:text-white bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 cursor-pointer transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isSavingEmail}
+                        onClick={handleUpdateEmail}
+                        className="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold text-white bg-accent hover:bg-accent/90 disabled:opacity-50 cursor-pointer transition-colors flex items-center gap-1.5 shadow-md shadow-accent/20"
+                      >
+                        {isSavingEmail ? (
+                          <>
+                            <RefreshCw size={12} className="animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          "Save Email"
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {emailUpdateSuccess && (
+                  <div className="mt-2 p-2.5 bg-emerald-950/40 border border-emerald-900/50 rounded-xl text-emerald-300 text-[11px] font-mono flex items-center gap-2">
+                    <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
+                    <span>{emailUpdateSuccess}</span>
+                  </div>
+                )}
+
                 {verificationSuccessMessage && (
                   <div className="mt-2 p-2.5 bg-emerald-950/40 border border-emerald-900/50 rounded-xl text-emerald-300 text-[11px] font-mono flex items-center gap-2">
                     <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />

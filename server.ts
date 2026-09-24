@@ -29,6 +29,7 @@ interface UserProfile {
   avatarUrl?: string;
   createdAt: string;
   email?: string;
+  emailVerified?: boolean;
   password?: string;
   username?: string;
   authUid?: string;
@@ -135,6 +136,29 @@ function verifyResetToken(token: string): string | null {
     return null;
   }
 }
+
+function generateVerifyEmailToken(email: string): string {
+  const payload = Buffer.from(JSON.stringify({ email: email.trim().toLowerCase(), exp: Date.now() + 86400000 })).toString('base64url'); // 24 hours
+  const signature = crypto.createHmac('sha256', SECRET_KEY).update(payload).digest('base64url');
+  return `verify.${payload}.${signature}`;
+}
+
+function verifyEmailToken(token: string): string | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3 || parts[0] !== 'verify') return null;
+    const expectedSignature = crypto.createHmac('sha256', SECRET_KEY).update(parts[1]).digest('base64url');
+    const expectedBuf = Buffer.from(expectedSignature, 'utf8');
+    const actualBuf = Buffer.from(parts[2], 'utf8');
+    if (expectedBuf.length !== actualBuf.length || !crypto.timingSafeEqual(expectedBuf, actualBuf)) return null;
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+    if (payload.exp < Date.now()) return null;
+    return payload.email;
+  } catch (err) {
+    return null;
+  }
+}
+
 
 
 // Mail Transport Setup (Optional SMTP for direct branded emails with Reset Password Button)
@@ -258,6 +282,118 @@ async function sendBrandedPasswordResetEmail(targetEmail: string, resetUrl: stri
       return true;
     } catch (e) {
       console.error("Failed sending email via SMTP:", e);
+    }
+  }
+
+  return false;
+}
+
+function getBrandedEmailVerificationHtml(email: string, verifyUrl: string): string {
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Your Golf Ball Vault Email</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0a0a0a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #ffffff;">
+  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0a0a0a; padding: 40px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 480px; background-color: #171717; border: 1px solid #262626; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+          <tr>
+            <td style="padding: 32px 32px 24px 32px; text-align: center; border-bottom: 1px solid #262626;">
+              <div style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 12px; background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; font-size: 20px; font-weight: 900; margin-bottom: 12px; text-align: center;">
+                ⛳
+              </div>
+              <h1 style="margin: 0; font-size: 18px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: #ffffff;">GOLF BALL VAULT</h1>
+              <p style="margin: 4px 0 0 0; font-size: 11px; font-family: monospace; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Account Email Verification</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 32px;">
+              <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 22px; color: #e5e5e5;">
+                Hello,
+              </p>
+              <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 22px; color: #d4d4d4;">
+                Please verify your email address (<span style="color: #34d399; font-family: monospace;">${email}</span>) to secure your <strong>Golf Ball Vault</strong> account and ensure you can recover your locker anytime:
+              </p>
+              
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td align="center" style="padding: 8px 0 28px 0;">
+                    <a href="${verifyUrl}" target="_blank" style="display: inline-block; background-color: #10b981; color: #ffffff; font-size: 13px; font-weight: 800; text-decoration: none; padding: 14px 32px; border-radius: 12px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
+                      Verify Email Address
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 0 0 8px 0; font-size: 12px; line-height: 18px; color: #737373;">
+                This link will expire in <strong>24 hours</strong>.
+              </p>
+              <p style="margin: 0; font-size: 12px; line-height: 18px; color: #737373;">
+                If you did not request this verification or create an account, you can safely ignore this email.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 20px 32px; background-color: #0f0f0f; border-top: 1px solid #262626; text-align: center;">
+              <p style="margin: 0; font-size: 11px; font-family: monospace; color: #525252;">
+                Golf Ball Vault • <a href="https://golfballvault.app" target="_blank" style="color: #60a5fa; text-decoration: none;">golfballvault.app</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+async function sendBrandedEmailVerificationEmail(targetEmail: string, verifyUrl: string): Promise<boolean> {
+  // 1. Resend API
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.RESEND_API_KEY}`
+        },
+        body: JSON.stringify({
+          from: process.env.MAIL_FROM || "Golf Ball Vault <noreply@golfballvault.app>",
+          to: [targetEmail],
+          subject: "Verify your Golf Ball Vault email address",
+          html: getBrandedEmailVerificationHtml(targetEmail, verifyUrl)
+        })
+      });
+      if (res.ok) {
+        console.log(`Sent branded email verification via Resend to ${targetEmail}`);
+        return true;
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        console.error("Resend API error:", errData);
+      }
+    } catch (e) {
+      console.error("Failed sending email verification via Resend:", e);
+    }
+  }
+
+  // 2. Standard SMTP Transporter
+  if (mailTransporter) {
+    try {
+      await mailTransporter.sendMail({
+        from: process.env.MAIL_FROM || '"Golf Ball Vault" <noreply@golfballvault.app>',
+        to: targetEmail,
+        subject: "Verify your Golf Ball Vault email address",
+        html: getBrandedEmailVerificationHtml(targetEmail, verifyUrl)
+      });
+      console.log(`Sent branded email verification via SMTP to ${targetEmail}`);
+      return true;
+    } catch (e) {
+      console.error("Failed sending verification email via SMTP:", e);
     }
   }
 
@@ -1776,6 +1912,232 @@ app.post("/api/auth/reset-password-sync", authLimiter, async (req, res) => {
     return res.status(500).json({ error: "Failed to synchronize password reset." });
   }
 });
+
+// Send branded email verification
+app.post("/api/auth/send-verification-email", authLimiter, async (req, res) => {
+  const { email } = req.body;
+  const actingUserId = (req as any).user?.uid as string | undefined;
+
+  let targetEmail = email ? email.trim().toLowerCase() : undefined;
+
+  if (!targetEmail && actingUserId) {
+    const resolvedId = await resolveUserDocId(actingUserId);
+    const users = await getUsersList();
+    const user = users.find(u => u.uid === resolvedId || u.authUid === resolvedId || u.authUid === actingUserId);
+    if (user && user.email) {
+      targetEmail = user.email.toLowerCase();
+    }
+  }
+
+  if (!targetEmail) {
+    return res.status(400).json({ error: "Email address is required." });
+  }
+
+  let emailSentDirectly = false;
+  if (process.env.RESEND_API_KEY || mailTransporter) {
+    try {
+      let verifyUrl = "";
+      if (isFirebaseAdminInitialized) {
+        try {
+          const rawLink = await admin.auth().generateEmailVerificationLink(targetEmail, {
+            url: "https://golfballvault.app/verify-email",
+            handleCodeInApp: false
+          });
+          const parsedUrl = new URL(rawLink);
+          const oobCode = parsedUrl.searchParams.get("oobCode") || "";
+          verifyUrl = `https://golfballvault.app/verify-email?oobCode=${encodeURIComponent(oobCode)}`;
+        } catch (linkErr) {
+          console.warn("Firebase Admin verification link failed, falling back to signed token:", linkErr);
+          const token = generateVerifyEmailToken(targetEmail);
+          verifyUrl = `https://golfballvault.app/verify-email?token=${encodeURIComponent(token)}`;
+        }
+      } else {
+        const token = generateVerifyEmailToken(targetEmail);
+        verifyUrl = `https://golfballvault.app/verify-email?token=${encodeURIComponent(token)}`;
+      }
+
+      if (verifyUrl) {
+        emailSentDirectly = await sendBrandedEmailVerificationEmail(targetEmail, verifyUrl);
+      }
+    } catch (err) {
+      console.error("Failed to send branded verification email:", err);
+    }
+  }
+
+  return res.json({
+    success: true,
+    emailSentDirectly,
+    email: targetEmail,
+    message: `Verification instructions sent to ${targetEmail}!`
+  });
+});
+
+// Verify email address via token or oobCode sync
+app.post("/api/auth/verify-email", authLimiter, async (req, res) => {
+  const { token, email } = req.body;
+
+  let targetEmail = email ? email.trim().toLowerCase() : undefined;
+
+  if (token) {
+    const verifiedEmail = verifyEmailToken(token);
+    if (!verifiedEmail) {
+      return res.status(400).json({ error: "Invalid or expired email verification link." });
+    }
+    targetEmail = verifiedEmail.toLowerCase();
+  }
+
+  if (!targetEmail) {
+    return res.status(400).json({ error: "Email address or token is required." });
+  }
+
+  try {
+    const users = await getUsersList();
+    const userIndex = users.findIndex(u => u.email?.toLowerCase() === targetEmail);
+    let targetUser: UserProfile | undefined;
+    if (userIndex !== -1) {
+      users[userIndex].emailVerified = true;
+      targetUser = users[userIndex];
+      saveUsers(users);
+    }
+
+    if (isFirebaseAdminInitialized && dbAdmin) {
+      const snap = await dbAdmin.collection("users").where("email", "==", targetEmail).get();
+      if (!snap.empty) {
+        for (const doc of snap.docs) {
+          await doc.ref.update({
+            emailVerified: true,
+            updatedAt: new Date().toISOString()
+          });
+        }
+      }
+
+      if (targetUser && targetUser.authUid) {
+        try {
+          await admin.auth().updateUser(targetUser.authUid, { emailVerified: true });
+        } catch (authErr) {
+          console.warn("Firebase Auth emailVerified sync error:", authErr);
+        }
+      }
+    }
+
+    return res.json({
+      success: true,
+      email: targetEmail,
+      message: "Email address verified successfully!"
+    });
+  } catch (err: any) {
+    console.error("Error verifying email address:", err);
+    return res.status(500).json({ error: "Failed to verify email address." });
+  }
+});
+
+// Update user email address
+app.post("/api/users/:id/email", authLimiter, async (req, res) => {
+  const { id } = req.params;
+  const { newEmail } = req.body;
+
+  const actingUserId = (req as any).user?.uid as string | undefined;
+  const resolvedId = await resolveUserDocId(id);
+  if (!actingUserId || (actingUserId !== id && actingUserId !== resolvedId && !(await verifyAdmin(actingUserId)))) {
+    return res.status(403).json({ error: "Access Denied. You are not authorized to update this email address." });
+  }
+
+  if (!newEmail || typeof newEmail !== "string") {
+    return res.status(400).json({ error: "New email address is required." });
+  }
+
+  const cleanNewEmail = newEmail.trim().toLowerCase();
+  if (!isValidEmailFormat(cleanNewEmail)) {
+    return res.status(400).json({ error: "Please enter a valid email address (e.g. name@domain.com)." });
+  }
+
+  if (isDisposableEmail(cleanNewEmail)) {
+    return res.status(400).json({ error: "Temporary or disposable email addresses are not permitted. Please use a permanent email address (e.g. Gmail, Apple, Outlook)." });
+  }
+
+  const users = await getUsersList();
+  const user = users.find(u => u.uid === resolvedId);
+  if (!user) {
+    return res.status(404).json({ error: "User not found." });
+  }
+
+  if (user.email?.toLowerCase() === cleanNewEmail) {
+    return res.status(400).json({ error: "New email address cannot be identical to your current email address." });
+  }
+
+  const emailInUse = users.some(u => u.uid !== resolvedId && u.email?.toLowerCase() === cleanNewEmail);
+  if (emailInUse) {
+    return res.status(400).json({ error: "This email address is already in use by another account." });
+  }
+
+  user.email = cleanNewEmail;
+  user.emailVerified = false;
+  saveUsers(users);
+
+  if (isFirebaseAdminInitialized && dbAdmin) {
+    try {
+      const userRef = dbAdmin.collection("users").doc(resolvedId);
+      await userRef.update({
+        email: cleanNewEmail,
+        emailVerified: false,
+        updatedAt: new Date().toISOString()
+      });
+
+      if (user.authUid) {
+        try {
+          await admin.auth().updateUser(user.authUid, {
+            email: cleanNewEmail,
+            emailVerified: false
+          });
+        } catch (authErr) {
+          console.warn("Firebase Auth email update skipped:", authErr);
+        }
+      }
+    } catch (dbErr) {
+      console.error("Firestore email update error:", dbErr);
+    }
+  }
+
+  // Automatically dispatch branded verification email to the new address
+  let emailSentDirectly = false;
+  if (process.env.RESEND_API_KEY || mailTransporter) {
+    try {
+      let verifyUrl = "";
+      if (isFirebaseAdminInitialized) {
+        try {
+          const rawLink = await admin.auth().generateEmailVerificationLink(cleanNewEmail, {
+            url: "https://golfballvault.app/verify-email",
+            handleCodeInApp: false
+          });
+          const parsedUrl = new URL(rawLink);
+          const oobCode = parsedUrl.searchParams.get("oobCode") || "";
+          verifyUrl = `https://golfballvault.app/verify-email?oobCode=${encodeURIComponent(oobCode)}`;
+        } catch (linkErr) {
+          const token = generateVerifyEmailToken(cleanNewEmail);
+          verifyUrl = `https://golfballvault.app/verify-email?token=${encodeURIComponent(token)}`;
+        }
+      } else {
+        const token = generateVerifyEmailToken(cleanNewEmail);
+        verifyUrl = `https://golfballvault.app/verify-email?token=${encodeURIComponent(token)}`;
+      }
+
+      if (verifyUrl) {
+        emailSentDirectly = await sendBrandedEmailVerificationEmail(cleanNewEmail, verifyUrl);
+      }
+    } catch (mailErr) {
+      console.error("Failed to send verification email for updated address:", mailErr);
+    }
+  }
+
+  return res.json({
+    success: true,
+    email: cleanNewEmail,
+    emailVerified: false,
+    emailSentDirectly,
+    message: `Email updated to ${cleanNewEmail}! A verification link has been sent to your new address.`
+  });
+});
+
 
 
 // Auth SignIn
