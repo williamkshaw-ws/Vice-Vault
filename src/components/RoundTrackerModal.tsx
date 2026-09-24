@@ -1473,7 +1473,7 @@ export default function RoundTrackerModal({
                                     onClick={() => setExpandedRoundSection({ roundId: round.id, filter: 'all' })}
                                     className={`px-2 py-0.5 rounded font-bold transition-all cursor-pointer ${
                                       activeFilter === 'all'
-                                        ? 'bg-neutral-800 text-neutral-900 dark:bg-neutral-800 dark:text-white shadow-xs'
+                                        ? 'bg-neutral-800 text-white shadow-xs'
                                         : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-850 dark:hover:bg-neutral-800'
                                     }`}
                                   >
@@ -1524,7 +1524,7 @@ export default function RoundTrackerModal({
                                             style={{ background: getMiniBallSwatch(b.color) }}
                                           />
                                           <div className="min-w-0">
-                                            <div className="font-bold text-neutral-900 dark:text-white truncate">
+                                            <div className="font-bold text-white truncate">
                                               {b.model} {colorDisplay ? `• ${colorDisplay}` : ''} {b.customNumber ? `(#${b.customNumber})` : ''}
                                             </div>
                                             <div className="text-neutral-500 text-[9px] truncate">
