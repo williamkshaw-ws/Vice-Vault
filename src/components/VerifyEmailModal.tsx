@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, RefreshCw, AlertTriangle, CheckCircle2, X } from "lucide-react";
 import { nativeHaptics } from "../utils/native";
 import { auth } from "../firebase";
-import { applyActionCode } from "firebase/auth";
+import { applyActionCode, checkActionCode } from "firebase/auth";
 
 interface VerifyEmailModalProps {
   isOpen: boolean;
@@ -37,17 +37,20 @@ export default function VerifyEmailModal({
 
     const verifyCode = async () => {
       try {
+        const urlParams = new URLSearchParams(window.location.search);
+        let targetEmail = urlParams.get("email") || "";
+
         if (code.startsWith("verify.")) {
           // Token-based verification
           const res = await fetch("/api/auth/verify-email", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: code })
+            body: JSON.stringify({ token: code, email: targetEmail || undefined })
           });
           const data = await res.json();
           if (isMounted) {
             if (data.success) {
-              setVerifiedEmail(data.email || "");
+              setVerifiedEmail(data.email || targetEmail || "");
               setStatus("success");
               nativeHaptics.notificationSuccess();
             } else {
@@ -64,21 +67,46 @@ export default function VerifyEmailModal({
           throw new Error("Authentication service is unavailable.");
         }
 
+        // 1. Try resolving email from action code info if not in URL params
+        try {
+          const actionInfo = await checkActionCode(auth, code);
+          if (actionInfo?.data?.email) {
+            targetEmail = actionInfo.data.email;
+          }
+        } catch (checkErr) {
+          console.warn("checkActionCode skipped or failed:", checkErr);
+        }
+
+        // 2. Apply action code in Firebase Auth
         await applyActionCode(auth, code);
 
-        // Sync verification state to backend database
+        // 3. Reload current user if active session exists
+        if (auth.currentUser) {
+          try {
+            await auth.currentUser.reload();
+            if (auth.currentUser.email) {
+              targetEmail = auth.currentUser.email;
+            }
+          } catch (rErr) {}
+        }
+
+        // 4. Sync verification state to backend database so the account is fully verified in one step
         try {
-          await fetch("/api/auth/verify-email", {
+          const syncRes = await fetch("/api/auth/verify-email", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: auth.currentUser?.email })
+            body: JSON.stringify({ email: targetEmail || auth.currentUser?.email })
           });
+          const syncData = await syncRes.json();
+          if (syncData?.email) {
+            targetEmail = syncData.email;
+          }
         } catch (syncErr) {
           console.warn("Backend email verification sync skipped:", syncErr);
         }
 
         if (isMounted) {
-          setVerifiedEmail(auth.currentUser?.email || "");
+          setVerifiedEmail(targetEmail || auth.currentUser?.email || "");
           setStatus("success");
           nativeHaptics.notificationSuccess();
         }

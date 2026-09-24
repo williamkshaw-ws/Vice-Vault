@@ -1945,15 +1945,15 @@ app.post("/api/auth/send-verification-email", authLimiter, async (req, res) => {
           });
           const parsedUrl = new URL(rawLink);
           const oobCode = parsedUrl.searchParams.get("oobCode") || "";
-          verifyUrl = `https://golfballvault.app/verify-email?oobCode=${encodeURIComponent(oobCode)}`;
+          verifyUrl = `https://golfballvault.app/verify-email?oobCode=${encodeURIComponent(oobCode)}&email=${encodeURIComponent(targetEmail)}`;
         } catch (linkErr) {
           console.warn("Firebase Admin verification link failed, falling back to signed token:", linkErr);
           const token = generateVerifyEmailToken(targetEmail);
-          verifyUrl = `https://golfballvault.app/verify-email?token=${encodeURIComponent(token)}`;
+          verifyUrl = `https://golfballvault.app/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(targetEmail)}`;
         }
       } else {
         const token = generateVerifyEmailToken(targetEmail);
-        verifyUrl = `https://golfballvault.app/verify-email?token=${encodeURIComponent(token)}`;
+        verifyUrl = `https://golfballvault.app/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(targetEmail)}`;
       }
 
       if (verifyUrl) {
@@ -2000,6 +2000,12 @@ app.post("/api/auth/verify-email", authLimiter, async (req, res) => {
       saveUsers(users);
     }
 
+    // Also update DEFAULT_USERS if matching
+    const defUser = DEFAULT_USERS.find(u => u.email?.toLowerCase() === targetEmail);
+    if (defUser) {
+      defUser.emailVerified = true;
+    }
+
     if (isFirebaseAdminInitialized && dbAdmin) {
       const snap = await dbAdmin.collection("users").where("email", "==", targetEmail).get();
       if (!snap.empty) {
@@ -2011,11 +2017,18 @@ app.post("/api/auth/verify-email", authLimiter, async (req, res) => {
         }
       }
 
-      if (targetUser && targetUser.authUid) {
-        try {
-          await admin.auth().updateUser(targetUser.authUid, { emailVerified: true });
-        } catch (authErr) {
-          console.warn("Firebase Auth emailVerified sync error:", authErr);
+      // Also ensure Firebase Auth user has emailVerified: true
+      try {
+        const authUser = await admin.auth().getUserByEmail(targetEmail);
+        if (authUser && !authUser.emailVerified) {
+          await admin.auth().updateUser(authUser.uid, { emailVerified: true });
+          console.log(`Updated emailVerified in Firebase Auth for ${targetEmail}`);
+        }
+      } catch (authErr) {
+        if (targetUser && (targetUser.authUid || targetUser.uid)) {
+          try {
+            await admin.auth().updateUser(targetUser.authUid || targetUser.uid, { emailVerified: true });
+          } catch (e2) {}
         }
       }
     }
@@ -2070,9 +2083,17 @@ app.post("/api/users/:id/email", authLimiter, async (req, res) => {
     return res.status(400).json({ error: "This email address is already in use by another account." });
   }
 
+  const oldEmail = user.email;
   user.email = cleanNewEmail;
   user.emailVerified = false;
   saveUsers(users);
+
+  // If updating default admin/user, keep in-memory DEFAULT_USERS in sync
+  const defUser = DEFAULT_USERS.find(u => u.uid === resolvedId || (oldEmail && u.email?.toLowerCase() === oldEmail.toLowerCase()));
+  if (defUser) {
+    defUser.email = cleanNewEmail;
+    defUser.emailVerified = false;
+  }
 
   if (isFirebaseAdminInitialized && dbAdmin) {
     try {
@@ -2083,14 +2104,27 @@ app.post("/api/users/:id/email", authLimiter, async (req, res) => {
         updatedAt: new Date().toISOString()
       });
 
-      if (user.authUid) {
+      const authUidToUpdate = user.authUid || (resolvedId.startsWith("u-") ? resolvedId : undefined);
+      if (authUidToUpdate) {
         try {
-          await admin.auth().updateUser(user.authUid, {
+          await admin.auth().updateUser(authUidToUpdate, {
             email: cleanNewEmail,
             emailVerified: false
           });
-        } catch (authErr) {
-          console.warn("Firebase Auth email update skipped:", authErr);
+          console.log(`Updated email in Firebase Auth for UID ${authUidToUpdate} to ${cleanNewEmail}`);
+        } catch (authErr: any) {
+          if (oldEmail) {
+            try {
+              const existingAuth = await admin.auth().getUserByEmail(oldEmail);
+              await admin.auth().updateUser(existingAuth.uid, {
+                email: cleanNewEmail,
+                emailVerified: false
+              });
+              console.log(`Updated email in Firebase Auth via old email lookup for ${oldEmail} to ${cleanNewEmail}`);
+            } catch (e2) {
+              console.warn("Firebase Auth email update skipped:", e2);
+            }
+          }
         }
       }
     } catch (dbErr) {
@@ -2111,14 +2145,14 @@ app.post("/api/users/:id/email", authLimiter, async (req, res) => {
           });
           const parsedUrl = new URL(rawLink);
           const oobCode = parsedUrl.searchParams.get("oobCode") || "";
-          verifyUrl = `https://golfballvault.app/verify-email?oobCode=${encodeURIComponent(oobCode)}`;
+          verifyUrl = `https://golfballvault.app/verify-email?oobCode=${encodeURIComponent(oobCode)}&email=${encodeURIComponent(cleanNewEmail)}`;
         } catch (linkErr) {
           const token = generateVerifyEmailToken(cleanNewEmail);
-          verifyUrl = `https://golfballvault.app/verify-email?token=${encodeURIComponent(token)}`;
+          verifyUrl = `https://golfballvault.app/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(cleanNewEmail)}`;
         }
       } else {
         const token = generateVerifyEmailToken(cleanNewEmail);
-        verifyUrl = `https://golfballvault.app/verify-email?token=${encodeURIComponent(token)}`;
+        verifyUrl = `https://golfballvault.app/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(cleanNewEmail)}`;
       }
 
       if (verifyUrl) {
@@ -2170,6 +2204,7 @@ app.post("/api/auth/signin", authLimiter, async (req, res) => {
   const clientUser = {
     uid: user.uid,
     email: user.email,
+    emailVerified: !!user.emailVerified,
     displayName: user.displayName,
     photoURL: user.avatarUrl,
     username: user.username,
@@ -2668,6 +2703,7 @@ app.get("/api/users/:id/profile", async (req, res) => {
     const clientUser = {
       uid: user.uid,
       email: user.email,
+      emailVerified: !!user.emailVerified,
       displayName: user.displayName,
       photoURL: user.avatarUrl,
       username: user.username,
@@ -3083,11 +3119,16 @@ app.patch("/api/users/:id", async (req, res) => {
     if (!email.trim() || !email.includes("@")) {
       return res.status(400).json({ error: "Invalid email format." });
     }
-    const emailExists = users.some(u => u.uid !== id && u.email?.toLowerCase() === email.trim().toLowerCase());
+    const cleanEmail = email.trim().toLowerCase();
+    const emailExists = users.some(u => u.uid !== id && u.uid !== resolvedId && u.email?.toLowerCase() === cleanEmail);
     if (emailExists) {
       return res.status(400).json({ error: "This email is already taken by another account." });
     }
-    targetUser.email = email.trim();
+    targetUser.email = cleanEmail;
+    const defUser = DEFAULT_USERS.find(u => u.uid === resolvedId);
+    if (defUser) {
+      defUser.email = cleanEmail;
+    }
   }
 
   if (password !== undefined && password !== "") {
@@ -3097,33 +3138,35 @@ app.patch("/api/users/:id", async (req, res) => {
     targetUser.password = hashPassword(password);
   }
 
-  // If Firebase Admin SDK is initialized, propagate changes to Firebase Auth (skip for mock/local users)
-  const isMockUser = !targetUser.authUid || targetUser.authUid.startsWith("u-");
-  if (isFirebaseAdminInitialized && !isMockUser && targetUser.authUid) {
-    try {
-      const authUpdates: any = {};
-      if (email !== undefined) {
-        authUpdates.email = email.trim();
-      }
-      if (password !== undefined && password !== "") {
-        authUpdates.password = password;
-      }
-      if (displayName !== undefined) {
-        authUpdates.displayName = displayName.trim();
-      }
-      if (avatarUrl !== undefined) {
-        authUpdates.photoURL = (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://")) ? avatarUrl : null;
-      }
-      if (Object.keys(authUpdates).length > 0) {
-        await admin.auth().updateUser(targetUser.authUid, authUpdates);
-        console.log(`Successfully updated Auth credentials for user ${targetUser.authUid} in Firebase Auth`);
-      }
-    } catch (authErr: any) {
-      console.error(`Failed to update user Auth credentials in Firebase:`, authErr);
-      if (authErr.code === "auth/user-not-found" || authErr.code === "auth/configuration-not-found") {
-        console.warn(`Ignoring Firebase Auth update error (code: ${authErr.code}) for user ${targetUser.authUid} and proceeding with database update.`);
-      } else {
-        return res.status(400).json({ error: authErr.message || "Failed to update Firebase Auth credentials." });
+  // If Firebase Admin SDK is initialized, propagate changes to Firebase Auth
+  if (isFirebaseAdminInitialized) {
+    const authUidToUpdate = targetUser.authUid || (resolvedId.startsWith("u-") ? resolvedId : undefined);
+    if (authUidToUpdate) {
+      try {
+        const authUpdates: any = {};
+        if (email !== undefined) {
+          authUpdates.email = email.trim();
+        }
+        if (password !== undefined && password !== "") {
+          authUpdates.password = password;
+        }
+        if (displayName !== undefined) {
+          authUpdates.displayName = displayName.trim();
+        }
+        if (avatarUrl !== undefined) {
+          authUpdates.photoURL = (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://")) ? avatarUrl : null;
+        }
+        if (Object.keys(authUpdates).length > 0) {
+          await admin.auth().updateUser(authUidToUpdate, authUpdates);
+          console.log(`Successfully updated Auth credentials for user ${authUidToUpdate} in Firebase Auth`);
+        }
+      } catch (authErr: any) {
+        console.error(`Failed to update user Auth credentials in Firebase:`, authErr);
+        if (authErr.code === "auth/user-not-found" || authErr.code === "auth/configuration-not-found") {
+          console.warn(`Ignoring Firebase Auth update error (code: ${authErr.code}) for user ${authUidToUpdate} and proceeding with database update.`);
+        } else {
+          return res.status(400).json({ error: authErr.message || "Failed to update Firebase Auth credentials." });
+        }
       }
     }
   }

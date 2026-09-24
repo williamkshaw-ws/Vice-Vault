@@ -251,6 +251,7 @@ export default function AuthModal({
 
   // Email Change State
   const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [displayEmail, setDisplayEmail] = useState(currentUser?.email || userProfile?.email || "");
   const [editEmailValue, setEditEmailValue] = useState("");
   const [isSavingEmail, setIsSavingEmail] = useState(false);
   const [emailUpdateError, setEmailUpdateError] = useState<string | null>(null);
@@ -284,7 +285,9 @@ export default function AuthModal({
       setIsSendingVerification(false);
       setVerificationSuccessMessage(null);
       setIsEditingEmail(false);
-      setEditEmailValue(currentUser?.email || userProfile?.email || "");
+      const initialEmail = currentUser?.email || userProfile?.email || "";
+      setDisplayEmail(initialEmail);
+      setEditEmailValue(initialEmail);
       setIsSavingEmail(false);
       setEmailUpdateError(null);
       setEmailUpdateSuccess(null);
@@ -324,6 +327,42 @@ export default function AuthModal({
     }
     prevIsOpenRef.current = isOpen;
   }, [isOpen, currentUser, userProfile, initialEmail]);
+
+  // Keep displayEmail in sync whenever props update with valid email
+  useEffect(() => {
+    const emailVal = currentUser?.email || userProfile?.email;
+    if (emailVal) {
+      setDisplayEmail(emailVal);
+    }
+  }, [currentUser?.email, userProfile?.email]);
+
+  // Always fetch latest profile info when settings tab is opened to keep verified badge & email synced
+  useEffect(() => {
+    if (isOpen && tab === "settings") {
+      const targetUid = userProfile?.uid || currentUser?.uid;
+      if (targetUid) {
+        getAuthHeaders().then(headers => {
+          fetch(`/api/users/${targetUid}/profile`, { headers })
+            .then(res => res.ok ? res.json() : null)
+            .then(profileData => {
+              if (profileData && profileData.email) {
+                setDisplayEmail(profileData.email);
+                if (userProfile) {
+                  userProfile.email = profileData.email;
+                  if (profileData.emailVerified !== undefined) {
+                    userProfile.emailVerified = profileData.emailVerified;
+                  }
+                }
+              }
+            })
+            .catch(() => {});
+        });
+      }
+      if (auth?.currentUser) {
+        auth.currentUser.reload().catch(() => {});
+      }
+    }
+  }, [isOpen, tab]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -699,7 +738,7 @@ export default function AuthModal({
   };
 
   const handleSendEmailVerification = async () => {
-    const targetEmail = currentUser?.email || userProfile?.email;
+    const targetEmail = displayEmail || currentUser?.email || userProfile?.email;
     if (!targetEmail) {
       setError("No email address found for this account.");
       return;
@@ -762,7 +801,7 @@ export default function AuthModal({
       return;
     }
 
-    const currentEmail = (currentUser?.email || userProfile?.email || "").toLowerCase();
+    const currentEmail = (displayEmail || currentUser?.email || userProfile?.email || "").toLowerCase();
     if (cleanEmail === currentEmail) {
       setEmailUpdateError("New email address is identical to your current email address.");
       nativeHaptics.notificationWarning();
@@ -787,6 +826,10 @@ export default function AuthModal({
         throw new Error(data.error || "Failed to update email address.");
       }
 
+      // Immediately reflect new email and unverified state in display
+      setDisplayEmail(cleanEmail);
+      setEditEmailValue(cleanEmail);
+
       // Update local storage if mock user
       const mockStr = localStorage.getItem("vice_vault_mock_user");
       if (mockStr) {
@@ -800,8 +843,12 @@ export default function AuthModal({
 
       // Update client user profile and current user
       if (currentUser) {
-        currentUser.email = cleanEmail;
-        currentUser.emailVerified = false;
+        try {
+          currentUser.email = cleanEmail;
+        } catch (e) {}
+        try {
+          currentUser.emailVerified = false;
+        } catch (e) {}
       }
       if (userProfile) {
         userProfile.email = cleanEmail;
@@ -811,6 +858,7 @@ export default function AuthModal({
       onProfileUpdate?.({
         ...(currentUser || {}),
         ...(userProfile || {}),
+        uid: targetUid,
         email: cleanEmail,
         emailVerified: false
       });
@@ -882,10 +930,11 @@ export default function AuthModal({
   };
 
   const activeAvatarUrl = selectedPreset;
+  const currentEmail = displayEmail || userProfile?.email || currentUser?.email || "";
   const isEmailVerified = Boolean(
-    (auth?.currentUser && auth.currentUser.emailVerified) ||
-    currentUser?.emailVerified ||
-    userProfile?.emailVerified
+    userProfile?.emailVerified ??
+    currentUser?.emailVerified ??
+    (auth?.currentUser && auth.currentUser.email?.toLowerCase() === currentEmail.toLowerCase() && auth.currentUser.emailVerified)
   );
 
   useEffect(() => {
@@ -1467,7 +1516,7 @@ export default function AuthModal({
                       type="button"
                       onClick={() => {
                         setIsEditingEmail(!isEditingEmail);
-                        setEditEmailValue(currentUser?.email || userProfile?.email || "");
+                        setEditEmailValue(displayEmail || currentUser?.email || userProfile?.email || "");
                         setEmailUpdateError(null);
                         nativeHaptics.selectionChanged();
                       }}
@@ -1491,7 +1540,7 @@ export default function AuthModal({
                         <AlertTriangle size={10} className="text-amber-400" />
                         Unverified
                       </span>
-                      {(currentUser?.email || userProfile?.email) && (
+                      {(displayEmail || currentUser?.email || userProfile?.email) && (
                         <button
                           type="button"
                           onClick={handleSendEmailVerification}
@@ -1518,7 +1567,7 @@ export default function AuthModal({
                     <input
                       type="email"
                       disabled
-                      value={currentUser?.email || userProfile?.email || ""}
+                      value={displayEmail || currentUser?.email || userProfile?.email || ""}
                       className="w-full bg-neutral-950/50 border border-neutral-900 rounded-xl py-2 pl-9 pr-3 text-xs text-neutral-500 cursor-not-allowed font-mono opacity-60"
                     />
                   </div>

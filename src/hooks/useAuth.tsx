@@ -78,7 +78,7 @@ export function useAuth() {
                 shareBag: !!profileData.shareBag,
                 shareToken: profileData.shareToken,
                 wishlist: profileData.wishlist || [],
-                emailVerified: Boolean(user.emailVerified || profileData.emailVerified)
+                emailVerified: Boolean(profileData.emailVerified !== undefined ? profileData.emailVerified : (user.email?.toLowerCase() === (profileData.email || "").toLowerCase() && user.emailVerified))
               });
               setAccentColor(profileData.preferredColor || "#2563eb");
             } else {

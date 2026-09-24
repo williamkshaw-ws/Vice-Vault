@@ -1123,17 +1123,22 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       }
       setUsersList(prev => prev.map(u => (u.uid === userId || u.id === userId) ? { ...u, ...data, id: data.uid || data.id, name: data.displayName || data.name } : u));
       if (userId === currentUser?.uid) {
-        setUserProfile({
+        setUserProfile(prev => ({
+          ...prev,
+          ...data,
           uid: data.uid || currentUser.uid,
-          displayName: data.displayName,
-          username: data.username,
-          avatarUrl: data.photoURL || data.avatarUrl || "preset-1",
-          preferredColor: data.preferredColor,
-          role: ((data.role && data.role.toLowerCase() === "admin") || data.username?.toLowerCase() === "admin") ? "Admin" : "User",
-          shareBag: !!data.shareBag,
-          shareToken: data.shareToken, pendingFriendRequestsCount: data.pendingFriendRequestsCount || 0
-        });
-        setAccentColor(data.preferredColor);
+          displayName: data.displayName || prev?.displayName,
+          username: data.username || prev?.username,
+          avatarUrl: data.photoURL || data.avatarUrl || prev?.avatarUrl || "preset-1",
+          preferredColor: data.preferredColor || prev?.preferredColor || "#2563eb",
+          email: data.email !== undefined ? data.email : (prev?.email || (currentUser as any)?.email || ""),
+          emailVerified: data.emailVerified !== undefined ? data.emailVerified : prev?.emailVerified,
+          role: ((data.role && data.role.toLowerCase() === "admin") || data.username?.toLowerCase() === "admin") ? "Admin" : (prev?.role || "User"),
+          shareBag: data.shareBag !== undefined ? !!data.shareBag : !!prev?.shareBag,
+          shareToken: data.shareToken || prev?.shareToken,
+          pendingFriendRequestsCount: data.pendingFriendRequestsCount !== undefined ? data.pendingFriendRequestsCount : (prev?.pendingFriendRequestsCount || 0)
+        }));
+        setAccentColor(data.preferredColor || (prevAccent => prevAccent));
       }
       return true;
     } catch (err: any) {
@@ -2663,10 +2668,22 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             setVerifyEmailCode(null);
             window.history.replaceState({}, document.title, window.location.pathname.replace(/\/verify-email\/?/, "/") || "/");
             if (userProfile) {
-              setUserProfile({ ...userProfile, emailVerified: true, email: email || userProfile.email });
+              setUserProfile(prev => prev ? ({ ...prev, emailVerified: true, email: email || prev.email }) : null);
             }
             if (currentUser) {
-              setCurrentUser({ ...currentUser, emailVerified: true, email: email || (currentUser as any).email });
+              setCurrentUser(prev => prev ? ({ ...prev, emailVerified: true, email: email || (prev as any).email }) : null);
+            }
+            const mockStr = localStorage.getItem("vice_vault_mock_user");
+            if (mockStr) {
+              try {
+                const parsed = JSON.parse(mockStr);
+                parsed.emailVerified = true;
+                if (email) parsed.email = email;
+                localStorage.setItem("vice_vault_mock_user", JSON.stringify(parsed));
+              } catch (e) {}
+            }
+            if (auth?.currentUser) {
+              auth.currentUser.reload().catch(() => {});
             }
           }}
         />
@@ -2687,31 +2704,41 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         onSignOut={handleSignOut}
         onProfileUpdate={(updatedUser) => {
           setCurrentUser(updatedUser);
-          setUserProfile({
-            uid: updatedUser.uid || updatedUser.id,
-            displayName: updatedUser.displayName,
-            username: updatedUser.username,
-            avatarUrl: updatedUser.photoURL || updatedUser.avatarUrl || "preset-1",
-            preferredColor: updatedUser.preferredColor,
-            role: ((updatedUser.role && updatedUser.role.toLowerCase() === "admin") || updatedUser.username?.toLowerCase() === "admin") ? "Admin" : "User",
-            shareBag: !!updatedUser.shareBag,
-            shareToken: updatedUser.shareToken, pendingFriendRequestsCount: userProfile?.pendingFriendRequestsCount || 0
-          });
-          setAccentColor(updatedUser.preferredColor);
+          setUserProfile(prev => ({
+            ...prev,
+            ...updatedUser,
+            uid: updatedUser.uid || updatedUser.id || prev?.uid,
+            displayName: updatedUser.displayName || prev?.displayName,
+            username: updatedUser.username || prev?.username,
+            avatarUrl: updatedUser.photoURL || updatedUser.avatarUrl || prev?.avatarUrl || "preset-1",
+            preferredColor: updatedUser.preferredColor || prev?.preferredColor || "#2563eb",
+            email: updatedUser.email !== undefined ? updatedUser.email : (prev?.email || (currentUser as any)?.email || ""),
+            emailVerified: updatedUser.emailVerified !== undefined ? updatedUser.emailVerified : prev?.emailVerified,
+            role: ((updatedUser.role && updatedUser.role.toLowerCase() === "admin") || updatedUser.username?.toLowerCase() === "admin") ? "Admin" : (prev?.role || "User"),
+            shareBag: updatedUser.shareBag !== undefined ? !!updatedUser.shareBag : !!prev?.shareBag,
+            shareToken: updatedUser.shareToken || prev?.shareToken,
+            pendingFriendRequestsCount: updatedUser.pendingFriendRequestsCount !== undefined ? updatedUser.pendingFriendRequestsCount : (prev?.pendingFriendRequestsCount || 0)
+          }));
+          setAccentColor(updatedUser.preferredColor || (prevAccent => prevAccent));
         }}
         onMockLogin={(mockUser) => {
           setCurrentUser(mockUser);
-          setUserProfile({
-            uid: mockUser.uid || mockUser.id,
-            displayName: mockUser.displayName,
-            username: mockUser.username,
-            avatarUrl: mockUser.photoURL || mockUser.avatarUrl || "preset-1",
-            preferredColor: mockUser.preferredColor,
+          setUserProfile(prev => ({
+            ...prev,
+            ...mockUser,
+            uid: mockUser.uid || mockUser.id || prev?.uid,
+            displayName: mockUser.displayName || prev?.displayName,
+            username: mockUser.username || prev?.username,
+            avatarUrl: mockUser.photoURL || mockUser.avatarUrl || prev?.avatarUrl || "preset-1",
+            preferredColor: mockUser.preferredColor || prev?.preferredColor || "#2563eb",
+            email: mockUser.email !== undefined ? mockUser.email : (prev?.email || ""),
+            emailVerified: mockUser.emailVerified !== undefined ? mockUser.emailVerified : (prev?.emailVerified || false),
             role: ((mockUser.role && mockUser.role.toLowerCase() === "admin") || mockUser.username?.toLowerCase() === "admin") ? "Admin" : "User",
-            shareBag: !!mockUser.shareBag,
-            shareToken: mockUser.shareToken, pendingFriendRequestsCount: mockUser.pendingFriendRequestsCount || 0
-          });
-          setAccentColor(mockUser.preferredColor);
+            shareBag: mockUser.shareBag !== undefined ? !!mockUser.shareBag : !!prev?.shareBag,
+            shareToken: mockUser.shareToken || prev?.shareToken,
+            pendingFriendRequestsCount: mockUser.pendingFriendRequestsCount || 0
+          }));
+          setAccentColor(mockUser.preferredColor || "#2563eb");
         }}
       />
 
