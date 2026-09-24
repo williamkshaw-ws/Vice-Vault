@@ -1515,7 +1515,7 @@ export default function RoundTrackerModal({
                                             ? 'bg-rose-50/60 border-rose-200 dark:bg-rose-950/20 dark:border-rose-900/40'
                                             : isDamaged
                                             ? 'bg-amber-50/60 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900/40'
-                                            : 'bg-neutral-900/60 border-neutral-800 dark:bg-neutral-900/80 dark:border-neutral-850'
+                                            : 'bg-emerald-50/60 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-900/40'
                                         }`}
                                       >
                                         <div className="flex items-center gap-2 min-w-0">
