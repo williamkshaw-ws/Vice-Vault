@@ -493,20 +493,12 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   const [isVaultManagerOpen, setIsVaultManagerOpen] = useState(false);
   const [isVaultProcessing, setIsVaultProcessing] = useState(false);
 
-  // State for viewing/editing user bags
+  // State for viewing/editing user bags inline
   const [selectedUserForBag, setSelectedUserForBag] = useState<UserProfile | null>(null);
   const [selectedUserBalls, setSelectedUserBalls] = useState<GolfBall[]>([]);
   const [isLoadingSelectedUserBalls, setIsLoadingSelectedUserBalls] = useState(false);
   const [bagModalErrorMessage, setBagModalErrorMessage] = useState<string | null>(null);
-  const [modalSelectedModel, setModalSelectedModel] = useState("");
-  const [modalSelectedColor, setModalSelectedColor] = useState("");
-  const [modalQty, setModalQty] = useState(12);
-  const [modalPkgType, setModalPkgType] = useState<"ea" | "sleeve" | "box">("box");
-  const [modalCondition, setModalCondition] = useState<BallCondition>(BallCondition.NEW);
-  const [modalNotes, setModalNotes] = useState("");
-  const [modalPlayNumber, setModalPlayNumber] = useState<number>(1);
-  const [modalCustomNumberInput, setModalCustomNumberInput] = useState<string>("");
-  const [modalYear, setModalYear] = useState<string>("");
+  const [isSavingUserBag, setIsSavingUserBag] = useState(false);
 
   // User Editing States
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
@@ -1173,15 +1165,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   };
 
   const handleViewUserBag = async (user: any) => {
+    setEditingUserId(null);
     setSelectedUserForBag(user);
     setIsLoadingSelectedUserBalls(true);
     setBagModalErrorMessage(null);
-    setModalSelectedModel("");
-    setModalSelectedColor("");
-    setModalQty(12);
-    setModalPkgType("box");
-    setModalCondition(BallCondition.NEW);
-    setModalNotes("");
     try {
       const headers = await getAuthHeaders();
       const res = await fetch(`/api/users/${user.uid || user.id}/locker`, { headers });
@@ -1202,9 +1189,11 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
   const handleSaveUserBag = async () => {
     if (!selectedUserForBag) return;
+    setIsSavingUserBag(true);
     try {
       const headers = await getAuthHeaders({ "Content-Type": "application/json" });
-      const res = await fetch(`/api/users/${selectedUserForBag.uid || selectedUserForBag.id}/locker`, {
+      const targetUid = selectedUserForBag.uid || selectedUserForBag.id;
+      const res = await fetch(`/api/users/${targetUid}/locker`, {
         method: "POST",
         headers,
         body: JSON.stringify({ balls: selectedUserBalls })
@@ -1214,16 +1203,16 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         throw new Error(data.error || "Failed to save user bag.");
       }
       showToast("User bag inventory updated successfully!", "success");
-      setTimeout(() => {
-        setSelectedUserForBag(null);
-      }, 1200);
     } catch (err: any) {
       console.error("Error saving user bag:", err);
       showToast(err.message || "Failed to update user bag.", "error");
+    } finally {
+      setIsSavingUserBag(false);
     }
   };
 
   const startEditingUser = (user: any) => {
+    setSelectedUserForBag(null);
     setEditingUserId(user.uid || user.id);
     setEditName(user.displayName || user.name || "");
     setEditUsername(user.username || "");
@@ -2742,370 +2731,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         }}
       />
 
-      {/* Selected User Bag Manager Modal */}
-      {selectedUserForBag && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200 animate-fade-in">
-            {/* Modal Header */}
-            <div className="flex justify-between items-center p-5 border-b border-neutral-800">
-              <div>
-                <h2 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-accent"></span>
-                  Bag Manager for {selectedUserForBag.displayName || selectedUserForBag.name || "User"}
-                </h2>
-                <p className="text-[10px] text-neutral-400 mt-0.5 font-mono">
-                  @{selectedUserForBag.username || "user"} • {selectedUserForBag.email}
-                </p>
-              </div>
-              <button 
-                onClick={() => setSelectedUserForBag(null)}
-                className="text-neutral-400 hover:text-white p-1 hover:bg-neutral-800 rounded-lg transition-colors cursor-pointer"
-              >
-                <X size={18} />
-              </button>
-            </div>
 
-            {/* Modal Content */}
-            <div className="p-6 overflow-y-auto flex-grow space-y-6">
-              {bagModalErrorMessage && (
-                <div className="p-3 bg-red-950/30 border border-red-900/50 rounded-xl text-red-200 text-xs font-mono">
-                  {bagModalErrorMessage}
-                </div>
-              )}
-
-              {/* Add Ball to Bag Section */}
-              <div className="bg-neutral-950/40 border border-neutral-850 p-4 rounded-xl space-y-4">
-                <h3 className="text-xs font-mono font-black uppercase text-neutral-300">Add Ball to User's Bag</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs font-mono">
-                  <div>
-                    <label className="block text-[9px] uppercase text-neutral-400 mb-1">Select Catalog Ball Design</label>
-                    <select
-                      value={`${modalSelectedModel}|${modalSelectedColor}`}
-                      onChange={(e) => {
-                        const [m, c] = e.target.value.split("|");
-                        setModalSelectedModel(m || "");
-                        setModalSelectedColor(c || "");
-                      }}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-accent outline-none cursor-pointer font-sans"
-                    >
-                      <option value="">-- Choose a Ball Design --</option>
-                      {catalog.map((item) => (
-                        <option key={item.id} value={`${item.model}|${item.color}`}>
-                          {item.model} ({item.color})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[9px] uppercase text-neutral-400 mb-1">Quantity</label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={modalQty}
-                        onChange={(e) => setModalQty(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-accent outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[9px] uppercase text-neutral-400 mb-1">Packaging</label>
-                      <select
-                        value={modalPkgType}
-                        onChange={(e) => setModalPkgType(e.target.value as any)}
-                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-accent outline-none cursor-pointer font-sans"
-                      >
-                        <option value="ea">Individual (ea)</option>
-                        <option value="sleeve">Sleeve (3 balls)</option>
-                        <option value="box">Dozen Box (12 balls)</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs font-mono">
-                  <div>
-                    <label className="block text-[9px] uppercase text-neutral-400 mb-1">Ball Play-Number</label>
-                    <div className="flex gap-1">
-                      {[0, 1, 2, 3, 4].map((num) => (
-                        <button
-                          key={num}
-                          type="button"
-                          disabled={modalPkgType === 'box'}
-                          onClick={() => {
-                            setModalPlayNumber(num);
-                            setModalCustomNumberInput("");
-                          }}
-                          className={`text-center py-1 rounded text-[11px] font-mono font-bold border transition-all cursor-pointer ${
-                            num === 0 ? "px-1 flex-[1.2]" : "flex-1"
-                          } ${
-                            modalPkgType === 'box'
-                              ? "bg-neutral-950 text-neutral-600 border-neutral-900 cursor-not-allowed opacity-55"
-                              : modalPlayNumber === num && modalCustomNumberInput === ""
-                              ? "bg-accent border-accent text-black"
-                              : "bg-neutral-950 border-neutral-850 text-neutral-300 hover:border-neutral-700"
-                          }`}
-                        >
-                          {num === 0 ? "None" : num}
-                        </button>
-                      ))}
-                      <input
-                        type="text"
-                        maxLength={2}
-                        disabled={modalPkgType === 'box'}
-                        value={modalPkgType === 'box' ? "" : modalCustomNumberInput}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/[^0-9]/g, "");
-                          setModalCustomNumberInput(val);
-                          if (val === "") {
-                            setModalPlayNumber(1);
-                          } else {
-                            setModalPlayNumber(parseInt(val, 10));
-                          }
-                        }}
-                        placeholder={modalPkgType === 'box' ? "—" : "##"}
-                        className={`w-9 text-center py-1 font-mono text-xs border rounded transition-all focus:outline-none focus:border-neutral-500 ${
-                          modalPkgType === 'box'
-                            ? "border-neutral-800 bg-neutral-950 text-neutral-600 cursor-not-allowed opacity-55"
-                            : modalCustomNumberInput !== ""
-                            ? "bg-accent text-black border-accent font-bold"
-                            : "bg-neutral-950 border-neutral-800 text-neutral-400"
-                        }`}
-                        title={modalPkgType === 'box' ? "Not customizable for boxes" : "Enter any 2-digit number"}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-[9px] uppercase text-neutral-400 mb-1">Condition</label>
-                    <select
-                      value={modalCondition}
-                      onChange={(e) => setModalCondition(e.target.value as any)}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-accent outline-none cursor-pointer font-sans"
-                    >
-                      <option value={BallCondition.NEW}>{BallCondition.NEW}</option>
-                      <option value={BallCondition.MINT}>{BallCondition.MINT}</option>
-                      <option value={BallCondition.PLAYED}>{BallCondition.PLAYED}</option>
-                      <option value={BallCondition.SHAG}>{BallCondition.SHAG}</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[9px] uppercase text-neutral-400 mb-1">Release Year</label>
-                    <select
-                      value={modalYear}
-                      onChange={(e) => setModalYear(e.target.value)}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:border-accent outline-none cursor-pointer font-sans"
-                    >
-                      <option value="">Unknown</option>
-                      {Array.from({ length: new Date().getFullYear() - 2012 + 1 }, (_, i) => String(2012 + i)).map((y) => (
-                        <option key={y} value={y}>
-                          {y}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!modalSelectedModel || !modalSelectedColor) {
-                      alert("Please select a ball design from the Catalog.");
-                      return;
-                    }
-                    const today = new Date().toLocaleDateString();
-                    const calculatedQty = modalPkgType === "box"
-                      ? modalQty * 12
-                      : modalPkgType === "sleeve"
-                      ? modalQty * 3
-                      : modalQty;
-
-                    const matchedCatalogItem = catalog.find(
-                      item => item.model === modalSelectedModel && item.color === modalSelectedColor
-                    );
-                    const customImage = matchedCatalogItem?.customImage;
-
-                    const newBall: GolfBall = {
-                      id: `OWNED-${modalSelectedModel.toUpperCase().replace(/\s+/g, "_")}-${modalSelectedColor.toUpperCase().replace(/\s+/g, "_")}-${Date.now()}`,
-                      model: modalSelectedModel,
-                      color: modalSelectedColor,
-                      quantity: calculatedQty,
-                      condition: modalCondition,
-                      packageType: modalPkgType,
-                      customNumber: modalPkgType === 'box' ? 1 : modalPlayNumber,
-                      notes: modalNotes.trim() || "Added by Admin",
-                      year: modalYear === "" ? undefined : modalYear,
-                      dateAdded: today,
-                      customImage
-                    };
-                    setSelectedUserBalls(prev => [newBall, ...prev]);
-                    setModalNotes("");
-                    setModalPlayNumber(1);
-                    setModalCustomNumberInput("");
-                    setModalYear("");
-                  }}
-                  className="w-full py-2 bg-accent hover:bg-[#b5e000] text-black font-extrabold rounded-lg text-xs uppercase tracking-wider transition-all cursor-pointer"
-                >
-                  + Add Ball to Bag
-                </button>
-               </div>
-
-               {/* User Bag Inventory List */}
-               <div className="space-y-3">
-                 <h3 className="text-xs font-mono font-black uppercase text-neutral-300">Bag Inventory ({selectedUserBalls.length} Items)</h3>
-                 {isLoadingSelectedUserBalls ? (
-                   <div className="py-8 text-center text-xs text-neutral-500 font-mono flex items-center justify-center gap-2">
-                     <RefreshCw className="animate-spin text-accent" size={14} />
-                     <span>Loading locker data...</span>
-                   </div>
-                 ) : selectedUserBalls.length === 0 ? (
-                   <div className="py-8 text-center bg-neutral-950/20 border border-dashed border-neutral-850 rounded-xl text-xs text-neutral-500 font-mono">
-                     This user's bag is empty.
-                   </div>
-                 ) : (
-                   <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
-                     {selectedUserBalls.map((ball) => {
-                        const currentPkg = ball.packageType || "ea";
-                        const pkgUnit = currentPkg === "box" ? 12 : currentPkg === "sleeve" ? 3 : 1;
-                        const displayQty = Math.max(1, Math.round(ball.quantity / pkgUnit));
-
-                        return (
-                          <div key={ball.id} className="bg-neutral-950 border border-neutral-850 p-3 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
-                            <div className="flex items-center gap-3">
-                              <BallVisual 
-                                color={ball.color} 
-                                model={ball.model} 
-                                size="sm" 
-                                customImage={ball.customImage} 
-                                customImageSleeve={ball.customImageSleeve}
-                                customImageBox={ball.customImageBox}
-                                packageType={ball.packageType} 
-                              />
-                              <div>
-                                <span className="text-white font-bold block">{ball.model}</span>
-                                <span className="text-neutral-450 block text-[10px]">{ball.color} • {currentPkg === "box" ? "box" : currentPkg === "sleeve" ? "sleeve" : "ea"}</span>
-                              </div>
-                            </div>
-                            
-                            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-end border-t border-neutral-900/60 pt-2 sm:border-t-0 sm:pt-0">
-                              {/* Qty Stepper */}
-                              <div className="flex items-center bg-neutral-900 border border-neutral-800 rounded-lg p-0.5">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setSelectedUserBalls(prev => prev.map(b => {
-                                      if (b.id === ball.id) {
-                                        const step = b.packageType === "box" ? 12 : b.packageType === "sleeve" ? 3 : 1;
-                                        return { ...b, quantity: Math.max(step, b.quantity - step) };
-                                      }
-                                      return b;
-                                    }));
-                                  }}
-                                  className="px-2 py-0.5 text-neutral-400 hover:text-white font-extrabold cursor-pointer"
-                                >
-                                  -
-                                </button>
-                                <span className="px-2 text-white font-bold text-xs min-w-[14px] text-center">{displayQty}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setSelectedUserBalls(prev => prev.map(b => {
-                                      if (b.id === ball.id) {
-                                        const step = b.packageType === "box" ? 12 : b.packageType === "sleeve" ? 3 : 1;
-                                        return { ...b, quantity: b.quantity + step };
-                                      }
-                                      return b;
-                                    }));
-                                  }}
-                                  className="px-2 py-0.5 text-neutral-400 hover:text-white font-extrabold cursor-pointer"
-                                >
-                                  +
-                                </button>
-                              </div>
-
-                              {/* Packaging Type Selector */}
-                              <select
-                                value={currentPkg}
-                                onChange={(e) => {
-                                  const newPkg = e.target.value as 'ea' | 'sleeve' | 'box';
-                                  setSelectedUserBalls(prev => prev.map(b => {
-                                    if (b.id === ball.id) {
-                                      const oldPkg = b.packageType || "ea";
-                                      const oldUnit = oldPkg === "box" ? 12 : oldPkg === "sleeve" ? 3 : 1;
-                                      const pkgCount = Math.max(1, Math.round(b.quantity / oldUnit));
-                                      const newUnit = newPkg === "box" ? 12 : newPkg === "sleeve" ? 3 : 1;
-                                      return {
-                                        ...b,
-                                        packageType: newPkg,
-                                        quantity: pkgCount * newUnit
-                                      };
-                                    }
-                                    return b;
-                                  }));
-                                }}
-                                className="bg-neutral-900 border border-neutral-800 text-neutral-300 rounded px-1.5 py-1 text-[10px] focus:outline-none focus:border-accent cursor-pointer font-sans"
-                              >
-                                <option value="ea">Ball (ea)</option>
-                                <option value="sleeve">Sleeve (3)</option>
-                                <option value="box">Box (12)</option>
-                              </select>
-
-                              {/* Condition Select */}
-                              <select
-                                value={ball.condition}
-                                onChange={(e) => {
-                                  const newCond = e.target.value as any;
-                                  setSelectedUserBalls(prev => prev.map(b => b.id === ball.id ? { ...b, condition: newCond } : b));
-                                }}
-                                className="bg-neutral-900 border border-neutral-800 text-neutral-300 rounded px-1.5 py-1 text-[10px] focus:outline-none focus:border-accent cursor-pointer font-sans"
-                              >
-                                <option value={BallCondition.NEW}>{BallCondition.NEW}</option>
-                                <option value={BallCondition.MINT}>{BallCondition.MINT}</option>
-                                <option value={BallCondition.PLAYED}>{BallCondition.PLAYED}</option>
-                                <option value={BallCondition.SHAG}>{BallCondition.SHAG}</option>
-                              </select>
-
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setSelectedUserBalls(prev => prev.filter(b => b.id !== ball.id));
-                                }}
-                                className="p-1.5 text-neutral-500 hover:text-rose-450 hover:bg-neutral-900 rounded transition-colors cursor-pointer"
-                                title="Remove Ball Stack"
-                              >
-                                <Trash2 size={13} />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                   </div>
-                 )}
-               </div>
-             </div>
-
-             {/* Modal Footer */}
-             <div className="flex gap-2 justify-end p-5 border-t border-neutral-800 bg-neutral-950/60">
-               <button
-                 type="button"
-                 onClick={() => setSelectedUserForBag(null)}
-                 className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-all cursor-pointer text-xs font-bold font-sans"
-               >
-                 Cancel
-               </button>
-               <button
-                 type="button"
-                 disabled={isLoadingSelectedUserBalls}
-                 onClick={handleSaveUserBag}
-                 className="px-4 py-2 bg-accent hover:bg-[#b5e000] text-black font-extrabold rounded-xl transition-all cursor-pointer text-xs uppercase tracking-wider font-sans"
-               >
-                 Save Bag Inventory
-               </button>
-             </div>
-           </div>
-         </div>
-       )}
 
       <Suspense fallback={null}>
         <VaultManagerModal
@@ -3170,6 +2796,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                 onClick={() => {
                   setIsUserManagerOpen(false);
                   setEditingUserId(null);
+                  setSelectedUserForBag(null);
                 }}
                 className="text-neutral-400 hover:text-white p-1 hover:bg-neutral-800 rounded-lg transition-colors cursor-pointer"
               >
@@ -3227,6 +2854,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                       const userUid = user.uid || user.id;
                       const isSelf = userUid === currentUser?.uid || user.authUid === currentUser?.uid;
                       const isEditing = editingUserId === userUid;
+                      const isViewingBag = !!selectedUserForBag && ((selectedUserForBag.uid || selectedUserForBag.id) === userUid);
 
                       if (isEditing) {
                         return (
@@ -3516,78 +3144,296 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                       return (
                         <div 
                           key={userUid}
-                          className="bg-neutral-950/60 border border-neutral-850 hover:border-neutral-750 p-3 rounded-xl flex items-center justify-between gap-3 transition-all"
+                          className={`bg-neutral-950/60 border rounded-xl transition-all ${
+                            isViewingBag
+                              ? "border-accent/40 bg-neutral-950/90 shadow-lg p-3 space-y-3"
+                              : "border-neutral-850 hover:border-neutral-750 p-3"
+                          }`}
                         >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <AvatarRenderer avatarUrl={user.avatarUrl} name={user.displayName || user.name || "User"} size="md" color={user.preferredColor || "#2563eb"} />
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className="font-bold text-white text-xs truncate max-w-[130px]">{user.displayName || user.name || "User"}</span>
-                                {isSelf && (
-                                  <span className="text-[9px] font-mono text-accent px-1 bg-accent/10 border border-accent/25 rounded uppercase">
-                                    Self
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-[9px] text-neutral-500 font-mono flex flex-wrap gap-x-1.5 items-center">
-                                {user.username && (
-                                  <span className="text-neutral-400">@{user.username}</span>
-                                )}
-                                {user.email && (
-                                  <>
-                                    <span className="text-neutral-700 select-none">•</span>
-                                    <span className="truncate max-w-[120px]">{user.email}</span>
-                                  </>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-1.5 mt-1">
-                                {user.role === "Admin" ? (
-                                  <span className="px-1 py-0.2 rounded border border-accent/30 text-accent bg-accent/10 text-[9px] uppercase tracking-wider font-bold font-mono">
-                                    Admin
-                                  </span>
-                                ) : (
-                                  <span className="px-1 py-0.2 rounded border border-neutral-800 text-neutral-400 bg-neutral-900/40 text-[9px] uppercase tracking-wider font-bold font-mono">
-                                    User
-                                  </span>
-                                )}
-                                <div className="flex items-center gap-1">
-                                  <span className="text-[9px] text-neutral-600 font-mono">Accent:</span>
-                                  <span className="w-2.5 h-2.5 rounded-full border border-white/10" style={{ backgroundColor: user.preferredColor || "#2563eb" }}></span>
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <AvatarRenderer avatarUrl={user.avatarUrl} name={user.displayName || user.name || "User"} size="md" color={user.preferredColor || "#2563eb"} />
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-white text-xs truncate max-w-[130px]">{user.displayName || user.name || "User"}</span>
+                                  {isSelf && (
+                                    <span className="text-[9px] font-mono text-accent px-1 bg-accent/10 border border-accent/25 rounded uppercase">
+                                      Self
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-[9px] text-neutral-500 font-mono flex flex-wrap gap-x-1.5 items-center">
+                                  {user.username && (
+                                    <span className="text-neutral-400">@{user.username}</span>
+                                  )}
+                                  {user.email && (
+                                    <>
+                                      <span className="text-neutral-700 select-none">•</span>
+                                      <span className="truncate max-w-[120px]">{user.email}</span>
+                                    </>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-1.5 mt-1">
+                                  {user.role === "Admin" ? (
+                                    <span className="px-1 py-0.2 rounded border border-accent/30 text-accent bg-accent/10 text-[9px] uppercase tracking-wider font-bold font-mono">
+                                      Admin
+                                    </span>
+                                  ) : (
+                                    <span className="px-1 py-0.2 rounded border border-neutral-800 text-neutral-400 bg-neutral-900/40 text-[9px] uppercase tracking-wider font-bold font-mono">
+                                      User
+                                    </span>
+                                  )}
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-[9px] text-neutral-600 font-mono">Accent:</span>
+                                    <span className="w-2.5 h-2.5 rounded-full border border-white/10" style={{ backgroundColor: user.preferredColor || "#2563eb" }}></span>
+                                  </div>
                                 </div>
                               </div>
                             </div>
+
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (isViewingBag) {
+                                    setSelectedUserForBag(null);
+                                  } else {
+                                    handleViewUserBag(user);
+                                  }
+                                }}
+                                className={`p-1 px-2 rounded-lg border transition-colors flex items-center gap-1 text-[10px] font-mono font-black cursor-pointer ${
+                                  isViewingBag
+                                    ? "bg-accent/15 border-accent text-accent"
+                                    : "bg-neutral-900 hover:bg-neutral-800 border-neutral-800 hover:border-neutral-750 text-neutral-355 hover:text-white"
+                                }`}
+                                title={isViewingBag ? "Hide Bag" : "Show Bag"}
+                              >
+                                <ShoppingBag size={10} />
+                                <span>{isViewingBag ? "Hide Bag" : "Show Bag"}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => startEditingUser(user)}
+                                className="p-1 px-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-750 text-accent hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black cursor-pointer"
+                                title="Edit User Settings"
+                              >
+                                <Pencil size={10} />
+                                <span>Edit</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setDeletingUserId(userUid);
+                                }}
+                                className="p-1.5 rounded-lg bg-neutral-900 hover:bg-rose-950/50 border border-neutral-800 hover:border-rose-900 text-neutral-555 hover:text-rose-455 transition-colors cursor-pointer"
+                                title="Delete User"
+                              >
+                                <Trash2 size={10} />
+                              </button>
+                            </div>
                           </div>
 
-                          <div className="flex items-center gap-1 shrink-0">
-                            <button
-                              type="button"
-                              onClick={() => handleViewUserBag(user)}
-                              className="p-1 px-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-750 text-neutral-355 hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black cursor-pointer"
-                              title="View & Edit Bag"
-                            >
-                              <ShoppingBag size={10} />
-                              <span>Show Bag</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => startEditingUser(user)}
-                              className="p-1 px-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-750 text-accent hover:text-white transition-colors flex items-center gap-1 text-[10px] font-mono font-black cursor-pointer"
-                              title="Edit User Settings"
-                            >
-                              <Pencil size={10} />
-                              <span>Edit</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setDeletingUserId(userUid);
-                              }}
-                              className="p-1.5 rounded-lg bg-neutral-900 hover:bg-rose-950/50 border border-neutral-800 hover:border-rose-900 text-neutral-555 hover:text-rose-455 transition-colors cursor-pointer"
-                              title="Delete User"
-                            >
-                              <Trash2 size={10} />
-                            </button>
-                          </div>
+                          {/* Inline User Bag Content */}
+                          {isViewingBag && (
+                            <div className="pt-3 border-t border-neutral-850 space-y-3 font-mono text-xs animate-in fade-in duration-200">
+                              <div className="flex items-center justify-between pb-1">
+                                <div className="flex items-center gap-2">
+                                  <ShoppingBag size={12} className="text-accent" />
+                                  <span className="text-white font-bold text-[11px] uppercase tracking-wider">
+                                    Bag Inventory
+                                  </span>
+                                  <span className="text-[10px] text-neutral-500 font-mono">
+                                    ({selectedUserBalls.length} {selectedUserBalls.length === 1 ? "item" : "items"})
+                                  </span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedUserForBag(null)}
+                                  className="text-[10px] text-neutral-400 hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
+                                >
+                                  <X size={12} />
+                                  <span>Close</span>
+                                </button>
+                              </div>
+
+                              {bagModalErrorMessage && (
+                                <div className="p-2.5 bg-rose-950/30 border border-rose-900/50 rounded-lg text-rose-200 text-[11px] font-mono">
+                                  {bagModalErrorMessage}
+                                </div>
+                              )}
+
+                              {isLoadingSelectedUserBalls ? (
+                                <div className="py-6 text-center text-xs text-neutral-500 font-mono flex items-center justify-center gap-2">
+                                  <RefreshCw className="animate-spin text-accent" size={14} />
+                                  <span>Loading bag data...</span>
+                                </div>
+                              ) : selectedUserBalls.length === 0 ? (
+                                <div className="py-6 text-center bg-neutral-900/40 border border-dashed border-neutral-800 rounded-xl text-xs text-neutral-500 font-mono">
+                                  This user's bag is empty.
+                                </div>
+                              ) : (
+                                <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
+                                  {selectedUserBalls.map((ball) => {
+                                    const currentPkg = ball.packageType || "ea";
+                                    const pkgUnit = currentPkg === "box" ? 12 : currentPkg === "sleeve" ? 3 : 1;
+                                    const displayQty = Math.max(1, Math.round(ball.quantity / pkgUnit));
+
+                                    return (
+                                      <div
+                                        key={ball.id}
+                                        className="bg-neutral-900/90 border border-neutral-800 p-2.5 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs font-mono"
+                                      >
+                                        <div className="flex items-center gap-2.5 min-w-0">
+                                          <BallVisual
+                                            color={ball.color}
+                                            model={ball.model}
+                                            size="sm"
+                                            customImage={ball.customImage}
+                                            customImageSleeve={ball.customImageSleeve}
+                                            customImageBox={ball.customImageBox}
+                                            packageType={ball.packageType}
+                                          />
+                                          <div className="min-w-0">
+                                            <span className="text-white font-bold block truncate text-xs">{ball.model}</span>
+                                            <span className="text-neutral-450 block text-[10px] truncate">
+                                              {ball.color} • {currentPkg === "box" ? "box" : currentPkg === "sleeve" ? "sleeve" : "ea"}
+                                              {ball.year ? ` • ${ball.year}` : ""}
+                                            </span>
+                                          </div>
+                                        </div>
+
+                                        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-between sm:justify-end border-t border-neutral-800/60 pt-2 sm:border-t-0 sm:pt-0 shrink-0">
+                                          {/* Qty Stepper */}
+                                          <div className="flex items-center bg-neutral-950 border border-neutral-800 rounded-lg p-0.5">
+                                            <button
+                                              type="button"
+                                              onClick={() => {
+                                                setSelectedUserBalls(prev => prev.map(b => {
+                                                  if (b.id === ball.id) {
+                                                    const step = b.packageType === "box" ? 12 : b.packageType === "sleeve" ? 3 : 1;
+                                                    return { ...b, quantity: Math.max(step, b.quantity - step) };
+                                                  }
+                                                  return b;
+                                                }));
+                                              }}
+                                              className="px-2 py-0.5 text-neutral-400 hover:text-white font-extrabold cursor-pointer"
+                                            >
+                                              -
+                                            </button>
+                                            <span className="px-1.5 text-white font-bold text-xs min-w-[14px] text-center">
+                                              {displayQty}
+                                            </span>
+                                            <button
+                                              type="button"
+                                              onClick={() => {
+                                                setSelectedUserBalls(prev => prev.map(b => {
+                                                  if (b.id === ball.id) {
+                                                    const step = b.packageType === "box" ? 12 : b.packageType === "sleeve" ? 3 : 1;
+                                                    return { ...b, quantity: b.quantity + step };
+                                                  }
+                                                  return b;
+                                                }));
+                                              }}
+                                              className="px-2 py-0.5 text-neutral-400 hover:text-white font-extrabold cursor-pointer"
+                                            >
+                                              +
+                                            </button>
+                                          </div>
+
+                                          {/* Packaging Type Selector */}
+                                          <select
+                                            value={currentPkg}
+                                            onChange={(e) => {
+                                              const newPkg = e.target.value as 'ea' | 'sleeve' | 'box';
+                                              setSelectedUserBalls(prev => prev.map(b => {
+                                                if (b.id === ball.id) {
+                                                  const oldPkg = b.packageType || "ea";
+                                                  const oldUnit = oldPkg === "box" ? 12 : oldPkg === "sleeve" ? 3 : 1;
+                                                  const pkgCount = Math.max(1, Math.round(b.quantity / oldUnit));
+                                                  const newUnit = newPkg === "box" ? 12 : newPkg === "sleeve" ? 3 : 1;
+                                                  return {
+                                                    ...b,
+                                                    packageType: newPkg,
+                                                    quantity: pkgCount * newUnit
+                                                  };
+                                                }
+                                                return b;
+                                              }));
+                                            }}
+                                            className="bg-neutral-950 border border-neutral-800 text-neutral-300 rounded px-1.5 py-1 text-[10px] focus:outline-none focus:border-accent cursor-pointer font-sans"
+                                          >
+                                            <option value="ea">Ball (ea)</option>
+                                            <option value="sleeve">Sleeve (3)</option>
+                                            <option value="box">Box (12)</option>
+                                          </select>
+
+                                          {/* Condition Select */}
+                                          <select
+                                            value={ball.condition}
+                                            onChange={(e) => {
+                                              const newCond = e.target.value as any;
+                                              setSelectedUserBalls(prev => prev.map(b => b.id === ball.id ? { ...b, condition: newCond } : b));
+                                            }}
+                                            className="bg-neutral-950 border border-neutral-800 text-neutral-300 rounded px-1.5 py-1 text-[10px] focus:outline-none focus:border-accent cursor-pointer font-sans"
+                                          >
+                                            <option value={BallCondition.NEW}>{BallCondition.NEW}</option>
+                                            <option value={BallCondition.MINT}>{BallCondition.MINT}</option>
+                                            <option value={BallCondition.PLAYED}>{BallCondition.PLAYED}</option>
+                                            <option value={BallCondition.SHAG}>{BallCondition.SHAG}</option>
+                                          </select>
+
+                                          {/* Delete Button */}
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              setSelectedUserBalls(prev => prev.filter(b => b.id !== ball.id));
+                                            }}
+                                            className="p-1.5 text-neutral-500 hover:text-rose-450 hover:bg-neutral-950 rounded transition-colors cursor-pointer"
+                                            title="Remove Ball Stack"
+                                          >
+                                            <Trash2 size={12} />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+
+                              {/* Inline Footer Actions */}
+                              {!isLoadingSelectedUserBalls && selectedUserBalls.length > 0 && (
+                                <div className="flex items-center justify-between pt-2 border-t border-neutral-850">
+                                  <span className="text-[10px] text-neutral-500 font-mono">
+                                    Total: {selectedUserBalls.reduce((sum, b) => sum + (b.quantity || 1), 0)} balls
+                                  </span>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => setSelectedUserForBag(null)}
+                                      className="px-2.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer text-[10px] font-sans"
+                                    >
+                                      Close
+                                    </button>
+                                    <button
+                                      type="button"
+                                      disabled={isSavingUserBag}
+                                      onClick={handleSaveUserBag}
+                                      className="px-3 py-1.5 bg-accent hover:bg-[#b5e000] disabled:opacity-50 text-black font-extrabold rounded-lg transition-all cursor-pointer text-[10px] uppercase tracking-wider font-sans flex items-center gap-1.5"
+                                    >
+                                      {isSavingUserBag ? (
+                                        <>
+                                          <RefreshCw size={10} className="animate-spin" />
+                                          <span>Saving...</span>
+                                        </>
+                                      ) : (
+                                        <span>Save Bag</span>
+                                      )}
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
