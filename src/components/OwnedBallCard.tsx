@@ -386,7 +386,7 @@ export default function OwnedBallCard({
       case BallCondition.DAMAGED:
         return "text-rose-700 bg-rose-100 border-rose-200 dark:text-rose-400 dark:bg-rose-950/30 dark:border-rose-900";
       default:
-        return "text-neutral-550 bg-neutral-100 border-neutral-200 dark:text-neutral-400 dark:bg-neutral-950/40 dark:border-neutral-900";
+        return "text-neutral-600 bg-neutral-900 border-neutral-850 dark:text-neutral-400 dark:bg-neutral-950/40 dark:border-neutral-900";
     }
   };
 

@@ -584,18 +584,18 @@ export default function RoundTrackerModal({
                     </div>
 
                     {/* Formula Verification Pill */}
-                    <div className="px-3 py-1.5 rounded-xl bg-neutral-100 border border-neutral-300 dark:bg-neutral-900/80 dark:border-neutral-800 text-[11px] text-neutral-800 dark:text-neutral-300 flex items-center justify-center gap-1.5 flex-wrap">
-                      <span className="text-emerald-800 dark:text-emerald-400 font-bold">{completedStats.survived} Survived</span>
+                    <div className="px-3 py-1.5 rounded-xl bg-neutral-900/60 border border-neutral-800 text-[11px] text-neutral-400 flex items-center justify-center gap-1.5 flex-wrap">
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">{completedStats.survived} Survived</span>
                       <span className="text-neutral-500">+</span>
-                      <span className="text-amber-800 dark:text-amber-400 font-bold">{completedStats.damaged} Damaged</span>
+                      <span className="text-amber-600 dark:text-amber-400 font-bold">{completedStats.damaged} Damaged</span>
                       <span className="text-neutral-500">+</span>
-                      <span className="text-rose-800 dark:text-rose-400 font-bold">{completedStats.lost} Lost</span>
+                      <span className="text-rose-600 dark:text-rose-400 font-bold">{completedStats.lost} Lost</span>
                       <span className="text-neutral-500">=</span>
-                      <span className="text-neutral-950 dark:text-white font-extrabold">{completedStats.total} Total Included</span>
+                      <span className="text-white font-extrabold">{completedStats.total} Total Included</span>
                     </div>
                   </div>
 
-                  <p className="text-[11px] text-neutral-600 dark:text-neutral-400 font-mono bg-neutral-100 dark:bg-neutral-900/60 p-2.5 rounded-xl border border-neutral-200 dark:border-neutral-850">
+                  <p className="text-[11px] text-neutral-400 font-mono bg-neutral-900/40 p-2.5 rounded-xl border border-neutral-850">
                     ✨ Your locker inventory was automatically updated: lost balls were deducted and damaged balls were moved to Damaged condition.
                   </p>
 
@@ -603,7 +603,7 @@ export default function RoundTrackerModal({
                     <button
                       type="button"
                       onClick={() => setJustCompletedRound(null)}
-                      className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer"
+                      className="px-4 py-2 bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer"
                     >
                       Pack Another Bag
                     </button>
@@ -622,10 +622,10 @@ export default function RoundTrackerModal({
               {activeRound && (
                 <div className="space-y-5">
                   {/* Round Overview Card */}
-                  <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-2xl space-y-3 font-mono text-xs">
+                  <div className="bg-neutral-950 border border-neutral-850 p-4 rounded-2xl space-y-3 font-mono text-xs">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                           <MapPin size={18} />
                         </div>
                         <div>
@@ -639,39 +639,39 @@ export default function RoundTrackerModal({
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300 text-[10px] font-bold">
+                        <span className="px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 text-[10px] font-bold">
                           {activeStats.total} Balls In Play
                         </span>
                       </div>
                     </div>
 
                     {/* Live Tally: Survived + Damaged + Lost = Total Included */}
-                    <div className="grid grid-cols-4 gap-2 pt-2 border-t border-neutral-200 dark:border-neutral-850 text-center">
-                      <div className="bg-neutral-100 border border-neutral-200 dark:bg-neutral-900/90 dark:border-neutral-800 p-2 rounded-xl">
-                        <span className="text-[9px] uppercase tracking-wider text-neutral-600 dark:text-neutral-400 font-bold block">Included</span>
+                    <div className="grid grid-cols-4 gap-2 pt-2 border-t border-neutral-850 text-center">
+                      <div className="bg-neutral-900/60 border border-neutral-800 p-2 rounded-xl">
+                        <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-bold block">Included</span>
                         <span className="text-base font-black text-white font-sans">{activeStats.total}</span>
                       </div>
-                      <div className="bg-emerald-50 border border-emerald-300 dark:bg-emerald-950/20 dark:border-emerald-500/30 p-2 rounded-xl">
-                        <span className="text-[9px] uppercase tracking-wider text-emerald-800 dark:text-emerald-400 font-bold block">Survived</span>
-                        <span className="text-base font-black text-emerald-900 dark:text-emerald-400 font-sans">{activeStats.survived}</span>
+                      <div className="bg-emerald-500/10 border border-emerald-500/30 p-2 rounded-xl">
+                        <span className="text-[9px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400 font-bold block">Survived</span>
+                        <span className="text-base font-black text-emerald-700 dark:text-emerald-400 font-sans">{activeStats.survived}</span>
                       </div>
-                      <div className="bg-amber-50 border border-amber-300 dark:bg-amber-950/20 dark:border-amber-500/30 p-2 rounded-xl">
-                        <span className="text-[9px] uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block">Damaged</span>
-                        <span className="text-base font-black text-amber-900 dark:text-amber-400 font-sans">{activeStats.damaged}</span>
+                      <div className="bg-amber-500/10 border border-amber-500/30 p-2 rounded-xl">
+                        <span className="text-[9px] uppercase tracking-wider text-amber-600 dark:text-amber-400 font-bold block">Damaged</span>
+                        <span className="text-base font-black text-amber-700 dark:text-amber-400 font-sans">{activeStats.damaged}</span>
                       </div>
-                      <div className="bg-rose-50 border border-rose-300 dark:bg-rose-950/20 dark:border-rose-500/30 p-2 rounded-xl">
-                        <span className="text-[9px] uppercase tracking-wider text-rose-800 dark:text-rose-400 font-bold block">Lost</span>
-                        <span className="text-base font-black text-rose-900 dark:text-rose-400 font-sans">{activeStats.lost}</span>
+                      <div className="bg-rose-500/10 border border-rose-500/30 p-2 rounded-xl">
+                        <span className="text-[9px] uppercase tracking-wider text-rose-600 dark:text-rose-400 font-bold block">Lost</span>
+                        <span className="text-base font-black text-rose-700 dark:text-rose-400 font-sans">{activeStats.lost}</span>
                       </div>
                     </div>
 
                     {/* Formula Confirmation Pill */}
-                    <div className="px-2.5 py-1 rounded-lg bg-neutral-100 border border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-850 text-[10px] text-neutral-600 dark:text-neutral-400 flex items-center justify-center gap-1.5 flex-wrap">
-                      <span className="text-emerald-800 dark:text-emerald-400 font-bold">{activeStats.survived} Survived</span>
+                    <div className="px-2.5 py-1 rounded-lg bg-neutral-900/40 border border-neutral-850 text-[10px] text-neutral-400 flex items-center justify-center gap-1.5 flex-wrap">
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">{activeStats.survived} Survived</span>
                       <span>+</span>
-                      <span className="text-amber-800 dark:text-amber-400 font-bold">{activeStats.damaged} Damaged</span>
+                      <span className="text-amber-600 dark:text-amber-400 font-bold">{activeStats.damaged} Damaged</span>
                       <span>+</span>
-                      <span className="text-rose-800 dark:text-rose-400 font-bold">{activeStats.lost} Lost</span>
+                      <span className="text-rose-600 dark:text-rose-400 font-bold">{activeStats.lost} Lost</span>
                       <span>=</span>
                       <span className="text-white font-bold">{activeStats.total} Total</span>
                     </div>
@@ -724,7 +724,7 @@ export default function RoundTrackerModal({
                                       </span>
                                     )}
                                     {item.customNumber && (
-                                      <span className="px-1 py-0.2 rounded bg-neutral-100 border border-neutral-200 dark:bg-neutral-900 dark:border-neutral-800 text-[9px] font-mono text-neutral-600 dark:text-neutral-400 font-bold">
+                                      <span className="px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[9px] font-mono text-neutral-600 dark:text-neutral-400 font-bold">
                                         play #{item.customNumber}
                                       </span>
                                     )}
@@ -743,7 +743,7 @@ export default function RoundTrackerModal({
                                   className={`px-2.5 py-1.5 rounded-lg border text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
                                     item.status === 'survived'
                                       ? 'bg-emerald-100 border-emerald-400 text-emerald-800 dark:bg-emerald-500/20 dark:border-emerald-500 dark:text-emerald-300 shadow-sm'
-                                      : 'bg-neutral-100 hover:bg-neutral-200 border-neutral-200 text-neutral-600 dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-400 dark:hover:text-white'
+                                      : 'bg-neutral-900 hover:bg-neutral-850 border-neutral-800 text-neutral-600 dark:text-neutral-400 dark:hover:text-white'
                                   }`}
                                   title="Ball survived without major damage"
                                 >
@@ -757,7 +757,7 @@ export default function RoundTrackerModal({
                                   className={`px-2.5 py-1.5 rounded-lg border text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
                                     isDamaged
                                       ? 'bg-amber-100 border-amber-400 text-amber-900 dark:bg-amber-500/20 dark:border-amber-500 dark:text-amber-300 shadow-sm'
-                                      : 'bg-neutral-100 hover:bg-neutral-200 border-neutral-200 text-neutral-600 dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-400 dark:hover:text-white'
+                                      : 'bg-neutral-900 hover:bg-neutral-850 border-neutral-800 text-neutral-600 dark:text-neutral-400 dark:hover:text-white'
                                   }`}
                                   title="Damaged or scuffed on cart path / trees (downgrades to Damaged condition in locker)"
                                 >
@@ -771,7 +771,7 @@ export default function RoundTrackerModal({
                                   className={`px-2.5 py-1.5 rounded-lg border text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
                                     item.status === 'lost'
                                       ? 'bg-rose-100 border-rose-400 text-rose-900 dark:bg-rose-500/20 dark:border-rose-500 dark:text-rose-300 shadow-sm'
-                                      : 'bg-neutral-100 hover:bg-neutral-200 border-neutral-200 text-neutral-600 dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-400 dark:hover:text-white'
+                                      : 'bg-neutral-900 hover:bg-neutral-850 border-neutral-800 text-neutral-600 dark:text-neutral-400 dark:hover:text-white'
                                   }`}
                                   title="Ball was lost (deducts 1 from your locker)"
                                 >
@@ -790,7 +790,7 @@ export default function RoundTrackerModal({
                                   <select
                                     value={item.lostHole || 1}
                                     onChange={(e) => handleUpdateLostDetails(item.id, parseInt(e.target.value, 10))}
-                                    className="bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-800 text-white rounded px-1.5 py-0.5 cursor-pointer outline-none focus:border-rose-500"
+                                    className="bg-neutral-900 border border-neutral-800 text-neutral-800 dark:text-neutral-200 rounded px-1.5 py-0.5 cursor-pointer outline-none focus:border-rose-500"
                                   >
                                     {Array.from({ length: activeRound.holes }, (_, i) => i + 1).map(h => (
                                       <option key={h} value={h}>Hole {h}</option>
@@ -802,7 +802,7 @@ export default function RoundTrackerModal({
                                   <select
                                     value={item.hazard || 'Water Hazard'}
                                     onChange={(e) => handleUpdateLostDetails(item.id, undefined, e.target.value)}
-                                    className="bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-800 text-white rounded px-1.5 py-0.5 cursor-pointer outline-none focus:border-rose-500"
+                                    className="bg-neutral-900 border border-neutral-800 text-neutral-800 dark:text-neutral-200 rounded px-1.5 py-0.5 cursor-pointer outline-none focus:border-rose-500"
                                   >
                                     <option value="Water Hazard">Water Hazard</option>
                                     <option value="Woods / Trees">Woods / Trees</option>
@@ -1340,7 +1340,7 @@ export default function RoundTrackerModal({
                                     ? 'bg-emerald-600 text-white border-emerald-700 shadow-sm ring-2 ring-emerald-500/40 cursor-pointer'
                                     : survivedCount > 0
                                     ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/20 cursor-pointer'
-                                    : 'opacity-40 cursor-default bg-neutral-100 dark:bg-neutral-900 border-neutral-300 dark:border-neutral-800 text-neutral-500'
+                                    : 'opacity-40 cursor-default bg-neutral-900 border-neutral-800 text-neutral-500'
                                 }`}
                                 title={survivedCount > 0 ? (isSurvivedActive ? 'Click to collapse survived balls' : 'Click to inspect survived balls') : 'No survived balls'}
                               >
@@ -1360,7 +1360,7 @@ export default function RoundTrackerModal({
                                     ? 'bg-amber-500 text-amber-950 border-amber-600 font-extrabold shadow-sm ring-2 ring-amber-400/50 cursor-pointer'
                                     : damagedCount > 0
                                     ? 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/20 cursor-pointer'
-                                    : 'opacity-40 cursor-default bg-neutral-100 dark:bg-neutral-900 border-neutral-300 dark:border-neutral-800 text-neutral-500'
+                                    : 'opacity-40 cursor-default bg-neutral-900 border-neutral-800 text-neutral-500'
                                 }`}
                                 title={damagedCount > 0 ? (isDamagedActive ? 'Click to collapse damaged balls' : 'Click to inspect damaged balls') : 'No damaged balls'}
                               >
@@ -1380,7 +1380,7 @@ export default function RoundTrackerModal({
                                     ? 'bg-rose-600 text-white border-rose-700 shadow-sm ring-2 ring-rose-500/40 cursor-pointer'
                                     : lostCount > 0
                                     ? 'bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-400 dark:border-rose-500/20 cursor-pointer'
-                                    : 'opacity-40 cursor-default bg-neutral-100 dark:bg-neutral-900 border-neutral-300 dark:border-neutral-800 text-neutral-500'
+                                    : 'opacity-40 cursor-default bg-neutral-900 border-neutral-800 text-neutral-500'
                                 }`}
                                 title={lostCount > 0 ? (isLostActive ? 'Click to collapse lost balls' : 'Click to inspect lost balls') : 'No lost balls'}
                               >
@@ -1404,7 +1404,7 @@ export default function RoundTrackerModal({
 
                           {/* Expandable detailed drawer when a category is tapped */}
                           {isThisRoundExpanded && (
-                            <div className="mt-2.5 pt-2.5 border-t border-neutral-200 dark:border-neutral-850 space-y-2 animate-in fade-in duration-200">
+                            <div className="mt-2.5 pt-2.5 border-t border-neutral-850 space-y-2 animate-in fade-in duration-200">
                               <div className="flex flex-wrap items-center justify-between gap-2 pb-0.5">
                                 <div className="flex items-center gap-1.5 text-[10px] font-mono">
                                   <span className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider mr-1">
@@ -1457,8 +1457,8 @@ export default function RoundTrackerModal({
                                     onClick={() => setExpandedRoundSection({ roundId: round.id, filter: 'all' })}
                                     className={`px-2 py-0.5 rounded font-bold transition-all cursor-pointer ${
                                       activeFilter === 'all'
-                                        ? 'bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900 shadow-xs'
-                                        : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800'
+                                        ? 'bg-neutral-800 text-neutral-900 dark:bg-neutral-800 dark:text-white shadow-xs'
+                                        : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-850 dark:hover:bg-neutral-800'
                                     }`}
                                   >
                                     All ({round.balls.length})
@@ -1468,7 +1468,7 @@ export default function RoundTrackerModal({
                                 <button
                                   type="button"
                                   onClick={() => setExpandedRoundSection(null)}
-                                  className="text-[10px] text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200 font-mono transition-colors cursor-pointer px-1.5 py-0.5 rounded"
+                                  className="text-[10px] text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200 font-mono transition-colors cursor-pointer px-1.5 py-0.5 rounded hover:bg-neutral-850 dark:hover:bg-neutral-800"
                                 >
                                   Close ✕
                                 </button>
@@ -1499,7 +1499,7 @@ export default function RoundTrackerModal({
                                             ? 'bg-rose-50/60 border-rose-200 dark:bg-rose-950/20 dark:border-rose-900/40'
                                             : isDamaged
                                             ? 'bg-amber-50/60 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900/40'
-                                            : 'bg-neutral-50 border-neutral-200 dark:bg-neutral-900/80 dark:border-neutral-850'
+                                            : 'bg-neutral-900/60 border-neutral-800 dark:bg-neutral-900/80 dark:border-neutral-850'
                                         }`}
                                       >
                                         <div className="flex items-center gap-2 min-w-0">
@@ -1508,7 +1508,7 @@ export default function RoundTrackerModal({
                                             style={{ background: getMiniBallSwatch(b.color) }}
                                           />
                                           <div className="min-w-0">
-                                            <div className="font-bold text-white truncate">
+                                            <div className="font-bold text-neutral-900 dark:text-white truncate">
                                               {b.model} {colorDisplay ? `• ${colorDisplay}` : ''} {b.customNumber ? `(#${b.customNumber})` : ''}
                                             </div>
                                             <div className="text-neutral-500 text-[9px] truncate">
