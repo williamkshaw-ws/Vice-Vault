@@ -1542,7 +1542,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     name?: string,
     variation?: string,
     bundleItems?: { catalogId: string; qty: number }[],
-    catalogId?: string
+    catalogId?: string,
+    notForPlay?: boolean
   ) => {
     const today = new Date().toLocaleDateString();
     nativeHaptics.notificationSuccess();
@@ -1555,7 +1556,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     const resolvedPkgType = packageType || (qty >= 12 ? 'box' : qty >= 3 ? 'sleeve' : 'ea');
 
     setBalls((prev) => {
-      // Check if matching ball stack exists to merge (model, color, packageType, year, condition, name, variation, and design notes matching)
+      // Check if matching ball stack exists to merge (model, color, packageType, year, condition, name, variation, notForPlay, and design notes matching)
       const existingIdx = prev.findIndex(b => 
         b.model.trim().toLowerCase() === model.trim().toLowerCase() &&
         b.color.trim().toLowerCase() === color.trim().toLowerCase() &&
@@ -1564,6 +1565,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         (b.year || "").trim().toLowerCase() === (year || "").trim().toLowerCase() &&
         (b.name || "").trim().toLowerCase() === (name || "").trim().toLowerCase() &&
         (b.variation || "").trim().toLowerCase() === (variation || "").trim().toLowerCase() &&
+        (b.notForPlay || false) === (notForPlay || false) &&
         (b.packageType || (b.quantity >= 12 ? 'box' : b.quantity >= 3 ? 'sleeve' : 'ea')) === resolvedPkgType
       );
 
@@ -1601,7 +1603,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           name,
           variation,
           bundleItems,
-          catalogId: catalogId || undefined
+          catalogId: catalogId || undefined,
+          notForPlay: notForPlay || false
         };
         return [newBall, ...prev];
       }
@@ -2073,12 +2076,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   }, [filteredCatalog, catalogSortBy]);
 
   // Group catalog items dynamically based on groupColor and groupVariation flags.
-  // Uses a single O(N) pass via a Map to avoid the previous O(N²) repeated catalog.filter() calls.
+  // Each catalog ball is displayed as its own card in the Ball Vault (all individual balls visible),
+  // while linking to all related subItems in the group so adding a Box pulls in the entire variety pack.
   const groupedCatalog = useMemo(() => {
-    const groups: { primary: CatalogItem; subItems: CatalogItem[] }[] = [];
-    const visited = new Set<string>();
-
-    // Pre-build a Map of groupKey -> items from the full catalog for O(1) lookups
+    // Pre-build a Map of groupKey -> related items from the full catalog for O(1) lookups
     const groupMap = new Map<string, CatalogItem[]>();
     for (const item of catalog) {
       if (!item.name || (!item.groupColor && !item.groupVariation)) continue;
@@ -2087,46 +2088,26 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       groupMap.get(key)!.push(item);
     }
 
-    for (const item of sortedCatalog) {
-      if (visited.has(item.id)) continue;
+    return sortedCatalog.map((item) => {
+      const key = `${item.model.trim().toLowerCase()}||${(item.name || "").trim().toLowerCase()}`;
+      const candidates = (item.groupColor || item.groupVariation) && item.name ? (groupMap.get(key) || [item]) : [item];
 
-      const shouldGroup = (item.groupColor || item.groupVariation) && dbPanelTab !== "wishlist";
-      if (shouldGroup && item.name) {
-        const key = `${item.model.trim().toLowerCase()}||${(item.name || "").trim().toLowerCase()}`;
-        const candidates = groupMap.get(key) || [];
-
-        const matching = candidates.filter(i => {
-          if (item.groupVariation && !i.groupVariation) return false;
-          if (item.groupColor && !i.groupColor) return false;
-
-          if (item.groupVariation) {
-            return i.color.trim().toLowerCase() === item.color.trim().toLowerCase();
-          }
-          if (item.groupColor) {
-            const itemVar = (item.variation || item.notes || "").trim().toLowerCase();
-            const iVar = (i.variation || i.notes || "").trim().toLowerCase();
-            return itemVar === iVar;
-          }
-          return false;
-        });
-
-        matching.forEach(i => visited.add(i.id));
-
-        const primary = { ...matching[0] };
-        matching.forEach(m => {
-          if (!primary.customImageSleeve && m.customImageSleeve) primary.customImageSleeve = m.customImageSleeve;
-          if (!primary.customImageBox && m.customImageBox) primary.customImageBox = m.customImageBox;
-        });
-
-        groups.push({ primary, subItems: matching });
-      } else {
-        visited.add(item.id);
-        groups.push({ primary: item, subItems: [item] });
+      const primary = { ...item };
+      if (!primary.customImageBox) {
+        const boxItem = candidates.find(c => c.customImageBox);
+        if (boxItem) primary.customImageBox = boxItem.customImageBox;
       }
-    }
+      if (!primary.customImageSleeve) {
+        const sleeveItem = candidates.find(c => c.customImageSleeve);
+        if (sleeveItem) primary.customImageSleeve = sleeveItem.customImageSleeve;
+      }
 
-    return groups;
-  }, [sortedCatalog, catalog, dbPanelTab]);
+      return {
+        primary,
+        subItems: candidates
+      };
+    });
+  }, [sortedCatalog, catalog]);
 
   // Calculate high level statistics for Locker
   const totalOwnedCount = useMemo(() => {

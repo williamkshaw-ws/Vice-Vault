@@ -56,7 +56,8 @@ interface CatalogViewProps {
     name?: string,
     variation?: string,
     bundleItems?: { catalogId: string; qty: number }[],
-    catalogId?: string
+    catalogId?: string,
+    notForPlay?: boolean
   ) => void;
   handleToggleWishlist: (catalogId: string) => void;
   globalCatalogStats: Record<string, number>;
@@ -106,18 +107,18 @@ export default function CatalogView({
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {catalogLength > 0 && (
-              <div className="relative">
+              <div className="relative inline-flex items-center">
                 <select
                   value={catalogSortBy}
                   onChange={(e) => setCatalogSortBy(e.target.value)}
-                  className="appearance-none bg-neutral-950/40 border border-neutral-850 text-neutral-400 hover:text-white text-[10px] font-mono py-0.5 pl-2 pr-6 rounded-md transition-all cursor-pointer focus:outline-none focus:border-accent"
+                  className="h-7 appearance-none bg-neutral-950/60 hover:bg-neutral-900 border border-neutral-850 text-neutral-300 hover:text-white text-[10px] font-mono font-bold pl-2.5 pr-6 rounded-md transition-all cursor-pointer focus:outline-none focus:border-accent static-size-select"
                 >
                   <option value="model_asc">Sort: Model (A-Z)</option>
                   <option value="model_desc">Sort: Model (Z-A)</option>
                   <option value="year_desc">Sort: Year (New)</option>
                   <option value="year_asc">Sort: Year (Old)</option>
                 </select>
-                <ChevronDown className="w-3 h-3 text-neutral-500 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <ChevronDown className="w-3 h-3 text-neutral-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             )}
           </div>

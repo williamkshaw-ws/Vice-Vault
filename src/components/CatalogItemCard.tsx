@@ -32,7 +32,8 @@ interface CatalogItemCardProps {
     name?: string,
     variation?: string,
     bundleItems?: { catalogId: string; qty: number }[],
-    catalogId?: string
+    catalogId?: string,
+    notForPlay?: boolean
   ) => void;
   wishlistItems?: string[];
   wishlistDates?: Record<string, string>;
@@ -58,6 +59,7 @@ function CatalogItemCardComponent({ item, subItems = [], onAddToLocker, isReadOn
   const [customNumberInput, setCustomNumberInput] = useState<string>("");
   const [condition, setCondition] = useState<BallCondition>(BallCondition.NEW);
   const [notes, setNotes] = useState("");
+  const [notForPlay, setNotForPlay] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
 
   const currentYear = new Date().getFullYear();
@@ -112,6 +114,7 @@ function CatalogItemCardComponent({ item, subItems = [], onAddToLocker, isReadOn
     setCustomNumberInput("");
     setCondition(BallCondition.NEW);
     setNotes("");
+    setNotForPlay(false);
     setActiveAddingCardId(item.id);
   };
 
@@ -133,6 +136,12 @@ function CatalogItemCardComponent({ item, subItems = [], onAddToLocker, isReadOn
       if (item.groupVariation) varToAdd = "Mixed";
     }
 
+    const bundleItemsToAdd = itemToAdd.bundleItems && itemToAdd.bundleItems.length > 0
+      ? itemToAdd.bundleItems
+      : (pkgType === 'box' && (item.groupColor || item.groupVariation) && subItems.length > 1)
+        ? subItems.map(si => ({ catalogId: si.id, qty: Math.max(1, Math.floor(quantity / subItems.length)) }))
+        : undefined;
+
     onAddToLocker(
       itemToAdd.model,
       colorToAdd,
@@ -147,8 +156,9 @@ function CatalogItemCardComponent({ item, subItems = [], onAddToLocker, isReadOn
       itemToAdd.customImageBox,
       itemToAdd.name,
       varToAdd,
-      itemToAdd.bundleItems,
-      itemToAdd.id
+      bundleItemsToAdd,
+      itemToAdd.id,
+      notForPlay
     );
 
     setJustAdded(true);
@@ -162,6 +172,7 @@ function CatalogItemCardComponent({ item, subItems = [], onAddToLocker, isReadOn
       setNotes("");
       setPlayNumber(1);
       setCustomNumberInput("");
+      setNotForPlay(false);
     }, 1200);
   };
 
@@ -276,13 +287,13 @@ function CatalogItemCardComponent({ item, subItems = [], onAddToLocker, isReadOn
                 {variant !== "wishlist" && (
                   <>
                     <p className="text-xs text-accent font-mono font-medium truncate mt-0.5">
-                      {item.groupColor && (!isOpen || pkgType === 'box') ? "Mixed" : activeItem.color}
+                      {item.color}
                     </p>
-                    {!(item.groupVariation && subItems.length > 1) && (activeItem.variation || activeItem.notes) && (
+                    {(item.variation || item.notes) && (
                       <p className="text-[10px] text-neutral-400 font-mono mt-1 break-words line-clamp-2 italic leading-tight" title={
-                        activeItem.variation || activeItem.notes
+                        item.variation || item.notes
                       }>
-                        "{activeItem.variation || activeItem.notes}"
+                        "{item.variation || item.notes}"
                       </p>
                     )}
                   </>
@@ -291,11 +302,11 @@ function CatalogItemCardComponent({ item, subItems = [], onAddToLocker, isReadOn
                 {variant === "wishlist" && (
                   <div className="mt-2 space-y-1.5">
                     {/* Variation if any */}
-                    {!(item.groupVariation && subItems.length > 1) && (activeItem.variation || activeItem.notes) && (
+                    {(item.variation || item.notes) && (
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] font-mono text-neutral-500 uppercase">Variation:</span>
                         <span className="bg-neutral-950/60 p-0.5 px-1.5 rounded text-neutral-400 text-[10px] font-mono font-bold select-none truncate max-w-[150px]">
-                          {activeItem.variation || activeItem.notes}
+                          {item.variation || item.notes}
                         </span>
                       </div>
                     )}
@@ -304,7 +315,7 @@ function CatalogItemCardComponent({ item, subItems = [], onAddToLocker, isReadOn
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-mono text-neutral-500 uppercase">Color:</span>
                       <span className="bg-neutral-950/60 p-0.5 px-1.5 rounded text-neutral-400 text-[10px] font-mono font-bold select-none">
-                        {item.groupColor && (!isOpen || pkgType === 'box') ? "Mixed" : activeItem.color}
+                        {item.color}
                       </span>
                     </div>
 
@@ -541,26 +552,7 @@ function CatalogItemCardComponent({ item, subItems = [], onAddToLocker, isReadOn
 
           </div>
 
-          {subItems.length > 1 && pkgType !== 'box' && (
-            <div className="mt-3">
-              <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
-                {item.groupColor ? 'Select Color' : item.groupVariation ? 'Select Variation' : 'Select Variant'}
-              </label>
-              <select
-                value={selectedItemId}
-                onChange={(e) => setSelectedItemId(e.target.value)}
-                className="w-full bg-neutral-950 text-xs py-1.5 px-2 rounded text-neutral-300 font-bold border border-neutral-850 focus:border-neutral-700 outline-none cursor-pointer"
-              >
-                {subItems.map((subItem) => (
-                  <option key={subItem.id} value={subItem.id}>
-                    {item.groupColor ? subItem.color : subItem.variation || subItem.color}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end mt-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start mt-3">
             {/* Quantity adjustment */}
             <div>
               <label className="block text-[10px] uppercase font-mono text-neutral-400 mb-1">
@@ -621,7 +613,7 @@ function CatalogItemCardComponent({ item, subItems = [], onAddToLocker, isReadOn
                           setQuantity(1);
                           setPkgType('ea');
                         }}
-                        className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
+                        className={`flex-1 py-1 px-1 border text-center font-mono text-[10px] rounded transition-all cursor-pointer truncate ${
                           pkgType === 'ea'
                             ? "bg-accent border-accent text-neutral-950 font-bold"
                             : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
@@ -635,7 +627,7 @@ function CatalogItemCardComponent({ item, subItems = [], onAddToLocker, isReadOn
                           setQuantity(3);
                           setPkgType('sleeve');
                         }}
-                        className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
+                        className={`flex-1 py-1 px-1 border text-center font-mono text-[10px] rounded transition-all cursor-pointer truncate ${
                           pkgType === 'sleeve'
                             ? "bg-accent border-accent text-neutral-950 font-bold"
                             : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
@@ -651,7 +643,7 @@ function CatalogItemCardComponent({ item, subItems = [], onAddToLocker, isReadOn
                       setQuantity(isBundle ? bundleTotal : 12);
                       setPkgType('box');
                     }}
-                    className={`flex-1 py-1 px-0.5 border text-center font-mono text-[9px] rounded transition-all cursor-pointer truncate ${
+                    className={`flex-1 py-1 px-1 border text-center font-mono text-[10px] rounded transition-all cursor-pointer truncate ${
                       pkgType === 'box'
                         ? "bg-accent border-accent text-neutral-950 font-bold"
                         : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
@@ -661,6 +653,15 @@ function CatalogItemCardComponent({ item, subItems = [], onAddToLocker, isReadOn
                   </button>
                 </div>
               </div>
+
+              {(item.groupColor || item.groupVariation) && pkgType === 'box' && (
+                <p className="text-[10px] text-accent font-mono mt-1.5 flex items-center gap-1 leading-tight">
+                  <span>📦</span>
+                  <span>
+                    Variety Box: adds full box with all {subItems.length} {item.groupColor ? 'colors' : 'variations'} to bag
+                  </span>
+                </p>
+              )}
             </div>
 
             {/* Custom Notes */}
@@ -676,6 +677,21 @@ function CatalogItemCardComponent({ item, subItems = [], onAddToLocker, isReadOn
                 className="w-full bg-neutral-950 text-xs py-1.5 px-3 rounded text-neutral-300 border border-neutral-850 focus:border-neutral-700 outline-none"
               />
             </div>
+          </div>
+
+          {/* Not for play checkbox */}
+          <div className="pt-0.5">
+            <label className="inline-flex items-center gap-2 cursor-pointer select-none group">
+              <input
+                type="checkbox"
+                checked={notForPlay}
+                onChange={(e) => setNotForPlay(e.target.checked)}
+                className="w-4 h-4 rounded border-neutral-700 bg-neutral-950 text-accent focus:ring-0 cursor-pointer accent-[#b5e000]"
+              />
+              <span className="text-[11px] font-mono text-neutral-300 group-hover:text-white transition-colors">
+                Display / Collection only <span className="text-neutral-500">(Not for play in Round Mode)</span>
+              </span>
+            </label>
           </div>
 
           {/* Submit */}

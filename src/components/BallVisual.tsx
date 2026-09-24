@@ -46,7 +46,7 @@ export default function BallVisual({
   };
 
   // If a custom box image is uploaded and packageType is box, render it directly!
-  if (packageType === "box" && customImageBox) {
+  if (packageType === "box" && customImageBox && customImageBox !== customImage) {
     return (
       <div 
         className={`inline-flex items-center justify-center rounded-xl border border-neutral-800 shadow-md select-none shrink-0 overflow-hidden ${sizeClasses[size]} ${className} bg-neutral-950`}

@@ -101,7 +101,8 @@ interface MyVaultViewProps {
     name?: string,
     variation?: string,
     bundleItems?: { catalogId: string; qty: number }[],
-    catalogId?: string
+    catalogId?: string,
+    notForPlay?: boolean
   ) => void;
   handleToggleWishlist: (catalogId: string) => void;
   handleUpdateBall: (id: string, updates: Partial<GolfBall>) => void;
@@ -395,7 +396,7 @@ export default function MyVaultView({
               <button
                 type="button"
                 onClick={onOpenRoundModal}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-mono font-bold transition-all cursor-pointer border ${
+                className={`h-7 inline-flex items-center justify-center gap-1.5 px-2.5 rounded-md text-[10px] font-mono font-bold whitespace-nowrap transition-all cursor-pointer border static-size-btn ${
                   activeRound
                     ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/25"
                     : "bg-neutral-950/60 hover:bg-neutral-900 text-neutral-300 hover:text-white border-neutral-850"
@@ -408,11 +409,11 @@ export default function MyVaultView({
             )}
 
             {balls.length > 0 && (
-              <div className="relative">
+              <div className="relative inline-flex items-center">
                 <select
                   value={bagSortBy}
                   onChange={(e) => setBagSortBy(e.target.value)}
-                  className="appearance-none bg-neutral-950/40 border border-neutral-850 text-neutral-400 hover:text-white text-[10px] font-mono py-0.5 pl-2 pr-6 rounded-md transition-all cursor-pointer focus:outline-none focus:border-accent"
+                  className="h-7 appearance-none bg-neutral-950/60 hover:bg-neutral-900 border border-neutral-850 text-neutral-300 hover:text-white text-[10px] font-mono font-bold pl-2.5 pr-6 rounded-md transition-all cursor-pointer focus:outline-none focus:border-accent static-size-select"
                 >
                   <option value="added_desc">Sort: Added (New)</option>
                   <option value="added_asc">Sort: Added (Old)</option>
@@ -423,7 +424,7 @@ export default function MyVaultView({
                   <option value="year_desc">Sort: Year (New)</option>
                   <option value="year_asc">Sort: Year (Old)</option>
                 </select>
-                <ChevronDown className="w-3 h-3 text-neutral-500 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <ChevronDown className="w-3 h-3 text-neutral-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             )}
           </div>

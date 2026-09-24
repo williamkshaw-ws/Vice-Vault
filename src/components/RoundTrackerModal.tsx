@@ -40,6 +40,8 @@ export interface RoundBallInPlay {
   packageType?: 'ea' | 'sleeve' | 'box';
   customNumber?: number;
   year?: string;
+  name?: string;
+  variation?: string;
   status: 'survived' | 'damaged' | 'lost' | 'scuffed';
   lostHole?: number;
   hazard?: string;
@@ -124,6 +126,9 @@ export default function RoundTrackerModal({
   const [holesInput, setHolesInput] = useState<9 | 18>(18);
   const [packedBalls, setPackedBalls] = useState<PackedBallItem[]>([]);
   const [expandedBundleIds, setExpandedBundleIds] = useState<Record<string, boolean>>({});
+
+  // Filter out balls marked "Not for play" (Display / Collection only)
+  const playableBalls = useMemo(() => balls.filter(b => !b.notForPlay), [balls]);
 
   const toggleBundleExpand = (ballId: string) => {
     setExpandedBundleIds(prev => ({
@@ -263,6 +268,8 @@ export default function RoundTrackerModal({
           packageType: ball.packageType,
           customNumber: ball.customNumber,
           year: ball.year,
+          name: ball.name,
+          variation: ball.variation,
           status: 'survived' // default to survived until marked otherwise
         });
       }
@@ -949,7 +956,7 @@ export default function RoundTrackerModal({
                                   )}
                                 </div>
                                 <span className="text-neutral-500 text-[10px] truncate block">
-                                  {ball.color} • {ball.condition}
+                                  {ball.variation || ball.color} • {ball.condition}
                                 </span>
                               </div>
                             </div>
@@ -993,25 +1000,27 @@ export default function RoundTrackerModal({
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <h3 className="text-xs font-mono font-black uppercase text-neutral-300 tracking-wider">
-                        Available in Locker ({balls.length})
+                        Available in Locker ({playableBalls.length})
                       </h3>
                       <span className="text-[10px] font-mono text-neutral-500">
                         Tap + to pack for round
                       </span>
                     </div>
 
-                    {balls.length === 0 ? (
-                      <div className="py-8 text-center bg-neutral-950/40 border border-neutral-850 rounded-2xl text-neutral-500 font-mono text-xs">
-                        Your locker has no balls yet! Add balls from the Catalog first.
+                    {playableBalls.length === 0 ? (
+                      <div className="py-8 text-center bg-neutral-950/40 border border-neutral-850 rounded-2xl text-neutral-500 font-mono text-xs px-4">
+                        {balls.length > 0 
+                          ? "All balls in your locker are marked 'Not for play' (Display Only)."
+                          : "Your locker has no balls yet! Add balls from the Catalog first."}
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[290px] overflow-y-auto pr-1">
-                        {balls.map((ball) => {
+                        {playableBalls.map((ball) => {
                           const bundleItems = getBundleItemsForBall(ball, catalog);
                           const isBundle = bundleItems.length > 0;
 
                           if (isBundle) {
-                            const isExpanded = expandedBundleIds[ball.id] !== false;
+                            const isExpanded = !!expandedBundleIds[ball.id];
                             const totalInBundle = bundleItems.reduce((sum, item) => sum + item.qty, 0);
                             const packedFromThisBundle = packedBalls
                               .filter(p => p.parentBundleBallId === ball.id)
@@ -1021,32 +1030,27 @@ export default function RoundTrackerModal({
                             return (
                               <div
                                 key={ball.id}
-                                className="col-span-1 sm:col-span-2 bg-neutral-950 border border-neutral-850 p-3 rounded-xl space-y-2.5 font-mono text-xs transition-colors"
+                                className={`col-span-1 bg-neutral-950 border border-neutral-850 hover:border-neutral-750 p-2.5 rounded-xl font-mono text-xs transition-colors ${
+                                  isExpanded ? 'space-y-2.5' : ''
+                                }`}
                               >
-                                <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+                                <div className="flex items-center justify-between gap-2.5">
                                   <div className="flex items-center gap-2.5 min-w-0">
-                                    <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0 flex items-center justify-center bg-blue-500/10 border border-blue-500/20">
-                                      {ball.customImageBox || ball.customImage ? (
-                                        <img
-                                          src={ball.customImageBox || ball.customImage}
-                                          alt={ball.name || ball.model}
-                                          className="w-full h-full object-contain p-0.5"
-                                        />
-                                      ) : (
-                                        <Box size={18} className="text-blue-500 dark:text-blue-400" />
-                                      )}
-                                    </div>
+                                    <BallVisual
+                                      color={ball.color}
+                                      model={ball.model}
+                                      size="sm"
+                                      customImage={ball.customImage}
+                                      customImageSleeve={ball.customImageSleeve}
+                                      customImageBox={ball.customImageBox || (catalog.find(c => c.id === ball.catalogId || (c.model === ball.model && c.name === ball.name))?.customImageBox)}
+                                      packageType={ball.packageType || 'box'}
+                                    />
                                     <div className="min-w-0">
-                                      <div className="flex items-center gap-1.5 flex-wrap">
-                                        <span className="text-white font-bold block truncate text-xs font-sans">
-                                          {ball.name || ball.model}
-                                        </span>
-                                        <span className="px-1.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-500 dark:text-blue-400 text-[9px] font-bold uppercase">
-                                          Variety Pack
-                                        </span>
-                                      </div>
-                                      <span className="text-neutral-500 text-[10px] block truncate">
-                                        {ball.condition} • {bundleAvailableLeft} of {totalInBundle} balls remaining
+                                      <span className="text-white font-bold block truncate text-xs">
+                                        {ball.name || ball.model}
+                                      </span>
+                                      <span className="text-neutral-500 text-[10px] truncate block">
+                                        {ball.color && ball.color.toLowerCase() !== 'mixed' ? `${ball.color} • ` : ''}{bundleAvailableLeft} avail
                                       </span>
                                     </div>
                                   </div>
@@ -1054,71 +1058,72 @@ export default function RoundTrackerModal({
                                   <button
                                     type="button"
                                     onClick={() => toggleBundleExpand(ball.id)}
-                                    className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 text-neutral-300 hover:text-white transition-colors cursor-pointer flex items-center gap-1 ml-auto shrink-0"
+                                    className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 text-white shadow-xs transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
                                   >
-                                    <span>{isExpanded ? 'Hide Balls' : 'Choose Balls'}</span>
-                                    <ChevronDown size={11} className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+                                    <span>{isExpanded ? 'Hide' : `Contains ${totalInBundle}`}</span>
+                                    <ChevronDown size={12} className={`transition-transform duration-200 text-neutral-400 ${isExpanded ? 'rotate-180' : ''}`} />
                                   </button>
                                 </div>
 
-                                {/* Expanded sub-balls inside variety pack */}
+                                {/* Expanded sub-balls inside variety pack (compact list matching bag card) */}
                                 {isExpanded && (
                                   <div className="pt-2 border-t border-neutral-850 space-y-1.5 animate-in fade-in duration-150">
-                                    <span className="text-[9px] uppercase text-neutral-500 font-bold block tracking-wider">
-                                      Choose ball from this pack:
-                                    </span>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                                      {bundleItems.map((item) => {
-                                        const catItem = (catalog || []).find(c => c.id === item.catalogId) || {
-                                          id: item.catalogId,
-                                          model: item.catalogId,
-                                          color: 'White'
-                                        };
-                                        const packed = packedBalls.find(p => p.parentBundleBallId === ball.id && p.bundleCatalogId === item.catalogId);
-                                        const currentPacked = packed ? packed.count : 0;
-                                        const left = Math.max(0, item.qty - currentPacked);
+                                    {bundleItems.map((item) => {
+                                      const catItem = (catalog || []).find(c => c.id === item.catalogId) || {
+                                        id: item.catalogId,
+                                        model: item.catalogId,
+                                        color: 'White'
+                                      };
+                                      const packed = packedBalls.find(p => p.parentBundleBallId === ball.id && p.bundleCatalogId === item.catalogId);
+                                      const currentPacked = packed ? packed.count : 0;
+                                      const left = Math.max(0, item.qty - currentPacked);
 
-                                        return (
-                                          <div
-                                            key={item.catalogId}
-                                            className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 flex items-center justify-between gap-2 text-xs"
-                                          >
-                                            <div className="flex items-center gap-2 min-w-0">
-                                              <BallVisual
-                                                color={catItem.color}
-                                                model={catItem.model}
-                                                size="sm"
-                                                customImage={catItem.customImage}
-                                                customImageSleeve={catItem.customImageSleeve}
-                                                customImageBox={catItem.customImageBox}
-                                                packageType="ea"
-                                              />
-                                              <div className="min-w-0">
-                                                <span className="text-white font-bold block text-[11px] truncate">
-                                                  {catItem.model} {catItem.name && catItem.name !== 'Standard' ? `• ${catItem.name}` : ''}
+                                      // If all balls in this bundle share the same color (e.g. all White variation packs like Eat This)
+                                      const bundleColors = bundleItems.map(bi => {
+                                        const cat = (catalog || []).find(c => c.id === bi.catalogId);
+                                        return (cat?.color || '').trim().toLowerCase();
+                                      }).filter(Boolean);
+                                      const isSameColorBundle = bundleColors.length > 0 && new Set(bundleColors).size === 1;
+
+                                      // When constituent balls share the same color, omit the color from the pill so it only shows the variation (e.g. "Eat This")
+                                      const badgeText = (isSameColorBundle && catItem.variation)
+                                        ? catItem.variation
+                                        : (catItem.variation ? `${catItem.color} • ${catItem.variation}` : catItem.color);
+
+                                      return (
+                                        <div
+                                          key={item.catalogId}
+                                          className="p-1.5 px-2 rounded-lg bg-neutral-900 border border-neutral-850 flex items-center justify-between gap-2 text-xs"
+                                        >
+                                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                                            <span className="font-bold text-neutral-500 font-mono text-[11px] shrink-0 w-5">{left}x</span>
+                                            <div className="flex items-center gap-1.5 flex-1 min-w-0 flex-wrap">
+                                              <span className="font-sans font-bold text-white text-[11px] truncate">
+                                                {catItem.model}{catItem.name && catItem.name !== 'Standard' ? ` - ${catItem.name}` : ''}
+                                              </span>
+                                              {badgeText && (
+                                                <span className="text-[10px] text-neutral-400 font-mono bg-neutral-950 border border-neutral-800 px-1.5 py-0.5 rounded truncate">
+                                                  {badgeText}
                                                 </span>
-                                                <span className="text-neutral-500 text-[9px] truncate block">
-                                                  {catItem.color} {catItem.variation ? `(${catItem.variation})` : ''} • {left} avail
-                                                </span>
-                                              </div>
+                                              )}
                                             </div>
-
-                                            <button
-                                              type="button"
-                                              disabled={left <= 0}
-                                              onClick={() => handlePackSubBall(ball, item, catItem as any)}
-                                              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all shrink-0 cursor-pointer ${
-                                                left > 0
-                                                  ? 'bg-accent hover:bg-[#b5e000] text-black font-extrabold shadow-xs'
-                                                  : 'bg-neutral-850 text-neutral-600 cursor-not-allowed opacity-50'
-                                              }`}
-                                            >
-                                              + Pack
-                                            </button>
                                           </div>
-                                        );
-                                      })}
-                                    </div>
+
+                                          <button
+                                            type="button"
+                                            disabled={left <= 0}
+                                            onClick={() => handlePackSubBall(ball, item, catItem as any)}
+                                            className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold transition-all shrink-0 cursor-pointer ${
+                                              left > 0
+                                                ? 'bg-accent hover:bg-[#b5e000] text-black font-extrabold shadow-xs'
+                                                : 'bg-neutral-850 text-neutral-600 cursor-not-allowed opacity-50'
+                                            }`}
+                                          >
+                                            + Pack
+                                          </button>
+                                        </div>
+                                      );
+                                    })}
                                   </div>
                                 )}
                               </div>

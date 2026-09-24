@@ -60,6 +60,7 @@ export interface GolfBall {
   totalMade?: number;
   bundleItems?: BundleItem[];
   catalogId?: string;
+  notForPlay?: boolean; // When true, excluded from Round Mode ball selector
 }
 
 export interface CourseLog {

@@ -184,8 +184,16 @@ input, textarea, select {
   input[type="password"],
   input[type="search"],
   input[type="number"],
-  textarea,
-  select {
+  textarea {
     font-size: 16px !important;
   }
+}
+
+/* Static size toolbar controls: lock height and font size across all screen sizes & browsers */
+.static-size-select,
+.static-size-btn {
+  font-size: 10px !important;
+  height: 28px !important;
+  line-height: 1 !important;
+  box-sizing: border-box !important;
 }

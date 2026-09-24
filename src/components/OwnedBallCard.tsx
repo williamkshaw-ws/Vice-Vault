@@ -47,6 +47,22 @@ export default function OwnedBallCard({
   const bundleItems = getBundleItemsForBall(ball, catalog);
   const isBundle = bundleItems.length > 0;
 
+  // Check if an image URL is actually a ball image rather than custom box packaging
+  const isBallImage = (url?: string): boolean => {
+    if (!url) return false;
+    if (ball.customImage && url === ball.customImage) return true;
+    if (catalogItem?.customImage && url === catalogItem.customImage) return true;
+    if (bundleItems.some(bi => {
+      const c = catalog.find(cat => cat.id === bi.catalogId);
+      return c?.customImage && c.customImage === url;
+    })) return true;
+    return false;
+  };
+
+  const actualCustomImageBox = (ball.customImageBox && !isBallImage(ball.customImageBox)) 
+    ? ball.customImageBox 
+    : undefined;
+
   const downscaleImageToDataUrl = async (url: string | undefined): Promise<string | undefined> => {
     if (!url) return undefined;
     
@@ -125,9 +141,9 @@ export default function OwnedBallCard({
     try {
       // 1. On-demand downscale the images to prevent Safari canvas memory crashes
       // MUST USE EXACT SAME FALLBACK LOGIC AS TRADING CARD RENDERER!
-      const targetBox = ball.customImageBox || ball.customImage || ball.customImageSleeve || catalogItem?.customImageBox || catalogItem?.customImage;
-      const targetSleeve = ball.customImageSleeve || ball.customImage || ball.customImageBox || catalogItem?.customImageSleeve || catalogItem?.customImage;
-      const targetEa = ball.customImage || ball.customImageBox || ball.customImageSleeve || catalogItem?.customImage;
+      const targetBox = actualCustomImageBox || catalogItem?.customImageBox;
+      const targetSleeve = ball.customImageSleeve || catalogItem?.customImageSleeve;
+      const targetEa = ball.customImage || catalogItem?.customImage;
 
       // Preload HTTP images to ensure they are fully downloaded and decoded before html-to-image captures the DOM
       const preloadImage = (src: string): Promise<void> => {
@@ -240,9 +256,10 @@ export default function OwnedBallCard({
   );
   const [editCondition, setEditCondition] = useState<BallCondition>(ball.condition);
   const [editNotes, setEditNotes] = useState<string>(currentNotes);
-  const [editCustomImageBox, setEditCustomImageBox] = useState(ball.customImageBox || ball.customImage || "");
+  const [editCustomImageBox, setEditCustomImageBox] = useState(actualCustomImageBox || "");
   const [editCustomImage, setEditCustomImage] = useState(ball.customImage || "");
   const [editYear, setEditYear] = useState<string>(ball.year || "2012");
+  const [editNotForPlay, setEditNotForPlay] = useState<boolean>(!!ball.notForPlay);
 
   const startEditing = () => {
     if (readOnly) return;
@@ -257,8 +274,9 @@ export default function OwnedBallCard({
     setEditCustomNumberInput([0, 1, 2, 3, 4].includes(ball.customNumber) ? "" : String(ball.customNumber !== undefined ? ball.customNumber : ""));
     setEditCondition(ball.condition);
     setEditNotes(notes);
-    setEditCustomImageBox(ball.customImageBox || ball.customImage || "");
+    setEditCustomImageBox(actualCustomImageBox || "");
     setEditYear(ball.year || "2012");
+    setEditNotForPlay(!!ball.notForPlay);
     setIsEditing(true);
   };
 
@@ -289,7 +307,8 @@ export default function OwnedBallCard({
       editNotes !== (ball.notes || '') ||
       editCustomImage !== (ball.customImage || "") ||
       editYear !== (ball.year || "2012") ||
-      editCustomImageBox !== (ball.customImageBox || "");
+      editCustomImageBox !== (actualCustomImageBox || "") ||
+      editNotForPlay !== (!!ball.notForPlay);
 
     if (isDirty) {
       setShowUnsavedPrompt(true);
@@ -302,15 +321,20 @@ export default function OwnedBallCard({
   const handleSave = () => {
     if (readOnly) return;
     if (onUpdateBall) {
+      const cleanedBoxImage = editCustomImageBox && !isBallImage(editCustomImageBox)
+        ? editCustomImageBox.trim()
+        : undefined;
+
       onUpdateBall(ball.id, {
         quantity: editQty,
         packageType: editPkgType,
         customNumber: editPkgType === 'box' ? 1 : editPlayNumber,
         condition: editCondition,
         notes: editNotes.trim(),
-        customImageBox: editCustomImageBox,
-        customImage: editCustomImage,
+        customImageBox: cleanedBoxImage,
+        customImage: editCustomImage.trim() || undefined,
         year: editYear,
+        notForPlay: editNotForPlay,
       });
       nativeHaptics.notificationSuccess();
     }
@@ -656,6 +680,21 @@ export default function OwnedBallCard({
           )}
         </div>
 
+        {/* Not for play checkbox */}
+        <div className="mt-2.5 pt-1">
+          <label className="inline-flex items-center gap-2 cursor-pointer select-none group">
+            <input
+              type="checkbox"
+              checked={editNotForPlay}
+              onChange={(e) => setEditNotForPlay(e.target.checked)}
+              className="w-4 h-4 rounded border-neutral-700 bg-neutral-950 text-accent focus:ring-0 cursor-pointer accent-[#2563eb]"
+            />
+            <span className="text-[11px] font-mono text-neutral-300 group-hover:text-white transition-colors">
+              Display / Collection only <span className="text-neutral-500">(Not for play in Round Mode)</span>
+            </span>
+          </label>
+        </div>
+
         {/* Action Buttons */}
         <div className="flex gap-2 justify-end mt-4 pt-3 border-t border-neutral-800/70">
           <button
@@ -729,7 +768,7 @@ export default function OwnedBallCard({
             size="md" 
             customImage={ball.customImage}
             customImageSleeve={ball.customImageSleeve}
-            customImageBox={ball.customImageBox}
+            customImageBox={actualCustomImageBox}
             packageType={ball.packageType}
           />
           {ball.packageType !== 'box' && (
@@ -850,6 +889,16 @@ export default function OwnedBallCard({
                 </span>
               </div>
             )}
+
+            {/* Display / Collection Only Badge */}
+            {ball.notForPlay && (
+              <div className="mt-1.5 flex items-center gap-2">
+                <span className="text-[10px] font-mono text-neutral-500 uppercase">Usage:</span>
+                <span className="bg-amber-500/10 border border-amber-500/20 text-amber-400 p-0.5 px-1.5 rounded text-[10px] font-mono font-bold select-none">
+                  Display Only (Not for Play)
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="mt-2 text-[10px] text-neutral-400 font-mono flex items-center gap-2">
@@ -941,6 +990,13 @@ export default function OwnedBallCard({
             <div className="mt-3 space-y-2 pl-6 animate-fade-in">
               {bundleItems.map((item, idx) => {
                 const catItem = catalog.find(c => c.id === item.catalogId);
+                const bundleColors = bundleItems.map(bItem => catalog.find(c => c.id === bItem.catalogId)?.color?.trim().toLowerCase()).filter(Boolean);
+                const isSameColorBundle = bundleColors.length > 0 && new Set(bundleColors).size === 1;
+
+                const badgeText = (isSameColorBundle && catItem?.variation)
+                  ? catItem.variation
+                  : (catItem ? `${catItem.color}${catItem.variation ? ` (${catItem.variation})` : ''}` : item.catalogId);
+
                 return (
                   <div key={idx} className="flex items-center gap-2 text-xs text-neutral-300">
                     <span className="font-bold text-neutral-500 w-6">{item.qty}x</span>
@@ -948,9 +1004,9 @@ export default function OwnedBallCard({
                       <span className="font-sans font-bold text-white truncate">
                         {catItem ? `${catItem.model}${catItem.name ? ` - ${catItem.name}` : ''}` : item.catalogId}
                       </span>
-                      {catItem && (
+                      {badgeText && (
                         <span className="text-[10px] text-neutral-400 font-mono bg-neutral-950 px-1.5 py-0.5 rounded truncate">
-                          {catItem.color} {catItem.variation ? `(${catItem.variation})` : ''}
+                          {badgeText}
                         </span>
                       )}
                     </div>
@@ -964,10 +1020,10 @@ export default function OwnedBallCard({
       {/* Hidden Trading Card Renderer for Export */}
       <TradingCardRenderer 
         ref={cardRef} 
-        ball={ball} 
+        ball={{ ...ball, customImageBox: actualCustomImageBox }} 
         catalogItem={catalogItem} 
         exportCustomImage={exportCustomImage}
-        exportCustomImageBox={exportCustomImageBox}
+        exportCustomImageBox={actualCustomImageBox || exportCustomImageBox}
         exportCustomImageSleeve={exportCustomImageSleeve}
         isDarkTheme={document.documentElement.classList.contains('dark')}
       />
