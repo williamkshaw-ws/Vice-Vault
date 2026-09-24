@@ -2104,6 +2104,7 @@ app.post("/api/users/:id/email", authLimiter, async (req, res) => {
         updatedAt: new Date().toISOString()
       });
 
+      let updatedInAuth = false;
       const authUidToUpdate = user.authUid || (resolvedId.startsWith("u-") ? resolvedId : undefined);
       if (authUidToUpdate) {
         try {
@@ -2111,20 +2112,25 @@ app.post("/api/users/:id/email", authLimiter, async (req, res) => {
             email: cleanNewEmail,
             emailVerified: false
           });
+          updatedInAuth = true;
           console.log(`Updated email in Firebase Auth for UID ${authUidToUpdate} to ${cleanNewEmail}`);
         } catch (authErr: any) {
-          if (oldEmail) {
-            try {
-              const existingAuth = await admin.auth().getUserByEmail(oldEmail);
-              await admin.auth().updateUser(existingAuth.uid, {
-                email: cleanNewEmail,
-                emailVerified: false
-              });
-              console.log(`Updated email in Firebase Auth via old email lookup for ${oldEmail} to ${cleanNewEmail}`);
-            } catch (e2) {
-              console.warn("Firebase Auth email update skipped:", e2);
-            }
+          console.warn(`Direct UID update failed in Firebase Auth for ${authUidToUpdate}:`, authErr.message);
+        }
+      }
+
+      if (!updatedInAuth && oldEmail) {
+        try {
+          const existingAuth = await admin.auth().getUserByEmail(oldEmail);
+          if (existingAuth) {
+            await admin.auth().updateUser(existingAuth.uid, {
+              email: cleanNewEmail,
+              emailVerified: false
+            });
+            console.log(`Updated email in Firebase Auth via old email lookup for ${oldEmail} to ${cleanNewEmail}`);
           }
+        } catch (e2) {
+          console.warn("Firebase Auth email update skipped:", e2);
         }
       }
     } catch (dbErr) {
@@ -3115,6 +3121,7 @@ app.patch("/api/users/:id", async (req, res) => {
     targetUser.avatarUrl = avatarUrl;
   }
 
+  let oldEmail = targetUser.email;
   if (email !== undefined) {
     if (!email.trim() || !email.includes("@")) {
       return res.status(400).json({ error: "Invalid email format." });
@@ -3124,6 +3131,7 @@ app.patch("/api/users/:id", async (req, res) => {
     if (emailExists) {
       return res.status(400).json({ error: "This email is already taken by another account." });
     }
+    oldEmail = targetUser.email;
     targetUser.email = cleanEmail;
     const defUser = DEFAULT_USERS.find(u => u.uid === resolvedId);
     if (defUser) {
@@ -3140,6 +3148,7 @@ app.patch("/api/users/:id", async (req, res) => {
 
   // If Firebase Admin SDK is initialized, propagate changes to Firebase Auth
   if (isFirebaseAdminInitialized) {
+    let updatedInAuth = false;
     const authUidToUpdate = targetUser.authUid || (resolvedId.startsWith("u-") ? resolvedId : undefined);
     if (authUidToUpdate) {
       try {
@@ -3158,15 +3167,30 @@ app.patch("/api/users/:id", async (req, res) => {
         }
         if (Object.keys(authUpdates).length > 0) {
           await admin.auth().updateUser(authUidToUpdate, authUpdates);
+          updatedInAuth = true;
           console.log(`Successfully updated Auth credentials for user ${authUidToUpdate} in Firebase Auth`);
         }
       } catch (authErr: any) {
-        console.error(`Failed to update user Auth credentials in Firebase:`, authErr);
-        if (authErr.code === "auth/user-not-found" || authErr.code === "auth/configuration-not-found") {
-          console.warn(`Ignoring Firebase Auth update error (code: ${authErr.code}) for user ${authUidToUpdate} and proceeding with database update.`);
-        } else {
-          return res.status(400).json({ error: authErr.message || "Failed to update Firebase Auth credentials." });
+        console.warn(`Direct UID update failed in Firebase Auth for ${authUidToUpdate}, trying lookup by email:`, authErr.message);
+      }
+    }
+
+    if (!updatedInAuth && oldEmail) {
+      try {
+        const existingAuth = await admin.auth().getUserByEmail(oldEmail);
+        if (existingAuth) {
+          const authUpdates: any = {};
+          if (email !== undefined) authUpdates.email = email.trim();
+          if (password !== undefined && password !== "") authUpdates.password = password;
+          if (displayName !== undefined) authUpdates.displayName = displayName.trim();
+          if (avatarUrl !== undefined) authUpdates.photoURL = (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://")) ? avatarUrl : null;
+          if (Object.keys(authUpdates).length > 0) {
+            await admin.auth().updateUser(existingAuth.uid, authUpdates);
+            console.log(`Updated Auth credentials via old email lookup for ${oldEmail} in Firebase Auth`);
+          }
         }
+      } catch (e2) {
+        console.warn("Firebase Auth fallback email update skipped:", e2);
       }
     }
   }
