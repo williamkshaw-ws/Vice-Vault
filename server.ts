@@ -1360,7 +1360,19 @@ if (serviceAccountConfig) {
           }
         }
 
-        const firestoreItems: CatalogItem[] = Object.values(groupedRaw);
+        const localCatalog = loadCatalog();
+        const localMap = new Map(localCatalog.map(c => [c.id, c]));
+
+        const firestoreItems: CatalogItem[] = Object.values(groupedRaw).map(item => {
+          const localItem = localMap.get(item.id);
+          return {
+            ...item,
+            groupColor: localItem?.groupColor !== undefined ? localItem.groupColor : !!item.groupColor,
+            groupVariation: localItem?.groupVariation !== undefined ? localItem.groupVariation : !!item.groupVariation,
+            bundleItems: (localItem?.bundleItems && localItem.bundleItems.length > 0) ? localItem.bundleItems : (item.bundleItems || []),
+            rarity: item.rarity || localItem?.rarity || 'common'
+          };
+        });
         const batch = dbAdmin!.batch();
         let needsCommit = false;
 
@@ -1418,6 +1430,10 @@ if (serviceAccountConfig) {
           name: item.name ? item.name.trim() : undefined,
           color: item.color.trim(),
           variation: item.variation || item.notes || undefined,
+          groupColor: !!item.groupColor,
+          groupVariation: !!item.groupVariation,
+          bundleItems: item.bundleItems || [],
+          rarity: item.rarity || 'common',
           customImage: item.customImage,
           customImageSleeve: item.customImageSleeve,
           customImageBox: item.customImageBox
@@ -3369,7 +3385,19 @@ app.delete("/api/users/:id", async (req, res) => {
 // Fetch current searchable Ball Vault Catalog
 app.get("/api/catalog", async (req, res) => {
   const catalog = await getGlobalCatalog();
-  res.json(catalog);
+  const localCatalog = loadCatalog();
+  const localMap = new Map(localCatalog.map(c => [c.id, c]));
+  const merged = catalog.map(c => {
+    const local = localMap.get(c.id);
+    return {
+      ...c,
+      groupColor: local?.groupColor !== undefined ? local.groupColor : !!c.groupColor,
+      groupVariation: local?.groupVariation !== undefined ? local.groupVariation : !!c.groupVariation,
+      bundleItems: (local?.bundleItems && local.bundleItems.length > 0) ? local.bundleItems : (c.bundleItems || []),
+      rarity: c.rarity || local?.rarity || 'common'
+    };
+  });
+  res.json(merged);
 });
 
 // POST: Add new design to catalog (Admin only)

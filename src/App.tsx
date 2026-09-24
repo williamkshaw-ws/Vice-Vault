@@ -74,7 +74,8 @@ import AuthModal, { AvatarRenderer } from "./components/AuthModal";
 import ResetPasswordModal from "./components/ResetPasswordModal";
 import VerifyEmailModal from "./components/VerifyEmailModal";
 import { User as FirebaseUser } from "firebase/auth";
-import { doc, getDoc, setDoc, query, where, collection, getDocs } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, query, where, collection, getDocs } from "firebase/firestore";
+import defaultCatalogData from "../data/catalog.json";
 
 // Premium Custom Golf-Specific SVGs designed to match the Munich technical aesthetic
 function GolfBagIcon({ className = "w-5 h-5 text-neutral-400" }: { className?: string }) {
@@ -167,8 +168,12 @@ const INITIAL_OWNED_BALLS: GolfBall[] = [];
 
 // Helper to generate the standard default Vice catalog entries
 const generateDefaultCatalog = (): CatalogItem[] => {
-  return SCRAPED_BALLS;
+  return (defaultCatalogData as CatalogItem[]) || SCRAPED_BALLS;
 };
+
+const bundledCatalogMap = new Map<string, CatalogItem>(
+  (defaultCatalogData as CatalogItem[]).map(item => [item.id, item])
+);
 
 const hexToRgb = (hex: string) => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -374,7 +379,18 @@ export default function App() {
       const saved = localStorage.getItem("vice_vault_catalog");
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((p: CatalogItem) => {
+            const bundled = bundledCatalogMap.get(p.id);
+            return bundled ? {
+              ...p,
+              groupColor: bundled.groupColor !== undefined ? bundled.groupColor : !!p.groupColor,
+              groupVariation: bundled.groupVariation !== undefined ? bundled.groupVariation : !!p.groupVariation,
+              bundleItems: (bundled.bundleItems && bundled.bundleItems.length > 0) ? bundled.bundleItems : (p.bundleItems || []),
+              rarity: p.rarity || bundled.rarity || 'common'
+            } : p;
+          });
+        }
       }
     } catch (e) {
       console.warn("Failed to parse catalog from localStorage", e);
@@ -388,7 +404,17 @@ export default function App() {
     migrateLocalStorageToIdb();
     idbGet<CatalogItem[]>("vice_vault_catalog").then((cached) => {
       if (cached && Array.isArray(cached) && cached.length > 0) {
-        setCatalog(cached);
+        const merged = cached.map((p: CatalogItem) => {
+          const bundled = bundledCatalogMap.get(p.id);
+          return bundled ? {
+            ...p,
+            groupColor: bundled.groupColor !== undefined ? bundled.groupColor : !!p.groupColor,
+            groupVariation: bundled.groupVariation !== undefined ? bundled.groupVariation : !!p.groupVariation,
+            bundleItems: (bundled.bundleItems && bundled.bundleItems.length > 0) ? bundled.bundleItems : (p.bundleItems || []),
+            rarity: p.rarity || bundled.rarity || 'common'
+          } : p;
+        });
+        setCatalog(merged);
       }
     }).catch(err => console.warn("Failed to load catalog from IndexedDB:", err));
   }, []);
@@ -1016,21 +1042,77 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     const fetchGlobalCatalog = async () => {
       try {
         if (isFirebaseConfigured && db) {
-          const { collection, getDocs } = await import("firebase/firestore");
+          const { collection, getDocs, updateDoc } = await import("firebase/firestore");
           const catalogSnap = await getDocs(collection(db, "catalog"));
           const items: CatalogItem[] = [];
-          catalogSnap.forEach((doc) => {
-            items.push({ id: doc.id, ...doc.data() } as CatalogItem);
+          const docsToHeal: { ref: any; data: any }[] = [];
+
+          catalogSnap.forEach((docSnap) => {
+            const data = docSnap.data() as CatalogItem;
+            const bundled = bundledCatalogMap.get(docSnap.id);
+
+            const effectiveGroupColor = bundled?.groupColor !== undefined ? bundled.groupColor : !!data.groupColor;
+            const effectiveGroupVariation = bundled?.groupVariation !== undefined ? bundled.groupVariation : !!data.groupVariation;
+            const effectiveBundleItems = (bundled?.bundleItems && bundled.bundleItems.length > 0) ? bundled.bundleItems : (data.bundleItems || []);
+            const effectiveRarity = data.rarity || bundled?.rarity || 'common';
+
+            items.push({
+              id: docSnap.id,
+              ...data,
+              groupColor: effectiveGroupColor,
+              groupVariation: effectiveGroupVariation,
+              bundleItems: effectiveBundleItems,
+              rarity: effectiveRarity
+            } as CatalogItem);
+
+            if (
+              data.groupColor !== effectiveGroupColor ||
+              data.groupVariation !== effectiveGroupVariation ||
+              (bundled?.bundleItems && bundled.bundleItems.length > 0 && (!data.bundleItems || data.bundleItems.length === 0))
+            ) {
+              docsToHeal.push({
+                ref: docSnap.ref,
+                data: {
+                  groupColor: effectiveGroupColor,
+                  groupVariation: effectiveGroupVariation,
+                  ...(bundled?.bundleItems && bundled.bundleItems.length > 0 ? { bundleItems: bundled.bundleItems } : {})
+                }
+              });
+            }
           });
+
           if (active) {
             setCatalog(items);
+          }
+
+          if (docsToHeal.length > 0 && currentUser?.role === 'Admin') {
+            (async () => {
+              try {
+                for (const healItem of docsToHeal) {
+                  await updateDoc(healItem.ref, healItem.data);
+                }
+                console.log(`Auto-healed ${docsToHeal.length} catalog items in Firestore with grouping flags.`);
+              } catch (e) {
+                console.warn("Could not auto-heal Firestore catalog docs:", e);
+              }
+            })();
           }
         } else {
           const res = await fetch("/api/catalog");
           if (res.ok) {
             const data = await res.json();
             if (active && data) {
-              setCatalog(data);
+              const merged = data.map((p: CatalogItem) => {
+                const bundled = bundledCatalogMap.get(p.id);
+                return bundled ? {
+                  ...p,
+                  groupColor: bundled.groupColor !== undefined ? bundled.groupColor : !!p.groupColor,
+                  groupVariation: bundled.groupVariation !== undefined ? bundled.groupVariation : !!p.groupVariation,
+                  bundleItems: (bundled.bundleItems && bundled.bundleItems.length > 0) ? bundled.bundleItems : (p.bundleItems || []),
+                  rarity: p.rarity || bundled.rarity || 'common'
+                } : p;
+              });
+              setCatalog(merged);
             }
           }
         }
