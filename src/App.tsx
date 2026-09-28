@@ -13,6 +13,7 @@ const FriendsPortal = React.lazy(() => import("./components/FriendsPortal"));
 import MetricCards from "./components/MetricCards";
 import { useAuth } from "./hooks/useAuth";
 import { useBallLocker } from "./hooks/useBallLocker";
+import { useRoundTracker } from "./hooks/useRoundTracker";
 import { filterLegacyBalls, safeJSONParse, getBundleItemsForBall } from "./utils/bagUtils";
 import { idbGet, idbSet, idbDelete, migrateLocalStorageToIdb } from "./utils/storage";
 import { initNativeApp } from "./utils/nativeBridge";
@@ -529,15 +530,14 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   const [bagModalErrorMessage, setBagModalErrorMessage] = useState<string | null>(null);
   const [isSavingUserBag, setIsSavingUserBag] = useState(false);
 
-  // Round Mode (In-Play & Loss Tracker)
+  // Round Mode (In-Play & Loss Tracker with cross-device sync)
   const [isRoundTrackerOpen, setIsRoundTrackerOpen] = useState(false);
-  const [activeRound, setActiveRound] = useState<GolfRound | null>(() => {
-    try {
-      const saved = localStorage.getItem("golf_ball_vault_active_round");
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return null;
-  });
+  const {
+    activeRound,
+    setActiveRound,
+    roundHistory,
+    saveRoundHistory
+  } = useRoundTracker(currentUser, userProfile);
 
   // User Editing States
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
@@ -2869,6 +2869,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           onApplyInventoryChanges={handleApplyRoundInventory}
           activeRound={activeRound}
           setActiveRound={setActiveRound}
+          roundHistory={roundHistory}
+          onSaveRoundHistory={saveRoundHistory}
           showToast={showToast}
         />
       </Suspense>

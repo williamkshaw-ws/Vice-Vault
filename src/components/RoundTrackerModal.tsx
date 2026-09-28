@@ -105,6 +105,8 @@ interface RoundTrackerModalProps {
   onApplyInventoryChanges: (ballsInPlay: RoundBallInPlay[]) => void;
   activeRound: GolfRound | null;
   setActiveRound: React.Dispatch<React.SetStateAction<GolfRound | null>>;
+  roundHistory?: GolfRound[];
+  onSaveRoundHistory?: (history: GolfRound[]) => void;
   showToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
 }
 
@@ -116,10 +118,13 @@ export default function RoundTrackerModal({
   onApplyInventoryChanges,
   activeRound,
   setActiveRound,
+  roundHistory: externalRoundHistory,
+  onSaveRoundHistory,
   showToast
 }: RoundTrackerModalProps) {
   const [tab, setTab] = useState<'round' | 'history'>('round');
-  const [roundHistory, setRoundHistory] = useState<GolfRound[]>([]);
+  const [internalRoundHistory, setInternalRoundHistory] = useState<GolfRound[]>([]);
+  const roundHistory = externalRoundHistory !== undefined ? externalRoundHistory : internalRoundHistory;
   const [expandedRoundSection, setExpandedRoundSection] = useState<{ roundId: string; filter: 'survived' | 'damaged' | 'lost' | 'all' } | null>(null);
   const [roundToDelete, setRoundToDelete] = useState<GolfRound | null>(null);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
@@ -143,25 +148,30 @@ export default function RoundTrackerModal({
   // Post-round celebration summary state
   const [justCompletedRound, setJustCompletedRound] = useState<GolfRound | null>(null);
 
-  // Load round history on mount
+  // Load round history on mount if not provided via props
   useEffect(() => {
+    if (externalRoundHistory !== undefined) return;
     try {
       const savedHistory = localStorage.getItem(ROUND_HISTORY_KEY);
       if (savedHistory) {
-        setRoundHistory(JSON.parse(savedHistory));
+        setInternalRoundHistory(JSON.parse(savedHistory));
       }
     } catch (e) {
       console.error('Failed to load round history:', e);
     }
-  }, []);
+  }, [externalRoundHistory]);
 
   // Save history helper
   const saveHistory = (newHistory: GolfRound[]) => {
-    setRoundHistory(newHistory);
-    try {
-      localStorage.setItem(ROUND_HISTORY_KEY, JSON.stringify(newHistory));
-    } catch (e) {
-      console.error('Failed to persist round history:', e);
+    if (onSaveRoundHistory) {
+      onSaveRoundHistory(newHistory);
+    } else {
+      setInternalRoundHistory(newHistory);
+      try {
+        localStorage.setItem(ROUND_HISTORY_KEY, JSON.stringify(newHistory));
+      } catch (e) {
+        console.error('Failed to persist round history:', e);
+      }
     }
   };
 

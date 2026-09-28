@@ -1640,6 +1640,60 @@ async function saveUserLocker(uid: string, balls: any[]): Promise<void> {
   saveUserData(resolvedId, { balls });
 }
 
+async function getUserRounds(uid: string): Promise<{ activeRound: any | null; roundHistory: any[] } | null> {
+  const resolvedId = await resolveUserDocId(uid);
+  if (dbAdmin) {
+    try {
+      const docSnap = await dbAdmin.collection("users").doc(resolvedId).collection("data").doc("rounds").get();
+      if (docSnap.exists) {
+        const data = docSnap.data();
+        return {
+          activeRound: data?.activeRound ?? null,
+          roundHistory: Array.isArray(data?.roundHistory) ? data.roundHistory : []
+        };
+      }
+    } catch (error) {
+      console.error("Firestore getUserRounds failed, fallback to file:", error);
+    }
+  }
+  const data = loadUserData(resolvedId);
+  if (data && (data.activeRound !== undefined || data.roundHistory !== undefined)) {
+    return {
+      activeRound: data.activeRound ?? null,
+      roundHistory: Array.isArray(data.roundHistory) ? data.roundHistory : []
+    };
+  }
+  return null;
+}
+
+async function saveUserRounds(uid: string, payload: { activeRound?: any; roundHistory?: any[] }): Promise<void> {
+  const resolvedId = await resolveUserDocId(uid);
+  const now = new Date().toISOString();
+  if (dbAdmin) {
+    try {
+      const updateData: any = { updatedAt: now };
+      if (payload.activeRound !== undefined) {
+        updateData.activeRound = payload.activeRound;
+      }
+      if (payload.roundHistory !== undefined) {
+        updateData.roundHistory = payload.roundHistory;
+      }
+      await dbAdmin.collection("users").doc(resolvedId).collection("data").doc("rounds").set(updateData, { merge: true });
+      return;
+    } catch (error) {
+      console.error("Firestore saveUserRounds failed, fallback to file:", error);
+    }
+  }
+  const existing = loadUserData(resolvedId) || {};
+  const updated = {
+    ...existing,
+    ...(payload.activeRound !== undefined ? { activeRound: payload.activeRound } : {}),
+    ...(payload.roundHistory !== undefined ? { roundHistory: payload.roundHistory } : {}),
+    roundsUpdatedAt: now
+  };
+  saveUserData(resolvedId, updated);
+}
+
 
 
 async function getGlobalCatalog(): Promise<CatalogItem[]> {
@@ -2599,6 +2653,50 @@ app.post("/api/users/:uid/locker", async (req, res) => {
   }
 
   await saveUserLocker(resolvedUid, balls);
+  res.json({ success: true });
+});
+
+// User specific Rounds APIs (Active Round & Round History)
+app.get("/api/users/:uid/rounds", async (req, res) => {
+  const { uid } = req.params;
+  const actingUserId = (req as any).user?.uid as string | undefined;
+  const actingEmail = (req as any).user?.email as string | undefined;
+  
+  const resolvedUid = await resolveUserDocId(uid, actingEmail);
+  const resolvedActingId = actingUserId ? await resolveUserDocId(actingUserId, actingEmail) : undefined;
+
+  const isAdmin = await verifyAdmin(actingUserId, actingEmail);
+  const isSelf = actingUserId === uid || resolvedActingId === resolvedUid || actingUserId === resolvedUid;
+  
+  if (!actingUserId || (!isSelf && !isAdmin)) {
+    return res.status(403).json({ error: "Access Denied." });
+  }
+
+  const rounds = await getUserRounds(resolvedUid);
+  res.json({
+    activeRound: rounds?.activeRound ?? null,
+    roundHistory: rounds?.roundHistory ?? [],
+    hasData: rounds !== null
+  });
+});
+
+app.post("/api/users/:uid/rounds", async (req, res) => {
+  const { uid } = req.params;
+  const actingUserId = (req as any).user?.uid as string | undefined;
+  const actingEmail = (req as any).user?.email as string | undefined;
+  
+  const resolvedUid = await resolveUserDocId(uid, actingEmail);
+  const resolvedActingId = actingUserId ? await resolveUserDocId(actingUserId, actingEmail) : undefined;
+
+  const isAdmin = await verifyAdmin(actingUserId, actingEmail);
+  const isSelf = actingUserId === uid || resolvedActingId === resolvedUid || actingUserId === resolvedUid;
+  
+  if (!actingUserId || (!isSelf && !isAdmin)) {
+    return res.status(403).json({ error: "Access Denied." });
+  }
+
+  const { activeRound, roundHistory } = req.body;
+  await saveUserRounds(resolvedUid, { activeRound, roundHistory });
   res.json({ success: true });
 });
 
