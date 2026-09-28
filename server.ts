@@ -563,8 +563,9 @@ app.use("/api", async (req, res, next) => {
     } catch (err) {
       // Invalid Firebase token
     }
-  } else {
-    // Local dev mode fallback for Firebase Auth ID tokens when service-account.json is absent
+  } else if (process.env.NODE_ENV !== "production") {
+    // Local dev mode fallback: trust raw Firebase JWT payload WITHOUT signature verification.
+    // This MUST never run in production — it would allow anyone to forge any user identity.
     try {
       const parts = token.split(".");
       if (parts.length === 3) {
@@ -1989,7 +1990,7 @@ app.post("/api/auth/forgot-password", authLimiter, async (req, res) => {
     message: "Password reset instructions dispatched.",
     emailFound: true,
     emailSentDirectly,
-    email: user.email
+    maskedEmail: maskEmail(user.email || "")
   });
 });
 

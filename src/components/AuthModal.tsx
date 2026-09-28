@@ -465,7 +465,6 @@ export default function AuthModal({
     nativeHaptics.impactLight();
 
     try {
-      let targetEmail = cleanId;
       let emailSentDirectly = false;
 
       // 1. Call backend to resolve username and/or send branded HTML email with Reset Password button
@@ -476,24 +475,26 @@ export default function AuthModal({
       });
       const data = await res.json();
       
-      if (data.email) {
-        targetEmail = data.email;
-      }
+      // The server returns a masked email (e.g. "j***e@gmail.com") for display.
+      // We never receive or show the user's full email from this endpoint.
+      const displayEmail = data.maskedEmail || cleanId;
+
       if (data.emailSentDirectly) {
         emailSentDirectly = true;
       }
 
-      // 2. If backend did not send email directly, send via Firebase Auth with actionCodeSettings targeting golfballvault.app
+      // 2. If backend did not send email directly, send via Firebase Auth.
+      // We use the user's own typed identifier as the email — they already know their own email.
       if (!emailSentDirectly && isFirebaseConfigured && auth) {
         const actionCodeSettings = {
           url: "https://golfballvault.app/reset-password",
           handleCodeInApp: false
         };
-        await sendPasswordResetEmail(auth, targetEmail, actionCodeSettings);
+        await sendPasswordResetEmail(auth, cleanId, actionCodeSettings);
       }
 
       nativeHaptics.notificationSuccess();
-      setResetSuccessMessage(`Password reset instructions sent to ${targetEmail}! Please check your inbox and spam folder.`);
+      setResetSuccessMessage(`Password reset instructions sent to ${displayEmail}! Please check your inbox and spam folder.`);
     } catch (err: any) {
       console.error("Forgot password error:", err);
       if (err.code === "auth/user-not-found") {
