@@ -11,6 +11,17 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "Admin";
     }
 
+    // Helper: checks if the requesting authenticated user owns the user account,
+    // handling both direct Auth UIDs and mapped doc IDs (e.g. u-username).
+    function isParentOwner(userId) {
+      return request.auth != null && (
+        userId == request.auth.uid ||
+        (exists(/databases/$(database)/documents/users/$(userId)) &&
+         (get(/databases/$(database)/documents/users/$(userId)).data.uid == request.auth.uid ||
+          get(/databases/$(database)/documents/users/$(userId)).data.authUid == request.auth.uid))
+      );
+    }
+
     // Rules for the golf ball catalog collection
     match /catalog/{itemId} {
       // Anyone (even guest/unauthenticated users) can read the catalog
@@ -22,20 +33,19 @@ service cloud.firestore {
 
     // Rules for the users collection
     match /users/{userId} {
-      // Allow user to get/write their own profile
-      allow read, write: if isAdmin() || (request.auth != null && (
+      // The main user document contains sensitive fields (password hash, email, etc.).
+      // All profile reads are served securely through the server API + Admin SDK, which strips passwords.
+      // Client SDK direct reads are therefore intentionally denied to prevent exposure of
+      // password hashes or other sensitive profile fields.
+      allow read: if false;
+      allow write: if isAdmin() || (request.auth != null && (
         userId == request.auth.uid ||
         (resource == null || resource.data.uid == request.auth.uid || resource.data.authUid == request.auth.uid)
       ));
 
       // Rules for locker subcollection
       match /locker/{document=**} {
-        allow read, write: if (request.auth != null && (
-          userId == request.auth.uid ||
-          (exists(/databases/$(database)/documents/users/$(userId)) &&
-           (get(/databases/$(database)/documents/users/$(userId)).data.uid == request.auth.uid ||
-            get(/databases/$(database)/documents/users/$(userId)).data.authUid == request.auth.uid))
-        )) || isAdmin();
+        allow read, write: if isParentOwner(userId) || isAdmin();
         
         // Allow public read if parent user has shareBag true
         allow read: if exists(/databases/$(database)/documents/users/$(userId)) &&
@@ -44,12 +54,7 @@ service cloud.firestore {
 
       // Rules for nested user data (rounds, settings, legacy locker)
       match /data/{document=**} {
-        allow read, write: if (request.auth != null && (
-          userId == request.auth.uid ||
-          (exists(/databases/$(database)/documents/users/$(userId)) &&
-           (get(/databases/$(database)/documents/users/$(userId)).data.uid == request.auth.uid ||
-            get(/databases/$(database)/documents/users/$(userId)).data.authUid == request.auth.uid))
-        )) || isAdmin();
+        allow read, write: if isParentOwner(userId) || isAdmin();
         
         // Allow public read if parent user has shareBag true
         allow read: if exists(/databases/$(database)/documents/users/$(userId)) &&
@@ -58,4 +63,3 @@ service cloud.firestore {
     }
   }
 }
-

@@ -2671,13 +2671,16 @@ app.post("/api/users/:uid/locker", async (req, res) => {
   }
 
   const { balls } = req.body;
-  if (!balls) {
+  if (!balls || !Array.isArray(balls)) {
     return res.status(400).json({ error: "Balls array is required." });
   }
+  if (balls.length > 5000) {
+    return res.status(400).json({ error: "Locker exceeds maximum allowed capacity of 5,000 items." });
+  }
 
-  if (Array.isArray(balls)) {
-    for (let i = 0; i < balls.length; i++) {
-      const b = balls[i];
+  for (let i = 0; i < balls.length; i++) {
+    const b = balls[i];
+    if (!b || typeof b !== "object") continue;
       if (b.customImage?.startsWith('data:image/')) {
         b.customImage = await uploadBase64ToStorage(b.customImage, `users/${resolvedUid}`);
       }
@@ -2687,7 +2690,6 @@ app.post("/api/users/:uid/locker", async (req, res) => {
       if (b.customImageBox?.startsWith('data:image/')) {
         b.customImageBox = await uploadBase64ToStorage(b.customImageBox, `users/${resolvedUid}`);
       }
-    }
   }
 
   await saveUserLocker(resolvedUid, balls);
@@ -2744,6 +2746,20 @@ app.post("/api/users/:uid/rounds", async (req, res) => {
   }
 
   const { activeRound, roundHistory } = req.body;
+
+  // Validate payload shape before writing to storage
+  if (roundHistory !== undefined && roundHistory !== null) {
+    if (!Array.isArray(roundHistory)) {
+      return res.status(400).json({ error: "roundHistory must be an array." });
+    }
+    if (roundHistory.length > 200) {
+      return res.status(400).json({ error: "roundHistory exceeds the maximum allowed length of 200 rounds." });
+    }
+  }
+  if (activeRound !== undefined && activeRound !== null && typeof activeRound !== "object") {
+    return res.status(400).json({ error: "activeRound must be an object or null." });
+  }
+
   await saveUserRounds(resolvedUid, { activeRound, roundHistory });
   res.json({ success: true });
 });
