@@ -2428,17 +2428,17 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             <button
               aria-label="Round Mode"
               onClick={() => setIsRoundTrackerOpen(true)}
-              className={`border transition-all cursor-pointer flex items-center justify-center p-2 rounded-xl relative ${
+              className={`border transition-all cursor-pointer flex items-center justify-center p-2 rounded-xl ${
                 activeRound
-                  ? "text-emerald-400 bg-emerald-500/15 border-emerald-500/30"
+                  ? "text-emerald-600 dark:text-emerald-400 bg-emerald-100 border-emerald-300 dark:bg-emerald-500/15 dark:border-emerald-500/30 shadow-xs"
                   : "text-neutral-500 hover:text-white border-transparent hover:border-neutral-800 bg-transparent hover:bg-neutral-900"
               }`}
               title={activeRound ? "Round Active: Open Tracker" : "Round Mode: Track Balls In Play"}
             >
-              <Flag size={18} className={activeRound ? "fill-emerald-400 text-emerald-400" : ""} />
-              {activeRound && (
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full border border-neutral-950 animate-pulse" />
-              )}
+              <Flag
+                size={18}
+                className={activeRound ? "fill-emerald-600 text-emerald-600 dark:fill-emerald-400 dark:text-emerald-400" : ""}
+              />
             </button>
 
             {/* Leaderboard Button */}

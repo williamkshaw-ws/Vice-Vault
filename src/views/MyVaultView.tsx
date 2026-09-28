@@ -398,12 +398,12 @@ export default function MyVaultView({
                 onClick={onOpenRoundModal}
                 className={`h-7 inline-flex items-center justify-center gap-1.5 px-2.5 rounded-md text-[10px] font-mono font-bold whitespace-nowrap transition-all cursor-pointer border static-size-btn ${
                   activeRound
-                    ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/25"
+                    ? "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30 hover:bg-emerald-200 dark:hover:bg-emerald-500/25"
                     : "bg-neutral-950/60 hover:bg-neutral-900 text-neutral-300 hover:text-white border-neutral-850"
                 }`}
                 title="Track balls during your golf round"
               >
-                <Flag size={11} className={activeRound ? "text-emerald-400 fill-emerald-400" : "text-accent"} />
+                <Flag size={11} className={activeRound ? "text-emerald-700 fill-emerald-700 dark:text-emerald-400 dark:fill-emerald-400" : "text-accent"} />
                 <span>{activeRound ? "Live Round" : "Round Mode"}</span>
               </button>
             )}
