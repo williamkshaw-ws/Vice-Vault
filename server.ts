@@ -60,10 +60,11 @@ const AES_KEY = crypto.createHash('sha256').update(SECRET_KEY).digest();
 const INITIAL_ADMIN_PASSWORD = process.env.INITIAL_ADMIN_PASSWORD || (() => {
   const generated = crypto.randomBytes(12).toString("hex");
   console.warn("==========================================================");
-  console.warn("WARNING: No INITIAL_ADMIN_PASSWORD set in environment variables!");
-  console.warn("A random password has been generated for default users.");
-  console.warn(`Generated Password: ${generated}`);
-  console.warn("Please save this or set INITIAL_ADMIN_PASSWORD in your .env file.");
+  console.warn("WARNING: INITIAL_ADMIN_PASSWORD is not set in environment variables.");
+  console.warn("Default accounts have been seeded with a randomly generated password.");
+  console.warn("Set INITIAL_ADMIN_PASSWORD in your .env file to control access.");
+  // NOTE: The generated password is intentionally NOT logged here to prevent
+  // it from appearing in persistent log storage or log aggregators.
   console.warn("==========================================================");
   return generated;
 })();
@@ -508,11 +509,25 @@ function isDisposableEmail(email: string): boolean {
 const app = express();
 app.set('trust proxy', 1);
 
-// Standard security headers
+// Standard security headers (applied to every response)
 app.use((req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "SAMEORIGIN");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  // Content-Security-Policy: restrict what the app can load/connect to
+  res.setHeader(
+    "Content-Security-Policy",
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://i.ibb.co https://i.ibb.co.com https://ik.imagekit.io https://firebasestorage.googleapis.com",
+      "connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebase.googleapis.com https://api.resend.com https://api.imgbb.com https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "frame-ancestors 'none'",
+    ].join("; ")
+  );
   next();
 });
 
@@ -520,7 +535,7 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (origin) {
-    const isAllowed = 
+    const isAllowed =
       origin === "https://golfballvault.app" ||
       origin.endsWith(".golfballvault.app") ||
       origin.startsWith("http://localhost") ||
@@ -528,10 +543,9 @@ app.use((req, res, next) => {
     if (isAllowed) {
       res.header("Access-Control-Allow-Origin", origin);
     }
-  } else {
-    // Non-browser or native shell requests without origin header
-    res.header("Access-Control-Allow-Origin", "*");
+    // Requests from a non-allowlisted browser origin get no CORS header — the browser will block them.
   }
+  // No CORS header for requests without an Origin (server-to-server, curl, etc.) — they don't need it.
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   if (req.method === "OPTIONS") {
@@ -544,6 +558,27 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 app.use(express.json({ limit: "15mb" }));
 
+// Rate limiters — defined and applied BEFORE auth middleware so IP limits are enforced
+// before any Firebase Admin SDK network calls are made on invalid/forged tokens.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Limit each IP to 20 auth requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many login attempts from this IP, please try again after 15 minutes" }
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 600, // Allow up to 600 API requests per 15 minutes per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests from this IP, please try again later." }
+});
+app.use("/api", apiLimiter);
+
+// Auth token resolution middleware — runs after rate limiting so abusive IPs are blocked
+// before any Firebase Admin SDK network calls are triggered.
 app.use("/api", async (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -561,7 +596,7 @@ app.use("/api", async (req, res, next) => {
       (req as any).user = { uid: decodedToken.uid, email: decodedToken.email };
       await resolveUserDocId(decodedToken.uid, decodedToken.email);
     } catch (err) {
-      // Invalid Firebase token
+      // Invalid Firebase token — req.user stays undefined; protected routes will 403
     }
   } else if (process.env.NODE_ENV !== "production") {
     // Local dev mode fallback: trust raw Firebase JWT payload WITHOUT signature verification.
@@ -585,23 +620,6 @@ app.use("/api", async (req, res, next) => {
   }
   next();
 });
-
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // Limit each IP to 20 auth requests per window
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: "Too many login attempts from this IP, please try again after 15 minutes" }
-});
-
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 600, // Allow up to 600 API requests per 15 minutes per IP
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: "Too many requests from this IP, please try again later." }
-});
-app.use("/api", apiLimiter);
 
 // Paths for JSON file persistence
 const DATA_DIR = path.join(process.cwd(), "data");
