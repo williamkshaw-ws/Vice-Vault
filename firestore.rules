@@ -24,29 +24,32 @@ service cloud.firestore {
     match /users/{userId} {
       // Allow user to get/write their own profile
       allow read, write: if isAdmin() || (request.auth != null && (
-        (resource == null || resource.data.uid == request.auth.uid) &&
-        (request.resource == null || (request.resource.data.uid == request.auth.uid && request.resource.data.role == (resource == null ? "User" : resource.data.role)))
+        userId == request.auth.uid ||
+        (resource == null || resource.data.uid == request.auth.uid || resource.data.authUid == request.auth.uid)
       ));
 
       // Rules for locker subcollection
       match /locker/{document=**} {
-        allow read, write: if (request.auth != null && 
-          exists(/databases/$(database)/documents/users/$(userId)) &&
-          get(/databases/$(database)/documents/users/$(userId)).data.uid == request.auth.uid
-        ) || isAdmin();
+        allow read, write: if (request.auth != null && (
+          userId == request.auth.uid ||
+          (exists(/databases/$(database)/documents/users/$(userId)) &&
+           (get(/databases/$(database)/documents/users/$(userId)).data.uid == request.auth.uid ||
+            get(/databases/$(database)/documents/users/$(userId)).data.authUid == request.auth.uid))
+        )) || isAdmin();
         
         // Allow public read if parent user has shareBag true
         allow read: if exists(/databases/$(database)/documents/users/$(userId)) &&
           get(/databases/$(database)/documents/users/$(userId)).data.shareBag == true;
       }
 
-      // Rules for nested user data (legacy path)
+      // Rules for nested user data (rounds, settings, legacy locker)
       match /data/{document=**} {
-        // Users can read/write their own locker data by checking the parent user doc's uid field.
-        allow read, write: if (request.auth != null && 
-          exists(/databases/$(database)/documents/users/$(userId)) &&
-          get(/databases/$(database)/documents/users/$(userId)).data.uid == request.auth.uid
-        ) || isAdmin();
+        allow read, write: if (request.auth != null && (
+          userId == request.auth.uid ||
+          (exists(/databases/$(database)/documents/users/$(userId)) &&
+           (get(/databases/$(database)/documents/users/$(userId)).data.uid == request.auth.uid ||
+            get(/databases/$(database)/documents/users/$(userId)).data.authUid == request.auth.uid))
+        )) || isAdmin();
         
         // Allow public read if parent user has shareBag true
         allow read: if exists(/databases/$(database)/documents/users/$(userId)) &&

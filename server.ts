@@ -1461,9 +1461,13 @@ if (serviceAccountConfig) {
 // Async Database Helpers
 async function resolveUserDocId(uid: string, emailHint?: string): Promise<string> {
   if (!uid) return "";
-  if (uid === "u-admin" || uid === "u-user") return uid;
+  if (uid.startsWith("u-")) return uid;
   if (dbAdmin) {
     try {
+      const directDoc = await dbAdmin.collection("users").doc(uid).get();
+      if (directDoc.exists) {
+        return directDoc.id;
+      }
       let q = await dbAdmin.collection("users").where("authUid", "==", uid).get();
       if (q.empty) {
         q = await dbAdmin.collection("users").where("uid", "==", uid).get();
@@ -1471,10 +1475,12 @@ async function resolveUserDocId(uid: string, emailHint?: string): Promise<string
       if (!q.empty) {
         return q.docs[0].id;
       }
-      const lookupEmail = emailHint || uid;
-      const qEmail = await dbAdmin.collection("users").where("email", "==", lookupEmail).get();
-      if (!qEmail.empty) {
-        return qEmail.docs[0].id;
+      const lookupEmail = emailHint || (uid.includes("@") ? uid : undefined);
+      if (lookupEmail) {
+        const qEmail = await dbAdmin.collection("users").where("email", "==", lookupEmail).get();
+        if (!qEmail.empty) {
+          return qEmail.docs[0].id;
+        }
       }
     } catch (e) {
       console.error("resolveUserDocId failed in Firestore:", e);
@@ -1642,26 +1648,33 @@ async function saveUserLocker(uid: string, balls: any[]): Promise<void> {
 
 async function getUserRounds(uid: string): Promise<{ activeRound: any | null; roundHistory: any[] } | null> {
   const resolvedId = await resolveUserDocId(uid);
+  const candidateIds = Array.from(new Set([resolvedId, uid])).filter(Boolean) as string[];
   if (dbAdmin) {
-    try {
-      const docSnap = await dbAdmin.collection("users").doc(resolvedId).collection("data").doc("rounds").get();
-      if (docSnap.exists) {
-        const data = docSnap.data();
-        return {
-          activeRound: data?.activeRound ?? null,
-          roundHistory: Array.isArray(data?.roundHistory) ? data.roundHistory : []
-        };
+    for (const cand of candidateIds) {
+      try {
+        const docSnap = await dbAdmin.collection("users").doc(cand).collection("data").doc("rounds").get();
+        if (docSnap.exists) {
+          const data = docSnap.data();
+          if (data && (data.activeRound !== undefined || data.roundHistory !== undefined)) {
+            return {
+              activeRound: data?.activeRound ?? null,
+              roundHistory: Array.isArray(data?.roundHistory) ? data.roundHistory : []
+            };
+          }
+        }
+      } catch (error) {
+        console.error("Firestore getUserRounds failed, fallback to file:", error);
       }
-    } catch (error) {
-      console.error("Firestore getUserRounds failed, fallback to file:", error);
     }
   }
-  const data = loadUserData(resolvedId);
-  if (data && (data.activeRound !== undefined || data.roundHistory !== undefined)) {
-    return {
-      activeRound: data.activeRound ?? null,
-      roundHistory: Array.isArray(data.roundHistory) ? data.roundHistory : []
-    };
+  for (const cand of candidateIds) {
+    const data = loadUserData(cand);
+    if (data && (data.activeRound !== undefined || data.roundHistory !== undefined)) {
+      return {
+        activeRound: data.activeRound ?? null,
+        roundHistory: Array.isArray(data.roundHistory) ? data.roundHistory : []
+      };
+    }
   }
   return null;
 }
@@ -1679,6 +1692,9 @@ async function saveUserRounds(uid: string, payload: { activeRound?: any; roundHi
         updateData.roundHistory = payload.roundHistory;
       }
       await dbAdmin.collection("users").doc(resolvedId).collection("data").doc("rounds").set(updateData, { merge: true });
+      if (uid && uid !== resolvedId) {
+        await dbAdmin.collection("users").doc(uid).collection("data").doc("rounds").set(updateData, { merge: true }).catch(() => {});
+      }
       return;
     } catch (error) {
       console.error("Firestore saveUserRounds failed, fallback to file:", error);
@@ -1692,6 +1708,9 @@ async function saveUserRounds(uid: string, payload: { activeRound?: any; roundHi
     roundsUpdatedAt: now
   };
   saveUserData(resolvedId, updated);
+  if (uid && uid !== resolvedId) {
+    saveUserData(uid, updated);
+  }
 }
 
 
@@ -2666,7 +2685,12 @@ app.get("/api/users/:uid/rounds", async (req, res) => {
   const resolvedActingId = actingUserId ? await resolveUserDocId(actingUserId, actingEmail) : undefined;
 
   const isAdmin = await verifyAdmin(actingUserId, actingEmail);
-  const isSelf = actingUserId === uid || resolvedActingId === resolvedUid || actingUserId === resolvedUid;
+  const isSelf = !actingUserId ? false : (
+    actingUserId === uid || 
+    resolvedActingId === resolvedUid || 
+    actingUserId === resolvedUid ||
+    resolvedActingId === uid
+  );
   
   if (!actingUserId || (!isSelf && !isAdmin)) {
     return res.status(403).json({ error: "Access Denied." });
@@ -2689,7 +2713,12 @@ app.post("/api/users/:uid/rounds", async (req, res) => {
   const resolvedActingId = actingUserId ? await resolveUserDocId(actingUserId, actingEmail) : undefined;
 
   const isAdmin = await verifyAdmin(actingUserId, actingEmail);
-  const isSelf = actingUserId === uid || resolvedActingId === resolvedUid || actingUserId === resolvedUid;
+  const isSelf = !actingUserId ? false : (
+    actingUserId === uid || 
+    resolvedActingId === resolvedUid || 
+    actingUserId === resolvedUid ||
+    resolvedActingId === uid
+  );
   
   if (!actingUserId || (!isSelf && !isAdmin)) {
     return res.status(403).json({ error: "Access Denied." });

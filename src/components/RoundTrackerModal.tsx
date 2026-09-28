@@ -267,24 +267,25 @@ export default function RoundTrackerModal({
     const ballsInPlay: RoundBallInPlay[] = [];
     packedBalls.forEach(({ ball, count, parentBundleBallId, bundleCatalogId }) => {
       for (let i = 0; i < count; i++) {
-        ballsInPlay.push({
+        const item: RoundBallInPlay = {
           id: `inplay-${ball.id}-${i}-${Date.now()}`,
           ballId: parentBundleBallId || ball.id,
-          parentBundleId: parentBundleBallId,
-          bundleCatalogId: bundleCatalogId,
-          model: ball.model,
-          color: ball.color,
-          originalCondition: ball.condition,
-          customImage: ball.customImage,
-          customImageSleeve: ball.customImageSleeve,
-          customImageBox: ball.customImageBox,
-          packageType: ball.packageType,
-          customNumber: ball.customNumber,
-          year: ball.year,
-          name: ball.name,
-          variation: ball.variation,
+          model: ball.model || '',
+          color: ball.color || 'White',
+          originalCondition: ball.condition || 'Mint',
           status: 'survived' // default to survived until marked otherwise
-        });
+        };
+        if (parentBundleBallId) item.parentBundleId = parentBundleBallId;
+        if (bundleCatalogId) item.bundleCatalogId = bundleCatalogId;
+        if (ball.customImage) item.customImage = ball.customImage;
+        if (ball.customImageSleeve) item.customImageSleeve = ball.customImageSleeve;
+        if (ball.customImageBox) item.customImageBox = ball.customImageBox;
+        if (ball.packageType) item.packageType = ball.packageType;
+        if (ball.customNumber !== undefined) item.customNumber = ball.customNumber;
+        if (ball.year) item.year = ball.year;
+        if (ball.name) item.name = ball.name;
+        if (ball.variation) item.variation = ball.variation;
+        ballsInPlay.push(item);
       }
     });
 
