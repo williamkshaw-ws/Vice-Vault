@@ -113,6 +113,7 @@ export function useAuth() {
         // Logged out
         if (!localStorage.getItem("vice_vault_mock_user")) {
           setUserProfile(null);
+          setCurrentUser(null);
           setAccentColor("#2563eb");
         }
         setIsAuthLoading(false);
@@ -169,6 +170,8 @@ export function useAuth() {
 
   const handleSignOut = async () => {
     try {
+      localStorage.removeItem("golf_ball_vault_active_round");
+      localStorage.removeItem("vice_vault_active_round");
       if (currentUser && (currentUser as any).isMock) {
         localStorage.removeItem("vice_vault_mock_user");
         setCurrentUser(null);

@@ -17,13 +17,26 @@ function cleanSanitizedJson<T>(data: T): T {
 }
 
 function getStoredActiveRound(candidateIds: string[] = []): GolfRound | null {
-  const keys: string[] = [];
-  for (const id of candidateIds) {
-    keys.push(`${ACTIVE_ROUND_STORAGE_KEY}_${id}`, `${LEGACY_ACTIVE_KEY}_${id}`);
+  // If user is logged in, check ONLY user-scoped candidate keys
+  if (candidateIds && candidateIds.length > 0) {
+    for (const id of candidateIds) {
+      const keys = [`${ACTIVE_ROUND_STORAGE_KEY}_${id}`, `${LEGACY_ACTIVE_KEY}_${id}`];
+      for (const k of keys) {
+        try {
+          const saved = localStorage.getItem(k);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed && typeof parsed === "object" && parsed.id) return parsed;
+          }
+        } catch (e) {}
+      }
+    }
+    // Never fall back to unscoped global keys when candidate IDs exist
+    return null;
   }
-  keys.push(ACTIVE_ROUND_STORAGE_KEY, LEGACY_ACTIVE_KEY);
 
-  for (const k of keys) {
+  // Only check guest keys if unauthenticated (candidateIds is empty)
+  for (const k of [ACTIVE_ROUND_STORAGE_KEY, LEGACY_ACTIVE_KEY]) {
     try {
       const saved = localStorage.getItem(k);
       if (saved) {
@@ -36,13 +49,23 @@ function getStoredActiveRound(candidateIds: string[] = []): GolfRound | null {
 }
 
 function getStoredHistory(candidateIds: string[] = []): GolfRound[] {
-  const keys: string[] = [];
-  for (const id of candidateIds) {
-    keys.push(`${ROUND_HISTORY_STORAGE_KEY}_${id}`, `${LEGACY_HISTORY_KEY}_${id}`);
+  if (candidateIds && candidateIds.length > 0) {
+    for (const id of candidateIds) {
+      const keys = [`${ROUND_HISTORY_STORAGE_KEY}_${id}`, `${LEGACY_HISTORY_KEY}_${id}`];
+      for (const k of keys) {
+        try {
+          const saved = localStorage.getItem(k);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          }
+        } catch (e) {}
+      }
+    }
+    return [];
   }
-  keys.push(ROUND_HISTORY_STORAGE_KEY, LEGACY_HISTORY_KEY);
 
-  for (const k of keys) {
+  for (const k of [ROUND_HISTORY_STORAGE_KEY, LEGACY_HISTORY_KEY]) {
     try {
       const saved = localStorage.getItem(k);
       if (saved) {
@@ -57,7 +80,14 @@ function getStoredHistory(candidateIds: string[] = []): GolfRound[] {
 export function useRoundTracker(currentUser: any, userProfile?: any) {
   const targetUid = userProfile?.uid || currentUser?.uid || currentUser?.id;
 
+  const isAdminUser = useMemo(() => {
+    const role = (userProfile?.role || currentUser?.role || "").toLowerCase();
+    const username = (userProfile?.username || currentUser?.username || "").toLowerCase();
+    return role === "admin" || username === "admin";
+  }, [userProfile?.role, userProfile?.username, currentUser?.role, currentUser?.username]);
+
   const candidateUids = useMemo(() => {
+    if (!targetUid) return [];
     const ids = [
       targetUid,
       userProfile?.uid,
@@ -66,10 +96,10 @@ export function useRoundTracker(currentUser: any, userProfile?: any) {
       userProfile?.username ? `u-${userProfile.username.toLowerCase().replace(/[^a-z0-9_]/g, '')}` : null,
       currentUser?.displayName ? `u-${currentUser.displayName.toLowerCase().replace(/[^a-z0-9_]/g, '')}` : null,
       currentUser?.email ? `u-${currentUser.email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '')}` : null,
-      "u-admin"
+      isAdminUser ? "u-admin" : null
     ].filter(Boolean) as string[];
     return Array.from(new Set(ids));
-  }, [targetUid, userProfile?.uid, userProfile?.username, currentUser?.uid, currentUser?.id, currentUser?.displayName, currentUser?.email]);
+  }, [targetUid, userProfile?.uid, userProfile?.username, currentUser?.uid, currentUser?.id, currentUser?.displayName, currentUser?.email, isAdminUser]);
 
   const [activeRound, setActiveRoundState] = useState<GolfRound | null>(() => getStoredActiveRound(candidateUids));
   const [roundHistory, setRoundHistoryState] = useState<GolfRound[]>(() => getStoredHistory(candidateUids));
@@ -82,32 +112,42 @@ export function useRoundTracker(currentUser: any, userProfile?: any) {
   roundHistoryRef.current = roundHistory;
 
   const syncTimeoutRef = useRef<any>(null);
+  const prevUserRef = useRef<string | null>(targetUid || null);
 
   // Helper to persist locally
   const persistLocally = useCallback((newActive: GolfRound | null, newHistory: GolfRound[], uids: string[] = []) => {
     try {
       const allUids = Array.from(new Set([...uids, targetUid].filter(Boolean))) as string[];
-      if (newActive) {
-        localStorage.setItem(ACTIVE_ROUND_STORAGE_KEY, JSON.stringify(newActive));
-        localStorage.setItem(LEGACY_ACTIVE_KEY, JSON.stringify(newActive));
+      
+      if (allUids.length > 0) {
+        // User is logged in: save ONLY under user-scoped keys
         for (const u of allUids) {
-          localStorage.setItem(`${ACTIVE_ROUND_STORAGE_KEY}_${u}`, JSON.stringify(newActive));
-          localStorage.setItem(`${LEGACY_ACTIVE_KEY}_${u}`, JSON.stringify(newActive));
+          if (newActive) {
+            localStorage.setItem(`${ACTIVE_ROUND_STORAGE_KEY}_${u}`, JSON.stringify(newActive));
+            localStorage.setItem(`${LEGACY_ACTIVE_KEY}_${u}`, JSON.stringify(newActive));
+          } else {
+            localStorage.removeItem(`${ACTIVE_ROUND_STORAGE_KEY}_${u}`);
+            localStorage.removeItem(`${LEGACY_ACTIVE_KEY}_${u}`);
+          }
+
+          localStorage.setItem(`${ROUND_HISTORY_STORAGE_KEY}_${u}`, JSON.stringify(newHistory));
+          localStorage.setItem(`${LEGACY_HISTORY_KEY}_${u}`, JSON.stringify(newHistory));
         }
-      } else {
+        // Remove unscoped keys so they do not leak into guest mode or other users
         localStorage.removeItem(ACTIVE_ROUND_STORAGE_KEY);
         localStorage.removeItem(LEGACY_ACTIVE_KEY);
-        for (const u of allUids) {
-          localStorage.removeItem(`${ACTIVE_ROUND_STORAGE_KEY}_${u}`);
-          localStorage.removeItem(`${LEGACY_ACTIVE_KEY}_${u}`);
+      } else {
+        // Guest mode
+        if (newActive) {
+          localStorage.setItem(ACTIVE_ROUND_STORAGE_KEY, JSON.stringify(newActive));
+          localStorage.setItem(LEGACY_ACTIVE_KEY, JSON.stringify(newActive));
+        } else {
+          localStorage.removeItem(ACTIVE_ROUND_STORAGE_KEY);
+          localStorage.removeItem(LEGACY_ACTIVE_KEY);
         }
-      }
 
-      localStorage.setItem(ROUND_HISTORY_STORAGE_KEY, JSON.stringify(newHistory));
-      localStorage.setItem(LEGACY_HISTORY_KEY, JSON.stringify(newHistory));
-      for (const u of allUids) {
-        localStorage.setItem(`${ROUND_HISTORY_STORAGE_KEY}_${u}`, JSON.stringify(newHistory));
-        localStorage.setItem(`${LEGACY_HISTORY_KEY}_${u}`, JSON.stringify(newHistory));
+        localStorage.setItem(ROUND_HISTORY_STORAGE_KEY, JSON.stringify(newHistory));
+        localStorage.setItem(LEGACY_HISTORY_KEY, JSON.stringify(newHistory));
       }
     } catch (e) {
       console.warn("Error persisting rounds to localStorage:", e);
@@ -133,7 +173,7 @@ export function useRoundTracker(currentUser: any, userProfile?: any) {
           updatedAt: new Date().toISOString()
         }, { merge: true });
 
-        // If targetUid differs from auth UID, also mirror to auth UID so rules pass under all circumstances
+        // If targetUid differs from auth UID, also mirror to auth UID
         if (currentUser?.uid && currentUser.uid !== primaryUid) {
           const authDocRef = doc(db, "users", currentUser.uid, "data", "rounds");
           setDoc(authDocRef, {
@@ -254,13 +294,16 @@ export function useRoundTracker(currentUser: any, userProfile?: any) {
       }
 
       if (fetched) {
+        activeRoundRef.current = cloudActive;
+        roundHistoryRef.current = cloudHistory || [];
         setActiveRoundState(cloudActive);
         setRoundHistoryState(cloudHistory || []);
         persistLocally(cloudActive, cloudHistory || [], candidateUids);
       } else {
-        // If server had no data but we had locally cached data for this user, sync local up to server
-        if (activeRoundRef.current || (roundHistoryRef.current && roundHistoryRef.current.length > 0)) {
-          syncToCloud(activeRoundRef.current, roundHistoryRef.current);
+        // If server had no data and this user had a locally cached round SPECIFICALLY for their own UID, sync up
+        const cachedForThisUser = getStoredActiveRound(candidateUids);
+        if (cachedForThisUser) {
+          syncToCloud(cachedForThisUser, roundHistoryRef.current);
         }
       }
     } catch (e) {
@@ -272,23 +315,47 @@ export function useRoundTracker(currentUser: any, userProfile?: any) {
 
   // Effect on authentication: load local cache, fetch cloud, and listen to Firestore real-time
   useEffect(() => {
+    const currentPrimary = targetUid || null;
+    const isUserSwitch = prevUserRef.current !== null && currentPrimary !== null && prevUserRef.current !== currentPrimary;
+    const isLogout = prevUserRef.current !== null && currentPrimary === null;
+    prevUserRef.current = currentPrimary;
+
+    // On user switch or sign out, immediately reset round state to prevent data bleed
+    if (isUserSwitch || isLogout) {
+      if (syncTimeoutRef.current) {
+        clearTimeout(syncTimeoutRef.current);
+      }
+      activeRoundRef.current = null;
+      roundHistoryRef.current = [];
+      setActiveRoundState(null);
+      setRoundHistoryState([]);
+      if (isLogout) {
+        try {
+          localStorage.removeItem(ACTIVE_ROUND_STORAGE_KEY);
+          localStorage.removeItem(LEGACY_ACTIVE_KEY);
+        } catch (e) {}
+      }
+    }
+
     if (!targetUid && candidateUids.length === 0) {
       // Guest mode
-      setActiveRoundState(getStoredActiveRound([]));
-      setRoundHistoryState(getStoredHistory([]));
+      const guestActive = isLogout ? null : getStoredActiveRound([]);
+      const guestHistory = isLogout ? [] : getStoredHistory([]);
+      activeRoundRef.current = guestActive;
+      roundHistoryRef.current = guestHistory;
+      setActiveRoundState(guestActive);
+      setRoundHistoryState(guestHistory);
       setIsCloudRoundsLoaded(true);
       return;
     }
 
-    // 1. Immediately hydrate from local user cache
-    const cachedActive = getStoredActiveRound(candidateUids);
-    const cachedHistory = getStoredHistory(candidateUids);
-    if (cachedActive) {
-      setActiveRoundState(cachedActive);
-    }
-    if (cachedHistory && cachedHistory.length > 0) {
-      setRoundHistoryState(cachedHistory);
-    }
+    // 1. Immediately hydrate from local user cache for THIS user only
+    const userActive = getStoredActiveRound(candidateUids);
+    const userHistory = getStoredHistory(candidateUids);
+    activeRoundRef.current = userActive;
+    roundHistoryRef.current = userHistory;
+    setActiveRoundState(userActive);
+    setRoundHistoryState(userHistory);
 
     // 2. Fetch from cloud
     fetchRoundsFromCloud();
@@ -312,13 +379,13 @@ export function useRoundTracker(currentUser: any, userProfile?: any) {
               if (snapshot.exists()) {
                 const data = snapshot.data();
                 if (data) {
-                  if (data.activeRound !== undefined) {
-                    setActiveRoundState(data.activeRound ?? null);
-                  }
-                  if (Array.isArray(data.roundHistory)) {
-                    setRoundHistoryState(data.roundHistory);
-                  }
-                  persistLocally(data.activeRound ?? null, Array.isArray(data.roundHistory) ? data.roundHistory : [], candidateUids);
+                  const incomingActive = data.activeRound !== undefined ? data.activeRound : null;
+                  const incomingHistory = Array.isArray(data.roundHistory) ? data.roundHistory : [];
+                  activeRoundRef.current = incomingActive;
+                  roundHistoryRef.current = incomingHistory;
+                  setActiveRoundState(incomingActive);
+                  setRoundHistoryState(incomingHistory);
+                  persistLocally(incomingActive, incomingHistory, candidateUids);
                 }
               }
             }, (err) => {
@@ -332,7 +399,7 @@ export function useRoundTracker(currentUser: any, userProfile?: any) {
       })();
     }
 
-    // 4. Listen for auth state transitions (e.g. Firebase Auth token becoming ready)
+    // 4. Listen for auth state transitions
     let unsubAuth: (() => void) | null = null;
     if (auth) {
       unsubAuth = auth.onAuthStateChanged((user) => {
@@ -342,7 +409,7 @@ export function useRoundTracker(currentUser: any, userProfile?: any) {
       });
     }
 
-    // 5. Also listen for window focus / visibility change to guarantee fresh state when switching devices/tabs
+    // 5. Also listen for window focus / visibility change
     const handleVisibilityOrFocus = () => {
       if (document.visibilityState === "visible") {
         fetchRoundsFromCloud();

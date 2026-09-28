@@ -299,9 +299,6 @@ export default function RoundTrackerModal({
     };
 
     setActiveRound(newRound);
-    try {
-      localStorage.setItem(ACTIVE_ROUND_KEY, JSON.stringify(newRound));
-    } catch (e) {}
 
     setCourseInput('');
     setPackedBalls([]);
@@ -328,9 +325,6 @@ export default function RoundTrackerModal({
 
     const updatedRound = { ...activeRound, balls: updatedBalls };
     setActiveRound(updatedRound);
-    try {
-      localStorage.setItem(ACTIVE_ROUND_KEY, JSON.stringify(updatedRound));
-    } catch (e) {}
   };
 
   // Update lost hole, hazard, or custom detail
@@ -352,9 +346,6 @@ export default function RoundTrackerModal({
 
     const updatedRound = { ...activeRound, balls: updatedBalls };
     setActiveRound(updatedRound);
-    try {
-      localStorage.setItem(ACTIVE_ROUND_KEY, JSON.stringify(updatedRound));
-    } catch (e) {}
   };
 
   // Finish and complete round
@@ -379,6 +370,7 @@ export default function RoundTrackerModal({
     setActiveRound(null);
     try {
       localStorage.removeItem(ACTIVE_ROUND_KEY);
+      localStorage.removeItem('vice_vault_active_round');
     } catch (e) {}
 
     setJustCompletedRound(completedRound);
@@ -390,6 +382,7 @@ export default function RoundTrackerModal({
     setActiveRound(null);
     try {
       localStorage.removeItem(ACTIVE_ROUND_KEY);
+      localStorage.removeItem('vice_vault_active_round');
     } catch (e) {}
     setShowDiscardConfirm(false);
     showToast('Active round discarded.', 'info');
