@@ -1525,10 +1525,11 @@ async function resolveUserDocId(uid: string, emailHint?: string): Promise<string
 // User-verification middleware helper
 async function verifyAdmin(userId: string | undefined, emailHint?: string): Promise<boolean> {
   if (!userId) return false;
-  if (userId === "u-admin") return true;
+  if (userId === "u-admin" || userId === "admin") return true;
+  if (emailHint && emailHint.toLowerCase() === "admin@vault.com") return true;
 
   const resolvedId = await resolveUserDocId(userId, emailHint);
-  if (resolvedId === "u-admin") return true;
+  if (resolvedId === "u-admin" || resolvedId === "admin") return true;
 
   if (dbAdmin) {
     try {
@@ -1537,13 +1538,15 @@ async function verifyAdmin(userId: string | undefined, emailHint?: string): Prom
       if (docSnap.exists) {
         const data = docSnap.data();
         const role = data?.role;
-        return (role && typeof role === "string" && role.toLowerCase() === "admin") || data?.username?.toLowerCase() === "admin";
+        if ((role && typeof role === "string" && role.toLowerCase() === "admin") || data?.username?.toLowerCase() === "admin") {
+          return true;
+        }
       }
     } catch (e) {
       console.error("verifyAdmin failed in Firebase Admin SDK:", e);
     }
-    return false;
   }
+
   const users = loadUsers();
   const user = users.find(u => 
     u.uid === resolvedId || 
@@ -3565,7 +3568,8 @@ app.get("/api/catalog", async (req, res) => {
 // POST: Add new design to catalog (Admin only)
 app.post("/api/catalog", async (req, res) => {
   const actingUserId = (req as any).user?.uid as string | undefined;
-  if (!(await verifyAdmin(actingUserId))) {
+  const actingEmail = (req as any).user?.email as string | undefined;
+  if (!(await verifyAdmin(actingUserId, actingEmail))) {
     return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
   }
 
@@ -3618,7 +3622,8 @@ app.post("/api/catalog", async (req, res) => {
 // POST: Bulk add catalog items (Admin only)
 app.post("/api/catalog/bulk", async (req, res) => {
   const actingUserId = (req as any).user?.uid as string | undefined;
-  if (!(await verifyAdmin(actingUserId))) {
+  const actingEmail = (req as any).user?.email as string | undefined;
+  if (!(await verifyAdmin(actingUserId, actingEmail))) {
     return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
   }
 
@@ -3797,7 +3802,8 @@ app.post("/api/catalog/bulk", async (req, res) => {
 // POST: Clear all catalog items (Admin only)
 app.post("/api/catalog/clear", async (req, res) => {
   const actingUserId = (req as any).user?.uid as string | undefined;
-  if (!(await verifyAdmin(actingUserId))) {
+  const actingEmail = (req as any).user?.email as string | undefined;
+  if (!(await verifyAdmin(actingUserId, actingEmail))) {
     return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
   }
 
@@ -3836,7 +3842,8 @@ app.post("/api/catalog/clear", async (req, res) => {
 // PUT: Save changes to existing catalog design (Admin only)
 app.put("/api/catalog/:id", async (req, res) => {
   const actingUserId = (req as any).user?.uid as string | undefined;
-  if (!(await verifyAdmin(actingUserId))) {
+  const actingEmail = (req as any).user?.email as string | undefined;
+  if (!(await verifyAdmin(actingUserId, actingEmail))) {
     return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
   }
 
@@ -3904,7 +3911,8 @@ app.put("/api/catalog/:id", async (req, res) => {
 // DELETE: Remove design from catalog (Admin only)
 app.delete("/api/catalog/:id", async (req, res) => {
   const actingUserId = (req as any).user?.uid as string | undefined;
-  if (!(await verifyAdmin(actingUserId))) {
+  const actingEmail = (req as any).user?.email as string | undefined;
+  if (!(await verifyAdmin(actingUserId, actingEmail))) {
     return res.status(403).json({ error: "Access Denied. Only Admin users can modify the Ball Vault." });
   }
 
@@ -3932,7 +3940,8 @@ app.delete("/api/catalog/:id", async (req, res) => {
 // MIGRATION: Convert base64 to Firebase Storage
 app.post("/api/admin/migrate-images", async (req, res) => {
   const actingUserId = (req as any).user?.uid as string | undefined;
-  if (!(await verifyAdmin(actingUserId))) {
+  const actingEmail = (req as any).user?.email as string | undefined;
+  if (!(await verifyAdmin(actingUserId, actingEmail))) {
     return res.status(403).json({ error: "Access Denied. Only Admin users can run migrations." });
   }
 
@@ -3998,7 +4007,8 @@ app.post("/api/admin/migrate-images", async (req, res) => {
 
 app.get("/api/admin/status", async (req, res) => {
   const actingUserId = (req as any).user?.uid as string | undefined;
-  if (!(await verifyAdmin(actingUserId))) {
+  const actingEmail = (req as any).user?.email as string | undefined;
+  if (!(await verifyAdmin(actingUserId, actingEmail))) {
     return res.status(403).json({ error: "Access Denied." });
   }
   res.json({

@@ -733,12 +733,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       const itemsWithIds: CatalogItem[] = [];
       
       if (currentUser) {
+        const headers = await getAuthHeaders({ "Content-Type": "application/json" });
         const res = await fetch("/api/catalog/bulk", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-
-          },
+          headers,
           body: JSON.stringify({
             items: newItems.map(item => ({
               model: item.model,
@@ -896,12 +894,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       const newId = sanitizeId(updatedModel, updatedColor, updatedName, updatedVariation);
 
       if (currentUser) {
+        const headers = await getAuthHeaders({ "Content-Type": "application/json" });
         const res = await fetch(`/api/catalog/${id}`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-
-          },
+          headers,
           body: JSON.stringify({
             model: updatedModel,
             name: updatedName,
@@ -998,11 +994,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   const handleDeleteCatalogItem = async (id: string) => {
     try {
       if (currentUser) {
+        const headers = await getAuthHeaders();
         const res = await fetch(`/api/catalog/${id}`, {
           method: "DELETE",
-          headers: {
-
-          }
+          headers
         });
         if (!res.ok) {
           const errData = await res.json();
@@ -1626,12 +1621,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       
       let itemWithId: CatalogItem;
       if (currentUser) {
+        const headers = await getAuthHeaders({ "Content-Type": "application/json" });
         const res = await fetch("/api/catalog", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-
-          },
+          headers,
           body: JSON.stringify({
             model: newItem.model,
             name: newItem.name,
@@ -1943,11 +1936,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     setIsVaultProcessing(true);
     try {
       if (currentUser) {
+        const headers = await getAuthHeaders();
         const res = await fetch("/api/catalog/clear", {
           method: "POST",
-          headers: {
-
-          }
+          headers
         });
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
@@ -3011,17 +3003,19 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             onClose={() => {
               setIsFriendsPortalOpen(false);
               if (userProfile?.uid) {
-                fetch(`/api/users/${userProfile.uid}/profile`)
-                  .then(res => res.json())
-                  .then(data => {
-                    if (data) {
-                      setUserProfile(prev => prev ? {
-                        ...prev,
-                        pendingFriendRequestsCount: data.pendingFriendRequestsCount || 0
-                      } : null);
-                    }
-                  })
-                  .catch(err => console.error("Failed to refresh friend requests count", err));
+                getAuthHeaders().then(headers => {
+                  fetch(`/api/users/${userProfile.uid}/profile`, { headers })
+                    .then(res => res.json())
+                    .then(data => {
+                      if (data) {
+                        setUserProfile(prev => prev ? {
+                          ...prev,
+                          pendingFriendRequestsCount: data.pendingFriendRequestsCount || 0
+                        } : null);
+                      }
+                    })
+                    .catch(err => console.error("Failed to refresh friend requests count", err));
+                });
               }
             }}
             onViewBag={(username) => {
