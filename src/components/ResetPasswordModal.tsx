@@ -9,7 +9,7 @@ import { Lock, Eye, EyeOff, Check, RefreshCw, AlertTriangle, CheckCircle2, Shiel
 import { isStrongPassword } from "../utils";
 import { nativeHaptics } from "../utils/native";
 import { auth } from "../firebase";
-import { verifyPasswordResetCode, confirmPasswordReset } from "firebase/auth";
+import { verifyPasswordResetCode, confirmPasswordReset, signInWithEmailAndPassword } from "firebase/auth";
 
 interface ResetPasswordModalProps {
   isOpen: boolean;
@@ -143,10 +143,20 @@ export default function ResetPasswordModal({
 
       // 2. Sync updated password hash to backend database
       try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const syncToken = urlParams.get("syncToken") || undefined;
+        let authHeader: Record<string, string> = {};
+        if (!syncToken && email) {
+          try {
+            const cred = await signInWithEmailAndPassword(auth, email, newPassword);
+            const idToken = await cred.user.getIdToken();
+            if (idToken) authHeader = { Authorization: `Bearer ${idToken}` };
+          } catch {}
+        }
         await fetch("/api/auth/reset-password-sync", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, newPassword })
+          headers: { "Content-Type": "application/json", ...authHeader },
+          body: JSON.stringify({ email, newPassword, token: syncToken })
         });
       } catch (syncErr) {
         console.warn("Backend password sync skipped:", syncErr);

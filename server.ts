@@ -50,8 +50,9 @@ const SECRET_KEY = process.env.SHARE_SECRET || (() => {
   console.warn("==========================================================");
   console.warn("WARNING: No SHARE_SECRET set in environment variables!");
   console.warn("A random secret key has been generated for share links.");
-  console.warn(`Generated SHARE_SECRET: ${generated}`);
-  console.warn("Please save this in your .env file to ensure share links persist across server restarts.");
+  // NOTE: The generated secret is intentionally NOT logged here to prevent
+  // it from appearing in persistent log storage or log aggregators.
+  console.warn("Please set SHARE_SECRET in your .env file to ensure share links persist across server restarts.");
   console.warn("==========================================================");
   return generated;
 })();
@@ -442,15 +443,22 @@ function verifyPassword(password: string, storedHash: string): boolean {
   if (parts.length === 2) {
     // Legacy 1000 iteration hash
     const [salt, hash] = parts;
+    if (!salt || !hash) return false;
     const checkHash = crypto.pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex");
-    return hash === checkHash;
+    const expectedBuf = Buffer.from(hash, "utf8");
+    const actualBuf = Buffer.from(checkHash, "utf8");
+    return expectedBuf.length === actualBuf.length && crypto.timingSafeEqual(expectedBuf, actualBuf);
   } else if (parts.length === 3) {
     // New format with embedded iterations
     const iterations = parseInt(parts[0], 10);
+    if (!Number.isFinite(iterations) || iterations < 1000 || iterations > 2000000) return false;
     const salt = parts[1];
     const hash = parts[2];
+    if (!salt || !hash) return false;
     const checkHash = crypto.pbkdf2Sync(password, salt, iterations, 64, "sha512").toString("hex");
-    return hash === checkHash;
+    const expectedBuf = Buffer.from(hash, "utf8");
+    const actualBuf = Buffer.from(checkHash, "utf8");
+    return expectedBuf.length === actualBuf.length && crypto.timingSafeEqual(expectedBuf, actualBuf);
   }
   
   return false;
@@ -521,10 +529,10 @@ app.use((req, res, next) => {
     [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://i.ibb.co https://i.ibb.co.com https://ik.imagekit.io https://firebasestorage.googleapis.com",
-      "connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebase.googleapis.com https://api.resend.com https://api.imgbb.com https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: blob: https:",
+      "connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebase.googleapis.com https://api.resend.com https://api.imgbb.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.shopify.com https://www.vicegolf.com https://i.ibb.co https://ik.imagekit.io https://firebasestorage.googleapis.com https://api.dicebear.com",
+      "font-src 'self' data: https://fonts.gstatic.com",
       "frame-ancestors 'none'",
     ].join("; ")
   );
@@ -1560,6 +1568,26 @@ async function verifyAdmin(userId: string | undefined, emailHint?: string): Prom
   return false;
 }
 
+async function isSelfOrAdmin(req: express.Request, targetId: string): Promise<{ allowed: boolean; resolvedId: string; isAdmin: boolean }> {
+  const actingUserId = (req as any).user?.uid as string | undefined;
+  const actingEmail = (req as any).user?.email as string | undefined;
+  const resolvedId = await resolveUserDocId(targetId, actingEmail);
+  if (!actingUserId) {
+    return { allowed: false, resolvedId, isAdmin: false };
+  }
+  const resolvedActingId = await resolveUserDocId(actingUserId, actingEmail);
+  const isSelf =
+    actingUserId === targetId ||
+    actingUserId === resolvedId ||
+    resolvedActingId === resolvedId ||
+    resolvedActingId === targetId;
+  if (isSelf) {
+    return { allowed: true, resolvedId, isAdmin: false };
+  }
+  const isAdmin = await verifyAdmin(actingUserId, actingEmail);
+  return { allowed: isAdmin, resolvedId, isAdmin };
+}
+
 
 // Async Database Helpers
 async function getUsersList(): Promise<UserProfile[]> {
@@ -1893,7 +1921,7 @@ app.post("/api/auth/signup", authLimiter, async (req, res) => {
     token: !isFirebaseAdminInitialized ? generateMockToken(newUser.uid) : undefined
   };
 
-  res.status(211).json(clientUser);
+  res.status(201).json(clientUser);
 });
 
 function maskEmail(email: string): string {
@@ -1991,7 +2019,8 @@ app.post("/api/auth/forgot-password", authLimiter, async (req, res) => {
         });
         const parsedUrl = new URL(rawLink);
         const oobCode = parsedUrl.searchParams.get("oobCode") || "";
-        resetUrl = `https://golfballvault.app/reset-password?oobCode=${encodeURIComponent(oobCode)}`;
+        const syncToken = generateResetToken(user.email);
+        resetUrl = `https://golfballvault.app/reset-password?oobCode=${encodeURIComponent(oobCode)}&syncToken=${encodeURIComponent(syncToken)}`;
       } else {
         // Fallback for environments without Firebase Admin initialized
         const token = generateResetToken(user.email);
@@ -2027,25 +2056,52 @@ app.post("/api/auth/verify-reset-token", authLimiter, (req, res) => {
 // Sync password reset update to backend local data/Firestore
 app.post("/api/auth/reset-password-sync", authLimiter, async (req, res) => {
   const { email, newPassword, token } = req.body;
-  if (!newPassword || (!email && !token)) {
-    return res.status(400).json({ error: "Email or token and new password are required." });
+  if (!newPassword || typeof newPassword !== "string" || (!email && !token)) {
+    return res.status(400).json({ error: "Token (or authenticated email) and new password are required." });
+  }
+
+  if (!isStrongPassword(newPassword)) {
+    return res.status(400).json({ error: "Password must be at least 8 characters long and include an uppercase letter, lowercase letter, number, and special character." });
   }
 
   try {
-    let targetEmail = email;
-    if (token) {
+    let targetEmail: string | undefined;
+    if (token && typeof token === "string") {
       const verifiedEmail = verifyResetToken(token);
       if (!verifiedEmail) {
         return res.status(400).json({ error: "Invalid or expired reset token." });
       }
       targetEmail = verifiedEmail;
+    } else {
+      // Without a signed reset token, require an authenticated user matching the requested email
+      const actingEmail = (req as any).user?.email as string | undefined;
+      const actingUid = (req as any).user?.uid as string | undefined;
+      if (!actingUid) {
+        return res.status(403).json({ error: "Valid reset token or authentication is required to synchronize password." });
+      }
+      const requestedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
+      if (actingEmail && actingEmail.toLowerCase() === requestedEmail) {
+        targetEmail = requestedEmail;
+      } else {
+        const resolvedId = await resolveUserDocId(actingUid, actingEmail);
+        const users = await getUsersList();
+        const actingUser = users.find(u => u.uid === resolvedId || u.authUid === actingUid);
+        if (actingUser?.email && actingUser.email.toLowerCase() === requestedEmail) {
+          targetEmail = requestedEmail;
+        } else {
+          return res.status(403).json({ error: "Access Denied." });
+        }
+      }
     }
 
     const cleanEmail = targetEmail.trim().toLowerCase();
+    const hashedPwd = hashPassword(newPassword);
     const users = await getUsersList();
     const userIndex = users.findIndex(u => u.email?.toLowerCase() === cleanEmail);
+    let matchedUser: UserProfile | undefined;
     if (userIndex !== -1) {
-      users[userIndex].password = hashPassword(newPassword);
+      users[userIndex].password = hashedPwd;
+      matchedUser = users[userIndex];
       saveUsers(users);
     }
 
@@ -2054,9 +2110,25 @@ app.post("/api/auth/reset-password-sync", authLimiter, async (req, res) => {
       if (!snap.empty) {
         for (const doc of snap.docs) {
           await doc.ref.update({
-            password: hashPassword(newPassword),
+            password: hashedPwd,
             updatedAt: new Date().toISOString()
           });
+        }
+      }
+
+      // If reset via signed backend token, also update Firebase Auth password so both stay in sync
+      if (token) {
+        try {
+          const authUser = await admin.auth().getUserByEmail(cleanEmail);
+          if (authUser) {
+            await admin.auth().updateUser(authUser.uid, { password: newPassword });
+          }
+        } catch (authErr) {
+          if (matchedUser?.authUid) {
+            try {
+              await admin.auth().updateUser(matchedUser.authUid, { password: newPassword });
+            } catch {}
+          }
         }
       }
     }
@@ -2100,7 +2172,8 @@ app.post("/api/auth/send-verification-email", authLimiter, async (req, res) => {
           });
           const parsedUrl = new URL(rawLink);
           const oobCode = parsedUrl.searchParams.get("oobCode") || "";
-          verifyUrl = `https://golfballvault.app/verify-email?oobCode=${encodeURIComponent(oobCode)}&email=${encodeURIComponent(targetEmail)}`;
+          const syncToken = generateVerifyEmailToken(targetEmail);
+          verifyUrl = `https://golfballvault.app/verify-email?oobCode=${encodeURIComponent(oobCode)}&email=${encodeURIComponent(targetEmail)}&token=${encodeURIComponent(syncToken)}`;
         } catch (linkErr) {
           console.warn("Firebase Admin verification link failed, falling back to signed token:", linkErr);
           const token = generateVerifyEmailToken(targetEmail);
@@ -2131,14 +2204,16 @@ app.post("/api/auth/send-verification-email", authLimiter, async (req, res) => {
 app.post("/api/auth/verify-email", authLimiter, async (req, res) => {
   const { token, email } = req.body;
 
-  let targetEmail = email ? email.trim().toLowerCase() : undefined;
+  let targetEmail = email && typeof email === "string" ? email.trim().toLowerCase() : undefined;
+  let verifiedViaToken = false;
 
-  if (token) {
+  if (token && typeof token === "string") {
     const verifiedEmail = verifyEmailToken(token);
     if (!verifiedEmail) {
       return res.status(400).json({ error: "Invalid or expired email verification link." });
     }
     targetEmail = verifiedEmail.toLowerCase();
+    verifiedViaToken = true;
   }
 
   if (!targetEmail) {
@@ -2146,6 +2221,41 @@ app.post("/api/auth/verify-email", authLimiter, async (req, res) => {
   }
 
   try {
+    // If not verified via a signed server token, verify that either Firebase Auth already confirmed emailVerified
+    // OR the request is authenticated as that user/admin
+    if (!verifiedViaToken) {
+      let authorized = false;
+      if (isFirebaseAdminInitialized) {
+        try {
+          const authUser = await admin.auth().getUserByEmail(targetEmail);
+          if (authUser && authUser.emailVerified) {
+            authorized = true;
+          }
+        } catch {}
+      }
+      if (!authorized) {
+        const actingUid = (req as any).user?.uid as string | undefined;
+        const actingEmail = (req as any).user?.email as string | undefined;
+        if (actingUid) {
+          if (actingEmail && actingEmail.toLowerCase() === targetEmail) {
+            authorized = true;
+          } else if (await verifyAdmin(actingUid, actingEmail)) {
+            authorized = true;
+          } else {
+            const resolvedId = await resolveUserDocId(actingUid, actingEmail);
+            const users = await getUsersList();
+            const actingUser = users.find(u => u.uid === resolvedId || u.authUid === actingUid);
+            if (actingUser?.email?.toLowerCase() === targetEmail) {
+              authorized = true;
+            }
+          }
+        }
+      }
+      if (!authorized) {
+        return res.status(403).json({ error: "Valid verification token or confirmed email verification is required." });
+      }
+    }
+
     const users = await getUsersList();
     const userIndex = users.findIndex(u => u.email?.toLowerCase() === targetEmail);
     let targetUser: UserProfile | undefined;
@@ -2204,9 +2314,8 @@ app.post("/api/users/:id/email", authLimiter, async (req, res) => {
   const { id } = req.params;
   const { newEmail } = req.body;
 
-  const actingUserId = (req as any).user?.uid as string | undefined;
-  const resolvedId = await resolveUserDocId(id);
-  if (!actingUserId || (actingUserId !== id && actingUserId !== resolvedId && !(await verifyAdmin(actingUserId)))) {
+  const { allowed, resolvedId } = await isSelfOrAdmin(req, id);
+  if (!allowed) {
     return res.status(403).json({ error: "Access Denied. You are not authorized to update this email address." });
   }
 
@@ -2306,7 +2415,8 @@ app.post("/api/users/:id/email", authLimiter, async (req, res) => {
           });
           const parsedUrl = new URL(rawLink);
           const oobCode = parsedUrl.searchParams.get("oobCode") || "";
-          verifyUrl = `https://golfballvault.app/verify-email?oobCode=${encodeURIComponent(oobCode)}&email=${encodeURIComponent(cleanNewEmail)}`;
+          const syncToken = generateVerifyEmailToken(cleanNewEmail);
+          verifyUrl = `https://golfballvault.app/verify-email?oobCode=${encodeURIComponent(oobCode)}&email=${encodeURIComponent(cleanNewEmail)}&token=${encodeURIComponent(syncToken)}`;
         } catch (linkErr) {
           const token = generateVerifyEmailToken(cleanNewEmail);
           verifyUrl = `https://golfballvault.app/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(cleanNewEmail)}`;
@@ -2387,9 +2497,8 @@ app.post("/api/auth/signin", authLimiter, async (req, res) => {
 // Get friends data (friends, requests in, requests out)
 app.get("/api/friends/:id", async (req, res) => {
   const { id } = req.params;
-  const resolvedId = await resolveUserDocId(id);
-  const actingUserId = (req as any).user?.uid as string | undefined;
-  if (!actingUserId || (actingUserId !== id && actingUserId !== resolvedId && !(await verifyAdmin(actingUserId)))) {
+  const { allowed, resolvedId } = await isSelfOrAdmin(req, id);
+  if (!allowed) {
     return res.status(403).json({ error: "Access Denied." });
   }
   const users = await getUsersList();
@@ -2424,9 +2533,8 @@ app.post("/api/friends/:id/request", async (req, res) => {
   // strip @ if they included it accidentally
   if (targetUsername.startsWith("@")) targetUsername = targetUsername.substring(1);
 
-  const resolvedId = await resolveUserDocId(id);
-  const actingUserId = (req as any).user?.uid as string | undefined;
-  if (!actingUserId || (actingUserId !== id && actingUserId !== resolvedId && !(await verifyAdmin(actingUserId)))) {
+  const { allowed, resolvedId } = await isSelfOrAdmin(req, id);
+  if (!allowed) {
     return res.status(403).json({ error: "Access Denied." });
   }
   const users = await getUsersList();
@@ -2473,9 +2581,8 @@ app.post("/api/friends/:id/accept", async (req, res) => {
   const { id } = req.params;
   const { targetUsername } = req.body;
   
-  const resolvedId = await resolveUserDocId(id);
-  const actingUserId = (req as any).user?.uid as string | undefined;
-  if (!actingUserId || (actingUserId !== id && actingUserId !== resolvedId && !(await verifyAdmin(actingUserId)))) {
+  const { allowed, resolvedId } = await isSelfOrAdmin(req, id);
+  if (!allowed) {
     return res.status(403).json({ error: "Access Denied." });
   }
   const users = await getUsersList();
@@ -2511,9 +2618,8 @@ app.post("/api/friends/:id/decline", async (req, res) => {
   const { id } = req.params;
   const { targetUsername } = req.body;
   
-  const resolvedId = await resolveUserDocId(id);
-  const actingUserId = (req as any).user?.uid as string | undefined;
-  if (!actingUserId || (actingUserId !== id && actingUserId !== resolvedId && !(await verifyAdmin(actingUserId)))) {
+  const { allowed, resolvedId } = await isSelfOrAdmin(req, id);
+  if (!allowed) {
     return res.status(403).json({ error: "Access Denied." });
   }
   const users = await getUsersList();
@@ -2538,9 +2644,8 @@ app.post("/api/friends/:id/remove", async (req, res) => {
   const { id } = req.params;
   const { targetUsername } = req.body;
   
-  const resolvedId = await resolveUserDocId(id);
-  const actingUserId = (req as any).user?.uid as string | undefined;
-  if (!actingUserId || (actingUserId !== id && actingUserId !== resolvedId && !(await verifyAdmin(actingUserId)))) {
+  const { allowed, resolvedId } = await isSelfOrAdmin(req, id);
+  if (!allowed) {
     return res.status(403).json({ error: "Access Denied." });
   }
   const users = await getUsersList();
@@ -2564,9 +2669,8 @@ app.post("/api/friends/:id/remove", async (req, res) => {
 app.get("/api/friends/:id/bag/:friendUsername", async (req, res) => {
   const { id, friendUsername } = req.params;
   
-  const resolvedId = await resolveUserDocId(id);
-  const actingUserId = (req as any).user?.uid as string | undefined;
-  if (!actingUserId || (actingUserId !== id && actingUserId !== resolvedId && !(await verifyAdmin(actingUserId)))) {
+  const { allowed, resolvedId } = await isSelfOrAdmin(req, id);
+  if (!allowed) {
     return res.status(403).json({ error: "Access Denied." });
   }
 
@@ -2770,16 +2874,14 @@ app.post("/api/users/:uid/rounds", async (req, res) => {
 // Toggle a catalog item in the user's wishlist
 app.post("/api/users/:uid/wishlist", async (req, res) => {
   const { uid } = req.params;
-  const actingUserId = (req as any).user?.uid as string | undefined;
-  if (!actingUserId || (actingUserId !== uid && !(await verifyAdmin(actingUserId)))) {
+  const { allowed, resolvedId } = await isSelfOrAdmin(req, uid);
+  if (!allowed) {
     return res.status(403).json({ error: "Access Denied." });
   }
   const { catalogId } = req.body;
   if (!catalogId) {
     return res.status(400).json({ error: "catalogId is required." });
   }
-
-  const resolvedId = await resolveUserDocId(uid);
   
   if (dbAdmin) {
     try {
@@ -2827,12 +2929,10 @@ app.post("/api/users/:uid/wishlist", async (req, res) => {
 // Clear the user's wishlist
 app.post("/api/users/:uid/wishlist/clear", async (req, res) => {
   const { uid } = req.params;
-  const actingUserId = (req as any).user?.uid as string | undefined;
-  if (!actingUserId || (actingUserId !== uid && !(await verifyAdmin(actingUserId)))) {
+  const { allowed, resolvedId } = await isSelfOrAdmin(req, uid);
+  if (!allowed) {
     return res.status(403).json({ error: "Access Denied." });
   }
-
-  const resolvedId = await resolveUserDocId(uid);
   
   if (dbAdmin) {
     try {
@@ -2864,12 +2964,7 @@ app.post("/api/users/:uid/wishlist/clear", async (req, res) => {
 // Fetch user profile details (Name, Username, avatarUrl, preferredColor, role)
 app.get("/api/users/:id/profile", async (req, res) => {
   const { id } = req.params;
-  const actingUserId = (req as any).user?.uid as string | undefined;
-  const actingEmail = (req as any).user?.email as string | undefined;
-  const resolvedId = await resolveUserDocId(id, actingEmail);
-  const resolvedActingId = actingUserId ? await resolveUserDocId(actingUserId, actingEmail) : undefined;
-  
-  const isOwnerOrAdmin = actingUserId === id || actingUserId === resolvedId || resolvedActingId === resolvedId || (await verifyAdmin(actingUserId, actingEmail));
+  const { allowed: isOwnerOrAdmin, resolvedId } = await isSelfOrAdmin(req, id);
   
   if (dbAdmin) {
     try {
@@ -2878,13 +2973,20 @@ app.get("/api/users/:id/profile", async (req, res) => {
         const data = docSnap.data();
         if (isOwnerOrAdmin) {
           const { password: _pwd, ...safeData } = data || {};
-          return res.json({ uid: docSnap.id, ...safeData });
+          return res.json({
+            ...safeData,
+            uid: docSnap.id,
+            photoURL: safeData.avatarUrl || safeData.photoURL,
+            shareToken: encryptUsername(safeData.username || ""),
+            pendingFriendRequestsCount: Array.isArray(safeData.friendRequestsIn) ? safeData.friendRequestsIn.length : 0
+          });
         } else {
           return res.json({
             uid: docSnap.id,
             displayName: data?.displayName,
             username: data?.username,
             avatarUrl: data?.avatarUrl,
+            photoURL: data?.avatarUrl,
             preferredColor: data?.preferredColor,
             role: data?.role,
             shareBag: data?.shareBag
@@ -2984,9 +3086,8 @@ app.patch("/api/users/:id/profile", async (req, res) => {
   const { displayName, username, avatarUrl, preferredColor, password, shareBag, optInLeaderboard } = req.body;
 
   // Authorization: only the account owner or an Admin can update this profile
-  const actingUserId = (req as any).user?.uid as string | undefined;
-  const resolvedId = await resolveUserDocId(id);
-  if (!actingUserId || (actingUserId !== id && actingUserId !== resolvedId && !(await verifyAdmin(actingUserId)))) {
+  const { allowed, resolvedId } = await isSelfOrAdmin(req, id);
+  if (!allowed) {
     return res.status(403).json({ error: "Access Denied. You are not authorized to update this profile." });
   }
 
@@ -3053,6 +3154,8 @@ app.patch("/api/users/:id/profile", async (req, res) => {
         const oldDocSnap = await oldDocRef.get();
         const oldLockerRef = oldDocRef.collection("data").doc("locker");
         const oldLockerSnap = await oldLockerRef.get();
+        const oldRoundsRef = oldDocRef.collection("data").doc("rounds");
+        const oldRoundsSnap = await oldRoundsRef.get();
 
         const oldData = oldDocSnap.exists ? oldDocSnap.data() : {};
         const newData = {
@@ -3067,6 +3170,9 @@ app.patch("/api/users/:id/profile", async (req, res) => {
 
         if (oldLockerSnap.exists) {
           await newDocRef.collection("data").doc("locker").set(oldLockerSnap.data() || {});
+        }
+        if (oldRoundsSnap.exists) {
+          await newDocRef.collection("data").doc("rounds").set(oldRoundsSnap.data() || {});
         }
 
         await deleteFirestoreDocAndSubcollections(oldDocRef);
@@ -3119,13 +3225,12 @@ app.patch("/api/users/:id/profile", async (req, res) => {
 // Update user stats directly from the client when saving locker
 app.post("/api/users/:uid/stats", async (req, res) => {
   const { uid } = req.params;
-  const actingUserId = (req as any).user?.uid as string | undefined;
-  if (!actingUserId || (actingUserId !== uid && !(await verifyAdmin(actingUserId)))) {
+  const { allowed, resolvedId } = await isSelfOrAdmin(req, uid);
+  if (!allowed) {
     return res.status(403).json({ error: "Access Denied." });
   }
   const { totalUniqueBalls, totalBalls } = req.body;
   
-  const resolvedId = await resolveUserDocId(uid);
   const users = await getUsersList();
   const user = users.find(u => u.uid === resolvedId);
   if (!user) {
@@ -3264,7 +3369,7 @@ app.post("/api/users", async (req, res) => {
 
   await saveUserToDb(newUser);
   const { password: _pwd, ...safeNewUser } = newUser;
-  res.status(211).json(safeNewUser);
+  res.status(201).json(safeNewUser);
 });
 
 // Appoint or modify roles (Admin / User)
@@ -3293,7 +3398,8 @@ app.patch("/api/users/:id/role", async (req, res) => {
 
   targetUser.role = normalizedRole;
   await saveUserToDb(targetUser);
-  res.json(targetUser);
+  const { password: _pwd, ...safeTargetUser } = targetUser;
+  res.json(safeTargetUser);
 });
 
 // Update user details (Admin only)
@@ -3447,6 +3553,8 @@ app.patch("/api/users/:id", async (req, res) => {
         const oldDocSnap = await oldDocRef.get();
         const oldLockerRef = oldDocRef.collection("data").doc("locker");
         const oldLockerSnap = await oldLockerRef.get();
+        const oldRoundsRef = oldDocRef.collection("data").doc("rounds");
+        const oldRoundsSnap = await oldRoundsRef.get();
 
         const oldData = oldDocSnap.exists ? oldDocSnap.data() : {};
         const newData = {
@@ -3461,6 +3569,9 @@ app.patch("/api/users/:id", async (req, res) => {
 
         if (oldLockerSnap.exists) {
           await newDocRef.collection("data").doc("locker").set(oldLockerSnap.data() || {});
+        }
+        if (oldRoundsSnap.exists) {
+          await newDocRef.collection("data").doc("rounds").set(oldRoundsSnap.data() || {});
         }
 
         await deleteFirestoreDocAndSubcollections(oldDocRef);
@@ -3616,7 +3727,7 @@ app.post("/api/catalog", async (req, res) => {
   };
 
   await saveGlobalCatalogItem(newItem);
-  res.status(211).json(newItem);
+  res.status(201).json(newItem);
 });
 
 // POST: Bulk add catalog items (Admin only)

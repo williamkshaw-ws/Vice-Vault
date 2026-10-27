@@ -8,12 +8,24 @@ import { isFirebaseConfigured, db } from "../firebase";
 export function useBallLocker(currentUser: any, userProfile?: any) {
   const [balls, setBalls] = useState<GolfBall[]>(() => {
     try {
-      const candidates = ["vice_vault_bag_u-admin", "vice_vault_guest_v2"];
-      for (const k of candidates) {
-        const saved = localStorage.getItem(k);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
+      const mockStr = localStorage.getItem("vice_vault_mock_user");
+      if (mockStr) {
+        const mockUser = safeJSONParse(mockStr);
+        const mockUid = mockUser?.uid;
+        if (mockUid) {
+          const saved = localStorage.getItem(`vice_vault_bag_${mockUid}`);
+          if (saved !== null) {
+            const parsed = safeJSONParse(saved);
+            if (Array.isArray(parsed)) {
+              return filterLegacyBalls(parsed);
+            }
+          }
+        }
+      } else {
+        const saved = localStorage.getItem("vice_vault_guest_v2");
+        if (saved !== null) {
+          const parsed = safeJSONParse(saved);
+          if (Array.isArray(parsed)) {
             return filterLegacyBalls(parsed);
           }
         }
@@ -26,30 +38,46 @@ export function useBallLocker(currentUser: any, userProfile?: any) {
   const [isCloudDataLoaded, setIsCloudDataLoaded] = useState(false);
   const ballsRef = useRef<GolfBall[]>(balls);
   ballsRef.current = balls;
+  const prevUidRef = useRef<string | null>(null);
 
   useEffect(() => {
+    let isCancelled = false;
+
     if (currentUser) {
-      setIsLoadingCloudData(true);
-      
       const targetUid = userProfile?.uid || currentUser.uid || currentUser.id;
+      const authUid = currentUser.uid || currentUser.id;
+      const isAdminUser =
+        targetUid === "u-admin" ||
+        userProfile?.username?.toLowerCase() === "admin" ||
+        currentUser?.username?.toLowerCase() === "admin" ||
+        currentUser?.email?.toLowerCase() === "admin@vault.com";
+
       const bagKey = "vice_vault_bag_" + targetUid;
 
-      // 1. Check local caches across all candidate keys
+      // If switching between two different logged-in accounts or logging in fresh, reset state before loading
+      if (prevUidRef.current !== authUid) {
+        prevUidRef.current = authUid;
+        setIsCloudDataLoaded(false);
+        setBalls([]);
+      }
+
+      setIsLoadingCloudData(true);
+
+      // 1. Check local caches strictly scoped to THIS user's keys
       const candidateKeys = Array.from(new Set([
         bagKey,
-        currentUser.uid ? `vice_vault_bag_${currentUser.uid}` : null,
+        authUid ? `vice_vault_bag_${authUid}` : null,
         userProfile?.uid ? `vice_vault_bag_${userProfile.uid}` : null,
-        "vice_vault_bag_u-admin",
-        "vice_vault_guest_v2"
+        isAdminUser ? "vice_vault_bag_u-admin" : null
       ])).filter(Boolean) as string[];
 
       let localFound = false;
       for (const key of candidateKeys) {
         const cached = localStorage.getItem(key);
-        if (cached) {
+        if (cached !== null) {
           try {
             const parsed = safeJSONParse(cached);
-            if (Array.isArray(parsed) && parsed.length > 0) {
+            if (Array.isArray(parsed)) {
               setBalls(filterLegacyBalls(parsed));
               localFound = true;
               break;
@@ -63,7 +91,7 @@ export function useBallLocker(currentUser: any, userProfile?: any) {
           for (const key of candidateKeys) {
             try {
               const idbBalls = await idbGet<GolfBall[]>(key);
-              if (idbBalls && Array.isArray(idbBalls) && idbBalls.length > 0) {
+              if (!isCancelled && idbBalls && Array.isArray(idbBalls)) {
                 setBalls(filterLegacyBalls(idbBalls));
                 break;
               }
@@ -75,28 +103,31 @@ export function useBallLocker(currentUser: any, userProfile?: any) {
       // 2. Fetch from cloud / server API
       const fetchLocker = async () => {
         try {
-          let headers = await getAuthHeaders();
-          let res = await fetch(`/api/users/${targetUid}/locker`, { headers });
+          const headers = await getAuthHeaders();
+          const res = await fetch(`/api/users/${targetUid}/locker`, { headers });
 
           let cloudBalls: GolfBall[] | null = null;
 
           if (res.ok) {
             const data = await res.json();
-            if (data && Array.isArray(data.balls) && data.balls.length > 0) {
+            if (data && Array.isArray(data.balls)) {
               cloudBalls = filterLegacyBalls(data.balls);
             }
           }
 
-          // 3. Fallback to direct client-side Firestore if server had 0 balls or failed
-          if ((!cloudBalls || cloudBalls.length === 0) && isFirebaseConfigured && db) {
+          // 3. Fallback to direct client-side Firestore if server returned null or failed
+          if (cloudBalls === null && isFirebaseConfigured && db) {
             try {
               const { doc, getDoc } = await import("firebase/firestore");
-              const firestoreUids = Array.from(new Set([targetUid, currentUser.uid, "u-admin"])).filter(Boolean) as string[];
+              const firestoreUids = Array.from(new Set([
+                targetUid,
+                authUid,
+                isAdminUser ? "u-admin" : null
+              ])).filter(Boolean) as string[];
               for (const fUid of firestoreUids) {
                 const snap = await getDoc(doc(db, "users", fUid, "data", "locker"));
-                if (snap.exists() && snap.data()?.balls && Array.isArray(snap.data().balls) && snap.data().balls.length > 0) {
+                if (snap.exists() && Array.isArray(snap.data()?.balls)) {
                   cloudBalls = filterLegacyBalls(snap.data().balls);
-                  // Sync to local server
                   const postHeaders = await getAuthHeaders({ "Content-Type": "application/json" });
                   fetch(`/api/users/${targetUid}/locker`, {
                     method: "POST",
@@ -111,14 +142,18 @@ export function useBallLocker(currentUser: any, userProfile?: any) {
             }
           }
 
-          if (cloudBalls && cloudBalls.length > 0) {
+          if (isCancelled) return;
+
+          if (cloudBalls !== null) {
             setBalls(cloudBalls);
-            await idbSet(bagKey, cloudBalls);
-            try {
-              localStorage.setItem(bagKey, JSON.stringify(cloudBalls));
-            } catch (e) {}
-          } else if (ballsRef.current && ballsRef.current.length > 0) {
-            // Server has no balls, but client has cached balls: preserve them and sync to server!
+            for (const key of candidateKeys) {
+              await idbSet(key, cloudBalls);
+              try {
+                localStorage.setItem(key, JSON.stringify(cloudBalls));
+              } catch (e) {}
+            }
+          } else if (localFound && ballsRef.current && ballsRef.current.length > 0) {
+            // Server has no locker doc yet, and THIS user has a local cache: sync it to server
             const postHeaders = await getAuthHeaders({ "Content-Type": "application/json" });
             await fetch(`/api/users/${targetUid}/locker`, {
               method: "POST",
@@ -129,8 +164,10 @@ export function useBallLocker(currentUser: any, userProfile?: any) {
         } catch (err) {
           console.error("Error loading locker from cloud:", err);
         } finally {
-          setIsLoadingCloudData(false);
-          setIsCloudDataLoaded(true);
+          if (!isCancelled) {
+            setIsLoadingCloudData(false);
+            setIsCloudDataLoaded(true);
+          }
         }
       };
 
@@ -138,6 +175,7 @@ export function useBallLocker(currentUser: any, userProfile?: any) {
 
     } else {
       // Logged out / local-only fallback
+      prevUidRef.current = null;
       if (!localStorage.getItem("vice_vault_mock_user")) {
         setIsCloudDataLoaded(false);
         const savedBalls = localStorage.getItem("vice_vault_guest_v2");
@@ -145,6 +183,10 @@ export function useBallLocker(currentUser: any, userProfile?: any) {
         setBalls(Array.isArray(parsedBalls) ? filterLegacyBalls(parsedBalls) : INITIAL_OWNED_BALLS);
       }
     }
+
+    return () => {
+      isCancelled = true;
+    };
   }, [currentUser, userProfile?.uid]);
 
   // Effect to sync balls back to local storage and IndexedDB when not logged in

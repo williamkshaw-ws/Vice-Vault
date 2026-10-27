@@ -92,10 +92,18 @@ export default function VerifyEmailModal({
 
         // 4. Sync verification state to backend database so the account is fully verified in one step
         try {
+          const syncToken = urlParams.get("token") || undefined;
+          let authHeader: Record<string, string> = {};
+          if (auth.currentUser) {
+            try {
+              const idToken = await auth.currentUser.getIdToken(true);
+              if (idToken) authHeader = { Authorization: `Bearer ${idToken}` };
+            } catch {}
+          }
           const syncRes = await fetch("/api/auth/verify-email", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: targetEmail || auth.currentUser?.email })
+            headers: { "Content-Type": "application/json", ...authHeader },
+            body: JSON.stringify({ email: targetEmail || auth.currentUser?.email, token: syncToken })
           });
           const syncData = await syncRes.json();
           if (syncData?.email) {

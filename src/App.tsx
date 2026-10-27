@@ -1393,8 +1393,12 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
   // Synchronize balls changes to IndexedDB and localStorage for instant UI caching on refresh
   useEffect(() => {
-    if (balls.length > 0) {
-      const bagKey = currentUser?.uid ? "vice_vault_bag_" + currentUser.uid : "vice_vault_guest_v2";
+    if (!currentUser || !isCloudDataLoaded) return;
+    const keys = Array.from(new Set([
+      userProfile?.uid ? `vice_vault_bag_${userProfile.uid}` : null,
+      currentUser.uid ? `vice_vault_bag_${currentUser.uid}` : null
+    ])).filter(Boolean) as string[];
+    for (const bagKey of keys) {
       idbSet(bagKey, balls).catch(err => console.warn("Failed to write bag to IndexedDB:", err));
       try {
         localStorage.setItem(bagKey, JSON.stringify(balls));
@@ -1402,7 +1406,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
         // localStorage quota exceeded; IndexedDB handles this gracefully
       }
     }
-  }, [balls, currentUser]);
+  }, [balls, currentUser, userProfile?.uid, isCloudDataLoaded]);
 
 
   // Modern synchronization: Ensure bag items stay perfectly synced with catalog changes (e.g. Name, Year).
