@@ -366,10 +366,10 @@ export default function LegalPage({ type, variant = "modal", onClose, onSwitch }
       <div className="min-h-screen bg-neutral-950 text-white">
         <div className="max-w-3xl mx-auto px-5 py-10 pt-[max(2.5rem,env(safe-area-inset-top))]">
           <a href="/" className="inline-block mb-8 text-sm font-black uppercase tracking-widest text-white">
-            ⛳ Golf Ball Vault
+            ⛳ Golf Ball Vault™
           </a>
           {body}
-          <p className="mt-10 text-[10px] text-neutral-600 font-mono">© 2026 Golf Ball Vault.</p>
+          <p className="mt-10 text-[10px] text-neutral-600 font-mono">Golf Ball Vault™</p>
         </div>
       </div>
     );

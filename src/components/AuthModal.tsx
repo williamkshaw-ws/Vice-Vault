@@ -36,6 +36,7 @@ interface AuthModalProps {
   onThemeChange?: (theme: 'light' | 'dark' | 'system') => void;
   hasBagItems?: boolean;
   initialEmail?: string;
+  onOpenLegal?: (type: "privacy" | "terms") => void;
 }
 
 const DISPOSABLE_EMAIL_DOMAINS = new Set([
@@ -215,7 +216,8 @@ export default function AuthModal({
   theme = "system",
   onThemeChange,
   hasBagItems,
-  initialEmail
+  initialEmail,
+  onOpenLegal
 }: AuthModalProps) {
   const [tab, setTab] = useState<"signin" | "signup" | "settings" | "forgot">("signin");
   
@@ -1456,7 +1458,40 @@ export default function AuthModal({
                 )}
               </button>
 
-              <p className="text-[10px] text-neutral-500 text-center mt-4 font-mono">
+              <p className="text-[10px] text-neutral-400 text-center font-mono leading-relaxed px-2">
+                By creating an account, you agree to our{" "}
+                <a
+                  href="/terms"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (onOpenLegal) {
+                      onOpenLegal("terms");
+                    } else {
+                      window.open("/terms", "_blank");
+                    }
+                  }}
+                  className="text-accent underline hover:text-white cursor-pointer"
+                >
+                  Terms of Service
+                </a>{" "}
+                and acknowledge our{" "}
+                <a
+                  href="/privacy"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (onOpenLegal) {
+                      onOpenLegal("privacy");
+                    } else {
+                      window.open("/privacy", "_blank");
+                    }
+                  }}
+                  className="text-accent underline hover:text-white cursor-pointer"
+                >
+                  Privacy Policy
+                </a>.
+              </p>
+
+              <p className="text-[10px] text-neutral-500 text-center mt-2 font-mono">
                 Already registered? <button type="button" onClick={() => setTab("signin")} className="text-accent underline hover:text-white cursor-pointer bg-transparent border-0 p-0">Access your vault account</button>
               </p>
             </form>

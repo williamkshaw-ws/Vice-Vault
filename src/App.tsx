@@ -2752,7 +2752,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       <footer className="border-t border-neutral-850 bg-neutral-950 py-6 mt-12 pb-28 lg:pb-6 text-neutral-600 text-xs">
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <span>© 2026 Golf Ball Vault.</span>
+            <span className="font-semibold text-neutral-450">Golf Ball Vault™</span>
           </div>
           <div className="flex items-center gap-4 font-mono text-[10px]">
             <a
@@ -2962,6 +2962,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           setAuthModalOpen(false);
           setPrefilledAuthEmail("");
         }}
+        onOpenLegal={(type) => setLegalDoc(type)}
         initialEmail={prefilledAuthEmail}
         currentUser={currentUser}
         userProfile={userProfile}
