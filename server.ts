@@ -669,8 +669,172 @@ const DEFAULT_USERS: UserProfile[] = [
     password: hashPassword(INITIAL_ADMIN_PASSWORD),
     shareBag: false,
     createdAt: new Date().toISOString()
+  },
+  {
+    uid: "u-applereviewer",
+    displayName: "App Store Reviewer",
+    email: "apple.review@golfballvault.app",
+    username: "applereviewer",
+    role: "User",
+    preferredColor: "#2563eb",
+    avatarUrl: "preset-1",
+    password: hashPassword("VaultReviewer2026!"),
+    shareBag: true,
+    emailVerified: true,
+    totalUniqueBalls: 4,
+    totalBalls: 25,
+    createdAt: new Date().toISOString()
   }
 ];
+
+const DEFAULT_REVIEWER_LOCKER = [
+  {
+    id: "ball-rev-1",
+    catalogId: "PRO_PLUS-STANDARD-WHITE",
+    model: "PRO PLUS",
+    color: "White",
+    quantity: 6,
+    condition: "Brand New",
+    packageType: "sleeve",
+    customNumber: 1,
+    notes: "Main competition sleeve for 2026 season",
+    year: "2024",
+    name: "Standard",
+    rarity: "common",
+    dateAdded: "2026-10-15T14:20:00.000Z"
+  },
+  {
+    id: "ball-rev-2",
+    catalogId: "PRO_PLUS-DRIP_LIME-DRIP_LIME_BLACK",
+    model: "PRO PLUS",
+    color: "Drip Lime/Black",
+    quantity: 3,
+    condition: "Near-Mint / Scuffed-0",
+    packageType: "ea",
+    customNumber: 3,
+    notes: "High visibility gamer ball",
+    year: "2023",
+    name: "Drip Lime",
+    rarity: "limited",
+    dateAdded: "2026-10-18T10:15:00.000Z"
+  },
+  {
+    id: "ball-rev-3",
+    catalogId: "PRO_SOFT-LIV_GOLF-WHITE",
+    model: "PRO SOFT",
+    color: "White",
+    quantity: 12,
+    condition: "Brand New",
+    packageType: "box",
+    customNumber: 4,
+    notes: "Full commemorative dozen in original packaging",
+    year: "2022",
+    name: "LIV Golf",
+    rarity: "rare",
+    totalMade: 500,
+    dateAdded: "2026-10-20T16:45:00.000Z"
+  },
+  {
+    id: "ball-rev-4",
+    catalogId: "TOUR-STANDARD-NEON_LIME",
+    model: "TOUR",
+    color: "Neon Lime",
+    quantity: 4,
+    condition: "Played / Scuffed-1",
+    packageType: "ea",
+    customNumber: 2,
+    notes: "Practice round balls",
+    year: "2023",
+    name: "Standard",
+    rarity: "common",
+    dateAdded: "2026-10-22T09:30:00.000Z"
+  }
+];
+
+const DEFAULT_REVIEWER_ROUNDS = {
+  activeRound: {
+    id: "round-active-review",
+    date: "2026-10-27T10:00:00.000Z",
+    courseName: "Pebble Beach Golf Links",
+    holes: 18,
+    status: "active",
+    balls: [
+      {
+        id: "r-ball-1",
+        ballId: "ball-rev-1",
+        model: "PRO PLUS",
+        color: "White",
+        originalCondition: "Brand New",
+        customNumber: 1,
+        status: "survived"
+      },
+      {
+        id: "r-ball-2",
+        ballId: "ball-rev-2",
+        model: "PRO PLUS",
+        color: "Drip Lime/Black",
+        originalCondition: "Near-Mint / Scuffed-0",
+        customNumber: 3,
+        status: "lost",
+        lostHole: 7,
+        hazard: "Water",
+        hazardDetail: "Ocean cliff drop on Hole 7"
+      }
+    ]
+  },
+  roundHistory: [
+    {
+      id: "round-hist-1",
+      date: "2026-10-24T13:30:00.000Z",
+      courseName: "Spyglass Hill Golf Course",
+      holes: 18,
+      status: "completed",
+      completedAt: "2026-10-24T17:45:00.000Z",
+      balls: [
+        {
+          id: "rh-1",
+          ballId: "ball-rev-1",
+          model: "PRO PLUS",
+          color: "White",
+          originalCondition: "Brand New",
+          customNumber: 1,
+          status: "survived"
+        },
+        {
+          id: "rh-2",
+          ballId: "ball-rev-4",
+          model: "TOUR",
+          color: "Neon Lime",
+          originalCondition: "Brand New",
+          customNumber: 2,
+          status: "damaged",
+          lostHole: 14,
+          hazard: "Cart Path",
+          hazardDetail: "Cart path scuff on drive"
+        }
+      ]
+    },
+    {
+      id: "round-hist-2",
+      date: "2026-10-18T09:00:00.000Z",
+      courseName: "Cypress Point Club",
+      holes: 9,
+      status: "completed",
+      completedAt: "2026-10-18T11:15:00.000Z",
+      balls: [
+        {
+          id: "rh-3",
+          ballId: "ball-rev-2",
+          model: "PRO PLUS",
+          color: "Drip Lime/Black",
+          originalCondition: "Brand New",
+          customNumber: 3,
+          status: "survived"
+        }
+      ]
+    }
+  ]
+};
 
 const DEFAULT_LOCKER: any[] = [];
 
@@ -1326,10 +1490,11 @@ if (serviceAccountConfig) {
               if (authErr.code === 'auth/user-not-found') {
                 console.log(`Seeding missing Firebase Auth user: ${user.email}`);
                 try {
+                  const seedPwd = user.uid === "u-applereviewer" ? "VaultReviewer2026!" : INITIAL_ADMIN_PASSWORD;
                   const authUser = await admin.auth().createUser({
                     uid: user.uid,
                     email: user.email,
-                    password: INITIAL_ADMIN_PASSWORD,
+                    password: seedPwd,
                     displayName: user.displayName
                   });
                   await dbAdmin!.collection("users").doc(user.uid).set({
@@ -1677,10 +1842,22 @@ async function getUserLocker(uid: string): Promise<any[] | null> {
     } catch (error) {
       console.error("Firestore getUserLocker failed, fallback to file:", error);
     }
+    // Reviewer account fallback if locker subcollection does not exist yet in Firestore
+    if (resolvedId === "u-applereviewer" || uid === "u-applereviewer") {
+      try {
+        await dbAdmin.collection("users").doc("u-applereviewer").collection("data").doc("locker").set({ balls: DEFAULT_REVIEWER_LOCKER }, { merge: true });
+        return DEFAULT_REVIEWER_LOCKER;
+      } catch {}
+    }
     return null;
   }
   const data = loadUserData(resolvedId);
-  return data && data.balls ? data.balls : null;
+  if (data && data.balls) return data.balls;
+  if (resolvedId === "u-applereviewer" || uid === "u-applereviewer") {
+    saveUserData("u-applereviewer", { balls: DEFAULT_REVIEWER_LOCKER });
+    return DEFAULT_REVIEWER_LOCKER;
+  }
+  return null;
 }
 
 async function saveUserLocker(uid: string, balls: any[]): Promise<void> {
@@ -1725,6 +1902,16 @@ async function getUserRounds(uid: string): Promise<{ activeRound: any | null; ro
         roundHistory: Array.isArray(data.roundHistory) ? data.roundHistory : []
       };
     }
+  }
+  if (resolvedId === "u-applereviewer" || uid === "u-applereviewer") {
+    if (dbAdmin) {
+      try {
+        await dbAdmin.collection("users").doc("u-applereviewer").collection("data").doc("rounds").set(DEFAULT_REVIEWER_ROUNDS, { merge: true });
+      } catch {}
+    } else {
+      saveUserData("u-applereviewer", DEFAULT_REVIEWER_ROUNDS);
+    }
+    return DEFAULT_REVIEWER_ROUNDS;
   }
   return null;
 }
