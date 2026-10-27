@@ -74,6 +74,7 @@ import { auth, db, isFirebaseConfigured } from "./firebase";
 import AuthModal, { AvatarRenderer } from "./components/AuthModal";
 import ResetPasswordModal from "./components/ResetPasswordModal";
 import VerifyEmailModal from "./components/VerifyEmailModal";
+import LegalPage, { LegalDocType } from "./components/LegalPage";
 import { User as FirebaseUser } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc, query, where, collection, getDocs } from "firebase/firestore";
 import defaultCatalogData from "../data/catalog.json";
@@ -532,6 +533,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
   // Round Mode (In-Play & Loss Tracker with cross-device sync)
   const [isRoundTrackerOpen, setIsRoundTrackerOpen] = useState(false);
+  const [legalDoc, setLegalDoc] = useState<LegalDocType | null>(null);
   const {
     activeRound,
     setActiveRound,
@@ -2753,10 +2755,36 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
             <span>© 2026 Golf Ball Vault.</span>
           </div>
           <div className="flex items-center gap-4 font-mono text-[10px]">
+            <a
+              href="/privacy"
+              onClick={(e) => { e.preventDefault(); setLegalDoc("privacy"); }}
+              className="hover:text-neutral-300 underline-offset-2 hover:underline transition-colors"
+            >
+              Privacy Policy
+            </a>
+            <span aria-hidden="true">·</span>
+            <a
+              href="/terms"
+              onClick={(e) => { e.preventDefault(); setLegalDoc("terms"); }}
+              className="hover:text-neutral-300 underline-offset-2 hover:underline transition-colors"
+            >
+              Terms of Service
+            </a>
+          </div>
+          <div className="flex items-center gap-4 font-mono text-[10px]">
             <span>All trade marks remain property of original owners.</span>
           </div>
         </div>
       </footer>
+
+      {legalDoc && (
+        <LegalPage
+          type={legalDoc}
+          variant="modal"
+          onClose={() => setLegalDoc(null)}
+          onSwitch={(next) => setLegalDoc(next)}
+        />
+      )}
 
       {/* Mobile Bottom Navigation Bar (Persistent iOS Tab Bar) */}
       {currentUser && (

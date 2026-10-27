@@ -1,6 +1,7 @@
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
+import LegalPage, { LegalDocType } from './components/LegalPage';
 import './index.css';
 import { auth } from './firebase';
 import { registerSW } from 'virtual:pwa-register';
@@ -91,8 +92,15 @@ window.fetch = async (...args) => {
   return originalFetch(...args);
 };
 
+// Public, standalone legal pages (https://golfballvault.app/privacy and /terms) used for App Store Connect URLs
+const normalizedPath = window.location.pathname.replace(/\/+$/, '').toLowerCase();
+const legalRoute: LegalDocType | null =
+  normalizedPath === '/privacy' || normalizedPath === '/privacy-policy' ? 'privacy' :
+  normalizedPath === '/terms' || normalizedPath === '/terms-of-service' ? 'terms' :
+  null;
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    {legalRoute ? <LegalPage type={legalRoute} variant="page" /> : <App />}
   </StrictMode>,
 );
