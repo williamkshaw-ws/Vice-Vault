@@ -630,18 +630,33 @@ app.use("/api", async (req, res, next) => {
 });
 
 // Paths for JSON file persistence
-const DATA_DIR = path.join(process.cwd(), "data");
+const BUNDLED_DATA_DIR = path.join(process.cwd(), "data");
+const DATA_DIR = process.env.VERCEL ? path.join("/tmp", "data") : BUNDLED_DATA_DIR;
 const USERS_FILE = path.join(DATA_DIR, "users.json");
 const CATALOG_FILE = path.join(DATA_DIR, "catalog.json");
 const USERS_DATA_DIR = path.join(DATA_DIR, "users_data");
 const PRESERVED_IMAGES_FILE = path.join(DATA_DIR, "preserved_images.json");
 
+// Ensure data exists in writable location if in Vercel serverless environment
+if (process.env.VERCEL) {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    if (fs.existsSync(BUNDLED_DATA_DIR)) {
+      fs.cpSync(BUNDLED_DATA_DIR, DATA_DIR, { recursive: true });
+    }
+  } catch (err) {
+    console.warn("Notice: copying bundled data to /tmp/data:", err);
+  }
+}
+
 // Dynamic directory and file creation if not exists
 if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+  try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
 }
 if (!fs.existsSync(USERS_DATA_DIR)) {
-  fs.mkdirSync(USERS_DATA_DIR, { recursive: true });
+  try { fs.mkdirSync(USERS_DATA_DIR, { recursive: true }); } catch (e) {}
 }
 
 // Initial Mock users
@@ -868,8 +883,11 @@ let _cachedUsers: UserProfile[] | null = null;
 function loadUsers(): UserProfile[] {
   if (_cachedUsers) return _cachedUsers;
   try {
-    if (fs.existsSync(USERS_FILE)) {
-      const raw = fs.readFileSync(USERS_FILE, "utf-8");
+    const targetFile = fs.existsSync(USERS_FILE)
+      ? USERS_FILE
+      : path.join(BUNDLED_DATA_DIR, "users.json");
+    if (fs.existsSync(targetFile)) {
+      const raw = fs.readFileSync(targetFile, "utf-8");
       _cachedUsers = JSON.parse(raw);
       return _cachedUsers as UserProfile[];
     }
@@ -895,8 +913,11 @@ let _cachedCatalog: CatalogItem[] | null = null;
 function loadCatalog(): CatalogItem[] {
   if (_cachedCatalog) return _cachedCatalog;
   try {
-    if (fs.existsSync(CATALOG_FILE)) {
-      const raw = fs.readFileSync(CATALOG_FILE, "utf-8");
+    const targetFile = fs.existsSync(CATALOG_FILE)
+      ? CATALOG_FILE
+      : path.join(BUNDLED_DATA_DIR, "catalog.json");
+    if (fs.existsSync(targetFile)) {
+      const raw = fs.readFileSync(targetFile, "utf-8");
       _cachedCatalog = JSON.parse(raw);
       return _cachedCatalog as CatalogItem[];
     }
@@ -927,8 +948,11 @@ let _cachedImages: Record<string, PreservedImages> | null = null;
 function loadPreservedImagesLocal(): Record<string, PreservedImages> {
   if (_cachedImages) return _cachedImages;
   try {
-    if (fs.existsSync(PRESERVED_IMAGES_FILE)) {
-      const raw = fs.readFileSync(PRESERVED_IMAGES_FILE, "utf-8");
+    const targetFile = fs.existsSync(PRESERVED_IMAGES_FILE)
+      ? PRESERVED_IMAGES_FILE
+      : path.join(BUNDLED_DATA_DIR, "preserved_images.json");
+    if (fs.existsSync(targetFile)) {
+      const raw = fs.readFileSync(targetFile, "utf-8");
       _cachedImages = JSON.parse(raw);
       return _cachedImages as Record<string, PreservedImages>;
     }
@@ -1002,8 +1026,14 @@ function getUserDataPath(uid: string): string {
 }
 
 function loadUserData(uid: string) {
-  const filePath = getUserDataPath(uid);
+  let filePath = getUserDataPath(uid);
   try {
+    if (!fs.existsSync(filePath)) {
+      const fallback = path.join(BUNDLED_DATA_DIR, "users_data", `${uid.replace(/[^a-zA-Z0-9_-]/g, "")}.json`);
+      if (fs.existsSync(fallback)) {
+        filePath = fallback;
+      }
+    }
     if (fs.existsSync(filePath)) {
       const raw = fs.readFileSync(filePath, "utf-8");
       return JSON.parse(raw);
@@ -4336,4 +4366,8 @@ async function startServer() {
   });
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;
