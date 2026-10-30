@@ -1412,7 +1412,7 @@ async function cleanDatabaseFields() {
   }
 }
 
-// Helper to upload base64 image directly to ImgBB
+// Helper to upload base64 image to Firebase Storage (or ImgBB as secondary fallback)
 async function uploadBase64ToStorage(base64Str: string | null | undefined, folder: string = "images"): Promise<string | undefined> {
   if (!base64Str || !base64Str.startsWith('data:image/')) return base64Str || undefined;
   
@@ -1421,41 +1421,50 @@ async function uploadBase64ToStorage(base64Str: string | null | undefined, folde
     return base64Str; // Not a valid base64 image string, return as is
   }
   
-  try {
-    const base64Data = matches[2];
-    
-    // Upload base64 to ImgBB
-    const formData = new FormData();
-    formData.append("image", base64Data);
-    
-    // ImgBB API Key
-    const API_KEY = process.env.IMGBB_API_KEY;
-    if (!API_KEY) {
-      throw new Error("IMGBB_API_KEY is missing from environment variables");
+  const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+  const base64Data = matches[2];
+
+  // 1. Primary: Use Firebase Storage if initialized
+  if (isFirebaseAdminInitialized) {
+    try {
+      const buffer = Buffer.from(base64Data, 'base64');
+      const uuid = 'xxxx-xxxx-xxxx'.replace(/[x]/g, () => (Math.random() * 16 | 0).toString(16));
+      const filename = `${folder}/${Date.now()}-${uuid}.${ext}`;
+      const bucket = admin.storage().bucket();
+      const file = bucket.file(filename);
+
+      await file.save(buffer, {
+        metadata: { contentType: `image/${ext}` }
+      });
+      await file.makePublic();
+
+      return `https://storage.googleapis.com/${bucket.name}/${filename}`;
+    } catch (fbErr) {
+      console.error("Failed to upload base64 image to Firebase Storage, trying fallback:", fbErr);
     }
-    
-    const response = await fetch(`https://api.imgbb.com/1/upload?key=${API_KEY}`, {
-      method: 'POST',
-      body: formData
-    });
-    
-    if (!response.ok) {
-       throw new Error(`ImgBB API responded with status ${response.status} ${response.statusText}`);
-    }
-    
-    const text = await response.text();
-    const json = JSON.parse(text);
-    if (json.success) {
-      return json.data.url;
-    } else {
-      throw new Error(`ImgBB upload failed: ${json.error?.message}`);
-    }
-  } catch (error) {
-    console.error("Failed to upload base64 image to ImgBB:", error);
-    // Do NOT fall back to storing the raw Base64 string — it can be up to 15MB and will
-    // bloat Firestore significantly. Instead, surface the error so the caller can handle it.
-    return undefined;
   }
+
+  // 2. Secondary: Fall back to ImgBB if key is available
+  try {
+    const API_KEY = process.env.IMGBB_API_KEY;
+    if (API_KEY) {
+      const formData = new FormData();
+      formData.append("image", base64Data);
+      const response = await fetch(`https://api.imgbb.com/1/upload?key=${API_KEY}`, {
+        method: 'POST',
+        body: formData
+      });
+      if (response.ok) {
+        const text = await response.text();
+        const json = JSON.parse(text);
+        if (json.success) return json.data.url;
+      }
+    }
+  } catch (imgbbErr) {
+    console.error("Failed to upload base64 image to ImgBB fallback:", imgbbErr);
+  }
+
+  return undefined;
 }
 
 // --- FIREBASE ADMIN SDK INTEGRATION SETUP ---

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useId } from "react";
 
 import { BallColor, BallModel } from "../types";
 
@@ -30,6 +30,26 @@ export default function BallVisual({
   customImageBox,
   packageType = "ea"
 }: BallVisualProps) {
+  const reactId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
+  const patternId = `imgPattern-${size}-${reactId}`;
+  const shineId = `ballShine-${size}-${reactId}`;
+
+  const [imgFailed, setImgFailed] = useState(false);
+  const [boxFailed, setBoxFailed] = useState(false);
+  const [sleeveFailed, setSleeveFailed] = useState(false);
+
+  useEffect(() => {
+    setImgFailed(false);
+  }, [customImage]);
+
+  useEffect(() => {
+    setBoxFailed(false);
+  }, [customImageBox]);
+
+  useEffect(() => {
+    setSleeveFailed(false);
+  }, [customImageSleeve]);
+
   // Sizing styles
   const sizeClasses = {
     sm: "w-10 h-10 text-[9px]",
@@ -46,7 +66,7 @@ export default function BallVisual({
   };
 
   // If a custom box image is uploaded and packageType is box, render it directly!
-  if (packageType === "box" && customImageBox && customImageBox !== customImage) {
+  if (packageType === "box" && customImageBox && customImageBox !== customImage && !boxFailed) {
     return (
       <div 
         className={`inline-flex items-center justify-center rounded-xl border border-neutral-800 shadow-md select-none shrink-0 overflow-hidden ${sizeClasses[size]} ${className} bg-neutral-950`}
@@ -57,13 +77,14 @@ export default function BallVisual({
           alt="Custom Box Design" 
           className="max-w-full max-h-full w-auto h-auto object-contain" 
           crossOrigin={customImageBox.startsWith('http') ? "anonymous" : undefined}
+          onError={() => setBoxFailed(true)}
         />
       </div>
     );
   }
 
   // If a custom sleeve image is uploaded and packageType is sleeve, render it directly!
-  if (packageType === "sleeve" && customImageSleeve) {
+  if (packageType === "sleeve" && customImageSleeve && !sleeveFailed) {
     return (
       <div 
         className={`relative inline-flex items-center justify-center rounded-xl border border-neutral-800 shadow-md select-none shrink-0 overflow-hidden ${sizeClasses[size]} ${className} bg-neutral-950`}
@@ -74,6 +95,7 @@ export default function BallVisual({
           alt="Custom Sleeve Design" 
           className="max-w-full max-h-full w-auto h-auto object-contain" 
           crossOrigin={customImageSleeve.startsWith('http') ? "anonymous" : undefined}
+          onError={() => setSleeveFailed(true)}
         />
       </div>
     );
@@ -440,7 +462,7 @@ export default function BallVisual({
 
   // If there is an uploaded custom image, render it inside an SVG using a pattern fill!
   // This bypasses Safari's infamous bug where it drops raster images with border-radius: 50% in foreignObject canvas renders.
-  if (customImage) {
+  if (customImage && !imgFailed) {
     return (
       <div 
         className={`relative inline-flex items-center justify-center aspect-square shrink-0 ${sizeClasses[size]} ${className}`}
@@ -448,10 +470,18 @@ export default function BallVisual({
       >
         <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full drop-shadow-md">
           <defs>
-            <pattern id={`imgPattern-${size}`} patternUnits="userSpaceOnUse" width="100" height="100">
-              <image href={customImage} x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid slice" />
+            <pattern id={patternId} patternUnits="userSpaceOnUse" width="100" height="100">
+              <image 
+                href={customImage} 
+                x="0" 
+                y="0" 
+                width="100" 
+                height="100" 
+                preserveAspectRatio="xMidYMid slice" 
+                onError={() => setImgFailed(true)}
+              />
             </pattern>
-            <radialGradient id={`ballShine-${size}`} cx="35%" cy="35%" r="65%">
+            <radialGradient id={shineId} cx="35%" cy="35%" r="65%">
               <stop offset="0%" stopColor="rgba(255,255,255,0.4)" />
               <stop offset="60%" stopColor="rgba(255,255,255,0.0)" />
               <stop offset="100%" stopColor="rgba(0,0,0,0.4)" />
@@ -459,10 +489,10 @@ export default function BallVisual({
           </defs>
           
           {/* Base image filled circle */}
-          <circle cx="50" cy="50" r="49" fill={`url(#imgPattern-${size})`} stroke="#475569" strokeWidth="1" />
+          <circle cx="50" cy="50" r="49" fill={`url(#${patternId})`} stroke="#475569" strokeWidth="1" />
           
           {/* 3D dimple and shine overlay */}
-          <circle cx="50" cy="50" r="49" fill={`url(#ballShine-${size})`} />
+          <circle cx="50" cy="50" r="49" fill={`url(#${shineId})`} />
           <circle cx="50" cy="50" r="49" fill="transparent" stroke="rgba(0,0,0,0.15)" strokeWidth="1" strokeDasharray="1.5 2" />
         </svg>
 
