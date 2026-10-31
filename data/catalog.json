@@ -7,7 +7,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/DRIVE-LIV_GOLF-WHITE.png"
   },
   {
@@ -18,7 +18,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/DRIVE-PSYCHO_BUNNY-WHITE.png"
   },
   {
@@ -119,7 +119,8 @@
       }
     ],
     "rarity": "common",
-    "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/MULTIPLE-VARIETY_PACK-MULTI_COLORED.jpg"
+    "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/MULTIPLE-VARIETY_PACK-MULTI_COLORED.jpg",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/MULTIPLE-VARIETY_PACK-MULTI_COLORED.jpg"
   },
   {
     "id": "PRO-101-NEON_LIME",
@@ -129,8 +130,9 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
-    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-101-NEON_LIME.png"
+    "rarity": "rare",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-101-NEON_LIME.png",
+    "totalMade": 999
   },
   {
     "id": "PRO-ADIDAS-LIME_BLACK_DRIP",
@@ -140,7 +142,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-ADIDAS-LIME_BLACK_DRIP.png"
   },
   {
@@ -151,7 +153,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-ADIDAS_THREE_STRIPE-GREEN.png"
   },
   {
@@ -162,7 +164,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-ADIDAS_TREFOIL_STAN_SMITH-GREEN.png"
   },
   {
@@ -173,7 +175,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO-ADIDAS_TREFOIL_STAN_SMITH-WHITE",
@@ -183,7 +185,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO-AMEN-YELLOW_GREEN_DRIP",
@@ -193,7 +195,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-AMEN-YELLOW_GREEN_DRIP.png"
   },
   {
@@ -204,7 +206,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-ARCHIVE-YELLOW_WHITE_SHADE.png"
   },
   {
@@ -239,7 +241,8 @@
     "groupColor": true,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-BEASTIN-FROST_BLUE.png"
   },
   {
     "id": "PRO-BEASTIN-GLACIER",
@@ -249,7 +252,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-BEASTIN-GLACIER.png"
   },
   {
@@ -260,7 +263,7 @@
     "groupColor": true,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-BEASTIN-LIMEADE.png"
   },
   {
@@ -271,7 +274,7 @@
     "groupColor": true,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-BEASTIN-ORANGE_BLAST.png"
   },
   {
@@ -282,7 +285,7 @@
     "groupColor": true,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-BEASTIN-WATERMELON_PUNCH.png"
   },
   {
@@ -293,7 +296,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-BOUNTY-BLACK.png"
   },
   {
@@ -304,7 +307,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-BREAKFAST_BALLS-YELLOW.png"
   },
   {
@@ -315,7 +318,7 @@
     "groupColor": true,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO-COSMIC_COLLECTION-AURORA_FIELDS.webp"
   },
   {
@@ -326,7 +329,7 @@
     "groupColor": true,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-COSMIC_COLLECTION-BLUE_SUPERCLUSTER.png",
     "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO-COSMIC_COLLECTION-BLUE_SUPERCLUSTER.webp"
   },
@@ -338,7 +341,7 @@
     "groupColor": true,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-COSMIC_COLLECTION-NEBULA_MIST.png",
     "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO-COSMIC_COLLECTION-NEBULA_MIST.webp"
   },
@@ -350,8 +353,9 @@
     "groupColor": true,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
-    "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO-COSMIC_COLLECTION-STELLAR_EMBER.webp"
+    "rarity": "limited",
+    "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO-COSMIC_COLLECTION-STELLAR_EMBER.webp",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-COSMIC_COLLECTION-STELLAR_EMBER.png"
   },
   {
     "id": "PRO-DRIP-LIME_BLACK",
@@ -394,7 +398,8 @@
     "groupVariation": false,
     "bundleItems": [],
     "rarity": "common",
-    "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO-DRIP_SHADE-GALAXY.jpg"
+    "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO-DRIP_SHADE-GALAXY.jpg",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-DRIP_SHADE-GALAXY.jpg"
   },
   {
     "id": "PRO-DRIP_SHADE-NEON_SUNSET",
@@ -405,7 +410,8 @@
     "groupVariation": false,
     "bundleItems": [],
     "rarity": "common",
-    "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO-DRIP_SHADE-NEON_SUNSET.png"
+    "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO-DRIP_SHADE-NEON_SUNSET.png",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-DRIP_SHADE-NEON_SUNSET.png"
   },
   {
     "id": "PRO-DRIP_SHADE-ROYAL_GOLD",
@@ -415,7 +421,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "common",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-DRIP_SHADE-ROYAL_GOLD.png"
   },
   {
     "id": "PRO-FLAMINGO-PINK",
@@ -425,7 +432,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO-GOOD_SUNDAYS-WHITE-EAT_THIS",
@@ -436,8 +443,9 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common",
-    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-GOOD_SUNDAYS-WHITE-EAT_THIS.png"
+    "rarity": "rare",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-GOOD_SUNDAYS-WHITE-EAT_THIS.png",
+    "totalMade": 199
   },
   {
     "id": "PRO-GOOD_SUNDAYS-WHITE-I_HEART_HOLES",
@@ -448,7 +456,9 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 199,
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-GOOD_SUNDAYS-WHITE-I_HEART_HOLES.png"
   },
   {
     "id": "PRO-GOOD_SUNDAYS-WHITE-SLAP_ON_ME",
@@ -459,7 +469,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 199
   },
   {
     "id": "PRO-GOOD_SUNDAYS-WHITE-YES_U_CAN",
@@ -470,7 +481,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 199
   },
   {
     "id": "PRO-GOOFBALLZ-BLUE-1_SUSHI",
@@ -481,7 +493,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO-GOOFBALLZ-BLUE-2_DONUT",
@@ -492,7 +504,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO-GOOFBALLZ-YELLOW-3_HOT_DOG",
@@ -503,7 +515,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-GOOFBALLZ-YELLOW-3_HOT_DOG.png"
   },
   {
@@ -515,7 +527,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-GOOFBALLZ-YELLOW-4_ICE_CREAM.png"
   },
   {
     "id": "PRO-GO_NUTZ-WHITE",
@@ -525,7 +538,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-GO_NUTZ-WHITE.png"
   },
   {
@@ -537,7 +550,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO-GREG_MIKE-GREEN-LOUDMOUF",
@@ -548,7 +561,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-GREG_MIKE-GREEN-LOUDMOUF.png",
     "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO-GREG_MIKE-GREEN-LOUDMOUF.png"
   },
@@ -561,7 +574,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-GREG_MIKE-WHITE-EYE.png"
   },
   {
@@ -573,7 +586,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO-GREG_MIKE-YELLOW-SMILEY.png"
   },
   {
@@ -605,7 +618,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-LIV_GOLF-YELLOW_BLACK_DRIP.png"
   },
   {
@@ -617,7 +630,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 500
   },
   {
     "id": "PRO-LOCAL_LEGEND-WHITE-MAGNOLIA",
@@ -628,7 +642,9 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 999,
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-LOCAL_LEGEND-WHITE-MAGNOLIA.png"
   },
   {
     "id": "PRO-LOCAL_LEGEND-WHITE-SANDWICH",
@@ -639,7 +655,9 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 444,
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-LOCAL_LEGEND-WHITE-SANDWICH.png"
   },
   {
     "id": "PRO-LOCAL_LEGEND_10_YEARS-LIME-AMEN",
@@ -650,7 +668,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO-LOCAL_LEGEND_10_YEARS-LIME-LOCAL_LEGEND",
@@ -661,7 +679,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-LOCAL_LEGEND_10_YEARS-LIME-LOCAL_LEGEND.png"
   },
   {
@@ -673,7 +691,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-LOCAL_LEGEND_10_YEARS-LIME-MAGNOLIA.png"
   },
   {
     "id": "PRO-LOCAL_LEGEND_10_YEARS-LIME-SANDWICH",
@@ -684,7 +703,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-LOCAL_LEGEND_10_YEARS-LIME-SANDWICH.png"
   },
   {
     "id": "PRO-MONACO_OKTOBERFEST-WHITE",
@@ -694,7 +714,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 222
   },
   {
     "id": "PRO-MOONROCK-BLACK",
@@ -704,7 +725,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 12000
   },
   {
     "id": "PRO-NEON-LIME",
@@ -746,7 +768,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO-NEVER_OUTGUNNED-WHITE-23",
@@ -757,7 +779,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-NEVER_OUTGUNNED-WHITE-23.png"
   },
   {
     "id": "PRO-NEVER_OUTGUNNED-WHITE-34",
@@ -768,7 +791,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-NEVER_OUTGUNNED-WHITE-34.png"
   },
   {
@@ -780,7 +803,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-NEVER_OUTGUNNED-WHITE-93.png"
   },
   {
     "id": "PRO-OAKMONT_US_OPEN-RED_BLUE_DRIP",
@@ -790,7 +814,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO-ORIGIN_OF_GOLF-RED",
@@ -800,7 +824,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-ORIGIN_OF_GOLF-RED.png"
   },
   {
@@ -811,7 +835,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO-PROPERTY_OF_BRAD-WHITE",
@@ -821,7 +845,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO-PRO_ST-GOLD",
@@ -831,7 +855,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO-PRO_ST_CHARACTER-WHITE-BRATWURST",
@@ -842,7 +866,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO-PRO_ST_CHARACTER-WHITE-FRIENDS",
@@ -853,7 +877,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO-PRO_ST_CHARACTER-WHITE-MUG",
@@ -864,7 +888,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-PRO_ST_CHARACTER-WHITE-MUG.png"
   },
   {
@@ -876,7 +900,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO-SHADE-NIGHTHAWK",
@@ -906,7 +930,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-SHINNECOCK_US_OPEN-RED_BLUE_DRIP.png"
   },
   {
     "id": "PRO-SILVER_HILLS-SLIVER_DRIP",
@@ -916,7 +941,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-SILVER_HILLS-SLIVER_DRIP.png"
   },
   {
     "id": "PRO-STANDARD-GLACIER_BLAST",
@@ -938,7 +964,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "common",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-STANDARD-WHITE.jpg"
   },
   {
     "id": "PRO-STANDARD_24_PACK-WHITE",
@@ -969,7 +996,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-TCAF-PRUPLE_DRIP.png"
   },
   {
@@ -1003,8 +1030,9 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
-    "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO-TRACER-YELLOW_GREEN-MAJOR_EDITION.webp"
+    "rarity": "limited",
+    "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO-TRACER-YELLOW_GREEN-MAJOR_EDITION.webp",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-TRACER-YELLOW_GREEN-MAJOR_EDITION.png"
   },
   {
     "id": "PRO-VICE_LINKS-GOLD_DRIP",
@@ -1014,7 +1042,7 @@
     "groupColor": true,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO-VICE_LINKS-PURPLE_DRIP",
@@ -1024,7 +1052,7 @@
     "groupColor": true,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO-WILD_WINDS-NEON_RED",
@@ -1034,8 +1062,9 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
-    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-WILD_WINDS-NEON_RED.png"
+    "rarity": "rare",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO-WILD_WINDS-NEON_RED.png",
+    "totalMade": 499
   },
   {
     "id": "PRO-ZARA_HOME_1_3-WHITE-GOLFER_BALL",
@@ -1093,7 +1122,8 @@
     "groupVariation": false,
     "bundleItems": [],
     "rarity": "common",
-    "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO_AIR-DRIP_SHADE-COTTON_CANDY.webp"
+    "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO_AIR-DRIP_SHADE-COTTON_CANDY.webp",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_AIR-DRIP_SHADE-COTTON_CANDY.png"
   },
   {
     "id": "PRO_AIR-GREEN_MILE_CLUB-WHITE-16",
@@ -1104,7 +1134,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_AIR-GREEN_MILE_CLUB-WHITE-17",
@@ -1115,7 +1145,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_AIR-GREEN_MILE_CLUB-WHITE-18",
@@ -1126,7 +1156,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_AIR-GREEN_MILE_CLUB-WHITE-28",
@@ -1137,7 +1167,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_AIR-NEON-LIME",
@@ -1167,7 +1197,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "common",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_AIR-NEON_DRIP-RED_BLACK.jpg"
   },
   {
     "id": "PRO_AIR-STANDARD-WHITE",
@@ -1189,7 +1220,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_AIR-TRACER-NEON_TIDE",
@@ -1222,7 +1253,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_PLUS-BETHPAGE_STATION-BLUE_EUROPE",
@@ -1232,7 +1263,7 @@
     "groupColor": true,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-BETHPAGE_STATION-BLUE_EUROPE.jpg",
     "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO_PLUS-BETHPAGE_STATION-BLUE_EUROPE.png"
   },
@@ -1244,7 +1275,7 @@
     "groupColor": true,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO_PLUS-BETHPAGE_STATION-RED_USA.png"
   },
   {
@@ -1255,7 +1286,9 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 222,
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-BORDEAUX_RED-WHITE.png"
   },
   {
     "id": "PRO_PLUS-CLUBHAUS-WHITE_BLUE",
@@ -1265,7 +1298,7 @@
     "groupColor": true,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-CLUBHAUS-WHITE_BLUE.png"
   },
   {
@@ -1276,7 +1309,8 @@
     "groupColor": true,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-CLUBHAUS-WHITE_GRAY.png"
   },
   {
     "id": "PRO_PLUS-CLUBHAUS-WHITE_GREEN",
@@ -1286,7 +1320,7 @@
     "groupColor": true,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_PLUS-CLUBHAUS-WHITE_RED",
@@ -1296,7 +1330,7 @@
     "groupColor": true,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-CLUBHAUS-WHITE_RED.png"
   },
   {
@@ -1307,7 +1341,7 @@
     "groupColor": true,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-CLUBHAUS-WHITE_YELLOW.png"
   },
   {
@@ -1328,7 +1362,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "common",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-DRIP-LIME_BLACK.jpg"
   },
   {
     "id": "PRO_PLUS-DRIP-NAVY_ORANGE",
@@ -1338,7 +1373,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "common",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-DRIP-NAVY_ORANGE.jpg"
   },
   {
     "id": "PRO_PLUS-EXTRA_BUTTER-GOLD",
@@ -1348,7 +1384,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-EXTRA_BUTTER-GOLD.png"
   },
   {
     "id": "PRO_PLUS-FASTBALL-WHITE",
@@ -1370,7 +1407,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-FLYER_S_CLUB-WHITE.png"
   },
   {
     "id": "PRO_PLUS-FUGU-WHITE",
@@ -1380,7 +1418,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-FUGU-WHITE.png"
   },
   {
     "id": "PRO_PLUS-GOLFERIA-WHITE",
@@ -1390,7 +1429,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_PLUS-HERITAGE_COLLECTION-WHITE-1_MAGNOLIA",
@@ -1401,7 +1440,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-HERITAGE_COLLECTION-WHITE-1_MAGNOLIA.png"
   },
   {
@@ -1413,7 +1452,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_PLUS-HERITAGE_COLLECTION-WHITE-3_OAK_TREE",
@@ -1424,7 +1463,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-HERITAGE_COLLECTION-WHITE-3_OAK_TREE.png"
   },
   {
     "id": "PRO_PLUS-HERITAGE_COLLECTION-WHITE-4_CLUBS",
@@ -1435,7 +1475,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-HERITAGE_COLLECTION-WHITE-4_CLUBS.png"
   },
   {
     "id": "PRO_PLUS-LEGEND_LEGACY-WHITE-LEGACY",
@@ -1446,7 +1487,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_PLUS-LEGEND_LEGACY-WHITE-LEGEND",
@@ -1457,7 +1498,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-LEGEND_LEGACY-WHITE-LEGEND.png"
   },
   {
@@ -1469,7 +1510,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_PLUS-LETTERS_TO_TROON-WHITE-SEAL",
@@ -1480,7 +1521,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_PLUS-LETTERS_TO_TROON-WHITE-WELL",
@@ -1491,7 +1532,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-LETTERS_TO_TROON-WHITE-WELL.webp"
   },
   {
@@ -1514,7 +1555,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_PLUS-ODE_TO_AUGUSTA-WHITE-12_GOLDEN_BELL",
@@ -1525,7 +1566,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_PLUS-ODE_TO_AUGUSTA-WHITE-16_RED_BUD",
@@ -1536,7 +1577,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_PLUS-ODE_TO_AUGUSTA-WHITE-5_MAGNOLIA",
@@ -1547,7 +1588,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_PLUS-PINE_HURST-ORANGE",
@@ -1557,7 +1598,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-PINE_HURST-ORANGE.png"
   },
   {
     "id": "PRO_PLUS-RANDOM_GOLF_CLUB_RGC-WHITE-DOODLE",
@@ -1568,7 +1610,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-RANDOM_GOLF_CLUB_RGC-WHITE-DOODLE.png"
   },
   {
@@ -1580,7 +1622,9 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 500,
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-RANDOM_GOLF_CLUB_RGC-WHITE-RULE_17B.png"
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-CHUNK",
@@ -1591,7 +1635,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 999
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-FIN",
@@ -1602,7 +1647,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 999
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-JUICED",
@@ -1613,7 +1659,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 999
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-KLAWS",
@@ -1624,7 +1671,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 999
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-MOONMAN",
@@ -1635,7 +1683,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 999
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-MULLIGAN_MARCHER",
@@ -1646,7 +1695,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 999
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-PITTED",
@@ -1657,7 +1707,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 999
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-PRICKLY_PAR",
@@ -1668,7 +1719,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 999
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-ROO",
@@ -1679,7 +1731,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 999
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-SLICE",
@@ -1690,7 +1743,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 999
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-STINGER_STRAT",
@@ -1701,7 +1755,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 999
   },
   {
     "id": "PRO_PLUS-RGC_CLASS_OF_2021-WHITE-THE_DROPOUT",
@@ -1712,7 +1767,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 999
   },
   {
     "id": "PRO_PLUS-ROYAL_RUSH-WHITE",
@@ -1722,8 +1778,9 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common",
-    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-ROYAL_RUSH-WHITE.png"
+    "rarity": "rare",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-ROYAL_RUSH-WHITE.png",
+    "totalMade": 999
   },
   {
     "id": "PRO_PLUS-SHADE-EARLY_BIRD",
@@ -1753,7 +1810,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "common",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-SHADE_X_EDITION-YELLOW_WHITE.png"
   },
   {
     "id": "PRO_PLUS-STANDARD-BLACK",
@@ -1776,7 +1834,8 @@
     "groupVariation": false,
     "bundleItems": [],
     "rarity": "common",
-    "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO_PLUS-STANDARD-GOLD.jpg"
+    "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO_PLUS-STANDARD-GOLD.jpg",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-STANDARD-GOLD.jpg"
   },
   {
     "id": "PRO_PLUS-STANDARD-WHITE",
@@ -1796,7 +1855,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_PLUS-TORREY-WHITE",
@@ -1806,7 +1865,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_PLUS-TRACER-ARCTIC_BOMB",
@@ -1837,7 +1896,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_PLUS-VOYAGE_TO_VALHALLA-WHITE",
@@ -1847,7 +1906,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-VOYAGE_TO_VALHALLA-WHITE.png"
   },
   {
     "id": "PRO_PLUS-WINNER_WINNER-WHITE-05_LOBSTER",
@@ -1858,7 +1918,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-WINNER_WINNER-WHITE-05_LOBSTER.png"
   },
   {
     "id": "PRO_PLUS-WINNER_WINNER-WHITE-22_SUSHI",
@@ -1869,7 +1930,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-WINNER_WINNER-WHITE-22_SUSHI.png"
   },
   {
@@ -1881,7 +1942,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-WINNER_WINNER-WHITE-89_BURGER.png"
   },
   {
@@ -1893,7 +1954,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-WINNER_WINNER-WHITE-94_TARTE.png"
   },
   {
     "id": "PRO_PLUS-YOU_LL_NEVER_PUTT_ALONE-ORANGE_DRIP-1_FLOWER",
@@ -1904,7 +1966,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-YOU_LL_NEVER_PUTT_ALONE-ORANGE_DRIP-1_FLOWER.png"
   },
   {
@@ -1916,7 +1978,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_PLUS-YOU_LL_NEVER_PUTT_ALONE-ORANGE_DRIP-3_OCTOPUS",
@@ -1927,7 +1989,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_PLUS-YOU_LL_NEVER_PUTT_ALONE-ORANGE_DRIP-3_OCTOPUS.png"
   },
   {
@@ -1939,7 +2001,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "PRO_SOFT-CYPRESS-WHITE",
@@ -1949,7 +2011,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "rare",
+    "totalMade": 999
   },
   {
     "id": "PRO_SOFT-DRIP-RED_BLACK",
@@ -1969,7 +2032,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "common",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_SOFT-HUE-BLUE_LIGHT.jpg"
   },
   {
     "id": "PRO_SOFT-HUE-LIVING_CORAL",
@@ -1989,7 +2053,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "common",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_SOFT-HUE-PEACH_PARFAIT.jpg"
   },
   {
     "id": "PRO_SOFT-MATTE-WHITE",
@@ -2030,7 +2095,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "common",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_SOFT-NEON-LIME.jpg"
   },
   {
     "id": "PRO_SOFT-NEON-RED",
@@ -2062,7 +2128,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_SOFT-TAILGATE-WHITE.png"
   },
   {
     "id": "PRO_ZERO-STANDARD-WHITE",
@@ -2073,7 +2140,8 @@
     "groupVariation": false,
     "bundleItems": [],
     "rarity": "common",
-    "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO_ZERO-STANDARD-WHITE.jpg"
+    "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/boxes/PRO_ZERO-STANDARD-WHITE.jpg",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/PRO_ZERO-STANDARD-WHITE.jpg"
   },
   {
     "id": "SIM-VICE_SIM-WHITE",
@@ -2105,7 +2173,8 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "common",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/TOUR-ALL_OVER_PRINT-ZAP.jpg"
   },
   {
     "id": "TOUR-CORONA_PREMIER-WHITE",
@@ -2115,7 +2184,7 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "TOUR-GRAY-GRAY",
@@ -2169,7 +2238,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-EUR2",
@@ -2180,7 +2249,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/TOUR-RYDER_CUP-WHITE-EUR2.png"
   },
   {
@@ -2192,7 +2261,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USA1",
@@ -2203,7 +2272,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/TOUR-RYDER_CUP-WHITE-USA1.png"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USA2",
@@ -2214,7 +2284,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USA3",
@@ -2225,7 +2295,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/TOUR-RYDER_CUP-WHITE-USA3.png"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USVEU1",
@@ -2236,7 +2307,8 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/TOUR-RYDER_CUP-WHITE-USVEU1.png"
   },
   {
     "id": "TOUR-RYDER_CUP-WHITE-USVEU2",
@@ -2247,7 +2319,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common",
+    "rarity": "limited",
     "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/TOUR-RYDER_CUP-WHITE-USVEU2.png"
   },
   {
@@ -2259,7 +2331,7 @@
     "groupColor": false,
     "groupVariation": true,
     "bundleItems": [],
-    "rarity": "common"
+    "rarity": "limited"
   },
   {
     "id": "TOUR-STANDARD-WHITE",
