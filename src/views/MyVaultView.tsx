@@ -180,8 +180,10 @@ export default function MyVaultView({
   const deferredWishlistSearchQuery = useDeferredValue(wishlistSearchQuery);
 
   const ballsWithCatalogRarity = useMemo(() => {
+    if (!Array.isArray(balls)) return [];
+    const catList = Array.isArray(catalog) ? catalog : [];
     return balls.map(ball => {
-      const cItem = catalog.find(c => c.id === (ball.catalogId || ball.id));
+      const cItem = catList.find(c => c.id === (ball.catalogId || ball.id));
       const rarity = cItem?.rarity || ball.rarity || 'common';
       return {
         ...ball,

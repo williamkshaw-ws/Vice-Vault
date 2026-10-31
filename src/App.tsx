@@ -359,12 +359,6 @@ export default function App() {
   // Shared Locker states
   const [sharedLockerOwner, setSharedLockerOwner] = useState<UserProfile | null>(null);
   const [sharedLockerBalls, setSharedLockerBalls] = useState<GolfBall[]>([]);
-  const sharedLockerBallsWithRarity = useMemo(() => {
-    return sharedLockerBalls.map(ball => ({
-      ...ball,
-      rarity: catalog.find(c => c.id === (ball.catalogId || ball.id))?.rarity || ball.rarity || 'common'
-    }));
-  }, [sharedLockerBalls, catalog]);
   const [sharedLockerError, setSharedLockerError] = useState<string | null>(null);
   const [isSharedViewLoading, setIsSharedViewLoading] = useState(false);
   const [globalCatalogStats, setGlobalCatalogStats] = useState<Record<string, number>>({});
@@ -469,6 +463,15 @@ export default function App() {
   }), [bFilterModel, bFilterColor, bFilterVariation, bFilterYear, bFilterName, bFilterCondition, bFilterRarity]);
 
 const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
+
+  const sharedLockerBallsWithRarity = useMemo(() => {
+    if (!Array.isArray(sharedLockerBalls)) return [];
+    const catList = Array.isArray(catalog) ? catalog : [];
+    return sharedLockerBalls.map(ball => ({
+      ...ball,
+      rarity: catList.find(c => c.id === (ball.catalogId || ball.id))?.rarity || ball.rarity || 'common'
+    }));
+  }, [sharedLockerBalls, catalog]);
 
   const [sFilterModel, setSFilterModel] = useState<string>("");
   const [sFilterColor, setSFilterColor] = useState<string>("");
