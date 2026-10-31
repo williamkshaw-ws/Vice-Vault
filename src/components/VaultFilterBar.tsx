@@ -15,6 +15,8 @@ export interface FilterState {
   setName: (v: string) => void;
   condition: string;
   setCondition: (v: string) => void;
+  rarity?: string;
+  setRarity?: (v: string) => void;
 }
 
 interface VaultFilterBarProps {
@@ -25,50 +27,78 @@ interface VaultFilterBarProps {
 }
 
 export default function VaultFilterBar({ items, filters, showCondition = true, children }: VaultFilterBarProps) {
-  const { model, setModel, color, setColor, variation, setVariation, year, setYear, name, setName, condition, setCondition } = filters;
+  const {
+    model, setModel,
+    color, setColor,
+    variation, setVariation,
+    year, setYear,
+    name, setName,
+    condition, setCondition,
+    rarity = "", setRarity
+  } = filters;
 
-  const { uniqueModels, uniqueColors, uniqueVariations, uniqueYears, uniqueNames, uniqueConditions } = useMemo(() => {
+  const { uniqueModels, uniqueColors, uniqueVariations, uniqueYears, uniqueNames, uniqueConditions, uniqueRarities } = useMemo(() => {
+    const matchRarity = (b: any) => (!rarity || (b.rarity || 'common').toLowerCase() === rarity.toLowerCase());
+
     const availableForModel = items
       .filter(b => (!color || b.color === color))
       .filter(b => (!condition || b.condition === condition))
       .filter(b => (!year || b.year === year))
       .filter(b => (!variation || b.variation === variation))
-      .filter(b => (!name || b.name === name));
+      .filter(b => (!name || b.name === name))
+      .filter(matchRarity);
 
     const availableForColor = items
       .filter(b => (!model || b.model === model))
       .filter(b => (!condition || b.condition === condition))
       .filter(b => (!year || b.year === year))
       .filter(b => (!variation || b.variation === variation))
-      .filter(b => (!name || b.name === name));
+      .filter(b => (!name || b.name === name))
+      .filter(matchRarity);
 
     const availableForCondition = items
       .filter(b => (!model || b.model === model))
       .filter(b => (!color || b.color === color))
       .filter(b => (!year || b.year === year))
       .filter(b => (!variation || b.variation === variation))
-      .filter(b => (!name || b.name === name));
+      .filter(b => (!name || b.name === name))
+      .filter(matchRarity);
 
     const availableForYear = items
       .filter(b => (!model || b.model === model))
       .filter(b => (!color || b.color === color))
       .filter(b => (!condition || b.condition === condition))
       .filter(b => (!variation || b.variation === variation))
-      .filter(b => (!name || b.name === name));
+      .filter(b => (!name || b.name === name))
+      .filter(matchRarity);
 
     const availableForVariation = items
       .filter(b => (!model || b.model === model))
       .filter(b => (!color || b.color === color))
       .filter(b => (!condition || b.condition === condition))
       .filter(b => (!year || b.year === year))
-      .filter(b => (!name || b.name === name));
+      .filter(b => (!name || b.name === name))
+      .filter(matchRarity);
 
     const availableForName = items
       .filter(b => (!model || b.model === model))
       .filter(b => (!color || b.color === color))
       .filter(b => (!condition || b.condition === condition))
       .filter(b => (!year || b.year === year))
-      .filter(b => (!variation || b.variation === variation));
+      .filter(b => (!variation || b.variation === variation))
+      .filter(matchRarity);
+
+    const availableForRarity = items
+      .filter(b => (!model || b.model === model))
+      .filter(b => (!color || b.color === color))
+      .filter(b => (!condition || b.condition === condition))
+      .filter(b => (!year || b.year === year))
+      .filter(b => (!variation || b.variation === variation))
+      .filter(b => (!name || b.name === name));
+
+    const presentRarities = new Set(availableForRarity.map(b => (b.rarity || 'common').toLowerCase()));
+    const orderedTiers = ['Limited', 'Rare', 'Common'];
+    const uniqueRarities = orderedTiers.filter(tier => presentRarities.has(tier.toLowerCase()));
 
     return {
       uniqueModels: Array.from(new Set(availableForModel.map(b => b.model).filter(Boolean))).sort(),
@@ -76,11 +106,12 @@ export default function VaultFilterBar({ items, filters, showCondition = true, c
       uniqueConditions: Array.from(new Set(availableForCondition.map(b => b.condition).filter(Boolean))).sort(),
       uniqueYears: Array.from(new Set(availableForYear.map(b => b.year).filter(Boolean))).sort(),
       uniqueVariations: Array.from(new Set(availableForVariation.map(b => b.variation).filter(Boolean))).sort(),
-      uniqueNames: Array.from(new Set(availableForName.map(b => b.name).filter(Boolean))).sort()
+      uniqueNames: Array.from(new Set(availableForName.map(b => b.name).filter(Boolean))).sort(),
+      uniqueRarities
     };
-  }, [items, model, color, condition, year, variation, name]);
+  }, [items, model, color, condition, year, variation, name, rarity]);
 
-  const hasActiveFilters = model || color || condition || year || variation || name;
+  const hasActiveFilters = model || color || condition || year || variation || name || rarity;
 
   const clearFilters = () => {
     setModel?.("");
@@ -89,6 +120,7 @@ export default function VaultFilterBar({ items, filters, showCondition = true, c
     setYear?.("");
     setVariation?.("");
     setName?.("");
+    setRarity?.("");
   };
 
   if (items.length === 0) return null;
@@ -107,6 +139,17 @@ export default function VaultFilterBar({ items, filters, showCondition = true, c
               options={uniqueModels as string[]}
               onChange={setModel}
               placeholder="Model"
+            />
+          </div>
+        )}
+
+        {uniqueRarities.length > 0 && (
+          <div className="shrink-0">
+            <SearchableDropdown
+              value={rarity}
+              options={uniqueRarities as string[]}
+              onChange={setRarity || (() => {})}
+              placeholder="Rarity"
             />
           </div>
         )}

@@ -359,6 +359,12 @@ export default function App() {
   // Shared Locker states
   const [sharedLockerOwner, setSharedLockerOwner] = useState<UserProfile | null>(null);
   const [sharedLockerBalls, setSharedLockerBalls] = useState<GolfBall[]>([]);
+  const sharedLockerBallsWithRarity = useMemo(() => {
+    return sharedLockerBalls.map(ball => ({
+      ...ball,
+      rarity: catalog.find(c => c.id === (ball.catalogId || ball.id))?.rarity || ball.rarity || 'common'
+    }));
+  }, [sharedLockerBalls, catalog]);
   const [sharedLockerError, setSharedLockerError] = useState<string | null>(null);
   const [isSharedViewLoading, setIsSharedViewLoading] = useState(false);
   const [globalCatalogStats, setGlobalCatalogStats] = useState<Record<string, number>>({});
@@ -431,6 +437,7 @@ export default function App() {
   const [cFilterYear, setCFilterYear] = useState<string>("");
   const [cFilterName, setCFilterName] = useState<string>("");
   const [cFilterCondition, setCFilterCondition] = useState<string>("");
+  const [cFilterRarity, setCFilterRarity] = useState<string>("");
 
   const catalogFilters = useMemo(() => ({
     model: cFilterModel, setModel: setCFilterModel,
@@ -438,8 +445,9 @@ export default function App() {
     variation: cFilterVariation, setVariation: setCFilterVariation,
     year: cFilterYear, setYear: setCFilterYear,
     name: cFilterName, setName: setCFilterName,
-    condition: cFilterCondition, setCondition: setCFilterCondition
-  }), [cFilterModel, cFilterColor, cFilterVariation, cFilterYear, cFilterName, cFilterCondition]);
+    condition: cFilterCondition, setCondition: setCFilterCondition,
+    rarity: cFilterRarity, setRarity: setCFilterRarity
+  }), [cFilterModel, cFilterColor, cFilterVariation, cFilterYear, cFilterName, cFilterCondition, cFilterRarity]);
 
   // Bag Filters
   const [bFilterModel, setBFilterModel] = useState<string>("");
@@ -448,6 +456,7 @@ export default function App() {
   const [bFilterYear, setBFilterYear] = useState<string>("");
   const [bFilterName, setBFilterName] = useState<string>("");
   const [bFilterCondition, setBFilterCondition] = useState<string>("");
+  const [bFilterRarity, setBFilterRarity] = useState<string>("");
 
   const bagFilters = useMemo(() => ({
     model: bFilterModel, setModel: setBFilterModel,
@@ -455,8 +464,9 @@ export default function App() {
     variation: bFilterVariation, setVariation: setBFilterVariation,
     year: bFilterYear, setYear: setBFilterYear,
     name: bFilterName, setName: setBFilterName,
-    condition: bFilterCondition, setCondition: setBFilterCondition
-  }), [bFilterModel, bFilterColor, bFilterVariation, bFilterYear, bFilterName, bFilterCondition]);
+    condition: bFilterCondition, setCondition: setBFilterCondition,
+    rarity: bFilterRarity, setRarity: setBFilterRarity
+  }), [bFilterModel, bFilterColor, bFilterVariation, bFilterYear, bFilterName, bFilterCondition, bFilterRarity]);
 
 const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
 
@@ -466,6 +476,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   const [sFilterYear, setSFilterYear] = useState<string>("");
   const [sFilterName, setSFilterName] = useState<string>("");
   const [sFilterCondition, setSFilterCondition] = useState<string>("");
+  const [sFilterRarity, setSFilterRarity] = useState<string>("");
 
   const sharedFilters = useMemo(() => ({
     model: sFilterModel, setModel: setSFilterModel,
@@ -473,14 +484,16 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     variation: sFilterVariation, setVariation: setSFilterVariation,
     year: sFilterYear, setYear: setSFilterYear,
     name: sFilterName, setName: setSFilterName,
-    condition: sFilterCondition, setCondition: setSFilterCondition
-  }), [sFilterModel, sFilterColor, sFilterVariation, sFilterYear, sFilterName, sFilterCondition]);
+    condition: sFilterCondition, setCondition: setSFilterCondition,
+    rarity: sFilterRarity, setRarity: setSFilterRarity
+  }), [sFilterModel, sFilterColor, sFilterVariation, sFilterYear, sFilterName, sFilterCondition, sFilterRarity]);
 
   const [swFilterModel, setSwFilterModel] = useState<string>("");
   const [swFilterColor, setSwFilterColor] = useState<string>("");
   const [swFilterVariation, setSwFilterVariation] = useState<string>("");
   const [swFilterYear, setSwFilterYear] = useState<string>("");
   const [swFilterName, setSwFilterName] = useState<string>("");
+  const [swFilterRarity, setSwFilterRarity] = useState<string>("");
 
   const sharedWishlistFilters = useMemo(() => ({
     model: swFilterModel, setModel: setSwFilterModel,
@@ -488,7 +501,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     variation: swFilterVariation, setVariation: setSwFilterVariation,
     year: swFilterYear, setYear: setSwFilterYear,
     name: swFilterName, setName: setSwFilterName,
-  }), [swFilterModel, swFilterColor, swFilterVariation, swFilterYear, swFilterName]);
+    rarity: swFilterRarity, setRarity: setSwFilterRarity
+  }), [swFilterModel, swFilterColor, swFilterVariation, swFilterYear, swFilterName, swFilterRarity]);
 
 
   // Wishlist Filters
@@ -498,6 +512,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   const [wFilterYear, setWFilterYear] = useState<string>("");
   const [wFilterName, setWFilterName] = useState<string>("");
   const [wFilterCondition, setWFilterCondition] = useState<string>("");
+  const [wFilterRarity, setWFilterRarity] = useState<string>("");
 
   const wishlistFilters = useMemo(() => ({
     model: wFilterModel, setModel: setWFilterModel,
@@ -505,8 +520,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     variation: wFilterVariation, setVariation: setWFilterVariation,
     year: wFilterYear, setYear: setWFilterYear,
     name: wFilterName, setName: setWFilterName,
-    condition: wFilterCondition, setCondition: setWFilterCondition
-  }), [wFilterModel, wFilterColor, wFilterVariation, wFilterYear, wFilterName, wFilterCondition]);
+    condition: wFilterCondition, setCondition: setWFilterCondition,
+    rarity: wFilterRarity, setRarity: setWFilterRarity
+  }), [wFilterModel, wFilterColor, wFilterVariation, wFilterYear, wFilterName, wFilterCondition, wFilterRarity]);
   const [showWishlistOnly, setShowWishlistOnly] = useState(false);
 
   const uniqueTrophyBalls = useMemo(() => getUniqueCatalogItems(balls, catalog), [balls, catalog]);
@@ -1999,6 +2015,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
       const matchesAdvancedVariation = !cFilterVariation || item.variation === cFilterVariation;
       const matchesAdvancedYear = !cFilterYear || item.year === cFilterYear;
       const matchesAdvancedName = !cFilterName || item.name === cFilterName;
+      const matchesAdvancedRarity = !cFilterRarity || (item.rarity || 'common').toLowerCase() === cFilterRarity.toLowerCase();
 
       const itemWishlisted = userProfile?.wishlist?.some(w => w === item.id || w.startsWith(`${item.id}-pkg-`));
       const isWishlistTab = dbPanelTab === "wishlist";
@@ -2011,9 +2028,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
           return matchesWishlist;
       }
 
-      return matchesBrand && matchesWishlist && matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName;
+      return matchesBrand && matchesWishlist && matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName && matchesAdvancedRarity;
     });
-  }, [searchedCatalog, selectedBrandFilter, showWishlistOnly, userProfile, dbPanelTab, cFilterModel, cFilterColor, cFilterVariation, cFilterYear, cFilterName]);
+  }, [searchedCatalog, selectedBrandFilter, showWishlistOnly, userProfile, dbPanelTab, cFilterModel, cFilterColor, cFilterVariation, cFilterYear, cFilterName, cFilterRarity]);
 
   // Unique models actually present in the registry catalog for the Filter Model buttons
   const registeredModels = useMemo(() => {
@@ -2316,7 +2333,8 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                           const matchesAdvancedVariation = !swFilterVariation || item.variation === swFilterVariation;
                           const matchesAdvancedYear = !swFilterYear || item.year === swFilterYear;
                           const matchesAdvancedName = !swFilterName || item.name === swFilterName;
-                          return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName;
+                          const matchesAdvancedRarity = !swFilterRarity || (item.rarity || 'common').toLowerCase() === swFilterRarity.toLowerCase();
+                          return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName && matchesAdvancedRarity;
                         })
                         .map((item, index) => {
                           if (!item) return null;
@@ -2340,7 +2358,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
               ) : (
                 <motion.div key="shared-owned" initial={{opacity: 0, x: -20}} animate={{opacity: 1, x: 0}} exit={{opacity: 0, x: 20}} transition={{ duration: 0.2 }} className="space-y-4">
                   {sharedLockerBalls.length > 0 && (
-                    <VaultFilterBar items={sharedLockerBalls} filters={sharedFilters} showCondition={true} />
+                    <VaultFilterBar items={sharedLockerBallsWithRarity} filters={sharedFilters} showCondition={true} />
                   )}
 
                   {sharedLockerBalls.length === 0 ? (
@@ -2357,7 +2375,9 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                       const matchesAdvancedYear = !sFilterYear || ball.year === sFilterYear;
                       const matchesAdvancedName = !sFilterName || ball.name === sFilterName;
                       const matchesAdvancedCondition = !sFilterCondition || ball.condition === sFilterCondition;
-                      return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName && matchesAdvancedCondition;
+                      const ballRarity = (catalog.find(c => c.id === (ball.catalogId || ball.id))?.rarity || ball.rarity || 'common').toLowerCase();
+                      const matchesAdvancedRarity = !sFilterRarity || ballRarity === sFilterRarity.toLowerCase();
+                      return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName && matchesAdvancedCondition && matchesAdvancedRarity;
                     })
                     .map((ball, index) => {
                     const currentPkg = ball.packageType || "ea";
@@ -2736,11 +2756,13 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
               bFilterYear={bFilterYear}
               bFilterName={bFilterName}
               bFilterCondition={bFilterCondition}
+              bFilterRarity={bFilterRarity}
               wFilterModel={wFilterModel}
               wFilterColor={wFilterColor}
               wFilterVariation={wFilterVariation}
               wFilterYear={wFilterYear}
               wFilterName={wFilterName}
+              wFilterRarity={wFilterRarity}
               activeRound={activeRound}
               onOpenRoundModal={() => setIsRoundTrackerOpen(true)}
             />

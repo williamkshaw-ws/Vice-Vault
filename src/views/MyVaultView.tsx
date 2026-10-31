@@ -113,11 +113,13 @@ interface MyVaultViewProps {
   bFilterYear: string;
   bFilterName: string;
   bFilterCondition: string;
+  bFilterRarity?: string;
   wFilterModel: string;
   wFilterColor: string;
   wFilterVariation: string;
   wFilterYear: string;
   wFilterName: string;
+  wFilterRarity?: string;
   activeRound?: any;
   onOpenRoundModal?: () => void;
 }
@@ -152,11 +154,13 @@ export default function MyVaultView({
   bFilterYear,
   bFilterName,
   bFilterCondition,
+  bFilterRarity = "",
   wFilterModel,
   wFilterColor,
   wFilterVariation,
   wFilterYear,
   wFilterName,
+  wFilterRarity = "",
   activeRound,
   onOpenRoundModal,
 }: MyVaultViewProps) {
@@ -174,6 +178,17 @@ export default function MyVaultView({
 
   const deferredBagSearchQuery = useDeferredValue(bagSearchQuery);
   const deferredWishlistSearchQuery = useDeferredValue(wishlistSearchQuery);
+
+  const ballsWithCatalogRarity = useMemo(() => {
+    return balls.map(ball => {
+      const cItem = catalog.find(c => c.id === (ball.catalogId || ball.id));
+      const rarity = cItem?.rarity || ball.rarity || 'common';
+      return {
+        ...ball,
+        rarity
+      };
+    });
+  }, [balls, catalog]);
 
   const filteredWishlistItems = useMemo(() => {
     if (!userProfile?.wishlist?.length) return [];
@@ -199,7 +214,9 @@ export default function MyVaultView({
         const matchesAdvancedVariation = !wFilterVariation || item.variation === wFilterVariation;
         const matchesAdvancedYear = !wFilterYear || item.year === wFilterYear;
         const matchesAdvancedName = !wFilterName || item.name === wFilterName;
-        return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName;
+        const itemRarity = (item.rarity || 'common').toLowerCase();
+        const matchesAdvancedRarity = !wFilterRarity || itemRarity === wFilterRarity.toLowerCase();
+        return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName && matchesAdvancedRarity;
       })
       .sort((a, b) => {
         if (!a || !b) return 0;
@@ -221,7 +238,7 @@ export default function MyVaultView({
           default: return 0;
         }
       });
-  }, [userProfile?.wishlist, userProfile?.wishlistDates, catalog, deferredWishlistSearchQuery, wFilterModel, wFilterColor, wFilterVariation, wFilterYear, wFilterName, bagSortBy]);
+  }, [userProfile?.wishlist, userProfile?.wishlistDates, catalog, deferredWishlistSearchQuery, wFilterModel, wFilterColor, wFilterVariation, wFilterYear, wFilterName, wFilterRarity, bagSortBy]);
 
   const filteredOwnedBalls = useMemo(() => {
     return balls
@@ -246,7 +263,9 @@ export default function MyVaultView({
         const matchesAdvancedYear = !bFilterYear || ball.year === bFilterYear;
         const matchesAdvancedName = !bFilterName || ball.name === bFilterName;
         const matchesAdvancedCondition = !bFilterCondition || ball.condition === bFilterCondition;
-        return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName && matchesAdvancedCondition;
+        const ballRarity = (catalog.find(c => c.id === (ball.catalogId || ball.id))?.rarity || ball.rarity || 'common').toLowerCase();
+        const matchesAdvancedRarity = !bFilterRarity || ballRarity === bFilterRarity.toLowerCase();
+        return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName && matchesAdvancedCondition && matchesAdvancedRarity;
       })
       .sort((a, b) => {
         switch (bagSortBy) {
@@ -261,7 +280,7 @@ export default function MyVaultView({
           default: return a.index - b.index;
         }
       });
-  }, [balls, bagFilter, deferredBagSearchQuery, bFilterModel, bFilterColor, bFilterVariation, bFilterYear, bFilterName, bFilterCondition, bagSortBy]);
+  }, [balls, catalog, bagFilter, deferredBagSearchQuery, bFilterModel, bFilterColor, bFilterVariation, bFilterYear, bFilterName, bFilterCondition, bFilterRarity, bagSortBy]);
 
   if (!currentUser) return null;
 
@@ -529,7 +548,7 @@ export default function MyVaultView({
                   onChange={setBagSearchQuery}
                   placeholder="Search bag (e.g., Red, Pro, 2021...)"
                 />
-                <VaultFilterBar items={balls} filters={bagFilters} showCondition={true} />
+                <VaultFilterBar items={ballsWithCatalogRarity} filters={bagFilters} showCondition={true} />
               </div>
             )}
             {balls.length === 0 ? (
