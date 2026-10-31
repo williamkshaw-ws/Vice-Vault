@@ -2184,7 +2184,9 @@
     "groupColor": false,
     "groupVariation": false,
     "bundleItems": [],
-    "rarity": "limited"
+    "rarity": "limited",
+    "customImage": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/TOUR-CORONA_PREMIER-WHITE.png",
+    "customImageBox": "https://storage.googleapis.com/vice-vault-f52e4.firebasestorage.app/catalog/TOUR-CORONA_PREMIER-WHITE_box.png"
   },
   {
     "id": "TOUR-GRAY-GRAY",
