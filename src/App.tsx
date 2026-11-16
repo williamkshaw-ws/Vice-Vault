@@ -5,69 +5,55 @@
 
 import React, { useState, useEffect, useMemo, useRef, useDeferredValue, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { GolfBall, CatalogItem, BallModel, BallColor, BallCondition, UserProfile } from "./types";
-import { VICE_BALLS_SPECS, COLOR_STYLES, SCRAPED_BALLS } from "./constants";
+import { GolfBall, CatalogItem, BallCondition, UserProfile } from "./types";
+import { SCRAPED_BALLS } from "./constants";
 import CatalogItemCard from "./components/CatalogItemCard";
 const VaultManagerModal = React.lazy(() => import("./components/VaultManagerModal"));
 const FriendsPortal = React.lazy(() => import("./components/FriendsPortal"));
-import MetricCards from "./components/MetricCards";
 import { useAuth } from "./hooks/useAuth";
 import { useBallLocker } from "./hooks/useBallLocker";
 import { useRoundTracker } from "./hooks/useRoundTracker";
-import { filterLegacyBalls, safeJSONParse, getBundleItemsForBall } from "./utils/bagUtils";
-import { idbGet, idbSet, idbDelete, migrateLocalStorageToIdb } from "./utils/storage";
+import { filterLegacyBalls, getBundleItemsForBall } from "./utils/bagUtils";
+import { idbGet, idbSet, migrateLocalStorageToIdb } from "./utils/storage";
 import { initNativeApp } from "./utils/nativeBridge";
 import { getAuthHeaders } from "./utils/authHeaders";
 import { nativeHaptics } from "./utils/native";
 import OwnedBallCard from "./components/OwnedBallCard";
-import SearchInput from "./components/SearchInput";
 import { ACCENT_COLORS, sanitizeId } from "./utils";
-import TrophyCase from "./components/TrophyCase";
 const ImportExportModal = React.lazy(() => import("./components/ImportExportModal"));
 const LeaderboardModal = React.lazy(() => import("./components/LeaderboardModal"));
 const RoundTrackerModal = React.lazy(() => import("./components/RoundTrackerModal"));
-import type { RoundBallInPlay, GolfRound } from "./components/RoundTrackerModal";
+import type { RoundBallInPlay } from "./components/RoundTrackerModal";
 import VaultFilterBar from "./components/VaultFilterBar";
 import BallVisual from "./components/BallVisual";
+import { GolfBagIcon } from "./components/GolfBagIcon";
 import CatalogView from "./views/CatalogView";
 import MyVaultView from "./views/MyVaultView";
 import { useAppStore } from "./store/useAppStore";
 import { 
-  Search, 
-  Sparkles, 
   Database, 
   Trash2,
-  SlidersHorizontal,
-  ChevronRight,
-  PlusSquare,
-  PackageCheck,
   Settings,
   Pencil,
   AlertTriangle,
-  FileSpreadsheet,
   User,
   Sun,
   Moon,
   Monitor,
   RefreshCw,
   LogOut,
-  CloudLightning,
   ChevronDown,
   Palette,
   Check,
-  Lock,
-  Mail,
   X,
   Eye,
   EyeOff,
   ShoppingBag,
-  FileText,
   Users,
   Heart,
   Trophy,
   Flag,
-  WifiOff,
-  Wifi
+  WifiOff
 } from "lucide-react";
 
 import { auth, db, isFirebaseConfigured } from "./firebase";
@@ -75,28 +61,9 @@ import AuthModal, { AvatarRenderer } from "./components/AuthModal";
 import ResetPasswordModal from "./components/ResetPasswordModal";
 import VerifyEmailModal from "./components/VerifyEmailModal";
 import LegalPage, { LegalDocType } from "./components/LegalPage";
-import { User as FirebaseUser } from "firebase/auth";
-import { doc, getDoc, setDoc, updateDoc, query, where, collection, getDocs } from "firebase/firestore";
 import defaultCatalogData from "../data/catalog.json";
 
 // Premium Custom Golf-Specific SVGs designed to match the Munich technical aesthetic
-function GolfBagIcon({ className = "w-5 h-5 text-neutral-400" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
-      {/* Club Shafts */}
-      <path d="M10 8L8.5 4M8.5 4C7.5 4 7 5 8 5" />
-      <path d="M12 8L12 3M12 3C13.5 3 14 4.5 12.5 5" />
-      <path d="M14 8L15.5 4M15.5 4C16.5 4 17 5 16 5" />
-      {/* Main Bag Body */}
-      <path d="M8 8 L9.5 21 C9.7 22 14.3 22 14.5 21 L16 8 Z" fill="#000" />
-      {/* Side Pocket */}
-      <path d="M8.5 11.5 C6.5 11.5 6.5 17 9.1 17.5" fill="#070707" />
-      {/* Shoulder Strap */}
-      <path d="M15.5 10 C18 11 18 16.5 14.5 18" />
-    </svg>
-  );
-}
-
 function GolfBallOutlineIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
@@ -165,9 +132,6 @@ function BallVaultIcon({ className = "w-4 h-4 text-neutral-400" }: { className?:
   );
 }
 
-// Initial owned mockup data to make the app look stunning right away
-const INITIAL_OWNED_BALLS: GolfBall[] = [];
-
 // Helper to generate the standard default Vice catalog entries
 const generateDefaultCatalog = (): CatalogItem[] => {
   return (defaultCatalogData as CatalogItem[]) || SCRAPED_BALLS;
@@ -176,11 +140,6 @@ const generateDefaultCatalog = (): CatalogItem[] => {
 const bundledCatalogMap = new Map<string, CatalogItem>(
   (defaultCatalogData as CatalogItem[]).map(item => [item.id, item])
 );
-
-const hexToRgb = (hex: string) => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : "124, 179, 0";
-};
 
 const getHash = (model: string, name: string, color: string, variation: string, year: string) => {
   return `${(model||"").trim().toLowerCase()}|${(name||"").trim().toLowerCase()}|${(color||"").trim().toLowerCase()}|${(variation||"").trim().toLowerCase()}|${(year||"").trim().toLowerCase()}`;
@@ -345,14 +304,12 @@ export default function App() {
     balls, 
     setBalls, 
     isLoadingCloudData, 
-    isCloudDataLoaded, 
-    setIsCloudDataLoaded 
+    isCloudDataLoaded
   } = useBallLocker(currentUser, userProfile);
 
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [isImportExportModalOpen, setIsImportExportModalOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [guestDropdownOpen, setGuestDropdownOpen] = useState(false);
   const [showClearWishlistConfirm, setShowClearWishlistConfirm] = useState(false);
   const [showTrophyCase, setShowTrophyCase] = useState(false);
 
@@ -366,7 +323,7 @@ export default function App() {
   // (balls managed by useBallLocker)
 
   const [bagFilter, setBagFilter] = useState<'ea' | 'sleeve' | 'box' | null>(null);
-  const { bagSortBy, setBagSortBy, catalogSortBy, setCatalogSortBy, bagTab, setBagTab } = useAppStore();
+  const { setBagSortBy, catalogSortBy, bagTab } = useAppStore();
 
   useEffect(() => {
     if (bagTab === "wishlist") {
@@ -421,9 +378,9 @@ export default function App() {
     }).catch(err => console.warn("Failed to load catalog from IndexedDB:", err));
   }, []);
 
-  const { searchQuery, setSearchQuery, bagSearchQuery, setBagSearchQuery, wishlistSearchQuery, setWishlistSearchQuery } = useAppStore();
+  const { searchQuery } = useAppStore();
   // Quick filter to narrow core brand models
-  const [selectedBrandFilter, setSelectedBrandFilter] = useState<string>("ALL");
+  const [selectedBrandFilter] = useState<string>("ALL");
   // Catalog Filters
   const [cFilterModel, setCFilterModel] = useState<string>("");
   const [cFilterColor, setCFilterColor] = useState<string>("");
@@ -577,26 +534,10 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   const { mobileTab, setMobileTab } = useAppStore();
 
   // Active Catalog Item for modification
-  const [editingItem, setEditingItem] = useState<CatalogItem | null>(null);
-
-  // Tracks which specification is in "Confirm Delete" mode
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-
-  // Tracks if the global reset confirm toggle is active
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
-
-  // Tracks if delete all for locker confirm is active
-  const [showDeleteAllLockerConfirm, setShowDeleteAllLockerConfirm] = useState(false);
-
-  // Tracks if delete all for catalog confirm is active
-  const [showDeleteAllCatalogConfirm, setShowDeleteAllCatalogConfirm] = useState(false);
-
-  // Search input filter inside Catalog Admin
-  // Quick filter to narrow models inside Catalog Admin (Vault Manager)
-  const [adminBrandFilter, setAdminBrandFilter] = useState<string>("ALL");
+  const [, setEditingItem] = useState<CatalogItem | null>(null);
 
   // Toggle for Spreadsheet bulk importer in admin
-  const [showXlsImporter, setShowXlsImporter] = useState(false);
+  const [, setShowXlsImporter] = useState(false);
 
   // Prevent background scrolling when a modal overlay is open
   useEffect(() => {
@@ -1763,27 +1704,6 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     }
   };
 
-  // Update owned quantity stepper
-  const handleUpdateQty = (id: string, newQty: number) => {
-    setBalls((prev) => 
-      prev.map(b => b.id === id ? { ...b, quantity: Math.max(1, newQty) } : b)
-    );
-  };
-
-  // Update condition appraisal
-  const handleUpdateCondition = (id: string, newCond: BallCondition) => {
-    setBalls((prev) => 
-      prev.map(b => b.id === id ? { ...b, condition: newCond } : b)
-    );
-  };
-
-  // Update notes inline
-  const handleUpdateNotes = (id: string, newNotes: string) => {
-    setBalls((prev) => 
-      prev.map(b => b.id === id ? { ...b, notes: newNotes } : b)
-    );
-  };
-
   // General update handler for locker balls with instant UI update
   const handleUpdateBall = (id: string, updatedFields: Partial<GolfBall>) => {
     setBalls((prev) =>
@@ -1953,7 +1873,6 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
   // Wipe entire owned Bag Locker
   const handleDeleteAllLocker = () => {
     setBalls([]);
-    setShowDeleteAllLockerConfirm(false);
   };
 
   // Wipe entire Catalog templates list
@@ -1979,21 +1898,6 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
     } finally {
       setIsVaultProcessing(false);
     }
-  };
-
-  // Safe restoration of demo inventory & default catalog database
-  const handleResetApp = () => {
-    setBalls(INITIAL_OWNED_BALLS);
-    const standardCatalog = generateDefaultCatalog();
-    setCatalog(standardCatalog);
-    localStorage.removeItem("vice_vault_guest_v2");
-    localStorage.removeItem("vice_vault_catalog");
-    idbDelete("vice_vault_guest_v2").catch(() => {});
-    idbDelete("vice_vault_catalog").catch(() => {});
-    setSearchQuery("");
-    setSelectedBrandFilter("ALL");
-    setDbPanelTab("browse");
-    setShowResetConfirm(false);
   };
 
   // Non-blocking deferred search query for high-frequency typing
@@ -2382,15 +2286,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                       const matchesAdvancedRarity = !sFilterRarity || ballRarity === sFilterRarity.toLowerCase();
                       return matchesAdvancedModel && matchesAdvancedColor && matchesAdvancedVariation && matchesAdvancedYear && matchesAdvancedName && matchesAdvancedCondition && matchesAdvancedRarity;
                     })
-                    .map((ball, index) => {
-                    const currentPkg = ball.packageType || "ea";
-                    const displayQty = ball.packageType === "box" 
-                      ? Math.max(1, Math.round(ball.quantity / 12)) 
-                      : ball.packageType === "sleeve" 
-                      ? Math.max(1, Math.round(ball.quantity / 3)) 
-                      : ball.quantity;
-
-                    return (
+                    .map((ball, index) => (
                       <OwnedBallCard 
                         index={index}
                         key={ball.id} 
@@ -2398,8 +2294,7 @@ const [sharedTab, setSharedTab] = useState<"owned" | "wishlist">("owned");
                         catalog={catalog} 
                         readOnly={true} 
                       />
-                    );
-                  })}
+                    ))}
                 </div>
               )}
               </motion.div>

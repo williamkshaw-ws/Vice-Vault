@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import html2canvas from "html2canvas";
 import { GolfBall, BallCondition, CatalogItem } from "../types";
 import BallVisual from "./BallVisual";
-import { Trash2, Calendar, FileText, ChevronDown, ChevronUp, Check, Save, Edit2, X, Package, MessageSquare, AlertTriangle, Box, Share2, Loader2 } from "lucide-react";
+import { Trash2, FileText, ChevronDown, ChevronUp, Save, Edit2, X, Package, MessageSquare, AlertTriangle, Box, Share2, Loader2 } from "lucide-react";
 import { TradingCardRenderer } from "./TradingCardRenderer";
 import { nativeHaptics } from "../utils/native";
 import { getBundleItemsForBall } from "../utils/bagUtils";

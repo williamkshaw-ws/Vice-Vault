@@ -5,7 +5,7 @@
 
 import React, { useState, useRef } from "react";
 import { CatalogItem, BundleItem } from "../types";
-import { Plus, Upload, Trash, Sparkles, CheckCircle2, Box, X } from "lucide-react";
+import { Plus, Upload, Trash, Sparkles, CheckCircle2, Box } from "lucide-react";
 import { compressImage } from "../utils/imageCompressor";
 
 interface AddMissingBallFormProps {
@@ -52,7 +52,6 @@ export default function AddMissingBallForm({
 
   
   // Visual feedback states
-  const [isDragActive, setIsDragActive] = useState(false);
   const [success, setSuccess] = useState(false);
   const ballInputRef = useRef<HTMLInputElement>(null);
   const sleeveInputRef = useRef<HTMLInputElement>(null);

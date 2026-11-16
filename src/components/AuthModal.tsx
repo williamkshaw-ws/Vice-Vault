@@ -5,24 +5,21 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Lock, User as UserIcon, Settings, Palette, Check, RefreshCw, Link as LinkIcon, Sun, Moon, Monitor, Copy, Eye, EyeOff, AlertTriangle, Share2, Trash2, ArrowLeft, CheckCircle2, ShieldCheck, Pencil } from "lucide-react";
+import { X, Mail, Lock, User as UserIcon, Palette, Check, RefreshCw, Link as LinkIcon, Copy, Eye, EyeOff, AlertTriangle, Share2, Trash2, ArrowLeft, CheckCircle2, ShieldCheck, Pencil } from "lucide-react";
 import { ACCENT_COLORS, isStrongPassword } from "../utils";
 import { nativeHaptics, nativeShare } from "../utils/native";
 import { getAuthHeaders } from "../utils/authHeaders";
 import {
   auth,
-  db,
   isFirebaseConfigured
 } from "../firebase";
 import {
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   updateProfile,
   updatePassword,
   sendPasswordResetEmail,
   sendEmailVerification
 } from "firebase/auth";
-import { doc, setDoc, getDoc, deleteDoc } from "firebase/firestore";
 
 interface AuthModalProps {
   isOpen: boolean;

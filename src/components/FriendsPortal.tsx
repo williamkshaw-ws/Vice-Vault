@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { GolfBagIcon } from "./GolfBagIcon";
-import { Users, UserPlus, UserCheck, UserX, Trash2, Search, ChevronRight, X } from "lucide-react";
+import { Users, UserPlus, UserCheck, Trash2, Search, X } from "lucide-react";
 import { getAuthHeaders } from "../utils/authHeaders";
 
 interface ProfileItem {

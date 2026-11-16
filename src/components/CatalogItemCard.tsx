@@ -6,8 +6,7 @@
 import React, { useState } from "react";
 import { CatalogItem, BallCondition } from "../types";
 import BallVisual from "./BallVisual";
-import { Plus, Check, ChevronDown, ChevronUp, Layers, HelpCircle, Package, MessageSquare, X, AlertTriangle, Heart } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Plus, Check, Package, MessageSquare, X, Heart } from "lucide-react";
 import { useAppStore } from "../store/useAppStore";
 import { nativeHaptics } from "../utils/native";
 

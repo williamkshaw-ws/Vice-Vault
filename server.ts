@@ -2,22 +2,11 @@ import "dotenv/config";
 import express from "express";
 import path from "path";
 import fs from "fs";
-import { fileURLToPath } from "url";
 import admin from "firebase-admin";
 import crypto from "crypto";
 import rateLimit from "express-rate-limit";
 import nodemailer from "nodemailer";
-import { BallModel } from "./src/types";
-import { VICE_BALLS_SPECS, COLOR_STYLES, SCRAPED_BALLS } from "./src/constants";
-
-const _filename = typeof __filename !== "undefined"
-  ? __filename
-  : typeof import.meta !== "undefined" && import.meta.url
-    ? fileURLToPath(import.meta.url)
-    : "";
-const _dirname = typeof __dirname !== "undefined"
-  ? __dirname
-  : path.dirname(_filename);
+import { SCRAPED_BALLS } from "./src/constants";
 
 
 interface UserProfile {
@@ -866,14 +855,6 @@ function sanitizeId(model: string, color: string, name?: string, variation?: str
   if (varPart) base += `-${varPart}`;
   return base;
 }
-
-// Dynamically build DEFAULT_IMAGES mapping from SCRAPED_BALLS for compatibility
-const DEFAULT_IMAGES: Record<string, string> = SCRAPED_BALLS.reduce((acc, ball) => {
-  if (ball.customImage) {
-    acc[ball.id] = ball.customImage;
-  }
-  return acc;
-}, {} as Record<string, string>);
 
 // Initial Standard Catalog templates
 const DEFAULT_CATALOG: CatalogItem[] = SCRAPED_BALLS;

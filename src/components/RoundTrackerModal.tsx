@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Flag, 
   CheckCircle2, 
@@ -7,19 +6,13 @@ import {
   X, 
   Trash2, 
   Plus, 
-  Minus, 
   History, 
   BarChart3, 
   Play, 
-  Calendar, 
   MapPin, 
-  RotateCcw, 
-  Sparkles, 
   ShieldCheck, 
-  HelpCircle,
   Skull,
   ChevronDown,
-  Box,
   XCircle
 } from 'lucide-react';
 import { GolfBall, BallCondition, CatalogItem, BundleItem } from '../types';

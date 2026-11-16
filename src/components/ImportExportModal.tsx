@@ -1,7 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Download, Upload, X, AlertTriangle, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { GolfBall } from "../types";
 
 interface ImportExportModalProps {
   isOpen: boolean;

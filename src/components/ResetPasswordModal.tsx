@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lock, Eye, EyeOff, Check, RefreshCw, AlertTriangle, CheckCircle2, ShieldCheck, X } from "lucide-react";
+import { Lock, Eye, EyeOff, RefreshCw, AlertTriangle, CheckCircle2, X } from "lucide-react";
 import { isStrongPassword } from "../utils";
 import { nativeHaptics } from "../utils/native";
 import { auth } from "../firebase";

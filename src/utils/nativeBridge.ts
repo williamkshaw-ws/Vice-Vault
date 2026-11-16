@@ -1,7 +1,6 @@
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SplashScreen } from '@capacitor/splash-screen';
-import { Keyboard } from '@capacitor/keyboard';
 
 export const isNative = Capacitor.isNativePlatform();
 export const isIos = Capacitor.getPlatform() === 'ios';
