@@ -5,8 +5,29 @@ import fs from "fs";
 import admin from "firebase-admin";
 import crypto from "crypto";
 import rateLimit from "express-rate-limit";
-import nodemailer from "nodemailer";
 import { SCRAPED_BALLS } from "./src/constants";
+import {
+  encryptUsername,
+  decryptUsername,
+  generateMockToken,
+  verifyMockToken,
+  generateResetToken,
+  verifyResetToken,
+  generateVerifyEmailToken,
+  verifyEmailToken,
+  isStrongPassword,
+  hashPassword,
+  verifyPassword,
+  cleanUsernameString,
+  isValidEmailFormat,
+  isDisposableEmail,
+  maskEmail
+} from "./server/authUtils";
+import {
+  isEmailConfigured,
+  sendBrandedPasswordResetEmail,
+  sendBrandedEmailVerificationEmail
+} from "./server/email";
 
 
 interface UserProfile {
@@ -33,19 +54,6 @@ interface UserProfile {
   totalBalls?: number;
 }
 
-const SECRET_KEY = process.env.SHARE_SECRET || (() => {
-  const generated = crypto.randomBytes(32).toString("hex");
-  console.warn("==========================================================");
-  console.warn("WARNING: No SHARE_SECRET set in environment variables!");
-  console.warn("A random secret key has been generated for share links.");
-  // NOTE: The generated secret is intentionally NOT logged here to prevent
-  // it from appearing in persistent log storage or log aggregators.
-  console.warn("Please set SHARE_SECRET in your .env file to ensure share links persist across server restarts.");
-  console.warn("==========================================================");
-  return generated;
-})();
-const AES_KEY = crypto.createHash('sha256').update(SECRET_KEY).digest();
-
 const INITIAL_ADMIN_PASSWORD = process.env.INITIAL_ADMIN_PASSWORD || (() => {
   const generated = crypto.randomBytes(12).toString("hex");
   console.warn("==========================================================");
@@ -57,338 +65,6 @@ const INITIAL_ADMIN_PASSWORD = process.env.INITIAL_ADMIN_PASSWORD || (() => {
   console.warn("==========================================================");
   return generated;
 })();
-
-function encryptUsername(username: string): string {
-  if (!username) return "";
-  // Use a secure random IV per encryption to prevent deterministic ciphertexts
-  const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv('aes-256-cbc', AES_KEY, iv);
-  let encrypted = cipher.update(username, 'utf8', 'base64url');
-  encrypted += cipher.final('base64url');
-  return iv.toString('base64url') + '.' + encrypted;
-}
-
-function decryptUsername(token: string): string | null {
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 2) return null;
-    const iv = Buffer.from(parts[0], 'base64url');
-    const encryptedText = parts[1];
-    const decipher = crypto.createDecipheriv('aes-256-cbc', AES_KEY, iv);
-    let decrypted = decipher.update(encryptedText, 'base64url', 'utf8');
-    decrypted += decipher.final('utf8');
-    return decrypted;
-  } catch (err) {
-    return null;
-  }
-}
-
-function generateMockToken(uid: string): string {
-  const payload = Buffer.from(JSON.stringify({ uid, exp: Date.now() + 86400000 })).toString('base64url');
-  const signature = crypto.createHmac('sha256', SECRET_KEY).update(payload).digest('base64url');
-  return `mock.${payload}.${signature}`;
-}
-
-function verifyMockToken(token: string): string | null {
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 3 || parts[0] !== 'mock') return null;
-    const expectedSignature = crypto.createHmac('sha256', SECRET_KEY).update(parts[1]).digest('base64url');
-    const expectedBuf = Buffer.from(expectedSignature, 'utf8');
-    const actualBuf = Buffer.from(parts[2], 'utf8');
-    if (expectedBuf.length !== actualBuf.length || !crypto.timingSafeEqual(expectedBuf, actualBuf)) return null;
-    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
-    if (payload.exp < Date.now()) return null;
-    return payload.uid;
-  } catch (err) {
-    return null;
-  }
-}
-
-function generateResetToken(email: string): string {
-  const payload = Buffer.from(JSON.stringify({ email: email.trim().toLowerCase(), exp: Date.now() + 3600000 })).toString('base64url'); // 1 hour
-  const signature = crypto.createHmac('sha256', SECRET_KEY).update(payload).digest('base64url');
-  return `reset.${payload}.${signature}`;
-}
-
-function verifyResetToken(token: string): string | null {
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 3 || parts[0] !== 'reset') return null;
-    const expectedSignature = crypto.createHmac('sha256', SECRET_KEY).update(parts[1]).digest('base64url');
-    const expectedBuf = Buffer.from(expectedSignature, 'utf8');
-    const actualBuf = Buffer.from(parts[2], 'utf8');
-    if (expectedBuf.length !== actualBuf.length || !crypto.timingSafeEqual(expectedBuf, actualBuf)) return null;
-    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
-    if (payload.exp < Date.now()) return null;
-    return payload.email;
-  } catch (err) {
-    return null;
-  }
-}
-
-function generateVerifyEmailToken(email: string): string {
-  const payload = Buffer.from(JSON.stringify({ email: email.trim().toLowerCase(), exp: Date.now() + 86400000 })).toString('base64url'); // 24 hours
-  const signature = crypto.createHmac('sha256', SECRET_KEY).update(payload).digest('base64url');
-  return `verify.${payload}.${signature}`;
-}
-
-function verifyEmailToken(token: string): string | null {
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 3 || parts[0] !== 'verify') return null;
-    const expectedSignature = crypto.createHmac('sha256', SECRET_KEY).update(parts[1]).digest('base64url');
-    const expectedBuf = Buffer.from(expectedSignature, 'utf8');
-    const actualBuf = Buffer.from(parts[2], 'utf8');
-    if (expectedBuf.length !== actualBuf.length || !crypto.timingSafeEqual(expectedBuf, actualBuf)) return null;
-    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
-    if (payload.exp < Date.now()) return null;
-    return payload.email;
-  } catch (err) {
-    return null;
-  }
-}
-
-
-
-// Mail Transport Setup (Optional SMTP for direct branded emails with Reset Password Button)
-let mailTransporter: any = null;
-if (process.env.SMTP_HOST && process.env.SMTP_USER) {
-  mailTransporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT || "587", 10),
-    secure: process.env.SMTP_SECURE === "true" || process.env.SMTP_PORT === "465",
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS || ""
-    }
-  });
-  console.log(`Configured SMTP mail transporter for host: ${process.env.SMTP_HOST}`);
-}
-
-function getBrandedPasswordResetHtml(email: string, resetUrl: string): string {
-  return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reset Your Golf Ball Vault Password</title>
-</head>
-<body style="margin: 0; padding: 0; background-color: #0a0a0a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #ffffff;">
-  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0a0a0a; padding: 40px 16px;">
-    <tr>
-      <td align="center">
-        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 480px; background-color: #171717; border: 1px solid #262626; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
-          <tr>
-            <td style="padding: 32px 32px 24px 32px; text-align: center; border-bottom: 1px solid #262626;">
-              <div style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 12px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; font-size: 20px; font-weight: 900; margin-bottom: 12px; text-align: center;">
-                ⛳
-              </div>
-              <h1 style="margin: 0; font-size: 18px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: #ffffff;">GOLF BALL VAULT</h1>
-              <p style="margin: 4px 0 0 0; font-size: 11px; font-family: monospace; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Account Security & Recovery</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 32px;">
-              <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 22px; color: #e5e5e5;">
-                Hello,
-              </p>
-              <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 22px; color: #d4d4d4;">
-                We received a request to reset the password for your <strong>Golf Ball Vault</strong> account (<span style="color: #60a5fa; font-family: monospace;">${email}</span>). Click the button below to choose a new password:
-              </p>
-              
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
-                <tr>
-                  <td align="center" style="padding: 8px 0 28px 0;">
-                    <a href="${resetUrl}" target="_blank" style="display: inline-block; background-color: #2563eb; color: #ffffff; font-size: 13px; font-weight: 800; text-decoration: none; padding: 14px 32px; border-radius: 12px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);">
-                      Reset Password
-                    </a>
-                  </td>
-                </tr>
-              </table>
-
-              <p style="margin: 0 0 8px 0; font-size: 12px; line-height: 18px; color: #737373;">
-                This link will expire in <strong>1 hour</strong>.
-              </p>
-              <p style="margin: 0; font-size: 12px; line-height: 18px; color: #737373;">
-                If you did not request a password reset, you can safely disregard this email. Your password will remain unchanged.
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 20px 32px; background-color: #0f0f0f; border-top: 1px solid #262626; text-align: center;">
-              <p style="margin: 0; font-size: 11px; font-family: monospace; color: #525252;">
-                Golf Ball Vault • <a href="https://golfballvault.app" target="_blank" style="color: #60a5fa; text-decoration: none;">golfballvault.app</a>
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
-}
-
-async function sendBrandedPasswordResetEmail(targetEmail: string, resetUrl: string): Promise<boolean> {
-  // 1. Resend API (HTTP REST API, no SMTP ports needed)
-  if (process.env.RESEND_API_KEY) {
-    try {
-      const res = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.RESEND_API_KEY}`
-        },
-        body: JSON.stringify({
-          from: process.env.MAIL_FROM || "Golf Ball Vault <noreply@golfballvault.app>",
-          to: [targetEmail],
-          subject: "Reset your Golf Ball Vault password",
-          html: getBrandedPasswordResetHtml(targetEmail, resetUrl)
-        })
-      });
-      if (res.ok) {
-        console.log(`Sent branded password reset email via Resend to ${targetEmail}`);
-        return true;
-      } else {
-        const errData = await res.json().catch(() => ({}));
-        console.error("Resend API error:", errData);
-      }
-    } catch (e) {
-      console.error("Failed sending email via Resend:", e);
-    }
-  }
-
-  // 2. Standard SMTP Transporter (Nodemailer)
-  if (mailTransporter) {
-    try {
-      await mailTransporter.sendMail({
-        from: process.env.MAIL_FROM || '"Golf Ball Vault" <noreply@golfballvault.app>',
-        to: targetEmail,
-        subject: "Reset your Golf Ball Vault password",
-        html: getBrandedPasswordResetHtml(targetEmail, resetUrl)
-      });
-      console.log(`Sent branded password reset email via SMTP to ${targetEmail}`);
-      return true;
-    } catch (e) {
-      console.error("Failed sending email via SMTP:", e);
-    }
-  }
-
-  return false;
-}
-
-function getBrandedEmailVerificationHtml(email: string, verifyUrl: string): string {
-  return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verify Your Golf Ball Vault Email</title>
-</head>
-<body style="margin: 0; padding: 0; background-color: #0a0a0a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #ffffff;">
-  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0a0a0a; padding: 40px 16px;">
-    <tr>
-      <td align="center">
-        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 480px; background-color: #171717; border: 1px solid #262626; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
-          <tr>
-            <td style="padding: 32px 32px 24px 32px; text-align: center; border-bottom: 1px solid #262626;">
-              <div style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 12px; background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; font-size: 20px; font-weight: 900; margin-bottom: 12px; text-align: center;">
-                ⛳
-              </div>
-              <h1 style="margin: 0; font-size: 18px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: #ffffff;">GOLF BALL VAULT</h1>
-              <p style="margin: 4px 0 0 0; font-size: 11px; font-family: monospace; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Account Email Verification</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 32px;">
-              <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 22px; color: #e5e5e5;">
-                Hello,
-              </p>
-              <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 22px; color: #d4d4d4;">
-                Please verify your email address (<span style="color: #34d399; font-family: monospace;">${email}</span>) to secure your <strong>Golf Ball Vault</strong> account and ensure you can recover your locker anytime:
-              </p>
-              
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
-                <tr>
-                  <td align="center" style="padding: 8px 0 28px 0;">
-                    <a href="${verifyUrl}" target="_blank" style="display: inline-block; background-color: #10b981; color: #ffffff; font-size: 13px; font-weight: 800; text-decoration: none; padding: 14px 32px; border-radius: 12px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
-                      Verify Email Address
-                    </a>
-                  </td>
-                </tr>
-              </table>
-
-              <p style="margin: 0 0 8px 0; font-size: 12px; line-height: 18px; color: #737373;">
-                This link will expire in <strong>24 hours</strong>.
-              </p>
-              <p style="margin: 0; font-size: 12px; line-height: 18px; color: #737373;">
-                If you did not request this verification or create an account, you can safely ignore this email.
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 20px 32px; background-color: #0f0f0f; border-top: 1px solid #262626; text-align: center;">
-              <p style="margin: 0; font-size: 11px; font-family: monospace; color: #525252;">
-                Golf Ball Vault • <a href="https://golfballvault.app" target="_blank" style="color: #60a5fa; text-decoration: none;">golfballvault.app</a>
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
-}
-
-async function sendBrandedEmailVerificationEmail(targetEmail: string, verifyUrl: string): Promise<boolean> {
-  // 1. Resend API
-  if (process.env.RESEND_API_KEY) {
-    try {
-      const res = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.RESEND_API_KEY}`
-        },
-        body: JSON.stringify({
-          from: process.env.MAIL_FROM || "Golf Ball Vault <noreply@golfballvault.app>",
-          to: [targetEmail],
-          subject: "Verify your Golf Ball Vault email address",
-          html: getBrandedEmailVerificationHtml(targetEmail, verifyUrl)
-        })
-      });
-      if (res.ok) {
-        console.log(`Sent branded email verification via Resend to ${targetEmail}`);
-        return true;
-      } else {
-        const errData = await res.json().catch(() => ({}));
-        console.error("Resend API error:", errData);
-      }
-    } catch (e) {
-      console.error("Failed sending email verification via Resend:", e);
-    }
-  }
-
-  // 2. Standard SMTP Transporter
-  if (mailTransporter) {
-    try {
-      await mailTransporter.sendMail({
-        from: process.env.MAIL_FROM || '"Golf Ball Vault" <noreply@golfballvault.app>',
-        to: targetEmail,
-        subject: "Verify your Golf Ball Vault email address",
-        html: getBrandedEmailVerificationHtml(targetEmail, verifyUrl)
-      });
-      console.log(`Sent branded email verification via SMTP to ${targetEmail}`);
-      return true;
-    } catch (e) {
-      console.error("Failed sending verification email via SMTP:", e);
-    }
-  }
-
-  return false;
-}
 
 interface CatalogItem {
   id: string;
@@ -406,100 +82,6 @@ interface CatalogItem {
   rarity?: 'common' | 'limited' | 'rare';
   totalMade?: number;
   bundleItems?: { catalogId: string; qty: number }[];
-}
-
-function isStrongPassword(password: string): boolean {
-  if (password.length < 8) return false;
-  if (!/[A-Z]/.test(password)) return false;
-  if (!/[a-z]/.test(password)) return false;
-  if (!/[0-9]/.test(password)) return false;
-  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) return false;
-  return true;
-}
-
-function hashPassword(password: string): string {
-  const salt = crypto.randomBytes(16).toString("hex");
-  const iterations = 600000;
-  const hash = crypto.pbkdf2Sync(password, salt, iterations, 64, "sha512").toString("hex");
-  return `${iterations}:${salt}:${hash}`;
-}
-
-function verifyPassword(password: string, storedHash: string): boolean {
-  if (!storedHash || !storedHash.includes(":")) return false;
-  
-  const parts = storedHash.split(":");
-  if (parts.length === 2) {
-    // Legacy 1000 iteration hash
-    const [salt, hash] = parts;
-    if (!salt || !hash) return false;
-    const checkHash = crypto.pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex");
-    const expectedBuf = Buffer.from(hash, "utf8");
-    const actualBuf = Buffer.from(checkHash, "utf8");
-    return expectedBuf.length === actualBuf.length && crypto.timingSafeEqual(expectedBuf, actualBuf);
-  } else if (parts.length === 3) {
-    // New format with embedded iterations
-    const iterations = parseInt(parts[0], 10);
-    if (!Number.isFinite(iterations) || iterations < 1000 || iterations > 2000000) return false;
-    const salt = parts[1];
-    const hash = parts[2];
-    if (!salt || !hash) return false;
-    const checkHash = crypto.pbkdf2Sync(password, salt, iterations, 64, "sha512").toString("hex");
-    const expectedBuf = Buffer.from(hash, "utf8");
-    const actualBuf = Buffer.from(checkHash, "utf8");
-    return expectedBuf.length === actualBuf.length && crypto.timingSafeEqual(expectedBuf, actualBuf);
-  }
-  
-  return false;
-}
-
-
-function cleanUsernameString(username: string): string {
-  let u = username.trim().toLowerCase();
-  if (u.includes("@")) {
-    const parts = u.split("@");
-    u = parts[0] ? parts[0] : parts[1];
-  }
-  return u.replace(/[^a-z0-9_]/g, "");
-}
-
-const DISPOSABLE_EMAIL_DOMAINS = new Set([
-  "mailinator.com",
-  "tempmail.com",
-  "temp-mail.org",
-  "guerrillamail.com",
-  "guerrillamailblock.com",
-  "sharklasers.com",
-  "10minutemail.com",
-  "10minutemail.net",
-  "throwawaymail.com",
-  "trashmail.com",
-  "trashmail.net",
-  "yopmail.com",
-  "dispostable.com",
-  "getairmail.com",
-  "mytemp.email",
-  "fakemailgenerator.com",
-  "mohmal.com",
-  "emailondeck.com",
-  "nada.ltd",
-  "crazymailing.com",
-  "burnermail.io",
-  "guerrillamail.biz",
-  "guerrillamail.org"
-]);
-
-function isValidEmailFormat(email: string): boolean {
-  if (!email || typeof email !== "string") return false;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email.trim());
-}
-
-function isDisposableEmail(email: string): boolean {
-  if (!email || typeof email !== "string") return false;
-  const parts = email.trim().toLowerCase().split("@");
-  if (parts.length !== 2) return false;
-  const domain = parts[1];
-  return DISPOSABLE_EMAIL_DOMAINS.has(domain);
 }
 
 const app = express();
@@ -1488,7 +1070,8 @@ if (serviceAccountConfig) {
     console.log("Firebase Admin SDK successfully initialized");
 
 
-    // Proactively seed default items and sync local catalog data on boot
+    // Proactively seed default items and sync local catalog data on boot (skip on Vercel serverless cold starts)
+    if (!process.env.VERCEL || process.env.RUN_BOOT_SYNC === "true") {
     (async () => {
       try {
         const usersSnap = await dbAdmin!.collection("users").get();
@@ -1616,6 +1199,7 @@ if (serviceAccountConfig) {
         console.error("Failed to sync initial Firestore data:", err);
       }
     })();
+    }
   } catch (error) {
     console.error("Failed to initialize Firebase Admin SDK from service-account.json:", error);
   }
@@ -2130,15 +1714,6 @@ app.post("/api/auth/signup", authLimiter, async (req, res) => {
   res.status(201).json(clientUser);
 });
 
-function maskEmail(email: string): string {
-  const [localPart, domain] = email.split("@");
-  if (!domain) return "***";
-  const maskedLocal = localPart.length <= 2
-    ? localPart[0] + "***"
-    : localPart[0] + "***" + localPart[localPart.length - 1];
-  return `${maskedLocal}@${domain}`;
-}
-
 // Resolve username to email address
 app.get("/api/auth/resolve-email", authLimiter, async (req, res) => {
   const { username } = req.query;
@@ -2215,7 +1790,7 @@ app.post("/api/auth/forgot-password", authLimiter, async (req, res) => {
   let emailSentDirectly = false;
 
   // If Resend API or SMTP is configured, generate reset link and send branded email directly
-  if ((process.env.RESEND_API_KEY || mailTransporter) && user.email) {
+  if (isEmailConfigured() && user.email) {
     try {
       let resetUrl = "";
       if (isFirebaseAdminInitialized) {
@@ -2367,7 +1942,7 @@ app.post("/api/auth/send-verification-email", authLimiter, async (req, res) => {
   }
 
   let emailSentDirectly = false;
-  if (process.env.RESEND_API_KEY || mailTransporter) {
+  if (isEmailConfigured()) {
     try {
       let verifyUrl = "";
       if (isFirebaseAdminInitialized) {
@@ -2610,7 +2185,7 @@ app.post("/api/users/:id/email", authLimiter, async (req, res) => {
 
   // Automatically dispatch branded verification email to the new address
   let emailSentDirectly = false;
-  if (process.env.RESEND_API_KEY || mailTransporter) {
+  if (isEmailConfigured()) {
     try {
       let verifyUrl = "";
       if (isFirebaseAdminInitialized) {

@@ -23,6 +23,7 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true,
+    "noUnusedLocals": true,
     "types": [
       "vite/client",
       "vite-plugin-pwa/client"
@@ -31,6 +32,7 @@
   "include": [
     "src/**/*",
     "server.ts",
+    "server/**/*",
     "api/**/*"
   ]
 }
